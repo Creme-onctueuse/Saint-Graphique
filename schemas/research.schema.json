@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "research.schema.json",
+  "title": "Contrats de recherche (fichiers locaux, non publiés)",
+  "$defs": {
+    "video": {
+      "description": "Une ligne de research/index/videos.jsonl",
+      "type": "object",
+      "required": ["id", "title", "channel", "upload_date", "url", "relevance"],
+      "properties": {
+        "id": { "type": "string" }, "title": { "type": "string" }, "channel": { "type": "string" },
+        "upload_date": { "type": "string", "description": "YYYYMMDD" },
+        "url": { "type": "string" }, "description": { "type": "string" },
+        "duration_s": { "type": "number" },
+        "links": { "type": "array", "items": { "type": "string" } },
+        "relevance": { "enum": ["core", "mention", "unrelated"] },
+        "transcript_path": { "type": ["string", "null"] },
+        "transcript_source": { "enum": ["youtube_auto", "youtube_manual", "whisper", null] },
+        "chart_segments": {
+          "type": "array",
+          "items": { "type": "object", "required": ["start_s", "end_s"], "properties": { "start_s": { "type": "number" }, "end_s": { "type": "number" }, "keywords": { "type": "array", "items": { "type": "string" } } } }
+        }
+      }
+    },
+    "capture": {
+      "description": "Une ligne de research/captures/manifest.jsonl",
+      "type": "object",
+      "required": ["video_id", "timestamp_s", "file", "phash"],
+      "properties": {
+        "video_id": { "type": "string" }, "timestamp_s": { "type": "number" },
+        "file": { "type": "string" }, "phash": { "type": "string" },
+        "chart_score": { "type": "number", "description": "Confiance de détection du graphique 0..1" },
+        "version_id": { "type": ["string", "null"] }
+      }
+    },
+    "digitized": {
+      "description": "research/digitized/<version_id>.json",
+      "type": "object",
+      "required": ["version_id", "date", "source", "axes", "points"],
+      "properties": {
+        "version_id": { "type": "string" },
+        "date": { "type": "string" },
+        "source": { "type": "object", "properties": { "video_id": { "type": "string" }, "timestamp_s": { "type": "number" }, "capture": { "type": "string" } } },
+        "axes": { "type": "object", "properties": { "x_label": { "type": "string" }, "y_label": { "type": "string" }, "range": { "type": "array" } } },
+        "election_id": { "type": ["string", "null"] },
+        "points": {
+          "type": "array",
+          "items": {
+            "type": "object", "required": ["kind", "label", "x", "y"],
+            "properties": {
+              "kind": { "enum": ["pcs", "candidate", "barycenter", "other"] },
+              "label": { "type": "string" }, "code": { "type": "string" },
+              "x": { "type": "number" }, "y": { "type": "number" },
+              "confidence": { "type": "number" }
+            }
+          }
+        },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

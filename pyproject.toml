@@ -1,0 +1,45 @@
+[project]
+name = "saint-graphique"
+version = "0.1.0"
+description = "Reconstruction ouverte du Saint-Graphique (sociologie électorale par PCS)"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    # Ciblage volontaire de pandas 3 (copy-on-write, dtype string par défaut) : c'est la version testée.
+    "pandas>=3.0,<4",
+    "numpy>=2.0,<3",
+    "pyyaml>=6.0",
+    "jsonschema>=4.22",
+    "openpyxl>=3.1",
+    "requests>=2.32",
+    "prince>=0.13",
+    "scikit-learn>=1.5",
+]
+
+[project.optional-dependencies]
+research = [
+    "yt-dlp>=2025.1.1",
+    "faster-whisper>=1.0",
+    "opencv-python>=4.10",
+    "imagehash>=4.3",
+    "pillow>=10.4",
+    "webvtt-py>=0.5",
+]
+dev = ["pytest>=8.2", "ruff>=0.6"]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+# research/ et pipeline/cache/ sont gitignorés (déjà exclus), web/ relève d'eslint.
+extend-exclude = ["research", "pipeline/cache", "web"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+
+[tool.pytest.ini_options]
+testpaths = ["pipeline/tests", "scripts/tests"]
+pythonpath = ["."]

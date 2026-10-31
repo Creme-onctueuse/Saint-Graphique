@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "source.schema.json",
+  "title": "Référence de source",
+  "type": "object",
+  "required": ["id", "title", "url", "accessed"],
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "publisher": { "type": "string" },
+    "url": { "type": "string" },
+    "accessed": { "type": "string", "format": "date" },
+    "license": { "type": "string" },
+    "notes": { "type": "string" }
+  }
+}

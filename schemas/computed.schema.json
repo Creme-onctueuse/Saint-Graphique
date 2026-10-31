@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "computed.schema.json",
+  "title": "Coordonnées calculées (data/computed/<method>/<election_id>.json ; election_id='population' pour la seule population)",
+  "type": "object",
+  "required": ["method", "params", "election_id", "axes", "pcs", "candidates", "population_barycenter"],
+  "properties": {
+    "method": { "type": "string" },
+    "params": { "type": "object" },
+    "election_id": { "type": "string" },
+    "generated_at": { "type": "string" },
+    "axes": {
+      "type": "object",
+      "required": ["x_label", "y_label", "range"],
+      "properties": {
+        "x_label": { "type": "string" }, "y_label": { "type": "string" },
+        "range": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
+      }
+    },
+    "pcs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "group", "label", "x", "y", "weight"],
+        "properties": {
+          "code": { "type": "string" }, "group": { "type": "string" }, "label": { "type": "string" },
+          "x": { "type": "number" }, "y": { "type": "number" },
+          "weight": { "type": "number", "description": "Part de la population (%)" }
+        }
+      }
+    },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "color", "x", "y"],
+        "properties": {
+          "id": { "type": "string" }, "label": { "type": "string" }, "color": { "type": "string" },
+          "x": { "type": "number" }, "y": { "type": "number" },
+          "national_share_pct": { "type": "number" },
+          "is_abstention": { "type": "boolean" },
+          "ellipse": {
+            "type": "object",
+            "description": "Ellipse de confiance 95 % (bootstrap)",
+            "required": ["rx", "ry", "angle_deg"],
+            "properties": { "rx": { "type": "number" }, "ry": { "type": "number" }, "angle_deg": { "type": "number" } }
+          }
+        }
+      }
+    },
+    "population_barycenter": {
+      "type": "object", "required": ["x", "y"],
+      "properties": { "x": { "type": "number" }, "y": { "type": "number" } }
+    }
+  }
+}

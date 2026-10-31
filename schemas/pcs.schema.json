@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "pcs.schema.json",
+  "title": "Données socio-économiques par PCS (data/pcs.json)",
+  "type": "object",
+  "required": ["nomenclature", "reference_year", "sources", "items"],
+  "properties": {
+    "nomenclature": { "type": "string" },
+    "reference_year": { "type": "integer" },
+    "sources": { "type": "array", "items": { "$ref": "source.schema.json" } },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["code", "group", "population", "niveau_vie_mensuel_eur", "patrimoine_keur", "diplomes"],
+        "properties": {
+          "code": { "type": "string" },
+          "group": { "type": "string", "pattern": "^[1-8]$" },
+          "population": { "type": "number", "minimum": 0, "description": "Effectif France entière (personnes)" },
+          "niveau_vie_mensuel_eur": { "type": "number", "minimum": 0, "description": "Niveau de vie mensuel médian ou moyen (préciser dans la source)" },
+          "patrimoine_keur": { "type": "number", "minimum": 0, "description": "Patrimoine brut médian ou moyen en k€ (préciser dans la source)" },
+          "diplomes": {
+            "type": "object",
+            "description": "Répartition (%) du plus haut diplôme ; somme ≈ 100",
+            "required": ["bac5", "bac3", "bac2", "bac", "cap", "brevet", "certif_aucun"],
+            "properties": {
+              "bac5": { "type": "number" }, "bac3": { "type": "number" }, "bac2": { "type": "number" },
+              "bac": { "type": "number" }, "cap": { "type": "number" }, "brevet": { "type": "number" },
+              "certif_aucun": { "type": "number" }
+            },
+            "additionalProperties": false
+          },
+          "source_refs": { "type": "array", "items": { "type": "string" } },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

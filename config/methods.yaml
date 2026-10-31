@@ -1,0 +1,23 @@
+# Paramètres des méthodes de placement. Modifiable sans toucher au code.
+axes:
+  x: { label: Exploitation, hint: "plus à droite = revenus tirés du capital plutôt que du travail" }
+  y: { label: Domination, hint: "plus haut = position dominante (capital culturel / diplôme)" }
+  range: [-10, 10]
+
+methods:
+  ranks_chris_v1:
+    description: "Réplique : rangs 1..N normalisés sur [-10,10] (méthode reconstruite par JnthnBS)"
+    x_score: patrimoine_over_niveau_vie      # score = patrimoine / niveau_vie
+    y_weights: { bac5: 5, bac3: 3, bac2: 2, bac: 1, cap: -1, brevet: -2, certif_aucun: -3 }
+    retired_y_override: { code: "7", score: -180 }  # équivaut à 180 % de CAP dans la référence
+    candidate_pcs_level: 1
+  continuous:
+    description: "Valeurs continues standardisées (z-scores) puis remises à l'échelle [-10,10]"
+    x_score: patrimoine_over_niveau_vie
+    y_weights: { bac5: 5, bac3: 3, bac2: 2, bac: 1, cap: -1, brevet: -2, certif_aucun: -3 }
+    retired_y_override: null
+    candidate_pcs_level: 1
+  mca:
+    description: "Analyse des correspondances multiples sur variables patrimoine/revenu/diplôme"
+    n_components: 2
+    candidate_pcs_level: 1

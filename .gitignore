@@ -1,0 +1,20 @@
+# Matériel de recherche protégé (vidéos, transcriptions, captures) : jamais publié
+research/
+pipeline/cache/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Web
+web/node_modules/
+web/dist/
+web/coverage/
+
+# OS / éditeurs
+.DS_Store
+Thumbs.db
+*.log

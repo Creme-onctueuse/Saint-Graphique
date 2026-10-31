@@ -1,0 +1,43 @@
+# Nomenclature PCS 2003, niveau 2 (29 postes actifs) + retraités agrégés = 30 points.
+# group = PCS de niveau 1 (1..7), utilisé pour les compositions d'électorat.
+# Liste alignée sur la reproduction JnthnBS ; à confirmer contre les captures de Chris (WP5).
+nomenclature: PCS2003-N2
+groups:
+  "1": { label: Agriculteurs exploitants, color: "#6b8e23" }
+  "2": { label: "Artisans, commerçants et chefs d'entreprise", color: "#b8860b" }
+  "3": { label: Cadres et professions intellectuelles supérieures, color: "#4b0082" }
+  "4": { label: Professions intermédiaires, color: "#1f77b4" }
+  "5": { label: Employés, color: "#d62728" }
+  "6": { label: Ouvriers, color: "#8c2d04" }
+  "7": { label: Retraités, color: "#7f7f7f" }
+items:
+  - { code: "10", group: "1", label: Agriculteurs exploitants, short: Agriculteurs }
+  - { code: "21", group: "2", label: Artisans, short: Artisans }
+  - { code: "22", group: "2", label: Commerçants et assimilés, short: Commerçants }
+  - { code: "23", group: "2", label: Chefs d'entreprise de 10 salariés ou plus, short: Chefs d'entreprise }
+  - { code: "31", group: "3", label: Professions libérales, short: Prof. libérales }
+  - { code: "33", group: "3", label: Cadres de la fonction publique, short: Cadres FP }
+  - { code: "34", group: "3", label: "Professeurs, professions scientifiques", short: Professeurs }
+  - { code: "35", group: "3", label: "Professions de l'information, des arts et du spectacle", short: Info/arts }
+  - { code: "37", group: "3", label: Cadres administratifs et commerciaux d'entreprise, short: Cadres admin. }
+  - { code: "38", group: "3", label: Ingénieurs et cadres techniques d'entreprise, short: Ingénieurs }
+  - { code: "42", group: "4", label: "Professeurs des écoles, instituteurs et assimilés", short: Prof. des écoles }
+  - { code: "43", group: "4", label: Professions intermédiaires de la santé et du travail social, short: PI santé/social }
+  - { code: "44", group: "4", label: "Clergé, religieux", short: Clergé }
+  - { code: "45", group: "4", label: Professions intermédiaires administratives de la fonction publique, short: PI admin. FP }
+  - { code: "46", group: "4", label: Professions intermédiaires administratives et commerciales des entreprises, short: PI admin. entr. }
+  - { code: "47", group: "4", label: Techniciens, short: Techniciens }
+  - { code: "48", group: "4", label: "Contremaîtres, agents de maîtrise", short: Contremaîtres }
+  - { code: "52", group: "5", label: Employés civils et agents de service de la fonction publique, short: Employés FP }
+  - { code: "53", group: "5", label: Policiers et militaires, short: Policiers/militaires }
+  - { code: "54", group: "5", label: Employés administratifs d'entreprise, short: Employés admin. }
+  - { code: "55", group: "5", label: Employés de commerce, short: Employés commerce }
+  - { code: "56", group: "5", label: Personnels des services directs aux particuliers, short: Services particuliers }
+  - { code: "62", group: "6", label: Ouvriers qualifiés de type industriel, short: OQ industriels }
+  - { code: "63", group: "6", label: Ouvriers qualifiés de type artisanal, short: OQ artisanaux }
+  - { code: "64", group: "6", label: Chauffeurs, short: Chauffeurs }
+  - { code: "65", group: "6", label: "Ouvriers qualifiés de la manutention, du magasinage et du transport", short: OQ manutention }
+  - { code: "67", group: "6", label: Ouvriers non qualifiés de type industriel, short: ONQ industriels }
+  - { code: "68", group: "6", label: Ouvriers non qualifiés de type artisanal, short: ONQ artisanaux }
+  - { code: "69", group: "6", label: Ouvriers agricoles, short: Ouvriers agricoles }
+  - { code: "7",  group: "7", label: Retraités, short: Retraités }

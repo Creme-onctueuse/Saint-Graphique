@@ -1,0 +1,6 @@
+# Fins de ligne normalisées (LF dans le dépôt), CRLF pour les scripts Windows.
+* text=auto eol=lf
+*.ps1 text eol=crlf
+*.png binary
+*.jpg binary
+*.ico binary

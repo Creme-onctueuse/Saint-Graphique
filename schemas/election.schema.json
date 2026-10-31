@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "election.schema.json",
+  "title": "Composition sociale des électorats (data/elections/<id>.json)",
+  "type": "object",
+  "required": ["id", "type", "year", "label", "pcs_level", "sources", "candidates", "composition"],
+  "properties": {
+    "id": { "type": "string" },
+    "type": { "enum": ["presidentielle", "legislatives", "europeennes", "municipales", "regionales", "referendum"] },
+    "year": { "type": "integer" },
+    "round": { "type": "integer" },
+    "label": { "type": "string" },
+    "pcs_level": { "enum": [1, 2], "description": "Niveau PCS des clés de composition" },
+    "sources": { "type": "array", "items": { "$ref": "source.schema.json" } },
+    "margin_pts": { "type": "number", "description": "Marge d'erreur indicative (points de %) pour le bootstrap" },
+    "candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "label", "color"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9_-]+$" },
+          "label": { "type": "string" },
+          "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+          "national_share_pct": { "type": "number", "description": "Score national (% exprimés ou inscrits si abstention)" },
+          "is_abstention": { "type": "boolean" }
+        }
+      }
+    },
+    "composition": {
+      "type": "object",
+      "description": "composition[candidate_id][pcs_code] = part (%) de l'électorat du candidat issue de cette PCS (somme ≈ 100 par candidat)",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": { "type": "number", "minimum": 0 }
+      }
+    }
+  }
+}
