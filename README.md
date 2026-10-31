@@ -2,6 +2,8 @@
 
 Reconstruction **open source, sourcée et vérifiable** du « Saint-Graphique », le graphique de sociologie électorale présenté par Chris (revue *Positions*) dans les vidéos de la PaduTeam.
 
+Le Saint-Graphique a été créé par **Chris et la PaduTeam**. Ce projet est directement **inspiré de [JnthnBS/saint-graphique](https://github.com/JnthnBS/saint-graphique)**, dont il réimplémente l'algorithme reconstruit. Voir [Crédits et inspiration](#crédits-et-inspiration).
+
 > **Projet non officiel.** Il n'a aucun lien avec Positions Revue ni avec la PaduTeam. L'algorithme original n'a pas été publié : ce dépôt en propose une **reconstruction**, calée sur les vidéos publiques et documentée, sans prétendre à l'identité exacte.
 
 **Statut :** en construction (v0.x). Voir la [feuille de route](#feuille-de-route).
@@ -78,11 +80,19 @@ Les vidéos, transcriptions et captures servent uniquement à l'analyse locale. 
 
 Voir [CONTRIBUTING.md](CONTRIBUTING.md) : comment ajouter une élection, une méthode ou une source.
 
-## Crédits
+## Crédits et inspiration
 
-- **Chris (revue *Positions*)** : idée, principe et graphique original, présentés dans les vidéos de la PaduTeam.
-- **JnthnBS** : première reproduction indépendante ([github.com/JnthnBS/saint-graphique](https://github.com/JnthnBS/saint-graphique)), qui a documenté une méthode par rangs. Son code et ses données, publiés sans licence, ne sont **pas réutilisés** ici. La méthode est réimplémentée à partir de sa description.
-- **INSEE** et les **instituts de sondage** cités dans `data/SOURCES.md`.
+- **Chris et la PaduTeam : à l'origine du Saint-Graphique.** L'idée, le principe (PCS placées selon l'exploitation et la domination, électorats en barycentres) et le graphique original viennent de Chris, de la revue [*Positions*](https://positions-revue.fr), et ont été présentés sur les chaînes YouTube [PaduTeam](https://www.youtube.com/@PaduTeam) et [Positions Revue](https://www.youtube.com/@Positions_revue).
+- **[JnthnBS/saint-graphique](https://github.com/JnthnBS/saint-graphique) : inspiration de ce projet et source de l'algorithme reconstruit.** JnthnBS a le premier publié une reproduction du Saint-Graphique et documenté la méthode qu'il en a reconstruite :
+  - rang du ratio patrimoine / niveau de vie ;
+  - rang d'un score de diplômes ;
+  - normalisation sur [−10, 10] ;
+  - barycentres des électorats.
+
+  C'est cette méthode que réimplémente `ranks_chris_v1`. Ce dépôt étant publié sans licence, son code, ses données et ses éléments graphiques **ne sont pas copiés** : la méthode est réécrite à partir de sa description, et toutes les données sont reprises aux sources primaires.
+- **INSEE** et **instituts de sondage** : données citées dans [`data/SOURCES.md`](data/SOURCES.md).
+
+Ce projet n'est pas affilié à ces auteurs. S'ils souhaitent une modification de ces mentions, une issue suffit.
 
 ## Licence
 
