@@ -8,6 +8,17 @@ Sous Linux ou macOS : installer `uv`, Node 22+ et `pnpm`, puis lancer `uv sync -
 
 Pour vérifier l'ensemble : `scripts/check.ps1`, qui enchaîne ruff, pytest, la validation des schémas, eslint, vitest et le build.
 
+### Cache des téléchargements
+Les fichiers sources bruts (INSEE, sondages) sont mis en cache **hors du dépôt** :
+- sous Windows : `%LOCALAPPDATA%\saint-graphique\cache` ;
+- ailleurs : `$XDG_CACHE_HOME/saint-graphique`, ou à défaut `~/.cache/saint-graphique`.
+
+On peut choisir un autre emplacement avec la variable d'environnement `SG_CACHE_DIR`.
+
+### Windows : chemins longs et dossiers synchronisés
+- Évitez de cloner le dépôt dans un dossier synchronisé (OneDrive, Dropbox…) : `web/node_modules` et `.venv` contiennent des dizaines de milliers de fichiers. Un chemin court, comme `C:\dev\saint-graphique`, est préférable.
+- `web/.npmrc` limite la longueur des noms de dossiers pnpm (`virtual-store-dir-max-length`). Pour les autres outils, activez si possible les chemins longs de Windows, en administrateur : `New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem' -Name LongPathsEnabled -Value 1 -PropertyType DWORD -Force`.
+
 ## Architecture
 Les étapes communiquent **uniquement par des fichiers dont le format est fixé par un schéma**, dans `schemas/` :
 
