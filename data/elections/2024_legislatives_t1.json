@@ -1,0 +1,164 @@
+{
+  "id": "2024_legislatives_t1",
+  "type": "legislatives",
+  "year": 2024,
+  "round": 1,
+  "label": "Législatives 2024 (1er tour)",
+  "pcs_level": 1,
+  "sources": [
+    {
+      "id": "ifop_2024_legislatives_t1",
+      "title": "Ifop pour TF1 et LCI, Analyse du premier tour des élections législatives 2024 : participation et structuration des électorats, juin 2024 (n° 120976)",
+      "url": "https://www.ifop.com/wp-content/uploads/2024/07/120976-Resultats.pdf",
+      "accessed": "2026-10-31",
+      "publisher": "Ifop",
+      "license": "Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'est documenté dans ce dépôt, voir data/SOURCES.md.",
+      "notes": "Échantillon : 2 806 inscrits, extraits d'un échantillon de 3 000 personnes. Terrain : en ligne, du 26 au 29 juin 2024, donc AVANT le scrutin du 30 juin ; données redressées ensuite sur les résultats officiels du 1er juillet 2024. Tableaux : colonnes de groupes, vote en composition p. 14 (PDF 16) et abstention en composition p. 8 (PDF 10) ; national_share_pct, ligne ENSEMBLE du vote p. 11 (PDF 13) et de la participation p. 6 (PDF 8). Groupes : 2=Artisans ou commerçants; 3=Cadres et prof. int. sup.; 4=Professions intermédiaires; 5=Employés; 6=Ouvriers; 7=Retraités; 8=Autres inactifs. Le rapport n'isole pas les agriculteurs : la clé « 1 » est absente, et on ignore s'ils sont comptés dans le groupe 2. « Autre inactif » (groupe 8) est retiré et les parts ramenées à 100 sur les groupes restants ; les parts publiées sont dans pipeline/sources/manual. national_share_pct : ligne ensemble du sondage (abstention en % des inscrits), pas le résultat officiel. Transcription manuelle ; « - » reproduit le tiret du rapport. Parts publiées en nombres entiers. Contrairement aux six autres élections, ce n'est pas un sondage réalisé le jour du vote."
+    }
+  ],
+  "candidates": [
+    {
+      "id": "extreme-gauche",
+      "label": "Extrême gauche",
+      "color": "#7b1113",
+      "national_share_pct": 1.1
+    },
+    {
+      "id": "nfp",
+      "label": "Nouveau Front populaire et divers NFP",
+      "color": "#e5383b",
+      "national_share_pct": 28.1
+    },
+    {
+      "id": "divers-gauche",
+      "label": "Divers gauche",
+      "color": "#ef9a9a",
+      "national_share_pct": 1.6
+    },
+    {
+      "id": "ensemble",
+      "label": "Majorité présidentielle et divers majorité",
+      "color": "#f9a825",
+      "national_share_pct": 21.3
+    },
+    {
+      "id": "divers-centre",
+      "label": "Divers centre",
+      "color": "#ffcc80",
+      "national_share_pct": 1.2
+    },
+    {
+      "id": "lr-dvd",
+      "label": "Les Républicains ou divers droite",
+      "color": "#1565c0",
+      "national_share_pct": 10.2
+    },
+    {
+      "id": "rn",
+      "label": "Investi ou soutenu par le Rassemblement national",
+      "color": "#0d1b4c",
+      "national_share_pct": 33.2
+    },
+    {
+      "id": "reconquete",
+      "label": "Reconquête",
+      "color": "#3e2723",
+      "national_share_pct": 0.7
+    },
+    {
+      "id": "divers",
+      "label": "Divers",
+      "color": "#8e8e8e",
+      "national_share_pct": 2.6
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "national_share_pct": 33.3,
+      "is_abstention": true
+    }
+  ],
+  "composition": {
+    "extreme-gauche": {
+      "2": 6.67,
+      "3": 27.78,
+      "4": 5.56,
+      "5": 21.11,
+      "6": 10.0,
+      "7": 28.89
+    },
+    "nfp": {
+      "2": 3.61,
+      "3": 14.46,
+      "4": 24.1,
+      "5": 16.87,
+      "6": 12.05,
+      "7": 28.92
+    },
+    "divers-gauche": {
+      "2": 11.63,
+      "3": 11.63,
+      "4": 10.47,
+      "5": 0.0,
+      "6": 11.63,
+      "7": 54.65
+    },
+    "ensemble": {
+      "2": 5.62,
+      "3": 13.48,
+      "4": 13.48,
+      "5": 10.11,
+      "6": 6.74,
+      "7": 50.56
+    },
+    "divers-centre": {
+      "2": 0.0,
+      "3": 15.85,
+      "4": 13.41,
+      "5": 18.29,
+      "6": 9.76,
+      "7": 42.68
+    },
+    "lr-dvd": {
+      "2": 6.67,
+      "3": 12.22,
+      "4": 13.33,
+      "5": 16.67,
+      "6": 11.11,
+      "7": 40.0
+    },
+    "rn": {
+      "2": 5.56,
+      "3": 8.89,
+      "4": 14.44,
+      "5": 21.11,
+      "6": 20.0,
+      "7": 30.0
+    },
+    "reconquete": {
+      "2": 6.74,
+      "3": 20.22,
+      "4": 23.6,
+      "5": 8.99,
+      "6": 0.0,
+      "7": 40.45
+    },
+    "divers": {
+      "2": 8.89,
+      "3": 7.78,
+      "4": 16.67,
+      "5": 18.89,
+      "6": 14.44,
+      "7": 33.33
+    },
+    "abstention": {
+      "2": 6.02,
+      "3": 9.64,
+      "4": 16.87,
+      "5": 21.69,
+      "6": 19.28,
+      "7": 26.51
+    }
+  }
+}

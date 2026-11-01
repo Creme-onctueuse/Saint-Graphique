@@ -1,0 +1,192 @@
+{
+  "id": "2017_presidentielle_t1",
+  "type": "presidentielle",
+  "year": 2017,
+  "round": 1,
+  "label": "Présidentielle 2017 (1er tour)",
+  "pcs_level": 1,
+  "sources": [
+    {
+      "id": "ifop_2017_presidentielle_t1",
+      "title": "Ifop et Fiducial pour Paris Match, CNews et Sud Radio, Le profil des électeurs et les clefs du premier tour de l'élection présidentielle, 23 avril 2017",
+      "url": "https://www.ifop.com/wp-content/uploads/2018/03/3749-1-study_file.pdf",
+      "accessed": "2026-10-31",
+      "publisher": "Ifop-Fiducial",
+      "license": "Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'est documenté dans ce dépôt, voir data/SOURCES.md.",
+      "notes": "Échantillon : 3 668 inscrits, extraits d'un échantillon de 3 814 personnes, France métropolitaine. Terrain : en ligne, le 23 avril 2017, de 11 h à 18 h. Tableaux : colonnes de groupes, vote en composition p. 22 (PDF 24) et abstention en composition p. 10 (PDF 12) ; national_share_pct, ligne ENSEMBLE du vote en pénétration p. 20 (PDF 22) et de la participation p. 8 (PDF 10). Groupes : 2=Travailleur indépendant; 3=Cadre et prof. int. supérieure; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif. Le rapport n'isole pas les agriculteurs : la clé « 1 » est absente, et on ignore s'ils sont comptés dans le groupe 2. « Autre inactif » (groupe 8) est retiré et les parts ramenées à 100 sur les groupes restants ; les parts publiées sont dans pipeline/sources/manual. national_share_pct : ligne ensemble du sondage (abstention en % des inscrits), pas le résultat officiel. Transcription manuelle ; « - » reproduit le tiret du rapport. Petits électorats à lire avec prudence (le rapport signale les effectifs inférieurs à 40 individus)."
+    }
+  ],
+  "candidates": [
+    {
+      "id": "arthaud",
+      "label": "Nathalie Arthaud",
+      "color": "#7b1113",
+      "national_share_pct": 0.6
+    },
+    {
+      "id": "poutou",
+      "label": "Philippe Poutou",
+      "color": "#b3261e",
+      "national_share_pct": 1.1
+    },
+    {
+      "id": "melenchon",
+      "label": "Jean-Luc Mélenchon",
+      "color": "#e5383b",
+      "national_share_pct": 19.6
+    },
+    {
+      "id": "hamon",
+      "label": "Benoît Hamon",
+      "color": "#f06292",
+      "national_share_pct": 6.3
+    },
+    {
+      "id": "macron",
+      "label": "Emmanuel Macron",
+      "color": "#f9a825",
+      "national_share_pct": 24.0
+    },
+    {
+      "id": "lassalle",
+      "label": "Jean Lassalle",
+      "color": "#8d8d5a",
+      "national_share_pct": 1.2
+    },
+    {
+      "id": "fillon",
+      "label": "François Fillon",
+      "color": "#1565c0",
+      "national_share_pct": 19.9
+    },
+    {
+      "id": "dupont-aignan",
+      "label": "Nicolas Dupont-Aignan",
+      "color": "#303f9f",
+      "national_share_pct": 4.8
+    },
+    {
+      "id": "le-pen",
+      "label": "Marine Le Pen",
+      "color": "#0d1b4c",
+      "national_share_pct": 21.4
+    },
+    {
+      "id": "asselineau",
+      "label": "François Asselineau",
+      "color": "#00897b",
+      "national_share_pct": 0.9
+    },
+    {
+      "id": "cheminade",
+      "label": "Jacques Cheminade",
+      "color": "#8e8e8e",
+      "national_share_pct": 0.2
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "national_share_pct": 20.4,
+      "is_abstention": true
+    }
+  ],
+  "composition": {
+    "arthaud": {
+      "2": 5.33,
+      "3": 0.0,
+      "4": 0.0,
+      "5": 38.7,
+      "6": 24.91,
+      "7": 31.05
+    },
+    "poutou": {
+      "2": 0.0,
+      "3": 16.04,
+      "4": 15.46,
+      "5": 23.6,
+      "6": 37.69,
+      "7": 7.22
+    },
+    "melenchon": {
+      "2": 4.85,
+      "3": 10.87,
+      "4": 23.29,
+      "5": 22.22,
+      "6": 16.9,
+      "7": 21.87
+    },
+    "hamon": {
+      "2": 6.04,
+      "3": 18.96,
+      "4": 29.15,
+      "5": 16.23,
+      "6": 11.02,
+      "7": 18.6
+    },
+    "macron": {
+      "2": 4.0,
+      "3": 19.33,
+      "4": 18.56,
+      "5": 13.11,
+      "6": 7.56,
+      "7": 37.44
+    },
+    "lassalle": {
+      "2": 6.29,
+      "3": 19.08,
+      "4": 10.77,
+      "5": 22.17,
+      "6": 12.47,
+      "7": 29.21
+    },
+    "fillon": {
+      "2": 6.46,
+      "3": 13.03,
+      "4": 7.91,
+      "5": 10.47,
+      "6": 4.01,
+      "7": 58.13
+    },
+    "dupont-aignan": {
+      "2": 7.24,
+      "3": 6.69,
+      "4": 21.6,
+      "5": 19.63,
+      "6": 8.77,
+      "7": 36.07
+    },
+    "le-pen": {
+      "2": 4.61,
+      "3": 5.88,
+      "4": 13.36,
+      "5": 25.46,
+      "6": 23.5,
+      "7": 27.19
+    },
+    "asselineau": {
+      "2": 11.43,
+      "3": 9.66,
+      "4": 14.65,
+      "5": 26.42,
+      "6": 31.52,
+      "7": 6.33
+    },
+    "cheminade": {
+      "2": 0.0,
+      "3": 49.02,
+      "4": 0.0,
+      "5": 0.0,
+      "6": 0.0,
+      "7": 50.98
+    },
+    "abstention": {
+      "2": 5.58,
+      "3": 7.77,
+      "4": 17.84,
+      "5": 23.91,
+      "6": 17.48,
+      "7": 27.43
+    }
+  }
+}

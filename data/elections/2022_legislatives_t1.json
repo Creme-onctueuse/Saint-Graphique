@@ -1,0 +1,178 @@
+{
+  "id": "2022_legislatives_t1",
+  "type": "legislatives",
+  "year": 2022,
+  "round": 1,
+  "label": "Législatives 2022 (1er tour)",
+  "pcs_level": 1,
+  "sources": [
+    {
+      "id": "ifop_2022_legislatives_t1",
+      "title": "Ifop-Fiducial pour TF1, LCI, Paris Match et Sud Radio, Législatives 2022, sondage jour du vote : profil des électeurs et clés du scrutin (1er tour), 12 juin 2022",
+      "url": "https://www.ifop.com/wp-content/uploads/2022/06/119150-Rapport-JDV-LEG22-T1-v1-12.06.2022-22h25-COMPLET.pdf",
+      "accessed": "2026-10-31",
+      "publisher": "Ifop-Fiducial",
+      "license": "Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'est documenté dans ce dépôt, voir data/SOURCES.md.",
+      "notes": "Échantillon : 2 818 inscrits, extraits d'un échantillon de 3 034 personnes. Terrain : en ligne, le 12 juin 2022, de 11 h à 18 h. Tableaux : colonnes de groupes, vote en composition p. 26 (PDF 27) et abstention en composition p. 11 (PDF 12) ; national_share_pct, ligne ENSEMBLE du vote p. 24 (PDF 25) et de la participation p. 9 (PDF 10). Groupes : 2=Artisan ou commerçant; 3=Cadre et prof. int. sup.; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif. Le rapport n'isole pas les agriculteurs : la clé « 1 » est absente, et on ignore s'ils sont comptés dans le groupe 2. « Autre inactif » (groupe 8) est retiré et les parts ramenées à 100 sur les groupes restants ; les parts publiées sont dans pipeline/sources/manual. national_share_pct : ligne ensemble du sondage (abstention en % des inscrits), pas le résultat officiel. Transcription manuelle ; « - » reproduit le tiret du rapport. Parts publiées en nombres entiers. Scores redressés sur l'estimation Ifop-Fiducial de 20 h 42 ; le rapport précise que ces agrégats peuvent différer des résultats du ministère de l'Intérieur."
+    }
+  ],
+  "candidates": [
+    {
+      "id": "extreme-gauche",
+      "label": "Extrême gauche",
+      "color": "#7b1113",
+      "national_share_pct": 1.3
+    },
+    {
+      "id": "nupes",
+      "label": "NUPES",
+      "color": "#e5383b",
+      "national_share_pct": 25.9
+    },
+    {
+      "id": "divers-gauche",
+      "label": "Divers gauche",
+      "color": "#ef9a9a",
+      "national_share_pct": 3.1
+    },
+    {
+      "id": "ensemble",
+      "label": "Ensemble (majorité présidentielle)",
+      "color": "#f9a825",
+      "national_share_pct": 25.9
+    },
+    {
+      "id": "divers-droite",
+      "label": "Divers droite",
+      "color": "#6f9fd8",
+      "national_share_pct": 2.9
+    },
+    {
+      "id": "lr",
+      "label": "Les Républicains et alliés",
+      "color": "#1565c0",
+      "national_share_pct": 11.4
+    },
+    {
+      "id": "droite-souverainiste",
+      "label": "Droite souverainiste",
+      "color": "#303f9f",
+      "national_share_pct": 1.0
+    },
+    {
+      "id": "rn",
+      "label": "Rassemblement national",
+      "color": "#0d1b4c",
+      "national_share_pct": 19.0
+    },
+    {
+      "id": "reconquete",
+      "label": "Reconquête !",
+      "color": "#3e2723",
+      "national_share_pct": 4.3
+    },
+    {
+      "id": "divers",
+      "label": "Divers",
+      "color": "#8e8e8e",
+      "national_share_pct": 5.2
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "national_share_pct": 51.3,
+      "is_abstention": true
+    }
+  ],
+  "composition": {
+    "extreme-gauche": {
+      "2": 8.42,
+      "3": 5.26,
+      "4": 15.79,
+      "5": 11.58,
+      "6": 34.74,
+      "7": 24.21
+    },
+    "nupes": {
+      "2": 2.33,
+      "3": 13.95,
+      "4": 22.09,
+      "5": 18.6,
+      "6": 13.95,
+      "7": 29.07
+    },
+    "divers-gauche": {
+      "2": 3.3,
+      "3": 15.38,
+      "4": 29.67,
+      "5": 13.19,
+      "6": 3.3,
+      "7": 35.16
+    },
+    "ensemble": {
+      "2": 5.43,
+      "3": 15.22,
+      "4": 14.13,
+      "5": 10.87,
+      "6": 5.43,
+      "7": 48.91
+    },
+    "divers-droite": {
+      "2": 0.0,
+      "3": 8.43,
+      "4": 10.84,
+      "5": 9.64,
+      "6": 9.64,
+      "7": 61.45
+    },
+    "lr": {
+      "2": 11.11,
+      "3": 12.22,
+      "4": 14.44,
+      "5": 10.0,
+      "6": 5.56,
+      "7": 46.67
+    },
+    "droite-souverainiste": {
+      "2": 9.2,
+      "3": 4.6,
+      "4": 19.54,
+      "5": 9.2,
+      "6": 29.89,
+      "7": 27.59
+    },
+    "rn": {
+      "2": 3.33,
+      "3": 6.67,
+      "4": 14.44,
+      "5": 22.22,
+      "6": 22.22,
+      "7": 31.11
+    },
+    "reconquete": {
+      "2": 7.87,
+      "3": 16.85,
+      "4": 8.99,
+      "5": 15.73,
+      "6": 12.36,
+      "7": 38.2
+    },
+    "divers": {
+      "2": 7.32,
+      "3": 12.2,
+      "4": 23.17,
+      "5": 21.95,
+      "6": 7.32,
+      "7": 28.05
+    },
+    "abstention": {
+      "2": 6.02,
+      "3": 10.84,
+      "4": 18.07,
+      "5": 22.89,
+      "6": 18.07,
+      "7": 24.1
+    }
+  }
+}

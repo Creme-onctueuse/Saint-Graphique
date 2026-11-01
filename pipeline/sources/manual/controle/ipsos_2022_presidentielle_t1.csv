@@ -1,0 +1,26 @@
+# source_id: ipsos_2022_presidentielle_t1
+# title: Ipsos - Sopra Steria pour France Télévisions et Radio France, Sociologie des électorats et profil des abstentionnistes, présidentielle 2022, 1er tour
+# publisher: Ipsos - Sopra Steria
+# url: https://www.ipsos.com/sites/default/files/ct/news/documents/2023-10/Ipsos%20Sopra%20Steria_Sociologie%20des%20electorats_11%20Avril%2011h30.pdf
+# accessed: 2026-10-31
+# cache_file: ipsos_2022_pres_t1.pdf
+# sha256: 8730a6176f26c5cef0431b17855742b3afd6aaa19744fe232e024b2e0c63d0fa
+# kind: vote
+# tables: colonnes de groupes, vote selon la profession p. 5 et abstention selon la profession p. 20 ; national_share_pct, ligne Ensemble des mêmes tableaux
+# sample: 4 000 inscrits, représentatifs de la population française de 18 ans et plus
+# fieldwork: en ligne, du 6 au 9 avril 2022
+# group_labels: 3=Cadre; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité
+# notes: Contrôle de la conversion de Bayes seulement : ce tableau n'alimente pas data/. Ipsos ne publie ni les artisans-commerçants ni les agriculteurs, et regroupe P. Poutou et N. Arthaud.
+candidate_id,label,famille,national_share_pct,is_abstention,3,4,5,6,7
+poutou-arthaud,P. Poutou et N. Arthaud,npa,1.4,,1,0,2,2,1
+melenchon,Jean-Luc Mélenchon,lfi,22,,27,27,27,25,13
+roussel,Fabien Roussel,pcf,2.3,,1,4,1,2,3
+jadot,Yannick Jadot,ecologie,4.6,,6,5,4,2,4
+hidalgo,Anne Hidalgo,ps,1.8,,3,2,2,0,2
+macron,Emmanuel Macron,majorite,27.8,,34,27,17,17,37
+pecresse,Valérie Pécresse,lr,4.8,,6,3,2,2,9
+lassalle,Jean Lassalle,lassalle,3.1,,4,4,2,3,3
+dupont-aignan,Nicolas Dupont-Aignan,dlf,2.1,,2,1,2,3,3
+le-pen,Marine Le Pen,rn,23.2,,11,24,35,35,17
+zemmour,Éric Zemmour,reconquete,7.1,,5,3,6,9,8
+abstention,Abstention,abstention,26.3,true,26,27,27,34,19

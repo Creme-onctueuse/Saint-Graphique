@@ -1,0 +1,206 @@
+{
+  "id": "2017_legislatives_t1",
+  "type": "legislatives",
+  "year": 2017,
+  "round": 1,
+  "label": "Législatives 2017 (1er tour)",
+  "pcs_level": 1,
+  "sources": [
+    {
+      "id": "ifop_2017_legislatives_t1",
+      "title": "Ifop et Fiducial pour Paris Match, CNews et Sud Radio, Le profil des électeurs et les clefs du premier tour des élections législatives, 11 juin 2017",
+      "url": "https://www.ifop.com/wp-content/uploads/2018/03/3791-1-study_file.pdf",
+      "accessed": "2026-10-31",
+      "publisher": "Ifop-Fiducial",
+      "license": "Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'est documenté dans ce dépôt, voir data/SOURCES.md.",
+      "notes": "Échantillon : 2 009 électeurs, représentatifs des inscrits en France métropolitaine. Terrain : en ligne, le 11 juin 2017, de 11 h à 18 h. Tableaux : colonnes de groupes, vote en composition p. 25 (PDF 27) et abstention en composition p. 10 (PDF 12) ; national_share_pct, ligne ENSEMBLE du vote en pénétration p. 23 (PDF 25) et de la participation p. 8 (PDF 10). Groupes : 2=Travailleur indépendant; 3=Cadre et prof. int. supérieure; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif. Le rapport n'isole pas les agriculteurs : la clé « 1 » est absente, et on ignore s'ils sont comptés dans le groupe 2. « Autre inactif » (groupe 8) est retiré et les parts ramenées à 100 sur les groupes restants ; les parts publiées sont dans pipeline/sources/manual. national_share_pct : ligne ensemble du sondage (abstention en % des inscrits), pas le résultat officiel. Transcription manuelle ; « - » reproduit le tiret du rapport. Agrégats de candidats définis par l'Ifop, pas les nuances du ministère de l'Intérieur."
+    }
+  ],
+  "candidates": [
+    {
+      "id": "extreme-gauche",
+      "label": "Extrême gauche",
+      "color": "#7b1113",
+      "national_share_pct": 0.8
+    },
+    {
+      "id": "lfi",
+      "label": "La France insoumise",
+      "color": "#e5383b",
+      "national_share_pct": 11.0
+    },
+    {
+      "id": "pcf",
+      "label": "Parti communiste français",
+      "color": "#c8102e",
+      "national_share_pct": 2.7
+    },
+    {
+      "id": "ps",
+      "label": "Parti socialiste",
+      "color": "#f06292",
+      "national_share_pct": 7.4
+    },
+    {
+      "id": "eelv",
+      "label": "Europe Écologie Les Verts",
+      "color": "#2e9e4f",
+      "national_share_pct": 3.4
+    },
+    {
+      "id": "divers-gauche",
+      "label": "Divers gauche",
+      "color": "#ef9a9a",
+      "national_share_pct": 2.0
+    },
+    {
+      "id": "lrem",
+      "label": "La République en marche",
+      "color": "#f9a825",
+      "national_share_pct": 32.3
+    },
+    {
+      "id": "lr-udi",
+      "label": "Les Républicains et UDI",
+      "color": "#1565c0",
+      "national_share_pct": 18.8
+    },
+    {
+      "id": "divers-droite",
+      "label": "Divers droite",
+      "color": "#6f9fd8",
+      "national_share_pct": 3.4
+    },
+    {
+      "id": "dlf",
+      "label": "Debout la France",
+      "color": "#303f9f",
+      "national_share_pct": 1.2
+    },
+    {
+      "id": "fn",
+      "label": "Front national",
+      "color": "#0d1b4c",
+      "national_share_pct": 13.2
+    },
+    {
+      "id": "divers",
+      "label": "Divers ou sans étiquette",
+      "color": "#8e8e8e",
+      "national_share_pct": 3.8
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "national_share_pct": 49.8,
+      "is_abstention": true
+    }
+  ],
+  "composition": {
+    "extreme-gauche": {
+      "2": 0.0,
+      "3": 15.87,
+      "4": 15.55,
+      "5": 34.23,
+      "6": 15.23,
+      "7": 19.11
+    },
+    "lfi": {
+      "2": 4.47,
+      "3": 7.53,
+      "4": 24.59,
+      "5": 22.59,
+      "6": 18.71,
+      "7": 22.12
+    },
+    "pcf": {
+      "2": 2.38,
+      "3": 8.98,
+      "4": 24.68,
+      "5": 10.5,
+      "6": 11.69,
+      "7": 41.77
+    },
+    "ps": {
+      "2": 2.37,
+      "3": 11.86,
+      "4": 13.67,
+      "5": 13.79,
+      "6": 5.2,
+      "7": 53.11
+    },
+    "eelv": {
+      "2": 0.0,
+      "3": 31.84,
+      "4": 26.34,
+      "5": 23.72,
+      "6": 9.99,
+      "7": 8.11
+    },
+    "divers-gauche": {
+      "2": 0.0,
+      "3": 9.31,
+      "4": 12.91,
+      "5": 20.32,
+      "6": 5.11,
+      "7": 52.35
+    },
+    "lrem": {
+      "2": 7.38,
+      "3": 13.12,
+      "4": 12.69,
+      "5": 16.59,
+      "6": 6.72,
+      "7": 43.49
+    },
+    "lr-udi": {
+      "2": 6.56,
+      "3": 5.54,
+      "4": 10.56,
+      "5": 11.69,
+      "6": 4.62,
+      "7": 61.03
+    },
+    "divers-droite": {
+      "2": 4.8,
+      "3": 19.6,
+      "4": 11.4,
+      "5": 10.4,
+      "6": 7.6,
+      "7": 46.2
+    },
+    "dlf": {
+      "2": 8.53,
+      "3": 2.35,
+      "4": 8.65,
+      "5": 13.84,
+      "6": 19.28,
+      "7": 47.34
+    },
+    "fn": {
+      "2": 4.15,
+      "3": 5.84,
+      "4": 11.45,
+      "5": 20.09,
+      "6": 27.5,
+      "7": 30.98
+    },
+    "divers": {
+      "2": 2.91,
+      "3": 14.81,
+      "4": 24.68,
+      "5": 5.95,
+      "6": 26.2,
+      "7": 25.44
+    },
+    "abstention": {
+      "2": 5.29,
+      "3": 13.16,
+      "4": 18.57,
+      "5": 20.54,
+      "6": 16.48,
+      "7": 25.95
+    }
+  }
+}

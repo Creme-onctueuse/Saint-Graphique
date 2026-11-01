@@ -1,0 +1,27 @@
+# source_id: ifop_2022_presidentielle_t1
+# title: Ifop-Fiducial pour TF1 & LCI, Présidentielle 2022, sondage jour du vote : profil des électeurs et clés du scrutin (1er tour), 10 avril 2022
+# publisher: Ifop-Fiducial
+# url: https://www.ifop.com/wp-content/uploads/2022/04/118997-Rapport-JDV-PRE22-T1-DET-11.04-1.pdf
+# accessed: 2026-10-31
+# cache_file: ifop_2022_pres_t1_det.pdf
+# sha256: 6385ccb1e12cd742f665fb576d0235a0226bf48037e2693a9cf59675b5dc105b
+# kind: composition
+# tables: colonnes de groupes, vote en composition p. 30 (PDF 31) et abstention en composition p. 15 (PDF 16) ; national_share_pct, ligne ENSEMBLE du vote p. 27 (PDF 28) et de la participation p. 13 (PDF 14)
+# sample: 3 784 inscrits, extraits d'un échantillon de 4 066 personnes
+# fieldwork: en ligne, le 10 avril 2022, de 11 h à 18 h
+# group_labels: 2=Artisan ou commerçant; 3=Cadre et prof. int. sup.; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif
+# notes: Transcription manuelle ; « - » reproduit le tiret du rapport. Parts publiées en nombres entiers.
+candidate_id,label,famille,national_share_pct,is_abstention,2,3,4,5,6,7,8
+arthaud,Nathalie Arthaud,exg,0.6,,-,7,20,11,26,30,6
+poutou,Philippe Poutou,npa,0.8,,2,10,14,16,24,17,16
+roussel,Fabien Roussel,pcf,2.3,,1,11,24,9,6,41,8
+melenchon,Jean-Luc Mélenchon,lfi,22,,4,10,15,18,14,21,18
+hidalgo,Anne Hidalgo,ps,1.7,,2,5,22,25,6,24,15
+jadot,Yannick Jadot,ecologie,4.6,,3,16,21,20,3,17,20
+macron,Emmanuel Macron,majorite,27.5,,4,12,14,11,7,43,10
+pecresse,Valérie Pécresse,lr,4.8,,8,10,10,8,4,57,3
+dupont-aignan,Nicolas Dupont-Aignan,dlf,2.1,,5,13,9,17,14,36,6
+le-pen,Marine Le Pen,rn,23.3,,5,6,15,22,17,24,11
+zemmour,Éric Zemmour,reconquete,7.1,,7,13,10,11,11,38,9
+lassalle,Jean Lassalle,lassalle,3.2,,6,5,35,14,14,19,7
+abstention,Abstention,abstention,25.1,true,4,8,11,15,13,26,22

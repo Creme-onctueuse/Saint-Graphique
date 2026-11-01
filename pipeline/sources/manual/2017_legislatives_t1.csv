@@ -1,0 +1,27 @@
+# source_id: ifop_2017_legislatives_t1
+# title: Ifop et Fiducial pour Paris Match, CNews et Sud Radio, Le profil des électeurs et les clefs du premier tour des élections législatives, 11 juin 2017
+# publisher: Ifop-Fiducial
+# url: https://www.ifop.com/wp-content/uploads/2018/03/3791-1-study_file.pdf
+# accessed: 2026-10-31
+# cache_file: ifop_2017_leg_t1.pdf
+# sha256: 15a2338e7620d3602dbe05f6222039e345854bec84cb62ca7bc501c562fa6304
+# kind: composition
+# tables: colonnes de groupes, vote en composition p. 25 (PDF 27) et abstention en composition p. 10 (PDF 12) ; national_share_pct, ligne ENSEMBLE du vote en pénétration p. 23 (PDF 25) et de la participation p. 8 (PDF 10)
+# sample: 2 009 électeurs, représentatifs des inscrits en France métropolitaine
+# fieldwork: en ligne, le 11 juin 2017, de 11 h à 18 h
+# group_labels: 2=Travailleur indépendant; 3=Cadre et prof. int. supérieure; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif
+# notes: Transcription manuelle ; « - » reproduit le tiret du rapport. Agrégats de candidats définis par l'Ifop, pas les nuances du ministère de l'Intérieur.
+candidate_id,label,famille,national_share_pct,is_abstention,2,3,4,5,6,7,8
+extreme-gauche,Extrême gauche,exg,0.8,,-,14.7,14.4,31.7,14.1,17.7,7.5
+lfi,La France insoumise,lfi,11.0,,3.8,6.4,20.9,19.2,15.9,18.8,14.9
+pcf,Parti communiste français,pcf,2.7,,2.2,8.3,22.8,9.7,10.8,38.6,7.5
+ps,Parti socialiste,ps,7.4,,2.1,10.5,12.1,12.2,4.6,47.0,11.5
+eelv,Europe Écologie Les Verts,ecologie,3.4,,-,25.5,21.1,19.0,8.0,6.5,20.0
+divers-gauche,Divers gauche,dvg,2.0,,-,9.3,12.9,20.3,5.1,52.3,-
+lrem,La République en marche,majorite,32.3,,6.8,12.1,11.7,15.3,6.2,40.1,7.8
+lr-udi,Les Républicains et UDI,lr,18.8,,6.4,5.4,10.3,11.4,4.5,59.5,2.6
+divers-droite,Divers droite,dvd,3.4,,4.8,19.6,11.4,10.4,7.6,46.2,-
+dlf,Debout la France,dlf,1.2,,6.9,1.9,7.0,11.2,15.6,38.3,19.0
+fn,Front national,rn,13.2,,3.7,5.2,10.2,17.9,24.5,27.6,10.9
+divers,Divers ou sans étiquette,divers,3.8,,2.3,11.7,19.5,4.7,20.7,20.1,20.9
+abstention,Abstention,abstention,49.8,true,4.3,10.7,15.1,16.7,13.4,21.1,18.9

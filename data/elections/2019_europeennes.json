@@ -1,0 +1,248 @@
+{
+  "id": "2019_europeennes",
+  "type": "europeennes",
+  "year": 2019,
+  "round": 1,
+  "label": "Européennes 2019",
+  "pcs_level": 1,
+  "sources": [
+    {
+      "id": "ifop_2019_europeennes",
+      "title": "Ifop-Fiducial pour Paris Match, CNEWS et Sud Radio, Européennes 2019 : profil des électeurs et clefs du scrutin, 27 mai 2019",
+      "url": "https://www.ifop.com/wp-content/uploads/2019/05/116339-rapport-jdv-complet-detaille_2019_05.27.pdf",
+      "accessed": "2026-10-31",
+      "publisher": "Ifop-Fiducial",
+      "license": "Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'est documenté dans ce dépôt, voir data/SOURCES.md.",
+      "notes": "Échantillon : 3 018 inscrits, extraits d'un échantillon de 3 291 personnes, France métropolitaine. Terrain : en ligne, le 26 mai 2019, de 12 h à 18 h. Tableaux : colonnes de groupes, vote en composition p. 29-31 (PDF 31-33) et abstention en composition p. 14 (PDF 16) ; national_share_pct, ligne ENSEMBLE du vote en pénétration p. 23-25 (PDF 25-27), abstention = 100 - 51 % de votants p. 12 (PDF 14). Groupes : 2=Artisan ou commerçant; 3=Profession libérale, cadre supérieur; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif. Le rapport n'isole pas les agriculteurs : la clé « 1 » est absente, et on ignore s'ils sont comptés dans le groupe 2. « Autre inactif » (groupe 8) est retiré et les parts ramenées à 100 sur les groupes restants ; les parts publiées sont dans pipeline/sources/manual. national_share_pct : ligne ensemble du sondage (abstention en % des inscrits), pas le résultat officiel. Transcription manuelle ; « - » reproduit le tiret du rapport. Le rapport avertit : pour les listes à très faible score, les chiffres détaillés sont à interpréter avec prudence. Pour quelques listes, la ligne « Catégorie supérieure » dépasse la somme de ses deux sous-lignes (LFI : 14,8 contre 2,8 + 8,5) sans que le rapport dise à quoi correspond l'écart : cette part non affichée n'est rattachée à aucun groupe."
+    }
+  ],
+  "candidates": [
+    {
+      "id": "lo",
+      "label": "Lutte ouvrière",
+      "color": "#7b1113",
+      "national_share_pct": 0.8
+    },
+    {
+      "id": "pcf",
+      "label": "Parti communiste",
+      "color": "#c8102e",
+      "national_share_pct": 2.5
+    },
+    {
+      "id": "lfi",
+      "label": "La France insoumise",
+      "color": "#e5383b",
+      "national_share_pct": 6.3
+    },
+    {
+      "id": "generation-s",
+      "label": "Génération.s et DiEM25",
+      "color": "#d81b8c",
+      "national_share_pct": 3.1
+    },
+    {
+      "id": "ps-pp",
+      "label": "Place publique, Parti socialiste et Nouvelle Donne",
+      "color": "#f06292",
+      "national_share_pct": 6.2
+    },
+    {
+      "id": "eelv",
+      "label": "Europe Écologie Les Verts, AEI et R&PS",
+      "color": "#2e9e4f",
+      "national_share_pct": 13.1
+    },
+    {
+      "id": "lrem",
+      "label": "La République en marche, Modem, Agir et Radicaux",
+      "color": "#f9a825",
+      "national_share_pct": 22.6
+    },
+    {
+      "id": "udi",
+      "label": "UDI",
+      "color": "#4fa3d1",
+      "national_share_pct": 2.4
+    },
+    {
+      "id": "lr",
+      "label": "Les Républicains et Centristes",
+      "color": "#1565c0",
+      "national_share_pct": 8.1
+    },
+    {
+      "id": "dlf",
+      "label": "Debout la France et CNIP",
+      "color": "#303f9f",
+      "national_share_pct": 3.4
+    },
+    {
+      "id": "rn",
+      "label": "Rassemblement national",
+      "color": "#0d1b4c",
+      "national_share_pct": 23.6
+    },
+    {
+      "id": "patriotes",
+      "label": "Patriotes et Jaunes et Citoyens",
+      "color": "#283593",
+      "national_share_pct": 0.7
+    },
+    {
+      "id": "upr",
+      "label": "Union populaire républicaine",
+      "color": "#00897b",
+      "national_share_pct": 1.2
+    },
+    {
+      "id": "alliance-jaune",
+      "label": "Alliance jaune",
+      "color": "#fdd835",
+      "national_share_pct": 0.5
+    },
+    {
+      "id": "autres-listes",
+      "label": "Autres listes",
+      "color": "#8e8e8e",
+      "national_share_pct": 5.5
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "national_share_pct": 49.0,
+      "is_abstention": true
+    }
+  ],
+  "composition": {
+    "lo": {
+      "2": 6.62,
+      "3": 8.99,
+      "4": 16.1,
+      "5": 15.36,
+      "6": 24.84,
+      "7": 28.09
+    },
+    "pcf": {
+      "2": 0.0,
+      "3": 1.1,
+      "4": 21.64,
+      "5": 22.37,
+      "6": 15.77,
+      "7": 39.12
+    },
+    "lfi": {
+      "2": 3.59,
+      "3": 10.9,
+      "4": 21.03,
+      "5": 20.9,
+      "6": 23.59,
+      "7": 20.0
+    },
+    "generation-s": {
+      "2": 2.24,
+      "3": 18.25,
+      "4": 39.59,
+      "5": 22.09,
+      "6": 13.66,
+      "7": 4.16
+    },
+    "ps-pp": {
+      "2": 2.14,
+      "3": 13.66,
+      "4": 17.49,
+      "5": 9.93,
+      "6": 7.0,
+      "7": 49.77
+    },
+    "eelv": {
+      "2": 3.17,
+      "3": 19.98,
+      "4": 27.77,
+      "5": 14.37,
+      "6": 7.67,
+      "7": 27.04
+    },
+    "lrem": {
+      "2": 4.64,
+      "3": 15.58,
+      "4": 13.04,
+      "5": 9.06,
+      "6": 6.19,
+      "7": 51.49
+    },
+    "udi": {
+      "2": 3.04,
+      "3": 11.82,
+      "4": 20.82,
+      "5": 8.46,
+      "6": 2.17,
+      "7": 53.69
+    },
+    "lr": {
+      "2": 3.79,
+      "3": 9.26,
+      "4": 9.04,
+      "5": 9.04,
+      "6": 3.57,
+      "7": 65.29
+    },
+    "dlf": {
+      "2": 6.78,
+      "3": 6.37,
+      "4": 23.28,
+      "5": 22.03,
+      "6": 10.33,
+      "7": 31.21
+    },
+    "rn": {
+      "2": 5.13,
+      "3": 5.7,
+      "4": 11.06,
+      "5": 20.64,
+      "6": 24.29,
+      "7": 33.18
+    },
+    "patriotes": {
+      "2": 0.0,
+      "3": 8.27,
+      "4": 26.62,
+      "5": 27.88,
+      "6": 9.17,
+      "7": 28.06
+    },
+    "upr": {
+      "2": 3.83,
+      "3": 15.74,
+      "4": 7.54,
+      "5": 24.48,
+      "6": 18.47,
+      "7": 29.95
+    },
+    "alliance-jaune": {
+      "2": 7.33,
+      "3": 43.97,
+      "4": 32.61,
+      "5": 7.33,
+      "6": 5.32,
+      "7": 3.45
+    },
+    "autres-listes": {
+      "2": 5.09,
+      "3": 14.55,
+      "4": 27.03,
+      "5": 21.94,
+      "6": 12.85,
+      "7": 18.55
+    },
+    "abstention": {
+      "2": 3.62,
+      "3": 12.09,
+      "4": 20.95,
+      "5": 25.06,
+      "6": 17.83,
+      "7": 20.45
+    }
+  }
+}

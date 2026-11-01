@@ -1,0 +1,30 @@
+# source_id: ifop_2019_europeennes
+# title: Ifop-Fiducial pour Paris Match, CNEWS et Sud Radio, Européennes 2019 : profil des électeurs et clefs du scrutin, 27 mai 2019
+# publisher: Ifop-Fiducial
+# url: https://www.ifop.com/wp-content/uploads/2019/05/116339-rapport-jdv-complet-detaille_2019_05.27.pdf
+# accessed: 2026-10-31
+# cache_file: ifop_2019_euro.pdf
+# sha256: ee208d4bd170ee5f11abed1d1d07e3551fa7e08a546fffc88d1052d893e3c690
+# kind: composition
+# tables: colonnes de groupes, vote en composition p. 29-31 (PDF 31-33) et abstention en composition p. 14 (PDF 16) ; national_share_pct, ligne ENSEMBLE du vote en pénétration p. 23-25 (PDF 25-27), abstention = 100 - 51 % de votants p. 12 (PDF 14)
+# sample: 3 018 inscrits, extraits d'un échantillon de 3 291 personnes, France métropolitaine
+# fieldwork: en ligne, le 26 mai 2019, de 12 h à 18 h
+# group_labels: 2=Artisan ou commerçant; 3=Profession libérale, cadre supérieur; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif
+# notes: Transcription manuelle ; « - » reproduit le tiret du rapport. Le rapport avertit : pour les listes à très faible score, les chiffres détaillés sont à interpréter avec prudence. Pour quelques listes, la ligne « Catégorie supérieure » dépasse la somme de ses deux sous-lignes (LFI : 14,8 contre 2,8 + 8,5) sans que le rapport dise à quoi correspond l'écart : cette part non affichée n'est rattachée à aucun groupe.
+candidate_id,label,famille,national_share_pct,is_abstention,2,3,4,5,6,7,8
+lo,Lutte ouvrière,exg,0.8,,5.3,7.2,12.9,12.3,19.9,22.5,20.0
+pcf,Parti communiste,pcf,2.5,,-,0.9,17.7,18.3,12.9,32.0,18.3
+lfi,La France insoumise,lfi,6.3,,2.8,8.5,16.4,16.3,18.4,15.6,18.5
+generation-s,Génération.s et DiEM25,generation,3.1,,2.1,17.1,37.1,20.7,12.8,3.9,6.3
+ps-pp,"Place publique, Parti socialiste et Nouvelle Donne",ps,6.2,,1.9,12.1,15.5,8.8,6.2,44.1,11.4
+eelv,"Europe Écologie Les Verts, AEI et R&PS",ecologie,13.1,,2.6,16.4,22.8,11.8,6.3,22.2,17.9
+lrem,"La République en marche, Modem, Agir et Radicaux",majorite,22.6,,4.2,14.1,11.8,8.2,5.6,46.6,7.3
+udi,UDI,udi,2.4,,2.8,10.9,19.2,7.8,2.0,49.5,7.8
+lr,Les Républicains et Centristes,lr,8.1,,3.4,8.3,8.1,8.1,3.2,58.5,8.4
+dlf,Debout la France et CNIP,dlf,3.4,,6.5,6.1,22.3,21.1,9.9,29.9,4.2
+rn,Rassemblement national,rn,23.6,,4.5,5.0,9.7,18.1,21.3,29.1,10.0
+patriotes,Patriotes et Jaunes et Citoyens,patriotes,0.7,,-,4.6,14.8,15.5,5.1,15.6,44.5
+upr,Union populaire républicaine,upr,1.2,,3.5,14.4,6.9,22.4,16.9,27.4,8.5
+alliance-jaune,Alliance jaune,alliance_jaune,0.5,,5.1,30.6,22.7,5.1,3.7,2.4,30.5
+autres-listes,Autres listes,divers,5.5,,4.2,12.0,22.3,18.1,10.6,15.3,14.2
+abstention,Abstention,abstention,49,true,2.9,9.7,16.8,20.1,14.3,16.4,19.8

@@ -1,0 +1,178 @@
+{
+  "id": "2024_europeennes",
+  "type": "europeennes",
+  "year": 2024,
+  "round": 1,
+  "label": "Européennes 2024",
+  "pcs_level": 1,
+  "sources": [
+    {
+      "id": "ifop_2024_europeennes",
+      "title": "Ifop-Fiducial pour LCI, Le Figaro et Sud Radio, Européennes 2024, sondage jour du vote : profil des électeurs et clés du scrutin, 9 juin 2024",
+      "url": "https://www.ifop.com/wp-content/uploads/2024/06/DET-120537-Rapport-JDV-EUR24-10.06.2024.pdf",
+      "accessed": "2026-10-31",
+      "publisher": "Ifop-Fiducial",
+      "license": "Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'est documenté dans ce dépôt, voir data/SOURCES.md.",
+      "notes": "Échantillon : 2 871 inscrits, extraits d'un échantillon de 3 065 personnes. Terrain : en ligne, le 9 juin 2024, de 11 h à 18 h. Tableaux : colonnes de groupes, vote en composition p. 37 (PDF 38) et abstention en composition p. 16 (PDF 17) ; national_share_pct, ligne ENSEMBLE du vote p. 34 (PDF 35) et de la participation p. 14 (PDF 15). Groupes : 2=Artisans ou commerçants; 3=Cadres et prof. int. sup.; 4=Professions intermédiaires; 5=Employés; 6=Ouvriers; 7=Retraités; 8=Autres inactifs. Le rapport n'isole pas les agriculteurs : la clé « 1 » est absente, et on ignore s'ils sont comptés dans le groupe 2. « Autre inactif » (groupe 8) est retiré et les parts ramenées à 100 sur les groupes restants ; les parts publiées sont dans pipeline/sources/manual. national_share_pct : ligne ensemble du sondage (abstention en % des inscrits), pas le résultat officiel. Transcription manuelle ; « - » reproduit le tiret du rapport. Parts publiées en nombres entiers."
+    }
+  ],
+  "candidates": [
+    {
+      "id": "lfi",
+      "label": "La France insoumise (M. Aubry)",
+      "color": "#e5383b",
+      "national_share_pct": 9.9
+    },
+    {
+      "id": "pcf",
+      "label": "Parti communiste-MRC (L. Deffontaines)",
+      "color": "#c8102e",
+      "national_share_pct": 2.4
+    },
+    {
+      "id": "ps-pp",
+      "label": "Parti socialiste-Place publique (R. Glucksmann)",
+      "color": "#f06292",
+      "national_share_pct": 13.8
+    },
+    {
+      "id": "ecologistes",
+      "label": "Les Écologistes (M. Toussaint)",
+      "color": "#2e9e4f",
+      "national_share_pct": 5.5
+    },
+    {
+      "id": "renaissance",
+      "label": "Renaissance-Modem-Horizons-UDI (V. Hayer)",
+      "color": "#f9a825",
+      "national_share_pct": 14.6
+    },
+    {
+      "id": "lr",
+      "label": "Les Républicains (F.-X. Bellamy)",
+      "color": "#1565c0",
+      "national_share_pct": 7.2
+    },
+    {
+      "id": "reconquete",
+      "label": "Reconquête (M. Maréchal)",
+      "color": "#3e2723",
+      "national_share_pct": 5.5
+    },
+    {
+      "id": "rn",
+      "label": "Rassemblement national (J. Bardella)",
+      "color": "#0d1b4c",
+      "national_share_pct": 31.4
+    },
+    {
+      "id": "animaliste",
+      "label": "Parti animaliste (H. Thouy)",
+      "color": "#7cb342",
+      "national_share_pct": 2.0
+    },
+    {
+      "id": "autres-listes",
+      "label": "Autres listes",
+      "color": "#8e8e8e",
+      "national_share_pct": 7.7
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "national_share_pct": 48.5,
+      "is_abstention": true
+    }
+  ],
+  "composition": {
+    "lfi": {
+      "2": 5.71,
+      "3": 14.29,
+      "4": 20.0,
+      "5": 22.86,
+      "6": 21.43,
+      "7": 15.71
+    },
+    "pcf": {
+      "2": 3.7,
+      "3": 14.81,
+      "4": 12.35,
+      "5": 14.81,
+      "6": 6.17,
+      "7": 48.15
+    },
+    "ps-pp": {
+      "2": 1.08,
+      "3": 17.2,
+      "4": 17.2,
+      "5": 12.9,
+      "6": 6.45,
+      "7": 45.16
+    },
+    "ecologistes": {
+      "2": 7.32,
+      "3": 19.51,
+      "4": 25.61,
+      "5": 17.07,
+      "6": 8.54,
+      "7": 21.95
+    },
+    "renaissance": {
+      "2": 2.22,
+      "3": 14.44,
+      "4": 14.44,
+      "5": 10.0,
+      "6": 3.33,
+      "7": 55.56
+    },
+    "lr": {
+      "2": 6.67,
+      "3": 15.56,
+      "4": 16.67,
+      "5": 12.22,
+      "6": 5.56,
+      "7": 43.33
+    },
+    "reconquete": {
+      "2": 6.52,
+      "3": 14.13,
+      "4": 14.13,
+      "5": 8.7,
+      "6": 13.04,
+      "7": 43.48
+    },
+    "rn": {
+      "2": 5.75,
+      "3": 6.9,
+      "4": 13.79,
+      "5": 21.84,
+      "6": 20.69,
+      "7": 31.03
+    },
+    "animaliste": {
+      "2": 0.0,
+      "3": 13.92,
+      "4": 22.78,
+      "5": 20.25,
+      "6": 13.92,
+      "7": 29.11
+    },
+    "autres-listes": {
+      "2": 7.32,
+      "3": 12.2,
+      "4": 18.29,
+      "5": 19.51,
+      "6": 23.17,
+      "7": 19.51
+    },
+    "abstention": {
+      "2": 7.41,
+      "3": 9.88,
+      "4": 18.52,
+      "5": 20.99,
+      "6": 17.28,
+      "7": 25.93
+    }
+  }
+}

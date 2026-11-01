@@ -1,0 +1,26 @@
+# source_id: ifop_2017_presidentielle_t1
+# title: Ifop et Fiducial pour Paris Match, CNews et Sud Radio, Le profil des électeurs et les clefs du premier tour de l'élection présidentielle, 23 avril 2017
+# publisher: Ifop-Fiducial
+# url: https://www.ifop.com/wp-content/uploads/2018/03/3749-1-study_file.pdf
+# accessed: 2026-10-31
+# cache_file: ifop_2017_pres_t1.pdf
+# sha256: 5083fb6d3b17adbd0a4744f9f3d139c0149b8de3aadc6e9e3d59dde78bd2f073
+# kind: composition
+# tables: colonnes de groupes, vote en composition p. 22 (PDF 24) et abstention en composition p. 10 (PDF 12) ; national_share_pct, ligne ENSEMBLE du vote en pénétration p. 20 (PDF 22) et de la participation p. 8 (PDF 10)
+# sample: 3 668 inscrits, extraits d'un échantillon de 3 814 personnes, France métropolitaine
+# fieldwork: en ligne, le 23 avril 2017, de 11 h à 18 h
+# group_labels: 2=Travailleur indépendant; 3=Cadre et prof. int. supérieure; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif
+# notes: Transcription manuelle ; « - » reproduit le tiret du rapport. Petits électorats à lire avec prudence (le rapport signale les effectifs inférieurs à 40 individus).
+candidate_id,label,famille,national_share_pct,is_abstention,2,3,4,5,6,7,8
+arthaud,Nathalie Arthaud,exg,0.6,,4.6,-,-,33.4,21.5,26.8,13.7
+poutou,Philippe Poutou,npa,1.1,,-,14.0,13.5,20.6,32.9,6.3,12.7
+melenchon,Jean-Luc Mélenchon,lfi,19.6,,4.1,9.2,19.7,18.8,14.3,18.5,15.4
+hamon,Benoît Hamon,ps,6.3,,5.1,16.0,24.6,13.7,9.3,15.7,15.5
+macron,Emmanuel Macron,majorite,24.0,,3.6,17.4,16.7,11.8,6.8,33.7,10.0
+lassalle,Jean Lassalle,lassalle,1.2,,5.9,17.9,10.1,20.8,11.7,27.4,6.2
+fillon,François Fillon,lr,19.9,,5.8,11.7,7.1,9.4,3.6,52.2,10.2
+dupont-aignan,Nicolas Dupont-Aignan,dlf,4.8,,6.6,6.1,19.7,17.9,8.0,32.9,8.8
+le-pen,Marine Le Pen,rn,21.4,,4.0,5.1,11.6,22.1,20.4,23.6,13.2
+asselineau,François Asselineau,upr,0.9,,10.3,8.7,13.2,23.8,28.4,5.7,9.9
+cheminade,Jacques Cheminade,divers,0.2,,-,35.0,-,-,-,36.4,28.5
+abstention,Abstention,abstention,20.4,true,4.6,6.4,14.7,19.7,14.4,22.6,17.6

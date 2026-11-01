@@ -1,0 +1,25 @@
+# source_id: ifop_2024_europeennes
+# title: Ifop-Fiducial pour LCI, Le Figaro et Sud Radio, Européennes 2024, sondage jour du vote : profil des électeurs et clés du scrutin, 9 juin 2024
+# publisher: Ifop-Fiducial
+# url: https://www.ifop.com/wp-content/uploads/2024/06/DET-120537-Rapport-JDV-EUR24-10.06.2024.pdf
+# accessed: 2026-10-31
+# cache_file: ifop_2024_euro.pdf
+# sha256: d2546b63d1af73135c1089adfe74ea4a44985c3b1f1bc07587c6b4df89ca1156
+# kind: composition
+# tables: colonnes de groupes, vote en composition p. 37 (PDF 38) et abstention en composition p. 16 (PDF 17) ; national_share_pct, ligne ENSEMBLE du vote p. 34 (PDF 35) et de la participation p. 14 (PDF 15)
+# sample: 2 871 inscrits, extraits d'un échantillon de 3 065 personnes
+# fieldwork: en ligne, le 9 juin 2024, de 11 h à 18 h
+# group_labels: 2=Artisans ou commerçants; 3=Cadres et prof. int. sup.; 4=Professions intermédiaires; 5=Employés; 6=Ouvriers; 7=Retraités; 8=Autres inactifs
+# notes: Transcription manuelle ; « - » reproduit le tiret du rapport. Parts publiées en nombres entiers.
+candidate_id,label,famille,national_share_pct,is_abstention,2,3,4,5,6,7,8
+lfi,La France insoumise (M. Aubry),lfi,9.9,,4,10,14,16,15,11,30
+pcf,Parti communiste-MRC (L. Deffontaines),pcf,2.4,,3,12,10,12,5,39,19
+ps-pp,Parti socialiste-Place publique (R. Glucksmann),ps,13.8,,1,16,16,12,6,42,7
+ecologistes,Les Écologistes (M. Toussaint),ecologie,5.5,,6,16,21,14,7,18,19
+renaissance,Renaissance-Modem-Horizons-UDI (V. Hayer),majorite,14.6,,2,13,13,9,3,50,9
+lr,Les Républicains (F.-X. Bellamy),lr,7.2,,6,14,15,11,5,39,10
+reconquete,Reconquête (M. Maréchal),reconquete,5.5,,6,13,13,8,12,40,8
+rn,Rassemblement national (J. Bardella),rn,31.4,,5,6,12,19,18,27,13
+animaliste,Parti animaliste (H. Thouy),animaliste,2.0,,-,11,18,16,11,23,21
+autres-listes,Autres listes,divers,7.7,,6,10,15,16,19,16,17
+abstention,Abstention,abstention,48.5,true,6,8,15,17,14,21,19
