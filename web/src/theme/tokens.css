@@ -1,0 +1,169 @@
+/*
+ * Thème de l'application : TOUS les tokens de couleur et de typographie sont ici, et seulement ici.
+ * Changer de style revient à modifier ce fichier ; app.css et le code n'utilisent que des var(--sg-*).
+ *
+ * Trois états : système (aucun attribut, suit prefers-color-scheme), [data-theme="light"],
+ * [data-theme="dark"]. Le bloc sombre est volontairement répété : une fois pour la préférence du
+ * système, une fois pour le choix explicite.
+ *
+ * Thème par défaut sobre, provisoire : le style cible sera calé sur les vidéos de Chris.
+ *
+ * Groupes PCS (--sg-group-N) : ils priment sur les couleurs de config/pcs.yaml, qui ne servent que
+ * de repli pour un groupe sans token. Teintes 1 à 6 : palette Okabe-Ito ; avec le gris des retraités,
+ * « toutes paires » : CVD ΔE 7,6 et vision normale ΔE ≥ 15. Ce niveau impose un encodage secondaire, assuré
+ * par les libellés directs, la légende et le tableau. Le gris des retraités rend leur très grand
+ * disque discret : un grand aplat saturé écraserait le reste.
+ */
+:root {
+  color-scheme: light;
+
+  /* Typographie : piles système, aucune police à charger */
+  --sg-font-ui:
+    system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  --sg-font-display: var(--sg-font-ui);
+  --sg-font-display-weight: 750;
+  --sg-radius: 8px;
+
+  /* Surfaces et texte */
+  --sg-page: #f3f3ef;
+  --sg-surface: #fcfcfb;
+  --sg-surface-2: #efeee9;
+  --sg-border: #d6d5cf;
+  --sg-border-strong: #85847d;
+  --sg-text: #1c1c1a;
+  --sg-text-muted: #56554f;
+  --sg-accent: #24527a;
+  --sg-accent-text: #ffffff;
+  --sg-focus: #0b62c4;
+  --sg-shadow: rgb(20 20 18 / 0.16);
+
+  /* Bandeau d'avertissement (données fictives) */
+  --sg-warning-bg: #fbf0d0;
+  --sg-warning-text: #4f3b00;
+  --sg-warning-border: #b38f1d;
+
+  /* Graphique : fond, quadrants, grille */
+  --sg-plot-bg: #fcfcfb;
+  --sg-plot-frame: #b9b8b1;
+  --sg-quadrant-tl: #f7f7f3;
+  --sg-quadrant-tr: #fcfcfb;
+  --sg-quadrant-bl: #fcfcfb;
+  --sg-quadrant-br: #f7f7f3;
+  --sg-grid: #e6e5df;
+  --sg-zero: #c4c3bc;
+  --sg-diagonal: #85847d;
+  --sg-axis-text: #56554f;
+
+  /* Graphique : repères et libellés */
+  --sg-label: #2a2a27;
+  --sg-label-halo: #fcfcfb;
+  --sg-ring: #fcfcfb;
+  --sg-cand-ring: #fcfcfb; /* contour clair en sombre : les couleurs de candidats sont imposées */
+  --sg-pcs-opacity: 0.92;
+  --sg-abstention: #2f2f2c;
+  --sg-barycenter: #1c1c1a;
+  --sg-ellipse-fill-opacity: 0.1;
+
+  /* Infobulle */
+  --sg-tooltip-bg: #1f1f1d;
+  --sg-tooltip-text: #f5f5f2;
+  --sg-tooltip-muted: #c9c8c0;
+  --sg-tooltip-bar: #9fc3e6;
+  --sg-tooltip-track: #41413d;
+
+  /* Groupes PCS de niveau 1 */
+  --sg-group-1: #009e73; /* Agriculteurs exploitants */
+  --sg-group-2: #e69f00; /* Artisans, commerçants, chefs d'entreprise */
+  --sg-group-3: #cc79a7; /* Cadres et professions intellectuelles supérieures */
+  --sg-group-4: #56b4e9; /* Professions intermédiaires */
+  --sg-group-5: #0072b2; /* Employés */
+  --sg-group-6: #d55e00; /* Ouvriers */
+  --sg-group-7: #c9c9c2; /* Retraités */
+  --sg-group-8: #8a8a84; /* Autres inactifs */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) {
+    color-scheme: dark;
+    --sg-page: #111110;
+    --sg-surface: #1a1a19;
+    --sg-surface-2: #252523;
+    --sg-border: #3a3a37;
+    --sg-border-strong: #85847d;
+    --sg-text: #f0efec;
+    --sg-text-muted: #b8b7ad;
+    --sg-accent: #8cb8e3;
+    --sg-accent-text: #10202e;
+    --sg-focus: #8ab8ff;
+    --sg-shadow: rgb(0 0 0 / 0.5);
+    --sg-warning-bg: #3a2e0c;
+    --sg-warning-text: #f4e3ac;
+    --sg-warning-border: #8a6f16;
+    --sg-plot-bg: #1a1a19;
+    --sg-plot-frame: #55544f;
+    --sg-quadrant-tl: #1e1e1c;
+    --sg-quadrant-tr: #1a1a19;
+    --sg-quadrant-bl: #1a1a19;
+    --sg-quadrant-br: #1e1e1c;
+    --sg-grid: #2c2c2a;
+    --sg-zero: #4a4a46;
+    --sg-diagonal: #85847d;
+    --sg-axis-text: #b8b7ad;
+    --sg-label: #e8e7e2;
+    --sg-label-halo: #1a1a19;
+    --sg-ring: #1a1a19;
+    --sg-cand-ring: #d8d7d0;
+    --sg-abstention: #d8d7d0;
+    --sg-barycenter: #f0efec;
+    --sg-ellipse-fill-opacity: 0.14;
+    --sg-tooltip-bg: #2b2b28;
+    --sg-tooltip-text: #f5f5f2;
+    --sg-tooltip-muted: #c9c8c0;
+    --sg-tooltip-bar: #8cb8e3;
+    --sg-tooltip-track: #4a4a46;
+    --sg-group-7: #5c5c56;
+    --sg-group-8: #5f5f5a;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --sg-page: #111110;
+  --sg-surface: #1a1a19;
+  --sg-surface-2: #252523;
+  --sg-border: #3a3a37;
+  --sg-border-strong: #85847d;
+  --sg-text: #f0efec;
+  --sg-text-muted: #b8b7ad;
+  --sg-accent: #8cb8e3;
+  --sg-accent-text: #10202e;
+  --sg-focus: #8ab8ff;
+  --sg-shadow: rgb(0 0 0 / 0.5);
+  --sg-warning-bg: #3a2e0c;
+  --sg-warning-text: #f4e3ac;
+  --sg-warning-border: #8a6f16;
+  --sg-plot-bg: #1a1a19;
+  --sg-plot-frame: #55544f;
+  --sg-quadrant-tl: #1e1e1c;
+  --sg-quadrant-tr: #1a1a19;
+  --sg-quadrant-bl: #1a1a19;
+  --sg-quadrant-br: #1e1e1c;
+  --sg-grid: #2c2c2a;
+  --sg-zero: #4a4a46;
+  --sg-diagonal: #85847d;
+  --sg-axis-text: #b8b7ad;
+  --sg-label: #e8e7e2;
+  --sg-label-halo: #1a1a19;
+  --sg-ring: #1a1a19;
+  --sg-cand-ring: #d8d7d0;
+  --sg-abstention: #d8d7d0;
+  --sg-barycenter: #f0efec;
+  --sg-ellipse-fill-opacity: 0.14;
+  --sg-tooltip-bg: #2b2b28;
+  --sg-tooltip-text: #f5f5f2;
+  --sg-tooltip-muted: #c9c8c0;
+  --sg-tooltip-bar: #8cb8e3;
+  --sg-tooltip-track: #4a4a46;
+  --sg-group-7: #5c5c56;
+  --sg-group-8: #5f5f5a;
+}

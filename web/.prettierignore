@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+pnpm-lock.yaml
+src/data/computed/
+src/data/sample/
+src/core/__fixtures__/

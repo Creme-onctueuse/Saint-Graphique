@@ -1,0 +1,5 @@
+node_modules/
+dist/
+coverage/
+# Copie locale des données, régénérée par scripts/sync-data.mjs avant dev et build
+src/data/computed/

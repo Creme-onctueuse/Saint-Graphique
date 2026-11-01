@@ -1,0 +1,105 @@
+/** Tableaux des données : même information que le graphique, sans dépendre de la vue ni du survol. */
+import { formatNumber, formatPct } from '../core/format.ts';
+import type { ResolvedView } from '../view.ts';
+import { el } from './dom.ts';
+
+function headerRow(columns: readonly [string, boolean][]): HTMLTableSectionElement {
+  return el(
+    'thead',
+    {},
+    el(
+      'tr',
+      {},
+      ...columns.map(([label, numeric]) =>
+        el('th', { class: numeric ? 'sg-num' : '', text: label, attrs: { scope: 'col' } }),
+      ),
+    ),
+  );
+}
+
+function cell(text: string, numeric = false): HTMLTableCellElement {
+  return el('td', { class: numeric ? 'sg-num' : '', text });
+}
+
+export function renderTables(host: HTMLElement, view: ResolvedView): void {
+  const { model } = view;
+  const x = model.xLabel;
+  const y = model.yLabel;
+
+  const pcsTable = el(
+    'table',
+    { class: 'sg-table' },
+    el('caption', { text: 'Catégories socioprofessionnelles' }),
+    headerRow([
+      ['Code', false],
+      ['Libellé', false],
+      ['Groupe', false],
+      ['Part de la population', true],
+      [x, true],
+      [y, true],
+    ]),
+    el(
+      'tbody',
+      {},
+      ...[...model.pcs]
+        .sort((a, b) => b.x - a.x)
+        .map((p) =>
+          el(
+            'tr',
+            {},
+            cell(p.code),
+            cell(p.label),
+            cell(p.groupLabel),
+            cell(formatPct(p.weight), true),
+            cell(formatNumber(p.x), true),
+            cell(formatNumber(p.y), true),
+          ),
+        ),
+    ),
+  );
+
+  const sections: Node[] = [el('div', { class: 'sg-table-wrap' }, pcsTable)];
+
+  if (model.candidates.length > 0) {
+    const candTable = el(
+      'table',
+      { class: 'sg-table' },
+      el('caption', { text: `Électorats : ${view.electionLabel}` }),
+      headerRow([
+        ['Électorat', false],
+        ['Score', true],
+        [x, true],
+        [y, true],
+      ]),
+      el(
+        'tbody',
+        {},
+        ...[...model.candidates]
+          .sort((a, b) => (b.share ?? 0) - (a.share ?? 0))
+          .map((c) =>
+            el(
+              'tr',
+              {},
+              cell(c.label),
+              cell(c.share !== null ? formatPct(c.share) : '–', true),
+              cell(formatNumber(c.x), true),
+              cell(formatNumber(c.y), true),
+            ),
+          ),
+      ),
+    );
+    sections.push(el('div', { class: 'sg-table-wrap' }, candTable));
+  }
+
+  if (model.barycenter) {
+    sections.push(
+      el('p', {
+        class: 'sg-note',
+        text:
+          `Barycentre de la population : ${x} ${formatNumber(model.barycenter.x)}, ` +
+          `${y} ${formatNumber(model.barycenter.y)}.`,
+      }),
+    );
+  }
+  host.replaceChildren(...sections);
+}

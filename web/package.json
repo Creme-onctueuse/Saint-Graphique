@@ -1,0 +1,54 @@
+{
+  "name": "saint-graphique-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Application web autonome du Saint-Graphique (reconstruction ouverte et non officielle)",
+  "license": "MIT",
+  "type": "module",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "sync-data": "node scripts/sync-data.mjs",
+    "dev": "node scripts/sync-data.mjs && vite",
+    "build": "node scripts/sync-data.mjs && pnpm run typecheck && vite build && node scripts/check-dist.mjs",
+    "preview": "vite preview",
+    "smoke": "node scripts/smoke.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "sample": "node --experimental-strip-types scripts/make-sample.ts"
+  },
+  "dependencies": {
+    "d3-scale": "4.0.2",
+    "d3-selection": "3.0.0",
+    "d3-transition": "3.0.1",
+    "d3-zoom": "3.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "10.0.1",
+    "@types/d3-scale": "4.0.9",
+    "@types/d3-selection": "3.0.12",
+    "@types/d3-transition": "3.0.9",
+    "@types/d3-zoom": "3.0.9",
+    "@types/node": "24.19.2",
+    "eslint": "10.12.0",
+    "eslint-config-prettier": "10.1.8",
+    "globals": "17.13.0",
+    "prettier": "3.9.10",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.71.2",
+    "vite": "7.3.7",
+    "vite-plugin-singlefile": "2.3.3",
+    "vitest": "4.1.12",
+    "yaml": "2.9.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "rollup": "4.64.7"
+    }
+  }
+}

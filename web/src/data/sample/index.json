@@ -1,0 +1,117 @@
+{
+  "sample": true,
+  "description": "Données FICTIVES de démonstration (web/scripts/make-sample.ts). Ne pas citer : elles ne représentent aucune réalité.",
+  "generated_at": "2026-10-31T00:00:00Z",
+  "axes": {
+    "x_label": "Exploitation",
+    "y_label": "Domination",
+    "x_hint": "plus à droite = revenus tirés du capital plutôt que du travail",
+    "y_hint": "plus haut = position dominante (capital culturel / diplôme)",
+    "range": [
+      -10,
+      10
+    ]
+  },
+  "path_template": "{method}/{election}.json",
+  "default_method": "ranks_chris_v1",
+  "methods": [
+    {
+      "id": "ranks_chris_v1",
+      "label": "Rangs (réplique Chris v1)",
+      "description": "Réplique : rangs 1..N normalisés sur [-10, 10] (algorithme reconstruit par JnthnBS ; graphique original de Chris et de la PaduTeam)",
+      "ellipses": true,
+      "elections": [
+        "population",
+        "exemple_presidentielle",
+        "exemple_europeennes"
+      ]
+    },
+    {
+      "id": "continuous",
+      "label": "Valeurs continues",
+      "description": "Valeurs continues standardisées (z-scores) puis remises à l’échelle [-10, 10]",
+      "ellipses": true,
+      "elections": [
+        "population",
+        "exemple_presidentielle",
+        "exemple_europeennes"
+      ]
+    }
+  ],
+  "elections": [
+    {
+      "id": "population",
+      "label": "Population fictive (sans élection)",
+      "type": "population",
+      "year": 2099
+    },
+    {
+      "id": "exemple_presidentielle",
+      "label": "Présidentielle fictive (exemple)",
+      "type": "presidentielle",
+      "year": 2099,
+      "round": 1
+    },
+    {
+      "id": "exemple_europeennes",
+      "label": "Européennes fictives (exemple)",
+      "type": "europeennes",
+      "year": 2098,
+      "round": 1
+    }
+  ],
+  "groups": [
+    {
+      "code": "1",
+      "label": "Agriculteurs exploitants",
+      "color": "#6b8e23"
+    },
+    {
+      "code": "2",
+      "label": "Artisans, commerçants et chefs d'entreprise",
+      "color": "#b8860b"
+    },
+    {
+      "code": "3",
+      "label": "Cadres et professions intellectuelles supérieures",
+      "color": "#4b0082"
+    },
+    {
+      "code": "4",
+      "label": "Professions intermédiaires",
+      "color": "#1f77b4"
+    },
+    {
+      "code": "5",
+      "label": "Employés",
+      "color": "#d62728"
+    },
+    {
+      "code": "6",
+      "label": "Ouvriers",
+      "color": "#8c2d04"
+    },
+    {
+      "code": "7",
+      "label": "Retraités",
+      "color": "#7f7f7f"
+    }
+  ],
+  "raw": {
+    "pcs": "_raw/pcs.json",
+    "elections": {
+      "exemple_presidentielle": "_raw/elections/exemple_presidentielle.json",
+      "exemple_europeennes": "_raw/elections/exemple_europeennes.json"
+    }
+  },
+  "sources": [
+    {
+      "id": "exemple-fictif",
+      "title": "Données fictives de démonstration (générées par web/scripts/make-sample.ts)",
+      "url": "",
+      "accessed": "2026-10-31",
+      "license": "CC0-1.0",
+      "notes": "Valeurs inventées pour le développement. Ne pas citer, ne représente aucune réalité."
+    }
+  ]
+}

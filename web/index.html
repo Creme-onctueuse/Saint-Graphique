@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- csp -->
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="description"
+      content="Reconstruction ouverte et non officielle du Saint-Graphique : les catégories socioprofessionnelles et les électorats français sur deux axes, exploitation et domination."
+    />
+    <title>Le Saint-Graphique, reconstruction ouverte</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23fcfcfb'/%3E%3Cpath d='M6 5v21h21' fill='none' stroke='%231c1c1a' stroke-width='2.5' stroke-linecap='round'/%3E%3Ccircle cx='13' cy='19' r='3' fill='%2324527a'/%3E%3Ccircle cx='22' cy='10' r='4' fill='%2324527a'/%3E%3Cpath d='M19 18l3 3-3 3-3-3z' fill='%231c1c1a'/%3E%3C/svg%3E"
+    />
+    <script>
+      // Applique le thème avant le premier affichage, pour éviter un éclair de la mauvaise couleur.
+      (function () {
+        var t = /(?:^#|&)t=(light|dark)(?:&|$)/.exec(location.hash);
+        var stored = null;
+        try {
+          stored = localStorage.getItem('sg-theme');
+        } catch (e) {
+          stored = null;
+        }
+        var choice = t ? t[1] : stored;
+        if (choice === 'light' || choice === 'dark') {
+          document.documentElement.setAttribute('data-theme', choice);
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="sg-skip" href="#sg-chart-region">Aller au graphique</a>
+    <div class="sg-page">
+      <header class="sg-header">
+        <div class="sg-brand">
+          <svg class="sg-logo" viewBox="0 0 32 32" aria-hidden="true">
+            <path class="sg-logo__axis" d="M5 4v22h23" />
+            <circle class="sg-logo__dot" cx="13" cy="18" r="3" />
+            <circle class="sg-logo__dot" cx="22" cy="9" r="4" />
+            <path class="sg-logo__diamond" d="M19 16l3 3-3 3-3-3z" />
+          </svg>
+          <div>
+            <h1 class="sg-title">Le Saint-Graphique</h1>
+            <p class="sg-tagline">
+              Classes sociales et électorats sur deux axes. Reconstruction ouverte, non officielle.
+            </p>
+          </div>
+        </div>
+        <div class="sg-header__actions">
+          <fieldset class="sg-theme" id="sg-theme">
+            <legend class="sg-sr-only">Thème</legend>
+            <label>
+              <input type="radio" name="sg-theme" value="system" />
+              <span>Système</span>
+            </label>
+            <label>
+              <input type="radio" name="sg-theme" value="light" />
+              <span>Clair</span>
+            </label>
+            <label>
+              <input type="radio" name="sg-theme" value="dark" />
+              <span>Sombre</span>
+            </label>
+          </fieldset>
+          <button class="sg-btn" id="sg-about-open" type="button">À propos</button>
+        </div>
+      </header>
+
+      <section class="sg-bar" aria-label="Choix de l'élection et de la méthode">
+        <label class="sg-field" for="sg-election">
+          Élection
+          <select id="sg-election"></select>
+        </label>
+        <label class="sg-field" for="sg-method">
+          Méthode
+          <select id="sg-method"></select>
+        </label>
+        <p class="sg-bar__desc" id="sg-method-desc"></p>
+      </section>
+
+      <p class="sg-banner" id="sg-banner" role="note" hidden></p>
+
+      <main class="sg-page__main">
+        <section class="sg-card" id="sg-chart-region" aria-labelledby="sg-chart-heading">
+          <div class="sg-card__head">
+            <h2 class="sg-chart-heading" id="sg-chart-heading"></h2>
+            <div class="sg-toolbar" role="toolbar" aria-label="Actions sur le graphique">
+              <button
+                class="sg-btn sg-btn--icon"
+                id="sg-zoom-in"
+                type="button"
+                aria-label="Zoom avant"
+                title="Zoom avant"
+              >
+                +
+              </button>
+              <button
+                class="sg-btn sg-btn--icon"
+                id="sg-zoom-out"
+                type="button"
+                aria-label="Zoom arrière"
+                title="Zoom arrière"
+              >
+                −
+              </button>
+              <button class="sg-btn" id="sg-zoom-reset" type="button">Réinitialiser</button>
+              <span class="sg-toolbar__sep" aria-hidden="true"></span>
+              <button class="sg-btn" id="sg-export-svg" type="button">SVG</button>
+              <button class="sg-btn" id="sg-export-png" type="button">PNG</button>
+            </div>
+          </div>
+          <div id="sg-chart-host"></div>
+          <p class="sg-hint">
+            Survol, toucher ou flèches du clavier pour lire un point. Zoom : Ctrl + molette,
+            pincement ou boutons +/−.
+          </p>
+          <p class="sg-status" id="sg-status" role="status"></p>
+          <div class="sg-legend" id="sg-legend"></div>
+        </section>
+
+        <div class="sg-panels">
+          <details class="sg-panel">
+            <summary>Filtres</summary>
+            <div class="sg-panel__body" id="sg-filters"></div>
+          </details>
+          <details class="sg-panel">
+            <summary>Méthode</summary>
+            <div class="sg-panel__body" id="sg-method-panel"></div>
+          </details>
+          <details class="sg-panel sg-panel--wide">
+            <summary>Tableau des données</summary>
+            <div class="sg-panel__body" id="sg-data-tables"></div>
+          </details>
+        </div>
+      </main>
+
+      <footer class="sg-footer">
+        <p>
+          Saint-Graphique original : Chris et la PaduTeam (revue Positions). Inspiré de
+          <a href="https://github.com/JnthnBS/saint-graphique" target="_blank" rel="noopener"
+            >JnthnBS/saint-graphique</a
+          >. Projet non officiel, sans affiliation.
+        </p>
+      </footer>
+    </div>
+
+    <dialog class="sg-about" id="sg-about" aria-labelledby="sg-about-title">
+      <div class="sg-about__head">
+        <h2 id="sg-about-title">À propos</h2>
+        <button class="sg-btn" id="sg-about-close" type="button">Fermer</button>
+      </div>
+      <div class="sg-about__body">
+        <p>
+          <strong>Projet non officiel, sans affiliation.</strong> Il n'a aucun lien avec Positions
+          Revue ni avec la PaduTeam. L'algorithme original n'a pas été publié : cette page en
+          propose une reconstruction, sans prétendre à l'identité exacte.
+        </p>
+
+        <h3>Crédits et inspiration</h3>
+        <ul>
+          <li>
+            <strong>Saint-Graphique original : Chris et la PaduTeam (revue Positions).</strong>
+            L'idée, le principe et le graphique original viennent de Chris, de la revue
+            <a href="https://positions-revue.fr" target="_blank" rel="noopener">Positions</a>, et
+            ont été présentés sur les chaînes YouTube
+            <a href="https://www.youtube.com/@PaduTeam" target="_blank" rel="noopener">PaduTeam</a>
+            et
+            <a href="https://www.youtube.com/@Positions_revue" target="_blank" rel="noopener"
+              >Positions Revue</a
+            >.
+          </li>
+          <li>
+            <strong
+              >Inspiré de
+              <a href="https://github.com/JnthnBS/saint-graphique" target="_blank" rel="noopener"
+                >JnthnBS/saint-graphique</a
+              >, source de l'algorithme reconstruit.</strong
+            >
+            JnthnBS a le premier publié une reproduction du Saint-Graphique et documenté la méthode
+            qu'il en a reconstruite. Ce dépôt étant publié sans licence, son code, ses données et
+            ses éléments graphiques ne sont pas copiés : la méthode est réimplémentée sans copie de
+            code, d'après sa description et la lecture de son implémentation.
+          </li>
+        </ul>
+
+        <h3>Lire le graphique</h3>
+        <ul>
+          <li id="sg-about-x"></li>
+          <li id="sg-about-y"></li>
+          <li>
+            Chaque disque est une catégorie socioprofessionnelle (PCS INSEE) : son aire est
+            proportionnelle à sa part de la population, sa couleur indique son groupe de niveau 1.
+          </li>
+          <li>
+            Chaque losange est un électorat (candidat, liste, abstention), placé au barycentre des
+            PCS de ses électeurs. Sa taille est proportionnelle à son score.
+          </li>
+          <li>
+            Le cercle ouvert marque le barycentre de la population. La diagonale pointillée va de
+            (−10, −10) à (10, 10).
+          </li>
+        </ul>
+
+        <h3>Méthodes</h3>
+        <ul id="sg-about-methods"></ul>
+
+        <h3>Sources des données</h3>
+        <ul id="sg-about-sources"></ul>
+      </div>
+    </dialog>
+
+    <div class="sg-sr-only" id="sg-live" aria-live="polite"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
