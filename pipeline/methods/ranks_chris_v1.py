@@ -1,7 +1,8 @@
 """Méthode « ranks_chris_v1 » : rangs normalisés (méthode de Chris reconstruite par JnthnBS).
 
-Algorithme reconstruit par JnthnBS (https://github.com/JnthnBS/saint-graphique), réimplémenté à
-partir de sa description, sans copie de code. Saint-Graphique original : Chris et la PaduTeam.
+Algorithme reconstruit par JnthnBS (https://github.com/JnthnBS/saint-graphique), réimplémenté
+sans copie de code, d'après sa description et la lecture de son implémentation.
+Saint-Graphique original : Chris et la PaduTeam.
 
 - x : score = patrimoine / niveau de vie × 100, classé par ordre décroissant (rang 1..N),
   puis x = -10 + 20/(N-1) · (N - rang), soit -10 + (20/29)·(30 - rang) pour N = 30 ;

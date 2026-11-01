@@ -14,6 +14,7 @@ import numpy as np
 import pytest
 
 from pipeline.methods import METHODS, Method, assemble_result, get_method, register
+from pipeline.methods.mca import indicator_table, quantile_bins
 from pipeline.methods.scores import minmax_coordinates, rank_coordinates, x_scores, y_scores
 from pipeline.model import (
     POPULATION_ID,
@@ -266,6 +267,25 @@ def test_methods_ranks_retired_override(pcs_data: PcsData) -> None:
     assert continuous.compute(items, None, {}).pcs["7"].y == 10
 
 
+def test_methods_y_score_is_a_left_to_right_sum(pcs_data: PcsData) -> None:
+    """Mêmes opérations flottantes que le portage TypeScript (voir ``scores.py``)."""
+    keys = ("bac5", "bac3", "bac2", "bac", "cap", "brevet", "certif_aucun")
+    weights = dict(zip(keys, (5, 3, 2, 1, -1, -2, -3), strict=True))
+    sequential = []
+    for p in pcs_data.items:
+        score = 0.0
+        for key in keys:
+            score += weights[key] * p.diplomes[key]
+        sequential.append(score)
+    assert y_scores(pcs_data.items, weights).tolist() == sequential
+    # Indépendant de l'ordre des clés du fichier de configuration.
+    reordered = dict(reversed(list(weights.items())))
+    assert y_scores(pcs_data.items, reordered).tolist() == sequential
+    # Le test a du pouvoir : sum() (compensé depuis Python 3.12) donnerait d'autres valeurs.
+    compensated = [sum(weights[k] * p.diplomes[k] for k in keys) for p in pcs_data.items]
+    assert compensated != sequential
+
+
 def test_methods_params_override(pcs_data: PcsData) -> None:
     result = METHODS["ranks_chris_v1"].compute(
         pcs_data.items, None, {"y_weights": {"bac5": 1}, "retired_y_override": None,
@@ -306,6 +326,25 @@ def test_methods_mca_orientation(results: dict, pcs_data: PcsData) -> None:
     for axis in (0, 1):
         values = [p[axis] for p in result.pcs.values()]
         assert min(values) == -10 and max(values) == 10
+
+
+def test_methods_mca_equal_values_stay_in_the_same_class(pcs_data: PcsData) -> None:
+    assert quantile_bins(np.arange(6.0), 3).tolist() == [0, 0, 1, 1, 2, 2]
+    assert quantile_bins(np.array([1.0, 2.0, 2.0, 2.0, 2.0, 3.0]), 3).tolist() == [0, 1, 1, 1, 1, 2]
+    assert quantile_bins(np.full(4, 7.0), 3).tolist() == [1, 1, 1, 1]
+    # Les PCS 62 et 63 du jeu fictif ont les mêmes revenus : mêmes classes de revenus.
+    weights = {"bac5": 5, "bac3": 3, "bac2": 2, "bac": 1, "cap": -1, "brevet": -2,
+               "certif_aucun": -3}
+    table = indicator_table(pcs_data.items, weights, 3)
+    income = [c for c in table.columns if not c.startswith("diplome")]
+    assert table.loc["62", income].tolist() == table.loc["63", income].tolist()
+    # Une variable constante laisse une seule colonne, sans empêcher le calcul.
+    flat = tuple(replace(p, patrimoine_keur=100.0) for p in pcs_data.items)
+    assert [c for c in indicator_table(flat, weights, 3) if c.startswith("patrimoine")] == [
+        "patrimoine_2"
+    ]
+    result = METHODS["mca"].compute(flat, None, {})
+    assert all(math.isfinite(p.x) and math.isfinite(p.y) for p in result.pcs.values())
 
 
 def test_methods_mca_quintiles_and_validation(pcs_data: PcsData) -> None:

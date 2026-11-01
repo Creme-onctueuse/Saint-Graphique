@@ -250,12 +250,14 @@ def parity_document(
         "source": source,
         "tolerance": 1e-9,
         "notes": [
-            "x = patrimoine_keur / niveau_vie_mensuel_eur * 100 ; y = somme des y_weights * "
-            "diplomes, sauf retired_y_override (score forcé pour un code).",
+            "x = patrimoine_keur / niveau_vie_mensuel_eur * 100 ; y = somme de gauche à droite, "
+            "dans l'ordre bac5..certif_aucun, des y_weights * diplomes, sauf retired_y_override "
+            "(score forcé pour un code).",
             "ranks_chris_v1 : rang décroissant 1..N, coordonnée = lo + (hi - lo) / (N - 1) * "
             "(N - rang). Ex æquo : le plus petit code PCS (ordre lexicographique) reçoit le "
             "meilleur rang. Le jeu contient des ex æquo volontaires (x : 62/63, y : 67/68).",
-            "continuous : z-score non pondéré (écart-type ddof 0) puis min/max vers [lo, hi].",
+            "continuous : z-score non pondéré (écart-type ddof 0) puis min/max : lo + (hi - lo) * "
+            "((z - zmin) / (zmax - zmin)).",
             "Groupes : barycentre des PCS du groupe pondéré par la population. Population : "
             "barycentre de toutes les PCS pondéré par la population.",
             "Candidats : barycentre des groupes pondéré par composition[candidat][groupe]. Une "

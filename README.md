@@ -89,7 +89,7 @@ Voir [CONTRIBUTING.md](CONTRIBUTING.md) : comment ajouter une élection, une mé
   - normalisation sur [−10, 10] ;
   - barycentres des électorats.
 
-  C'est cette méthode que réimplémente `ranks_chris_v1`. Ce dépôt étant publié sans licence, son code, ses données et ses éléments graphiques **ne sont pas copiés** : la méthode est réécrite à partir de sa description, et toutes les données sont reprises aux sources primaires.
+  C'est cette méthode que réimplémente `ranks_chris_v1`. Ce dépôt étant publié sans licence, son code, ses données et ses éléments graphiques **ne sont pas copiés** : la méthode est réécrite d'après sa description et la lecture de son code, sans en reprendre une ligne. L'exactitude est vérifiée par un test local, non publié, qui s'exécute contre sa version. Toutes les données sont reprises aux sources primaires.
 - **INSEE** et **instituts de sondage** : données citées dans [`data/SOURCES.md`](data/SOURCES.md).
 
 Ce projet n'est pas affilié à ces auteurs. S'ils souhaitent une modification de ces mentions, une issue suffit.

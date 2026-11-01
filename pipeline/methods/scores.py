@@ -3,8 +3,9 @@
 - score x (« exploitation ») : patrimoine / niveau de vie × 100 (``patrimoine_over_niveau_vie``) ;
 - score y (« domination ») : somme pondérée de la répartition des diplômes (``y_weights``).
 
-Algorithme reconstruit par JnthnBS (https://github.com/JnthnBS/saint-graphique), réimplémenté à
-partir de sa description, sans copie de code. Saint-Graphique original : Chris et la PaduTeam.
+Algorithme reconstruit par JnthnBS (https://github.com/JnthnBS/saint-graphique), réimplémenté
+sans copie de code, d'après sa description et la lecture de son implémentation.
+Saint-Graphique original : Chris et la PaduTeam.
 """
 
 from __future__ import annotations
@@ -32,6 +33,20 @@ def x_scores(pcs: Sequence[Pcs], kind: str = "patrimoine_over_niveau_vie") -> np
     return np.array([X_SCORES[kind](p) for p in pcs], dtype=float)
 
 
+def _weighted_diplomas(p: Pcs, weights: Mapping[str, float]) -> float:
+    """Somme pondérée, de gauche à droite, dans l'ordre fixe de ``DIPLOMA_KEYS``.
+
+    Surtout pas ``sum()`` : depuis Python 3.12, il compense les arrondis sur les flottants, alors
+    que la référence et le portage TypeScript additionnent pas à pas. Un écart au dernier chiffre
+    suffirait à inverser deux scores quasi égaux, donc deux rangs.
+    """
+    score = 0.0
+    for key in DIPLOMA_KEYS:
+        if key in weights:
+            score += weights[key] * p.diplomes[key]
+    return score
+
+
 def y_scores(
     pcs: Sequence[Pcs],
     weights: Mapping[str, float],
@@ -45,9 +60,7 @@ def y_scores(
     unknown = set(weights) - set(DIPLOMA_KEYS)
     if unknown:
         raise ValueError(f"y_weights : diplômes inconnus {sorted(unknown)}")
-    scores = np.array(
-        [sum(w * p.diplomes[k] for k, w in weights.items()) for p in pcs], dtype=float
-    )
+    scores = np.array([_weighted_diplomas(p, weights) for p in pcs], dtype=float)
     if retired_override:
         code, score = str(retired_override["code"]), float(retired_override["score"])
         for i, p in enumerate(pcs):
