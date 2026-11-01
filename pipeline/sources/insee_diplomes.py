@@ -25,7 +25,6 @@ from pipeline.sources import _rp2022_indreg as rp
 from pipeline.sources._common import DIPLOMA_KEYS, PCS_CODES
 
 REFERENCE_YEAR = 2022
-SOURCES = [rp.SOURCE]
 
 
 def fetch(force: bool = False) -> None:

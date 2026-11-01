@@ -1,11 +1,9 @@
 """Modules de sources primaires.
 
-Chaque module expose :
-- ``fetch()`` : télécharge les fichiers bruts et les met en cache dans ``pipeline/cache/`` ;
-- ``load()`` : renvoie un ``pandas.DataFrame`` normalisé ;
-- ``SOURCES`` : la liste des références (format ``schemas/source.schema.json``).
+Chaque module de données expose :
+- ``fetch()`` : télécharge les fichiers bruts dans le cache, hors du dépôt (voir ``_cache``) ;
+- ``load()`` : renvoie un ``pandas.DataFrame`` normalisé.
 
-Aucune donnée n'est inventée : chaque valeur provient d'un fichier publié (INSEE,
-instituts de sondage) ou d'une transcription manuelle référencée dans
-``pipeline/sources/manual/``.
+Chaque valeur provient d'un fichier publié (Insee, instituts de sondage), d'une transcription
+référencée dans ``pipeline/sources/manual/``, ou d'un calcul décrit et signalé comme tel.
 """

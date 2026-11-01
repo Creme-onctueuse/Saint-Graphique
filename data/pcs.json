@@ -1,0 +1,695 @@
+{
+  "nomenclature": "PCS2020-N2",
+  "reference_year": 2022,
+  "sources": [
+    {
+      "id": "insee_rp2022_fd_indreg",
+      "title": "Recensement de la population 2022 — Fichier détail « Individus localisés à la région »",
+      "url": "https://www.insee.fr/fr/statistiques/8590183",
+      "accessed": "2026-10-31",
+      "publisher": "Insee",
+      "license": "Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation",
+      "notes": "Zip national https://www.insee.fr/fr/statistiques/fichier/8590183/RP2022_indreg.zip (France hors Mayotte, exploitation complémentaire, pondération IPONDI). Dictionnaire des variables : https://www.insee.fr/fr/statistiques/fichier/8590183/contenu_RP2022_indreg.pdf"
+    },
+    {
+      "id": "insee_erfs2022_ti02",
+      "title": "Niveau de vie et revenu annuel des individus en 2022, ERFS, Insee Résultats, tableaux TI02D et TI02C",
+      "url": "https://www.insee.fr/fr/statistiques/8278900",
+      "accessed": "2026-11-01",
+      "publisher": "Insee-DGFiP-Cnaf-Cnav-CCMSA",
+      "license": "Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation",
+      "notes": "Fichier : https://www.insee.fr/fr/statistiques/fichier/8278900/irsocerfs2022_dd2_excel.zip. Médianes annuelles divisées par 12. Champ : individus de 15 ans ou plus, ménages ordinaires de France métropolitaine dont la personne de référence n'est pas étudiante, selon leur propre CS."
+    },
+    {
+      "id": "insee_hvp2023_2024",
+      "title": "Patrimoine et endettement des ménages en 2024, enquête Histoire de vie et Patrimoine 2023-2024, Insee Résultats",
+      "url": "https://www.insee.fr/fr/statistiques/8736842",
+      "accessed": "2026-11-01",
+      "publisher": "Insee",
+      "license": "Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation",
+      "notes": "Fichiers : https://www.insee.fr/fr/statistiques/fichier/8736842/hvp_mtmoymed_patbrut_patnet.xlsx (feuilles « PCS » et « AGE ») et https://www.insee.fr/fr/statistiques/fichier/8736842/hvp_profil_menages.xlsx (feuille « PCS »). Patrimoine brut médian, début 2024. Champ : ménages en logement ordinaire, France hors Mayotte, selon la CS de la personne de référence (12 catégories, jamais les 29 postes) : la plupart des valeurs par PCS sont donc imputées, voir notes."
+    }
+  ],
+  "items": [
+    {
+      "code": "10",
+      "group": "1",
+      "population": 389097,
+      "niveau_vie_mensuel_eur": 1981.7,
+      "patrimoine_keur": 903.1,
+      "diplomes": {
+        "bac5": 4.61,
+        "bac3": 5.46,
+        "bac2": 18.03,
+        "bac": 30.19,
+        "cap": 29.21,
+        "brevet": 3.92,
+        "certif_aucun": 8.58
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie IMPUTÉ, pas une donnée Insee à ce niveau : l'ERFS 2022 ne publie qu'une ligne commune aux agriculteurs, artisans, commerçants et chefs d'entreprise, appliquée ici à cette PCS. Patrimoine : médiane publiée par l'Insee pour les ménages dont la personne de référence relève de cette catégorie (HVP 2023-2024), pas pour les individus. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "21",
+      "group": "2",
+      "population": 1021160,
+      "niveau_vie_mensuel_eur": 1981.7,
+      "patrimoine_keur": 436.9,
+      "diplomes": {
+        "bac5": 4.41,
+        "bac3": 5.77,
+        "bac2": 10.49,
+        "bac": 24.4,
+        "cap": 39.56,
+        "brevet": 3.38,
+        "certif_aucun": 11.99
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie IMPUTÉ, pas une donnée Insee à ce niveau : l'ERFS 2022 ne publie qu'une ligne commune aux agriculteurs, artisans, commerçants et chefs d'entreprise, appliquée ici à cette PCS. Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Artisans, commerçants et chefs d'entreprise » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "22",
+      "group": "2",
+      "population": 772052,
+      "niveau_vie_mensuel_eur": 1981.7,
+      "patrimoine_keur": 436.9,
+      "diplomes": {
+        "bac5": 12.99,
+        "bac3": 12.97,
+        "bac2": 16.41,
+        "bac": 21.21,
+        "cap": 21.1,
+        "brevet": 4.43,
+        "certif_aucun": 10.88
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie IMPUTÉ, pas une donnée Insee à ce niveau : l'ERFS 2022 ne publie qu'une ligne commune aux agriculteurs, artisans, commerçants et chefs d'entreprise, appliquée ici à cette PCS. Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Artisans, commerçants et chefs d'entreprise » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "23",
+      "group": "2",
+      "population": 238069,
+      "niveau_vie_mensuel_eur": 1981.7,
+      "patrimoine_keur": 436.9,
+      "diplomes": {
+        "bac5": 27.39,
+        "bac3": 13.79,
+        "bac2": 17.29,
+        "bac": 16.06,
+        "cap": 16.45,
+        "brevet": 2.7,
+        "certif_aucun": 6.31
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie IMPUTÉ, pas une donnée Insee à ce niveau : l'ERFS 2022 ne publie qu'une ligne commune aux agriculteurs, artisans, commerçants et chefs d'entreprise, appliquée ici à cette PCS. Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Artisans, commerçants et chefs d'entreprise » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "31",
+      "group": "3",
+      "population": 721473,
+      "niveau_vie_mensuel_eur": 3448.3,
+      "patrimoine_keur": 772.0,
+      "diplomes": {
+        "bac5": 73.91,
+        "bac3": 8.57,
+        "bac2": 6.26,
+        "bac": 5.19,
+        "cap": 3.3,
+        "brevet": 0.8,
+        "certif_aucun": 1.97
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine : médiane publiée par l'Insee pour les ménages dont la personne de référence relève de cette catégorie (HVP 2023-2024), pas pour les individus. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "33",
+      "group": "3",
+      "population": 523201,
+      "niveau_vie_mensuel_eur": 3088.3,
+      "patrimoine_keur": 416.2,
+      "diplomes": {
+        "bac5": 50.02,
+        "bac3": 21.83,
+        "bac2": 10.85,
+        "bac": 9.8,
+        "cap": 4.43,
+        "brevet": 1.17,
+        "certif_aucun": 1.9
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "34",
+      "group": "3",
+      "population": 908266,
+      "niveau_vie_mensuel_eur": 3030.0,
+      "patrimoine_keur": 416.2,
+      "diplomes": {
+        "bac5": 67.25,
+        "bac3": 24.12,
+        "bac2": 3.45,
+        "bac": 2.09,
+        "cap": 1.61,
+        "brevet": 0.3,
+        "certif_aucun": 1.18
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "35",
+      "group": "3",
+      "population": 410038,
+      "niveau_vie_mensuel_eur": 2387.5,
+      "patrimoine_keur": 416.2,
+      "diplomes": {
+        "bac5": 33.04,
+        "bac3": 26.73,
+        "bac2": 12.75,
+        "bac": 15.5,
+        "cap": 5.59,
+        "brevet": 2.76,
+        "certif_aucun": 3.62
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "37",
+      "group": "3",
+      "population": 1687972,
+      "niveau_vie_mensuel_eur": 3323.3,
+      "patrimoine_keur": 416.2,
+      "diplomes": {
+        "bac5": 51.32,
+        "bac3": 17.09,
+        "bac2": 16.3,
+        "bac": 8.54,
+        "cap": 4.39,
+        "brevet": 0.95,
+        "certif_aucun": 1.41
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "38",
+      "group": "3",
+      "population": 1716872,
+      "niveau_vie_mensuel_eur": 3160.0,
+      "patrimoine_keur": 416.2,
+      "diplomes": {
+        "bac5": 61.18,
+        "bac3": 12.42,
+        "bac2": 14.06,
+        "bac": 6.34,
+        "cap": 3.99,
+        "brevet": 0.71,
+        "certif_aucun": 1.31
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "42",
+      "group": "4",
+      "population": 1069728,
+      "niveau_vie_mensuel_eur": 2248.3,
+      "patrimoine_keur": 226.1,
+      "diplomes": {
+        "bac5": 30.11,
+        "bac3": 34.05,
+        "bac2": 12.52,
+        "bac": 14.48,
+        "cap": 5.37,
+        "brevet": 1.27,
+        "certif_aucun": 2.2
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "43",
+      "group": "4",
+      "population": 1823771,
+      "niveau_vie_mensuel_eur": 2429.2,
+      "patrimoine_keur": 226.1,
+      "diplomes": {
+        "bac5": 11.68,
+        "bac3": 39.92,
+        "bac2": 24.59,
+        "bac": 13.67,
+        "cap": 6.83,
+        "brevet": 1.18,
+        "certif_aucun": 2.13
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "44",
+      "group": "4",
+      "population": 22922,
+      "niveau_vie_mensuel_eur": 2364.2,
+      "patrimoine_keur": 226.1,
+      "diplomes": {
+        "bac5": 24.75,
+        "bac3": 19.04,
+        "bac2": 9.48,
+        "bac": 14.05,
+        "cap": 9.86,
+        "brevet": 2.82,
+        "certif_aucun": 20.0
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie IMPUTÉ, pas une donnée Insee à ce niveau : l'ERFS 2022 publie « ns » pour cette PCS ; la médiane du groupe Professions intermédiaires lui est appliquée à défaut, sans garantie de représentativité. Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "45",
+      "group": "4",
+      "population": 519171,
+      "niveau_vie_mensuel_eur": 2446.7,
+      "patrimoine_keur": 226.1,
+      "diplomes": {
+        "bac5": 9.97,
+        "bac3": 17.58,
+        "bac2": 22.96,
+        "bac": 28.81,
+        "cap": 14.03,
+        "brevet": 3.48,
+        "certif_aucun": 3.17
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "46",
+      "group": "4",
+      "population": 2662032,
+      "niveau_vie_mensuel_eur": 2330.8,
+      "patrimoine_keur": 226.1,
+      "diplomes": {
+        "bac5": 14.93,
+        "bac3": 17.56,
+        "bac2": 26.49,
+        "bac": 21.96,
+        "cap": 12.98,
+        "brevet": 2.49,
+        "certif_aucun": 3.57
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "47",
+      "group": "4",
+      "population": 1311257,
+      "niveau_vie_mensuel_eur": 2341.7,
+      "patrimoine_keur": 226.1,
+      "diplomes": {
+        "bac5": 7.36,
+        "bac3": 14.7,
+        "bac2": 30.19,
+        "bac": 23.81,
+        "cap": 17.59,
+        "brevet": 2.01,
+        "certif_aucun": 4.34
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "48",
+      "group": "4",
+      "population": 636772,
+      "niveau_vie_mensuel_eur": 2449.2,
+      "patrimoine_keur": 226.1,
+      "diplomes": {
+        "bac5": 4.77,
+        "bac3": 8.05,
+        "bac2": 19.37,
+        "bac": 25.82,
+        "cap": 31.2,
+        "brevet": 3.12,
+        "certif_aucun": 7.66
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "52",
+      "group": "5",
+      "population": 2551217,
+      "niveau_vie_mensuel_eur": 1980.0,
+      "patrimoine_keur": 46.2,
+      "diplomes": {
+        "bac5": 2.84,
+        "bac3": 5.59,
+        "bac2": 12.12,
+        "bac": 29.24,
+        "cap": 33.77,
+        "brevet": 5.21,
+        "certif_aucun": 11.23
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Employés » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "53",
+      "group": "5",
+      "population": 630321,
+      "niveau_vie_mensuel_eur": 2176.7,
+      "patrimoine_keur": 46.2,
+      "diplomes": {
+        "bac5": 3.32,
+        "bac3": 6.84,
+        "bac2": 12.12,
+        "bac": 39.57,
+        "cap": 22.69,
+        "brevet": 6.44,
+        "certif_aucun": 9.03
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Employés » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "54",
+      "group": "5",
+      "population": 1954058,
+      "niveau_vie_mensuel_eur": 2190.0,
+      "patrimoine_keur": 46.2,
+      "diplomes": {
+        "bac5": 8.21,
+        "bac3": 13.69,
+        "bac2": 25.91,
+        "bac": 28.99,
+        "cap": 15.42,
+        "brevet": 3.07,
+        "certif_aucun": 4.7
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Employés » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "55",
+      "group": "5",
+      "population": 1424475,
+      "niveau_vie_mensuel_eur": 1853.3,
+      "patrimoine_keur": 46.2,
+      "diplomes": {
+        "bac5": 3.41,
+        "bac3": 6.6,
+        "bac2": 12.29,
+        "bac": 31.95,
+        "cap": 28.67,
+        "brevet": 5.86,
+        "certif_aucun": 11.23
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Employés » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "56",
+      "group": "5",
+      "population": 2015854,
+      "niveau_vie_mensuel_eur": 1677.5,
+      "patrimoine_keur": 46.2,
+      "diplomes": {
+        "bac5": 2.78,
+        "bac3": 4.89,
+        "bac2": 7.3,
+        "bac": 23.79,
+        "cap": 34.28,
+        "brevet": 6.74,
+        "certif_aucun": 20.22
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Employés » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "62",
+      "group": "6",
+      "population": 955838,
+      "niveau_vie_mensuel_eur": 2044.2,
+      "patrimoine_keur": 44.4,
+      "diplomes": {
+        "bac5": 1.59,
+        "bac3": 3.02,
+        "bac2": 8.6,
+        "bac": 25.7,
+        "cap": 43.19,
+        "brevet": 4.33,
+        "certif_aucun": 13.57
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "63",
+      "group": "6",
+      "population": 1665764,
+      "niveau_vie_mensuel_eur": 1880.8,
+      "patrimoine_keur": 44.4,
+      "diplomes": {
+        "bac5": 2.05,
+        "bac3": 2.9,
+        "bac2": 5.9,
+        "bac": 22.13,
+        "cap": 46.29,
+        "brevet": 3.66,
+        "certif_aucun": 17.07
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "64",
+      "group": "6",
+      "population": 776397,
+      "niveau_vie_mensuel_eur": 1945.0,
+      "patrimoine_keur": 44.4,
+      "diplomes": {
+        "bac5": 1.61,
+        "bac3": 2.63,
+        "bac2": 5.59,
+        "bac": 20.71,
+        "cap": 44.69,
+        "brevet": 6.1,
+        "certif_aucun": 18.67
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "65",
+      "group": "6",
+      "population": 420533,
+      "niveau_vie_mensuel_eur": 1933.3,
+      "patrimoine_keur": 44.4,
+      "diplomes": {
+        "bac5": 1.64,
+        "bac3": 2.9,
+        "bac2": 6.9,
+        "bac": 24.52,
+        "cap": 40.17,
+        "brevet": 6.04,
+        "certif_aucun": 17.84
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "67",
+      "group": "6",
+      "population": 1410285,
+      "niveau_vie_mensuel_eur": 1773.3,
+      "patrimoine_keur": 44.4,
+      "diplomes": {
+        "bac5": 1.71,
+        "bac3": 2.92,
+        "bac2": 5.77,
+        "bac": 22.31,
+        "cap": 36.24,
+        "brevet": 6.63,
+        "certif_aucun": 24.42
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "68",
+      "group": "6",
+      "population": 992161,
+      "niveau_vie_mensuel_eur": 1604.2,
+      "patrimoine_keur": 44.4,
+      "diplomes": {
+        "bac5": 2.06,
+        "bac3": 2.65,
+        "bac2": 4.02,
+        "bac": 15.48,
+        "cap": 34.1,
+        "brevet": 6.12,
+        "certif_aucun": 35.57
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "69",
+      "group": "6",
+      "population": 297443,
+      "niveau_vie_mensuel_eur": 1822.5,
+      "patrimoine_keur": 44.4,
+      "diplomes": {
+        "bac5": 2.37,
+        "bac3": 3.6,
+        "bac2": 9.35,
+        "bac": 23.73,
+        "cap": 31.25,
+        "brevet": 5.77,
+        "certif_aucun": 23.93
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+    },
+    {
+      "code": "7",
+      "group": "7",
+      "population": 15575052,
+      "niveau_vie_mensuel_eur": 1994.2,
+      "patrimoine_keur": 263.5,
+      "diplomes": {
+        "bac5": 5.59,
+        "bac3": 6.15,
+        "bac2": 6.49,
+        "bac": 12.62,
+        "cap": 26.83,
+        "brevet": 7.84,
+        "certif_aucun": 34.49
+      },
+      "source_refs": [
+        "insee_rp2022_fd_indreg",
+        "insee_erfs2022_ti02",
+        "insee_hvp2023_2024"
+      ],
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine CALCULÉ, non publié par l'Insee : médiane des ménages de retraités estimée par interpolation linéaire à partir de leur répartition dans les déciles de patrimoine de HVP 2023-2024 (4 catégories de retraités réunies, entre 205,1 et 283,2 k€). Effectif et diplômes : recensement 2022, fichier détail. Diplômes réels des retraités ; la méthode ranks_chris_v1 les remplace par un score fixe."
+    }
+  ]
+}

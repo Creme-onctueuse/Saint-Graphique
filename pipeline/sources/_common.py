@@ -5,7 +5,6 @@ from __future__ import annotations
 import datetime as dt
 import hashlib
 import json
-from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -30,9 +29,10 @@ PCS_CODES: tuple[str, ...] = (*ACTIVE_PCS_CODES, RETIRED_CODE)
 #: Clés de la répartition des diplômes (du plus élevé au plus faible).
 DIPLOMA_KEYS: tuple[str, ...] = ("bac5", "bac3", "bac2", "bac", "cap", "brevet", "certif_aucun")
 
+#: Mentions légales de l'Insee : https://www.insee.fr/fr/information/2008466
 LICENCE_INSEE = (
-    "Licence Ouverte / Open Licence 2.0 (Etalab) — réutilisation libre avec mention "
-    "« Source : Insee »"
+    "Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise "
+    "à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation"
 )
 
 # Certains serveurs (instituts de sondage) refusent les clients sans User-Agent de navigateur.
@@ -114,13 +114,13 @@ def download(url: str, dest: Path, *, force: bool = False, timeout: int = 120) -
 
 
 def source_ref(
-    id: str,  # noqa: A002 - nom imposé par source.schema.json
+    id: str,
     title: str,
     url: str,
     accessed: str | None,
     *,
     publisher: str | None = None,
-    license: str | None = None,  # noqa: A002
+    license: str | None = None,
     notes: str | None = None,
 ) -> dict[str, str]:
     """Référence de source au format ``schemas/source.schema.json``."""
@@ -134,11 +134,3 @@ def source_ref(
         if value:
             ref[key] = value
     return ref
-
-
-def accessed_of(paths: Mapping[str, Path] | list[Path]) -> str:
-    """Date d'accès la plus récente parmi des fichiers en cache."""
-    items = paths.values() if isinstance(paths, Mapping) else paths
-    dates = [file_meta(Path(p)).get("accessed") for p in items]
-    dates = [d for d in dates if d]
-    return max(dates) if dates else dt.date.today().isoformat()

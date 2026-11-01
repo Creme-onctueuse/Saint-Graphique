@@ -23,7 +23,6 @@ from pipeline.sources import _rp2022_indreg as rp
 from pipeline.sources._common import PCS_CODES, group_of
 
 REFERENCE_YEAR = 2022
-SOURCES = [rp.SOURCE]
 
 
 def fetch(force: bool = False) -> None:
