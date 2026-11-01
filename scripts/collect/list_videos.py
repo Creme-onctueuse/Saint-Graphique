@@ -14,7 +14,9 @@
    récurrentes des descriptions d'une même chaîne (la PaduTeam ajoute par
    exemple « Playlist sur le Graphique : … » à ses vidéos) : ``core``,
    ``mention`` ou ``unrelated``.
-4. Écrit ``research/index/videos.jsonl`` (core et mention seulement) en
+4. Relève la pertinence d'après le dépistage par transcription
+   (``screen_transcripts.py``), s'il a eu lieu.
+5. Écrit ``research/index/videos.jsonl`` (core et mention seulement) en
    conservant les champs produits par les étapes suivantes.
 
 Les appels à YouTube sont espacés (``SG_YTDLP_MIN_INTERVAL``, 2 s par défaut)
@@ -49,12 +51,14 @@ if __package__ in (None, ""):
 from scripts.collect.common import (  # noqa: E402
     LISTING_CACHE_DIR,
     META_CACHE_DIR,
+    SCREENING_JSON,
     VIDEOS_JSONL,
     Video,
     YouTubeBlocked,
     file_lock,
     is_throttled,
     load_index,
+    mark_blocked,
     read_json,
     save_index,
     setup_logging,
@@ -67,7 +71,9 @@ from scripts.collect.pure import (  # noqa: E402
     boilerplate_lines,
     classify,
     extract_links,
+    is_complete_meta,
     strip_boilerplate,
+    upgrade_relevance,
 )
 
 log = logging.getLogger("collect.list_videos")
@@ -211,6 +217,13 @@ class MetaFetcher:
         self._lock = threading.Lock()
         self.stopped = threading.Event()
 
+    def _note_throttled(self) -> None:
+        with self._lock:
+            self._throttled += 1
+            if self._throttled >= self.max_throttle:
+                log.error("YouTube bride les requêtes : arrêt des métadonnées")
+                self.stopped.set()
+
     def __call__(self, video_id: str) -> dict[str, Any] | None:
         path = META_CACHE_DIR / f"{video_id}.json"
         for attempt in range(1, self.retries + 1):
@@ -226,16 +239,19 @@ class MetaFetcher:
                 self.stopped.set()
                 return None
             if proc.returncode == 0 and proc.stdout.strip():
-                meta = slim_meta(json.loads(proc.stdout.decode("utf-8")))
-                write_json_atomic(path, meta)
-                return meta
+                info = json.loads(proc.stdout.decode("utf-8"))
+                meta = slim_meta(info)
+                if is_complete_meta(meta) or info.get("formats"):
+                    write_json_atomic(path, meta)
+                    return meta
+                # Lecteur refusé : réponse partielle qu'il ne faut pas mettre en cache.
+                log.warning("%s : réponse incomplète (YouTube bride ?)", video_id)
+                mark_blocked()
+                self._note_throttled()
+                continue
             err = stderr_tail(proc)
             if is_throttled(proc):
-                with self._lock:
-                    self._throttled += 1
-                    if self._throttled >= self.max_throttle:
-                        log.error("YouTube bride les requêtes : arrêt des métadonnées")
-                        self.stopped.set()
+                self._note_throttled()
                 continue
             if any(s in err for s in PERMANENT_ERRORS):
                 last = err.strip().splitlines()[-1] if err.strip() else "erreur"
@@ -283,7 +299,7 @@ def fetch_all_meta(
     todo = []
     for vid in ids:
         cached = read_json(META_CACHE_DIR / f"{vid}.json")
-        if cached is None or (retry_errors and "error" in cached):
+        if cached is None or not is_complete_meta(cached) or (retry_errors and "error" in cached):
             todo.append(vid)
     n_cached = len(ids) - len(todo)
     if max_fetch is not None:
@@ -318,6 +334,7 @@ def build_records(
         by_channel.setdefault(channel_key(meta), []).append(meta.get("description") or "")
     boiler = {k: boilerplate_lines(v) for k, v in by_channel.items()}
 
+    screening: dict[str, dict[str, Any]] = read_json(SCREENING_JSON) or {}
     counts: Counter[str] = Counter()
     records: list[Video] = []
     for vid, cand in candidates.items():
@@ -334,6 +351,10 @@ def build_records(
             tags=meta.get("tags") or (),
             search_hit=cand.get("search_hit", False),
         )
+        screened = screening.get(vid) or {}
+        if screened.get("relevance"):
+            relevance = upgrade_relevance(relevance, screened["relevance"])
+            terms.append(f"transcription:graphique×{screened.get('graphique', 0)}")
         counts[relevance] += 1
         if relevance == "unrelated":
             continue

@@ -172,6 +172,16 @@ def strip_boilerplate(description: str, boilerplate: set[str]) -> str:
     )
 
 
+def is_complete_meta(meta: dict[str, Any]) -> bool:
+    """Fiche de métadonnées exploitable : erreur permanente notée, ou réponse complète.
+
+    Quand YouTube refuse le lecteur (« not a bot »), ``yt-dlp --ignore-no-formats-error``
+    réussit quand même avec les seules données de la page : ni durée, ni tags, ni
+    sous-titres. Une telle fiche doit être redemandée.
+    """
+    return "error" in meta or meta.get("duration") is not None
+
+
 def extract_links(text: str) -> list[str]:
     """URL d'un texte, sans doublons, dans l'ordre d'apparition."""
     seen: dict[str, None] = {}
@@ -305,6 +315,41 @@ def choose_subtitle(meta: dict[str, Any]) -> tuple[str, str] | None:
     return (others[0], "auto") if others else None
 
 
+# --------------------------------------------------------------------------- dépistage
+
+# « graphique » prononcé : étalonné sur les vidéos de la playlist dédiée (13 à 93 occurrences
+# pour la plupart) et sur des vidéos sans graphique (0 à 2).
+SPOKEN_CORE = 10
+SPOKEN_MENTION = 3
+_GRAPH_RX = re.compile(r"\bgraphiques?\b")
+_SAINT_RX = re.compile(r"\bsaints?[ -]?graphiques?\b")
+_RELEVANCE_RANK = {"unrelated": 0, "mention": 1, "core": 2}
+
+
+def spoken_signal(lines: Iterable[Line]) -> dict[str, int]:
+    """Nombre de « graphique » et de « saint graphique » prononcés dans une transcription."""
+    text = " ".join(t for _, t in lines).lower()
+    return {
+        "graphique": len(_GRAPH_RX.findall(text)),
+        "saint_graphique": len(_SAINT_RX.findall(text)),
+    }
+
+
+def screening_relevance(signal: dict[str, int]) -> str | None:
+    """Pertinence déduite de ce qui est dit dans la vidéo (``None`` sans signal)."""
+    n = signal.get("graphique", 0)
+    if n >= SPOKEN_CORE:
+        return "core"
+    return "mention" if n >= SPOKEN_MENTION else None
+
+
+def upgrade_relevance(relevance: str, screened: str | None) -> str:
+    """La plus forte de la pertinence par mots-clés et de celle du dépistage."""
+    if screened and _RELEVANCE_RANK[screened] > _RELEVANCE_RANK[relevance]:
+        return screened
+    return relevance
+
+
 # --------------------------------------------------------------------------- segments
 
 # Mots-clés du commentaire du graphique (texte en minuscules, accents conservés) et poids.
@@ -426,24 +471,42 @@ def sampling_plan(
     duration: float,
     segment_step: float = 2.0,
     full_step: float = 10.0,
+    full_scan: bool = False,
 ) -> list[tuple[float, float, float]]:
-    """Fenêtres d'échantillonnage ``(début, fin, pas)`` des frames d'une vidéo :
-    les segments (pas de 2 s), ou toute la vidéo (pas de 10 s) s'il n'y en a pas."""
-    if segments:
-        plan = []
-        for seg in merge_segments([dict(s) for s in segments], gap=0.0):
-            start = max(0.0, float(seg["start_s"]))
-            end = min(float(seg["end_s"]), duration) if duration else float(seg["end_s"])
-            if end > start:
-                plan.append((start, end, segment_step))
-        return plan
-    return [(0.0, float(duration), full_step)] if duration > 0 else []
+    """Fenêtres d'échantillonnage ``(début, fin, pas)`` d'une vidéo, dans l'ordre du temps.
+
+    Les segments sont échantillonnés au pas ``segment_step`` ; sans segment, toute
+    la vidéo l'est au pas ``full_step``. Avec ``full_scan``, les intervalles entre
+    les segments sont aussi parcourus au pas ``full_step`` (le graphique peut
+    rester à l'écran sans être nommé).
+    """
+    if not segments:
+        return [(0.0, float(duration), full_step)] if duration > 0 else []
+    plan: list[tuple[float, float, float]] = []
+    cursor = 0.0
+    for seg in merge_segments([dict(x) for x in segments], gap=0.0):
+        start = max(0.0, float(seg["start_s"]))
+        end = min(float(seg["end_s"]), duration) if duration else float(seg["end_s"])
+        if end <= start:
+            continue
+        if full_scan and start - cursor >= full_step:
+            plan.append((cursor, start, full_step))
+        plan.append((start, end, segment_step))
+        cursor = end
+    if full_scan and duration - cursor >= full_step:
+        plan.append((cursor, float(duration), full_step))
+    return plan
 
 
 # --------------------------------------------------------------------------- axes
 
 HSeg = tuple[float, float, float]  # (x1, x2, y) : segment horizontal
 VSeg = tuple[float, float, float]  # (y1, y2, x) : segment vertical
+
+
+def is_grid(hsegs: Sequence[HSeg], vsegs: Sequence[VSeg]) -> bool:
+    """Trop de traits francs pour des axes : c'est un tableau."""
+    return (len(hsegs) >= 4 and len(vsegs) >= 4) or max(len(hsegs), len(vsegs)) >= 6
 
 
 def axes_kind(

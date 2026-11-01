@@ -26,6 +26,7 @@ import argparse
 import json
 import logging
 import os
+import subprocess
 import sys
 import tempfile
 import threading
@@ -61,6 +62,7 @@ from scripts.collect.pure import (  # noqa: E402
     choose_subtitle,
     dedupe,
     format_transcript,
+    is_complete_meta,
     json3_to_lines,
     vtt_to_lines,
 )
@@ -124,6 +126,22 @@ _MODEL: Any = None
 _MODEL_LOCK = threading.Lock()
 
 
+def decode_audio_16k(path: Path) -> Any:
+    """Décode un fichier audio avec ffmpeg en tableau numpy mono 16 kHz (float32).
+
+    faster-whisper 1.2 ne sait plus ouvrir un fichier avec PyAV ≥ 19
+    (``av.open(metadata_errors=…)`` a disparu) ; il accepte en revanche un tableau.
+    """
+    import numpy as np
+
+    proc = subprocess.run(
+        ["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin", "-i", str(path),
+         "-vn", "-ac", "1", "-ar", "16000", "-f", "f32le", "pipe:1"],
+        capture_output=True, check=True,
+    )
+    return np.frombuffer(proc.stdout, dtype=np.float32)
+
+
 def whisper_transcribe(
     video_id: str, model_size: str = "small", threads: int = 4
 ) -> list[tuple[float, float, str]]:
@@ -148,7 +166,9 @@ def whisper_transcribe(
                 _MODEL = WhisperModel(model_size, device="cpu", compute_type="int8",
                                       cpu_threads=threads)
             t0 = time.monotonic()
-            segments, info = _MODEL.transcribe(str(audio), language="fr", vad_filter=True)
+            segments, info = _MODEL.transcribe(
+                decode_audio_16k(audio), language="fr", vad_filter=True
+            )
             result = [(s.start, s.end, s.text.strip()) for s in segments]
             log.info("%s : whisper, %.0f s d'audio en %.0f s", video_id, info.duration,
                      time.monotonic() - t0)
@@ -177,10 +197,13 @@ def process_video(
     if is_done(video) and not force:
         return None
     meta = read_json(META_CACHE_DIR / f"{vid}.json")
-    if meta is None or "error" in meta:
+    if meta is None or "error" in meta or not is_complete_meta(meta):
         from scripts.collect.list_videos import MetaFetcher
 
-        meta = MetaFetcher()(vid) or {}
+        meta = MetaFetcher()(vid)
+        if meta is None:  # YouTube bride : ne pas conclure à l'absence de sous-titres
+            log.warning("%s : métadonnées indisponibles, à réessayer plus tard", vid)
+            return None
     choice = choose_subtitle(meta)
     if choice is not None:
         lang, kind = choice

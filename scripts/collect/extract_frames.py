@@ -4,10 +4,13 @@ Pour chaque vidéo ``core`` de l'index :
 
 1. télécharge la vidéo seule (≤ 480p, sans audio) dans un dossier temporaire ;
 2. extrait avec ffmpeg une frame toutes les 2 s dans ses ``chart_segments``
-   (toutes les 10 s sur toute la vidéo si elle n'a aucun segment) ;
+   (toutes les 10 s sur toute la vidéo si elle n'a aucun segment ; avec
+   ``--full-scan``, toutes les 10 s aussi entre les segments) ;
 3. calcule un ``chart_score`` (0..1) par heuristique OpenCV :
    - cercles creux (ou points) sombres sur fond clair peu saturé, détectés par
-     HoughCircles puis vérifiés (anneau sombre, extérieur clair) ;
+     une transformée de Hough circulaire puis vérifiés (anneau sombre, extérieur
+     clair) ; les petits, que le texte imite, ne comptent que pour un poids plafonné ;
+   - disques pleins colorés (style web de 2026, bulles) ;
    - axes orthogonaux : longs traits fins horizontaux et verticaux (ouverture
      morphologique du « black-hat »), qui se croisent loin de leurs extrémités ;
    - panneau clair et rectangulaire (le fond du graphique) ;
@@ -19,11 +22,12 @@ Pour chaque vidéo ``core`` de l'index :
 
 Reprise : chaque vidéo traitée laisse ``research/captures/state/<id>.json``
 (paramètres, scores de toutes les frames échantillonnées) et n'est pas
-retraitée, sauf ``--force``.
+retraitée, sauf ``--force`` (qui n'enlève aucune capture existante).
 
 Usage :
     uv run python scripts/collect/extract_frames.py [--limit N] [--ids ID ...] [--workers 2]
     uv run python scripts/collect/extract_frames.py --score-images a.png b.png   # diagnostic
+    uv run python scripts/collect/extract_frames.py --ids ID --review-dir DOSSIER  # planches
 """
 
 from __future__ import annotations
@@ -53,10 +57,13 @@ if __package__ in (None, ""):
 from scripts.collect.common import (  # noqa: E402
     CAPTURE_STATE_DIR,
     CAPTURES_DIR,
+    MANIFEST_JSONL,
+    ROOT,
     Video,
     YouTubeBlocked,
     load_index,
     process_pool,
+    read_jsonl,
     rel,
     replace_manifest_rows,
     select_videos,
@@ -67,14 +74,21 @@ from scripts.collect.common import (  # noqa: E402
     write_json_atomic,
     ytdlp,
 )
-from scripts.collect.pure import axes_kind, nearest_duplicate, sampling_plan  # noqa: E402
+from scripts.collect.pure import (  # noqa: E402
+    axes_kind,
+    is_grid,
+    nearest_duplicate,
+    sampling_plan,
+)
 
 log = logging.getLogger("collect.frames")
 
 VIDEO_FORMAT = "bv*[height<=480][vcodec^=avc1]/bv*[height<=480]/b[height<=480]/wv*/w"
-# Seuil étalonné à la main (planches annotées) : axes en croix + panneau + au moins un
-# cercle, ou une dizaine de cercles sur panneau clair. Le gabarit vide est écarté.
-DEFAULT_THRESHOLD = 0.6
+# Seuil étalonné à la main sur des planches annotées (2025-2026, chaînes tierces comprises) :
+# les webcams seules plafonnent à 0,35 ; de vrais graphiques descendent à 0,47. Il est bas à
+# dessein : une capture perdue coûte un nouveau téléchargement, un faux positif se filtre
+# ensuite sur le ``chart_score`` du manifeste.
+DEFAULT_THRESHOLD = 0.45
 PHASH_MAX_DIST = 6
 SEGMENT_STEP = 2.0
 FULL_STEP = 10.0
@@ -82,10 +96,22 @@ FULL_STEP = 10.0
 # Paramètres de l'heuristique (images ramenées à 854 px de large, comme du 480p).
 ANALYSIS_WIDTH = 854
 LIGHT_MIN = 150  # niveau de gris minimal du fond clair
-SAT_MAX = 50  # saturation maximale du fond (exclut le jaune des incrustations)
-THIN_MIN = 35  # contraste minimal d'un trait fin (black-hat)
+SAT_MAX = 50  # saturation maximale du fond autour d'un cercle
+PANEL_SAT_MAX = 70  # idem pour le panneau : tolère les dégradés, exclut le décor jaune
+THIN_MIN = 22  # contraste minimal d'un axe (black-hat) : les axes de 2026 sont pâles
+STRONG_LINE_MIN = 35  # contraste d'un trait franc (filets de tableau)
 AXIS_MIN_FRAC = 0.22  # longueur minimale d'un axe, en fraction de la largeur / hauteur
 CIRCLES_FULL = 8  # nombre de cercles valant un score « cercles » de 1
+RING_RADII = (*range(4, 13), *range(14, 26, 2))  # rayons cherchés, en pixels
+CIRCLE_CONTRAST = 40  # contraste minimal d'un contour de cercle (black-hat)
+RING_MIN_RESPONSE = 0.85  # fraction minimale de l'anneau tombant sur un trait sombre
+BIG_RADIUS = 6  # en deçà, un cercle peut être une lettre
+SMALL_CIRCLE_WEIGHT = 0.5  # poids d'un petit cercle dans le score
+SMALL_CIRCLES_CAP = 4.0  # le texte seul ne doit pas suffire : poids total plafonné
+DISC_WEIGHT = 3.0  # poids d'un disque plein coloré (style web de 2026, bulles)
+DISC_SAT_MIN = 70  # saturation minimale d'un disque coloré
+DISC_DIAMETER = (6, 60)  # diamètres cherchés, en pixels
+PANEL_MIN_FRAC = 0.05  # surface minimale du panneau clair pour chercher des cercles
 WEIGHTS = {"circles": 0.45, "axes": 0.35, "panel": 0.20}
 
 _ANGLES = np.linspace(0.0, 2.0 * np.pi, 32, endpoint=False)
@@ -100,7 +126,8 @@ class ChartFeatures:
     """Indices de présence du graphique dans une frame."""
 
     score: float
-    n_circles: int
+    n_circles: int  # cercles contourés (grands et petits)
+    n_discs: int  # disques pleins colorés
     axes: str | None
     panel_frac: float
     panel_fill: float
@@ -126,43 +153,98 @@ def _ring(img: np.ndarray, x: float, y: float, r: float) -> np.ndarray:
     return img[ys, xs]
 
 
-def _valid_circles(gray: np.ndarray, sat: np.ndarray) -> list[tuple[float, float, float]]:
+def _ring_kernel(radius: int) -> np.ndarray:
+    """Noyau de convolution : anneau de rayon ``radius``, de somme 1."""
+    size = 2 * radius + 3
+    kernel = np.zeros((size, size), np.float32)
+    cv2.circle(kernel, (radius + 1, radius + 1), radius, 1.0, 1, cv2.LINE_8)
+    return kernel / kernel.sum()
+
+
+_RING_KERNELS = [(r, _ring_kernel(r)) for r in RING_RADII]
+
+
+def _is_valid_circle(gray: np.ndarray, sat: np.ndarray, x: float, y: float, r: float) -> bool:
+    """Contour sombre sur 85 % du tour, extérieur clair et peu saturé, intérieur clair
+    (cercle creux) ou franchement sombre (disque plein de rayon ≤ 10 px)."""
+    out_r = r + max(3.0, 0.3 * r)
+    outside = _ring(gray, x, y, out_r)
+    bg = float(np.median(outside))
+    if bg < LIGHT_MIN or float(np.median(_ring(sat, x, y, out_r))) > SAT_MAX:
+        return False
+    if np.mean(outside >= LIGHT_MIN) < 0.5:
+        return False
+    if r < BIG_RADIUS:  # lettre au milieu d'un mot : des traits sombres de chaque côté
+        near_dark = outside <= bg - 45
+        if near_dark[_COS > 0.7].mean() >= 0.25 and near_dark[_COS < -0.7].mean() >= 0.25:
+            return False
+    ring = np.min(np.stack([_ring(gray, x, y, r + d) for d in (-1.0, 0.0, 1.0)]), axis=0)
+    if np.mean(ring <= bg - 45) < 0.85:
+        return False
+    radii = (0.25 * r,) if r < 8 else (0.3 * r, 0.55 * r)
+    inside = np.concatenate([_ring(gray, x, y, rr) for rr in radii])
+    hollow = np.mean(inside >= bg - 35) >= 0.75
+    filled = r <= 10 and np.mean(inside <= bg - 45) >= 0.75
+    return bool(hollow or filled)
+
+
+def _valid_circles(
+    gray: np.ndarray,
+    sat: np.ndarray,
+    blackhat: np.ndarray,
+    roi: tuple[int, int, int, int] | None = None,
+) -> list[tuple[float, float, float]]:
     """Cercles creux (ou petits disques pleins) sombres sur fond clair peu saturé.
 
-    Les candidats de HoughCircles sont vérifiés : contour sombre sur au moins
-    85 % du tour (rayon ±1 px), extérieur majoritairement clair et peu saturé,
-    intérieur clair (cercle creux) ou franchement sombre (disque plein de rayon
-    ≤ 10 px), mesuré près du centre pour les petits cercles. Cela écarte la
-    plupart des lettres, les lunettes et les visages des webcams.
+    Transformée de Hough circulaire calculée par convolution : pour chaque rayon,
+    chaque centre reçoit la fraction de son anneau qui tombe sur un trait sombre fin
+    (black-hat), puis on garde les maxima locaux. ``cv2.HoughCircles`` ne convient
+    pas ici : il ne garde qu'un rayon par centre et manque les cercles de 4 à 6 px,
+    chevauchés par les étiquettes. Les candidats sont ensuite vérifiés
+    (:func:`_is_valid_circle`), ce qui écarte les lunettes et les visages des webcams.
     """
-    found = cv2.HoughCircles(
-        cv2.GaussianBlur(gray, (3, 3), 0), cv2.HOUGH_GRADIENT, dp=1, minDist=5,
-        param1=120, param2=13, minRadius=4, maxRadius=60,
-    )
-    if found is None:
-        return []
+    x0, y0, w, h = roi or (0, 0, gray.shape[1], gray.shape[0])
+    dark = (blackhat[y0 : y0 + h, x0 : x0 + w] >= CIRCLE_CONTRAST).astype(np.float32)
+    best = np.zeros_like(dark)
+    best_radius = np.zeros(dark.shape, np.int16)
+    for radius, kernel in _RING_KERNELS:
+        response = cv2.filter2D(dark, cv2.CV_32F, kernel, borderType=cv2.BORDER_CONSTANT)
+        better = response >= best  # à réponse égale, le plus grand rayon
+        best[better] = response[better]
+        best_radius[better] = radius
+    peaks = (best >= RING_MIN_RESPONSE) & (best >= cv2.dilate(best, np.ones((5, 5), np.uint8)))
+    ys, xs = np.nonzero(peaks)
+    order = np.argsort(-best[ys, xs])
     keep: list[tuple[float, float, float]] = []
-    for x, y, r in found[0]:
-        out_r = r + max(3.0, 0.3 * r)
-        outside = _ring(gray, x, y, out_r)
-        bg = float(np.median(outside))
-        if bg < LIGHT_MIN or float(np.median(_ring(sat, x, y, out_r))) > SAT_MAX:
-            continue
-        if np.mean(outside >= LIGHT_MIN) < 0.5:
-            continue
-        ring = np.min(np.stack([_ring(gray, x, y, r + d) for d in (-1.0, 0.0, 1.0)]), axis=0)
-        if np.mean(ring <= bg - 45) < 0.85:
-            continue
-        radii = (0.25 * r,) if r < 8 else (0.3 * r, 0.55 * r)
-        inside = np.concatenate([_ring(gray, x, y, rr) for rr in radii])
-        hollow = np.mean(inside >= bg - 35) >= 0.75
-        filled = r <= 10 and np.mean(inside <= bg - 45) >= 0.75
-        if not (hollow or filled):
-            continue
+    for i in order:
+        x, y, r = float(xs[i] + x0), float(ys[i] + y0), float(best_radius[ys[i], xs[i]])
         if any(abs(x - kx) <= 3 and abs(y - ky) <= 3 for kx, ky, _ in keep):
             continue
-        keep.append((float(x), float(y), float(r)))
+        if _is_valid_circle(gray, sat, x, y, r):
+            keep.append((x, y, r))
     return keep
+
+
+def _colored_discs(
+    hsv: np.ndarray, roi: tuple[int, int, int, int]
+) -> list[tuple[float, float, float]]:
+    """Disques pleins colorés : composantes saturées, à peu près aussi hautes que larges,
+    dont la surface est celle d'un disque (ce qui écarte les carrés des barres empilées)."""
+    x0, y0, w, h = roi
+    crop = hsv[y0 : y0 + h, x0 : x0 + w]
+    mask = ((crop[:, :, 1] >= DISC_SAT_MIN) & (crop[:, :, 2] >= 40)).astype(np.uint8)
+    _, _, stats, centroids = cv2.connectedComponentsWithStats(mask, connectivity=8)
+    discs: list[tuple[float, float, float]] = []
+    for (_, _, cw, ch, area), (cx, cy) in zip(stats[1:], centroids[1:], strict=True):
+        if not (DISC_DIAMETER[0] <= cw <= DISC_DIAMETER[1]):
+            continue
+        if not (DISC_DIAMETER[0] <= ch <= DISC_DIAMETER[1]):
+            continue
+        if max(cw, ch) / min(cw, ch) > 1.25:
+            continue
+        if 0.8 <= area / (np.pi / 4.0 * cw * ch) <= 1.12:
+            discs.append((float(cx) + x0, float(cy) + y0, (cw + ch) / 4.0))
+    return discs
 
 
 def chart_features(frame: np.ndarray) -> ChartFeatures:
@@ -173,10 +255,11 @@ def chart_features(frame: np.ndarray) -> ChartFeatures:
         frame, (ANALYSIS_WIDTH, max(1, round(h0 * scale))), interpolation=cv2.INTER_AREA)
     H, W = img.shape[:2]
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    sat = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)[:, :, 1]
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    sat = hsv[:, :, 1]
 
     # Panneau clair et peu saturé (fond du graphique).
-    light = ((gray >= LIGHT_MIN) & (sat <= SAT_MAX)).astype(np.uint8)
+    light = ((gray >= LIGHT_MIN) & (sat <= PANEL_SAT_MAX)).astype(np.uint8)
     light = cv2.morphologyEx(light, cv2.MORPH_CLOSE, np.ones((9, 9), np.uint8))
     n, _, stats, _ = cv2.connectedComponentsWithStats(light, connectivity=8)
     panel: tuple[int, int, int, int] | None = None
@@ -198,10 +281,30 @@ def chart_features(frame: np.ndarray) -> ChartFeatures:
                              cv2.getStructuringElement(cv2.MORPH_RECT, (1, vlen)))
     hsegs, vsegs = _segments(hmask, True), _segments(vmask, False)
     axes = axes_kind(hsegs, vsegs)
+    # Beaucoup de filets francs : un tableau, pas des axes (les filets pâles d'une
+    # interface web, eux, n'empêchent pas de reconnaître les axes du graphique).
+    strong = np.where(blackhat >= STRONG_LINE_MIN, 255, 0).astype(np.uint8)
+    strong_h = cv2.morphologyEx(strong, cv2.MORPH_OPEN,
+                                cv2.getStructuringElement(cv2.MORPH_RECT, (hlen, 1)))
+    strong_v = cv2.morphologyEx(strong, cv2.MORPH_OPEN,
+                                cv2.getStructuringElement(cv2.MORPH_RECT, (1, vlen)))
+    if is_grid(_segments(strong_h, True), _segments(strong_v, False)):
+        axes = "grid"
 
-    circles = _valid_circles(gray, sat)
+    # Cercles : seulement sur le panneau clair (les frames de webcams sont vite écartées).
+    circles: list[tuple[float, float, float]] = []
+    discs: list[tuple[float, float, float]] = []
+    if panel is not None and panel_frac >= PANEL_MIN_FRAC:
+        px, py, pw, ph = panel
+        x1, y1 = max(0, px - 4), max(0, py - 4)
+        roi = (x1, y1, min(W, px + pw + 4) - x1, min(H, py + ph + 4) - y1)
+        circles = _valid_circles(gray, sat, blackhat, roi)
+        discs = _colored_discs(hsv, roi)
 
-    c_term = min(1.0, len(circles) / CIRCLES_FULL)
+    # Les lettres (« o », « e ») ressemblent à de petits cercles : leur poids est plafonné.
+    n_big = sum(1 for _, _, r in circles if r >= BIG_RADIUS)
+    small = min(SMALL_CIRCLES_CAP, SMALL_CIRCLE_WEIGHT * (len(circles) - n_big))
+    c_term = min(1.0, (n_big + small + DISC_WEIGHT * len(discs)) / CIRCLES_FULL)
     a_term = {"cross": 1.0, "corner": 0.3}.get(axes or "", 0.0)
     if panel_frac >= 0.12 and panel_fill >= 0.75:
         p_term = 1.0
@@ -217,9 +320,9 @@ def chart_features(frame: np.ndarray) -> ChartFeatures:
         bx, by, bw, bh = panel
     else:
         xs = [c[0] for c in circles] + [s[0] for s in hsegs] + [s[1] for s in hsegs] \
-            + [s[2] for s in vsegs]
+            + [s[2] for s in vsegs] + [d[0] for d in discs]
         ys = [c[1] for c in circles] + [s[2] for s in hsegs] + [s[0] for s in vsegs] \
-            + [s[1] for s in vsegs]
+            + [s[1] for s in vsegs] + [d[1] for d in discs]
         if xs and ys and score > 0:
             x1, x2 = max(0, int(min(xs)) - 20), min(W, int(max(xs)) + 20)
             y1, y2 = max(0, int(min(ys)) - 20), min(H, int(max(ys)) + 20)
@@ -228,7 +331,7 @@ def chart_features(frame: np.ndarray) -> ChartFeatures:
             bx, by, bw, bh = 0, 0, W, H
     inv = 1.0 / scale
     bbox = (int(bx * inv), int(by * inv), max(1, int(bw * inv)), max(1, int(bh * inv)))
-    return ChartFeatures(round(score, 3), len(circles), axes, round(panel_frac, 3),
+    return ChartFeatures(round(score, 3), len(circles), len(discs), axes, round(panel_frac, 3),
                          round(panel_fill, 3), bbox)
 
 
@@ -316,6 +419,33 @@ def capture_path(video_id: str, t: float) -> Path:
     return CAPTURES_DIR / f"{video_id}_{int(round(t)):05d}.png"
 
 
+def _thumb(frame: np.ndarray, t: float, feats: ChartFeatures) -> np.ndarray:
+    """Vignette annotée (instant, score, cercles, axes) pour les planches de contrôle."""
+    th = cv2.resize(frame, (284, 160), interpolation=cv2.INTER_AREA)
+    cv2.rectangle(th, (0, 0), (284, 14), (255, 255, 255), -1)
+    label = (
+        f"{int(t) // 60:03d}:{int(t) % 60:02d} s={feats.score:.2f} c={feats.n_circles} "
+        f"d={feats.n_discs} {feats.axes or '-'} p={feats.panel_frac:.2f}"
+    )
+    cv2.putText(th, label, (2, 11), cv2.FONT_HERSHEY_SIMPLEX, 0.36, (0, 0, 160), 1, cv2.LINE_AA)
+    return th
+
+
+def write_sheet(path: Path, thumbs: Sequence[np.ndarray], cols: int = 6, rows: int = 7) -> None:
+    """Planche de vignettes régulièrement réparties (au plus ``cols × rows``)."""
+    if not thumbs:
+        return
+    n = cols * rows
+    if len(thumbs) > n:
+        thumbs = [thumbs[int(i * len(thumbs) / n)] for i in range(n)]
+    cells = list(thumbs)
+    while len(cells) % cols:
+        cells.append(np.zeros_like(cells[0]))
+    grid = np.vstack([np.hstack(cells[i : i + cols]) for i in range(0, len(cells), cols)])
+    path.parent.mkdir(parents=True, exist_ok=True)
+    cv2.imwrite(str(path), grid)
+
+
 def analyse_video(
     path: Path,
     plan: Sequence[tuple[float, float, float]],
@@ -323,16 +453,27 @@ def analyse_video(
     height: int,
     threshold: float,
     max_dist: int,
+    near_miss: list[np.ndarray] | None = None,
 ) -> tuple[list[Kept], list[list[float]]]:
-    """Échantillonne, note et dédoublonne les frames d'un fichier vidéo."""
+    """Échantillonne, note et dédoublonne les frames d'un fichier vidéo.
+
+    ``near_miss`` reçoit, si fourni, les vignettes distinctes des frames rejetées
+    de peu (score ≥ seuil − 0,3), pour contrôler le seuil à l'œil.
+    """
     kept: list[Kept] = []
     hashes: list[str] = []
     scores: list[list[float]] = []
+    near_hashes: list[str] = []
     for start, end, step in plan:
         for t, frame in iter_frames(path, start, end, step, width, height):
             feats = chart_features(frame)
             scores.append([round(t, 1), feats.score])
             if feats.score < threshold:
+                if near_miss is not None and feats.score >= threshold - 0.3:
+                    near = region_phash(frame, (0, 0, width, height))
+                    if nearest_duplicate(near, near_hashes, 10) is None:
+                        near_hashes.append(near)
+                        near_miss.append(_thumb(frame, t, feats))
                 continue
             ph = region_phash(frame, feats.bbox)
             j = nearest_duplicate(ph, hashes, max_dist)
@@ -359,6 +500,7 @@ def process_video(
     full_step: float = FULL_STEP,
     full_scan: bool = False,
     force: bool = False,
+    review_dir: str | None = None,
 ) -> dict[str, Any] | None:
     """Traite une vidéo core : téléchargement, échantillonnage, captures, manifeste.
 
@@ -374,20 +516,24 @@ def process_video(
         log.info("%s : téléchargement (%s)", vid, video.get("title", "")[:60])
         path = download_video(vid, Path(tmp))
         width, height, duration = probe(path)
-        plan = sampling_plan(segments, duration, segment_step, full_step)
-        if full_scan and segments:
-            plan = plan + [(0.0, duration, full_step)]
+        plan = sampling_plan(segments, duration, segment_step, full_step, full_scan)
         log.info("%s : %dx%d, %.0f s, %d fenêtre(s) d'échantillonnage", vid, width, height,
                  duration, len(plan))
-        kept, scores = analyse_video(path, plan, width, height, threshold, max_dist)
+        near_miss: list[np.ndarray] | None = [] if review_dir else None
+        kept, scores = analyse_video(path, plan, width, height, threshold, max_dist, near_miss)
     # Le dossier temporaire (et la vidéo) est supprimé à la sortie du bloc.
-    if full_scan and segments:  # doublons d'instants entre segments et balayage complet
-        seen: set[int] = set()
-        kept = [k for k in kept if not (int(round(k.t)) in seen or seen.add(int(round(k.t))))]
+    if review_dir:
+        write_sheet(Path(review_dir) / f"{vid}_near.png", near_miss or [])
+        write_sheet(
+            Path(review_dir) / f"{vid}_kept.png",
+            [
+                _thumb(cv2.imdecode(np.frombuffer(k.png, np.uint8), cv2.IMREAD_COLOR), k.t,
+                       k.features)
+                for k in kept
+            ],
+        )
 
-    for old in CAPTURES_DIR.glob(f"{vid}_*.png"):
-        if old not in {capture_path(vid, k.t) for k in kept}:
-            old.unlink(missing_ok=True)
+    previous = [r for r in read_jsonl(MANIFEST_JSONL) if r.get("video_id") == vid]
     rows = []
     for k in kept:
         png_path = capture_path(vid, k.t)
@@ -403,9 +549,13 @@ def process_video(
             "upload_date": video.get("upload_date"),
             "chart_bbox": [x, y, w, h],
             "n_circles": k.features.n_circles,
+            "n_discs": k.features.n_discs,
             "axes": k.features.axes,
         })
-    replace_manifest_rows(vid, rows)
+    # Un retraitement n'enlève rien : les captures d'un passage antérieur restent.
+    files = {r["file"] for r in rows}
+    carried = [r for r in previous if r["file"] not in files and (ROOT / r["file"]).exists()]
+    replace_manifest_rows(vid, rows + carried)
     state = {
         "video_id": vid,
         "processed_at": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -418,6 +568,7 @@ def process_video(
         "n_sampled": len(scores),
         "n_above_threshold": sum(1 for _, s in scores if s >= threshold),
         "n_kept": len(rows),
+        "n_carried": len(carried),
         "elapsed_s": round(time.monotonic() - t0, 1),
         "scores": scores,
     }
@@ -473,6 +624,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     ap.add_argument("--full-scan", action="store_true",
                     help="balaye aussi toute la vidéo (pas --full-step) en plus des segments")
     ap.add_argument("--force", action="store_true", help="retraite les vidéos déjà traitées")
+    ap.add_argument("--review-dir", default=None,
+                    help="écrit des planches de contrôle (gardées, rejetées de peu) ici")
     ap.add_argument("--score-images", nargs="+", metavar="PNG",
                     help="affiche seulement les indices de ces images")
     ap.add_argument("-v", "--verbose", action="store_true")
@@ -492,7 +645,8 @@ def main(argv: list[str] | None = None) -> int:
     log.info("captures : %d vidéos retenues, %d à traiter", len(videos), len(todo))
     n_ok = run_batch(todo, args.workers, args.verbose, threshold=args.threshold,
                      max_dist=args.phash_dist, segment_step=args.segment_step,
-                     full_step=args.full_step, full_scan=args.full_scan, force=args.force)
+                     full_step=args.full_step, full_scan=args.full_scan, force=args.force,
+                     review_dir=args.review_dir)
     log.info("captures : %d vidéo(s) traitée(s)", n_ok)
     return 0
 
