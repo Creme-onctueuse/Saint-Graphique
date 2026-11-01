@@ -2,8 +2,8 @@
 # Prérequis (une fois) : Settings > Pages > Build and deployment > Source = « GitHub Actions ».
 name: Pages
 
-# Lancement manuel uniquement : la page contient des coordonnées tirées de rapports Ifop,
-# dont la publication reste à trancher (voir README, « la mention de l'Ifop »).
+# Lancement manuel uniquement, et à ne pas lancer en l'état : la page contient des coordonnées
+# tirées de rapports Ifop, qui ne sont pas publiées (voir README, « Publication »).
 on:
   workflow_dispatch:
 

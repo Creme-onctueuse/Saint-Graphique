@@ -33,6 +33,12 @@
           },
           "niveau_vie_status": { "enum": ["published", "imputed", "calculated"], "description": "published = publié par la source pour cette PCS ; imputed = repris d'un niveau plus agrégé ; calculated = estimé par ce projet" },
           "patrimoine_status": { "enum": ["published", "imputed", "calculated"], "description": "Même signification que niveau_vie_status" },
+          "patrimoine_composition": {
+            "type": "object",
+            "description": "Composition du patrimoine pour cette PCS, telle que publiée par la source. Clés courtes (ex. professionnel_pct, immobilier_pct, financier_pct, autre_pct), en pourcentage de la masse ou en taux de détention : le préciser dans notes et dans la source.",
+            "additionalProperties": { "type": "number" }
+          },
+          "patrimoine_composition_status": { "enum": ["published", "imputed", "calculated"] },
           "source_refs": { "type": "array", "items": { "type": "string" } },
           "notes": { "type": "string" }
         }

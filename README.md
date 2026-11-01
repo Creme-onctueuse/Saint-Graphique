@@ -6,7 +6,7 @@ Le Saint-Graphique a été créé par **Chris et la PaduTeam**. Ce projet est di
 
 > **Projet non officiel.** Il n'a aucun lien avec Positions Revue ni avec la PaduTeam. L'algorithme original n'a pas été publié : ce dépôt en propose une **reconstruction**, calée sur les vidéos publiques et documentée, sans prétendre à l'identité exacte.
 
-**Statut :** en construction (v0.x). Voir la [feuille de route](#feuille-de-route). **À régler avant toute publication :** [la mention de l'Ifop](#question-ouverte--la-mention-de-lifop).
+**Statut :** en construction (v0.x). Voir la [feuille de route](#feuille-de-route). **Usage personnel et non commercial :** les données tirées des rapports Ifop ne sont pas publiées ([détails](#données-ifop--usage-personnel-et-non-commercial)).
 
 ## Le principe
 
@@ -48,7 +48,7 @@ Pour la vérification complète (identique à la CI) : `scripts/check.ps1`.
 config/      configuration déclarative (PCS, élections, paramètres des méthodes)
 schemas/     JSON Schemas des fichiers échangés entre étapes (contrats)
 pipeline/    Python : sources/ (collecte des données ouvertes), methods/ (placement), build.py
-data/        données publiées : pcs.json, elections/, computed/, SOURCES.md
+data/        données : pcs.json, elections/, computed/, SOURCES.md
 web/         application Vite + TypeScript + D3 (build en un seul index.html)
 scripts/     outillage : installation, validation, collecte et analyse des vidéos
 docs/        méthodologie, chronologie des versions du graphique
@@ -57,22 +57,26 @@ research/    matériel local NON publié (vidéos, transcriptions, captures) : g
 
 ## Données et sources
 
-Toutes les données publiées proviennent de **sources primaires citées**, recensées dans [`data/SOURCES.md`](data/SOURCES.md) :
+Toutes les données proviennent de **sources primaires citées**, recensées dans [`data/SOURCES.md`](data/SOURCES.md) :
 
 - INSEE / data.gouv.fr (Licence Ouverte Etalab 2.0) : effectifs, diplômes, revenus et patrimoine ;
 - rapports de sondage Ifop du jour du vote : composition sociale des électorats.
 
-Les vidéos, transcriptions et captures servent uniquement à l'analyse locale. Elles ne sont **pas redistribuées**. Seuls des chiffres dérivés sont publiés, chacun cité avec l'identifiant de la vidéo et l'horodatage.
+Les vidéos, transcriptions et captures servent uniquement à l'analyse locale. Elles ne sont **pas redistribuées**. Seuls des chiffres dérivés figurent dans la documentation, chacun cité avec l'identifiant de la vidéo et l'horodatage.
 
-### Question ouverte : la mention de l'Ifop
+### Données Ifop : usage personnel et non commercial
 
-Les rapports Ifop dont sont tirées les 7 élections indiquent : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » **Aucun accord n'est documenté à ce jour.** Sont concernés `data/elections/`, `pipeline/sources/manual/` et les coordonnées d'électorats de `data/computed/`, donc aussi la page construite.
+Les rapports Ifop dont sont tirées les 7 élections indiquent : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu.
 
-Le code reste sous licence MIT, mais ces données n'y sont pas soumises. La question reste à trancher avant toute publication : obtenir l'accord de l'Ifop, s'appuyer sur d'autres sources, ou ne publier que le code et les données INSEE. Pour cette raison, le déploiement sur GitHub Pages n'est lancé que manuellement.
+Ce projet a donc un usage **personnel et non commercial**, et les données tirées de ces rapports **ne sont pas publiées**. Sont concernés `data/elections/`, `pipeline/sources/manual/`, les coordonnées d'électorats de `data/computed/`, et donc la page construite à partir d'elles. La source Ifop reste citée sur la page et dans `data/SOURCES.md`.
+
+Le code reste sous licence MIT, mais ces données n'y sont pas soumises. Le dépôt n'a pas de dépôt distant public, et le workflow GitHub Pages n'est pas lancé.
 
 ### Limite actuelle de l'axe X
 
-Le patrimoine et une partie du niveau de vie ne sont pas toujours publiés au niveau de détail des 30 PCS. Quand une valeur est imputée ou calculée, `data/SOURCES.md` et la page l'indiquent, et l'ordre des PCS concernées sur l'axe X ne doit pas être lu comme une mesure.
+La méthode `ranks_chris_v1` classe les PCS selon le ratio patrimoine / niveau de vie : c'est la reconstruction de JnthnBS. Ses valeurs viennent d'une table Insee par PCS (2020-2021), diffusée sur [nomenclature-pcs.fr](https://www.nomenclature-pcs.fr). Le patrimoine des retraités, absent de cette table, est une valeur calculée par ce projet.
+
+Chris définit pourtant cet axe par la **composition du patrimoine** de chaque PCS ([vidéo de la PaduTeam](https://www.youtube.com/watch?v=GTN2rUgOdFo), vers 03:25). Dans les sources consultées, cette composition n'est publiée que pour 11 ou 12 catégories de ménages, pas pour les 30 PCS. La source exacte de Chris reste donc inconnue, et la méthode réplique peut s'écarter de son graphique sur cet axe.
 
 ## Feuille de route
 
@@ -80,11 +84,11 @@ Le patrimoine et une partie du niveau de vie ne sont pas toujours publiés au ni
 - **v2 : rigueur.** Valeurs continues, ACM, incertitudes (ellipses par bootstrap), sources affichées dans l'application.
 - **v3 : exploration.** Évolution animée d'une élection à l'autre, comparaison des méthodes côte à côte, sous-groupes (âge, territoire), version anglaise.
 
-## Publication sur GitHub Pages
+## Publication
 
-1. Pousser le dépôt sur GitHub.
-2. Dans *Settings → Pages → Build and deployment*, choisir *Source* = **GitHub Actions**.
-3. Une fois [la question de l'Ifop](#question-ouverte--la-mention-de-lifop) réglée, lancer manuellement le workflow `.github/workflows/pages.yml` (onglet *Actions*). Il publie `web/dist/index.html`.
+**En l'état, ce dépôt et sa page ne doivent pas être publiés**, car ils contiennent des données tirées des rapports Ifop. Publier plus tard supposerait d'abord de retirer ces fichiers de tout l'historique git, pas seulement du dernier commit, ou d'obtenir l'accord de l'Ifop.
+
+Le workflow `.github/workflows/pages.yml` ne se lance que manuellement. S'il est lancé un jour, il faut choisir *Settings → Pages → Source* = **GitHub Actions**.
 
 ## Contribuer
 

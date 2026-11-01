@@ -1,135 +1,72 @@
-"""Niveau de vie et patrimoine par PCS — Insee (ERFS 2022, enquête HVP 2023-2024).
+"""Niveau de vie et patrimoine brut médians par PCS de niveau 2.
 
-Ce que l'Insee publie réellement, et ce qui est calculé ici :
+**29 PCS actives** : table « Situation financière des ménages … en 2020-2021 », feuilles
+« Ensemble », publiée sur nomenclature-pcs.fr (site détenu par l'Insee, Progedo, le Cnam-CEET et le
+laboratoire Printemps ; source indiquée : Insee, enquête Revenus fiscaux et sociaux 2021 et
+Patrimoine histoire de vie 2020-2021). Champ : personnes actives ayant déjà travaillé. Cette table
+n'a pas été trouvée sur insee.fr, dont les tableaux s'arrêtent à 12 catégories pour le patrimoine.
 
-**Niveau de vie** (ERFS 2022, tableaux TI02D et TI02C, individus de 15 ans ou plus selon leur
-propre CS, France métropolitaine) :
+**Retraités**, absents de cette table :
 
-- 25 des 30 PCS ont une valeur publiée à leur niveau ;
-- 10, 21, 22, 23 : l'Insee ne publie qu'une ligne commune ; cette valeur leur est appliquée
-  (IMPUTATION : ce n'est pas une donnée Insee à ce niveau) ;
-- 44 (ministres du culte) : l'Insee publie « ns » (non significatif) ; la valeur du groupe
-  « Professions intermédiaires » est appliquée à défaut (IMPUTATION).
-
-**Patrimoine brut** (enquête Histoire de vie et Patrimoine 2023-2024, ménages selon la CS de la
-personne de référence, France hors Mayotte) : l'Insee ne publie que 12 catégories, jamais les
-29 postes. Aucune source primaire en accès libre trouvée au niveau 2.
-
-- 10 et 31 : catégorie publiée équivalente (mais pour le ménage, pas pour l'individu) ;
-- 21-23, 33-38, 42-48, 52-56, 62-69 : valeur de la catégorie appliquée à toutes ses PCS
-  (IMPUTATION) ;
-- 7 : l'Insee publie 4 catégories de retraités, sans ensemble. Leur médiane commune est estimée
-  par interpolation linéaire à partir de leur répartition dans les déciles de patrimoine et des
-  seuils de ces déciles (CALCUL). Elle se situe avec certitude entre les deux seuils encadrants.
-
-Conséquence à garder en tête : à l'intérieur d'une catégorie, le patrimoine est constant ; le
-classement du ratio patrimoine / niveau de vie n'y dépend donc que du niveau de vie, et il va à
-l'inverse de celui-ci. Cet ordre interne est un effet de l'imputation.
-
-Les médianes sont retenues pour les deux variables : statistique de référence de l'Insee, peu
-sensible aux très hauts patrimoines, elle décrit mieux un membre typique d'une PCS. Les moyennes
-publiées restent disponibles dans le DataFrame renvoyé par ``load()``.
+- niveau de vie : médiane publiée par l'Insee pour les retraités, ERFS 2021 (tableau TI02D) ;
+- patrimoine : valeur CALCULÉE. L'Insee publie plusieurs catégories de retraités, sans ensemble.
+  La médiane des ménages de retraités est estimée début 2024 par interpolation linéaire, à partir
+  de leur répartition dans les déciles de patrimoine de HVP 2023-2024, puis ramenée à début 2021
+  par le rapport des médianes de l'ensemble des ménages (HVP 2020-2021 / HVP 2023-2024). Les
+  seuils des déciles encadrent avec certitude la médiane de 2024.
 """
 
 from __future__ import annotations
 
-import io
-import re
-import unicodedata
 import zipfile
 from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import openpyxl
 import pandas as pd
 
+from pipeline.sources import _nomenclature_pcs as portraits
 from pipeline.sources._common import (
+    ACTIVE_PCS_CODES,
     LICENCE_INSEE,
     PCS_CODES,
+    RETIRED_CODE,
     cache_dir,
     download,
     file_meta,
     group_of,
     source_ref,
 )
+from pipeline.sources._tables import normalize_label, number, xlsx_rows
 
-REFERENCE_YEAR_NIVEAU_VIE = 2022
-REFERENCE_YEAR_PATRIMOINE = 2024
+PORTRAIT_FILE = "DEC_POR_8.xls"
 
-ERFS_PAGE = "https://www.insee.fr/fr/statistiques/8278900"
-ERFS_ZIP_URL = "https://www.insee.fr/fr/statistiques/fichier/8278900/irsocerfs2022_dd2_excel.zip"
-ERFS_ZIP = "irsocerfs2022_dd2_excel.zip"
-HVP_PAGE = "https://www.insee.fr/fr/statistiques/8736842"
-HVP_MONTANTS_URL = (
+ERFS_PAGE = "https://www.insee.fr/fr/statistiques/7766291"
+ERFS_ZIP_URL = "https://www.insee.fr/fr/statistiques/fichier/7766291/irsocerfs2021_dd2_excel.zip"
+ERFS_ZIP = "irsocerfs2021_dd2_excel.zip"
+HVP2024_PAGE = "https://www.insee.fr/fr/statistiques/8736842"
+HVP2024_MONTANTS_URL = (
     "https://www.insee.fr/fr/statistiques/fichier/8736842/hvp_mtmoymed_patbrut_patnet.xlsx"
 )
-HVP_PROFIL_URL = "https://www.insee.fr/fr/statistiques/fichier/8736842/hvp_profil_menages.xlsx"
-HVP_MONTANTS = "hvp_mtmoymed_patbrut_patnet.xlsx"
-HVP_PROFIL = "hvp_profil_menages.xlsx"
+HVP2024_PROFIL_URL = "https://www.insee.fr/fr/statistiques/fichier/8736842/hvp_profil_menages.xlsx"
+HVP2024_MONTANTS = "hvp_mtmoymed_patbrut_patnet.xlsx"
+HVP2024_PROFIL = "hvp_profil_menages.xlsx"
+HVP2021_PAGE = "https://www.insee.fr/fr/statistiques/8262352"
+HVP2021_MONTANTS_URL = (
+    "https://www.insee.fr/fr/statistiques/fichier/8262352/hvp_mtmoymed_patbrut_patnet_fr.xlsx"
+)
+HVP2021_MONTANTS = "hvp_mtmoymed_patbrut_patnet_fr.xlsx"
 
-SOURCE_ID_ERFS = "insee_erfs2022_ti02"
-SOURCE_ID_HVP = "insee_hvp2023_2024"
+SOURCE_ID_PORTRAIT = "nomenclature_pcs_dec_por_8"
+SOURCE_ID_ERFS = "insee_erfs2021_ti02d"
+SOURCE_ID_HVP2024 = "insee_hvp2023_2024"
+SOURCE_ID_HVP2021 = "insee_hvp2020_2021"
 
-# Statuts d'une valeur.
-PUBLIE = "publie"  # publié par l'Insee au niveau de cette PCS
-PUBLIE_MENAGE = "publie_menage"  # catégorie équivalente publiée, mais pour le ménage
-IMPUTE = "impute"  # valeur d'un agrégat appliquée à la PCS : pas une donnée Insee à ce niveau
-CALCULE = "calcule"  # combinaison arithmétique de valeurs publiées
+# Valeurs de ``niveau_vie_status`` et ``patrimoine_status`` (schemas/pcs.schema.json).
+PUBLISHED = "published"
+CALCULATED = "calculated"
 
-#: PCS -> début du libellé normalisé de sa ligne dans TI02D.
-ERFS_LABELS: dict[str, str] = {
-    "31": "professions liberales",
-    "33": "cadres de la fonction publique",
-    "34": "professeurs et professions scientifiques superieures",
-    "35": "professions de l'information, des arts et des spectacles",
-    "37": "cadres administratifs et commerciaux d'entreprise",
-    "38": "ingenieurs et cadres techniques d'entreprise",
-    "42": "professions de l'enseignement primaire et professionnel",
-    "43": "professions intermediaires de la sante et du travail social",
-    "44": "ministres du culte et religieux consacres",
-    "45": "professions intermediaires de la fonction publique",
-    "46": "professions intermediaires administratives et commerciales",
-    "47": "techniciens",
-    "48": "agents de maitrise",
-    "52": "employes administratifs de la fonction publique",
-    "53": "policiers, militaires, pompiers",
-    "54": "employes administratifs d'entreprise",
-    "55": "employes de commerce",
-    "56": "personnels des services directs aux particuliers",
-    "62": "ouvriers qualifies de type industriel",
-    "63": "ouvriers qualifies de type artisanal",
-    "64": "conducteurs de vehicules de transport",
-    "65": "conducteurs d'engins",
-    "67": "ouvriers peu qualifies de type industriel",
-    "68": "ouvriers peu qualifies de type artisanal",
-    "69": "ouvriers agricoles",
-    "7": "retraites",
-}
-ERFS_INDEPENDANTS_CODES = ("10", "21", "22", "23")
-ERFS_INDEPENDANTS_LABEL = "agriculteurs exploitants"
-ERFS_GROUP4_LABEL = "professions intermediaires"
-
-#: Catégorie HVP (libellé normalisé) -> PCS rattachées.
-HVP_CATEGORIES: dict[str, tuple[str, ...]] = {
-    "agriculteurs": ("10",),
-    "artisans, commercants et chefs d'entreprise": ("21", "22", "23"),
-    "professions liberales": ("31",),
-    "cadres (autre que professions liberales)": ("33", "34", "35", "37", "38"),
-    "professions intermediaires": ("42", "43", "44", "45", "46", "47", "48"),
-    "employes": ("52", "53", "54", "55", "56"),
-    "ouvriers": ("62", "63", "64", "65", "67", "68", "69"),
-}
-#: Libellés de ces catégories tels que publiés, pour les notes.
-HVP_LABELS: dict[str, str] = {
-    "agriculteurs": "Agriculteurs",
-    "artisans, commercants et chefs d'entreprise": "Artisans, commerçants et chefs d'entreprise",
-    "professions liberales": "Professions libérales",
-    "cadres (autre que professions liberales)": "Cadres (autre que professions libérales)",
-    "professions intermediaires": "Professions intermédiaires",
-    "employes": "Employés",
-    "ouvriers": "Ouvriers",
-}
 HVP_RETRAITES: tuple[str, ...] = (
     "retraites anciens agriculteurs, artisans, commercants, chefs d'entreprise",
     "retraites anciens cadres ou professions liberales",
@@ -138,47 +75,50 @@ HVP_RETRAITES: tuple[str, ...] = (
 )
 
 
-def normalize_label(text: Any) -> str:
-    """Libellé sans accents, en minuscules, sans renvoi de note ni préfixe « dont : »."""
-    s = unicodedata.normalize("NFKD", str(text))
-    s = "".join(ch for ch in s if not unicodedata.combining(ch))
-    s = s.replace("’", "'").lower()
-    s = re.sub(r"^\s*dont\s*:\s*", "", s)
-    s = re.sub(r"\(\d+\)", "", s)
-    return re.sub(r"\s+", " ", s).strip()
+@dataclass(frozen=True)
+class RetiredWealth:
+    """Patrimoine brut médian des ménages de retraités, en k€, et les éléments de son calcul."""
+
+    value_keur: float
+    median_2024_keur: float
+    low_2024_keur: float
+    high_2024_keur: float
+    all_2021_keur: float
+    all_2024_keur: float
+    age_60_69_2021_keur: float
+    age_70_plus_2021_keur: float
+
+    @property
+    def low_keur(self) -> float:
+        return self.low_2024_keur * self.all_2021_keur / self.all_2024_keur
+
+    @property
+    def high_keur(self) -> float:
+        return self.high_2024_keur * self.all_2021_keur / self.all_2024_keur
 
 
-def _number(value: Any) -> float | None:
-    return float(value) if isinstance(value, int | float) else None
+def french(value: float) -> str:
+    """Nombre à une décimale, avec virgule, pour un texte en français."""
+    return f"{value:.1f}".replace(".", ",")
 
 
-def _sheet_rows(
-    source: Path | bytes, sheet: str | None = None, max_row: int = 60, max_col: int = 16
-) -> list[tuple[Any, ...]]:
-    """Premières lignes d'une feuille Excel (certaines déclarent 1 048 576 lignes vides)."""
-    handle = io.BytesIO(source) if isinstance(source, bytes) else source
-    workbook = openpyxl.load_workbook(handle, read_only=True, data_only=True)
-    try:
-        worksheet = workbook[sheet] if sheet else workbook.worksheets[0]
-        return list(worksheet.iter_rows(max_row=max_row, max_col=max_col, values_only=True))
-    finally:
-        workbook.close()
+def portrait_values(
+    sheets: Mapping[str, Sequence[Sequence[Any]]],
+) -> dict[str, tuple[float, float]]:
+    """Feuilles de ``DEC_POR_8`` -> ``{PCS : (niveau de vie mensuel, patrimoine en k€)}``.
 
-
-def _erfs_member(zip_path: Path, table: str) -> bytes:
-    """Contenu du tableau ``table`` (ex. ``ti02d``) du zip ERFS, sans tenir compte de la casse."""
-    with zipfile.ZipFile(zip_path) as archive:
-        for name in archive.namelist():
-            if name.lower().endswith(f"_{table}.xlsx"):
-                return archive.read(name)
-    raise FileNotFoundError(f"{table} absent de {zip_path}")
+    Colonnes : libellé, niveau de vie médian (euros), patrimoine brut médian (milliers d'euros),
+    taux de pauvreté, taux de richesse.
+    """
+    values = portraits.values_by_pcs(sheets, [1, 2])
+    missing = sorted(set(ACTIVE_PCS_CODES) - set(values))
+    if missing:
+        raise ValueError(f"PCS absentes de {PORTRAIT_FILE} : {missing}")
+    return {code: (v[0], v[1]) for code, v in values.items()}
 
 
 def parse_erfs_rows(rows: Iterable[Sequence[Any]]) -> dict[str, tuple[float | None, float | None]]:
-    """Lignes d'un tableau TI02 -> ``{libellé normalisé : (moyenne, médiane) annuelles}``.
-
-    ``None`` pour une valeur non significative (« ns »).
-    """
+    """Lignes d'un tableau TI02 -> ``{libellé normalisé : (moyenne, médiane) annuelles}``."""
     table: dict[str, tuple[float | None, float | None]] = {}
     for row in rows:
         cells = list(row) + [None] * 5
@@ -186,61 +126,16 @@ def parse_erfs_rows(rows: Iterable[Sequence[Any]]) -> dict[str, tuple[float | No
         is_data = isinstance(effectif, int | float) or effectif == "ns"
         if label is None or not is_data:
             continue
-        table[normalize_label(label)] = (_number(moyenne), _number(mediane))
+        table[normalize_label(label)] = (number(moyenne), number(mediane))
     return table
 
 
-def _one_row(table: Mapping[str, Any], prefix: str) -> Any:
-    matches = [key for key in table if key.startswith(prefix)]
-    if len(matches) != 1:
-        raise ValueError(f"Ligne {prefix!r} : {len(matches)} correspondance(s) dans {list(table)}")
-    return table[matches[0]]
-
-
-def niveau_vie_table(
-    detail: Mapping[str, tuple[float | None, float | None]],
-    aggregate: Mapping[str, tuple[float | None, float | None]],
-) -> pd.DataFrame:
-    """Niveau de vie annuel par PCS, avec le statut de chaque valeur."""
-    records: list[dict[str, Any]] = []
-    independants = _one_row(detail, ERFS_INDEPENDANTS_LABEL)
-    group4 = aggregate[ERFS_GROUP4_LABEL]
-    for code in PCS_CODES:
-        if code in ERFS_INDEPENDANTS_CODES:
-            moyenne, mediane = independants
-            statut, base = IMPUTE, "ligne commune agriculteurs, artisans, commerçants, chefs"
-        else:
-            moyenne, mediane = _one_row(detail, ERFS_LABELS[code])
-            statut, base = PUBLIE, "ligne de la PCS"
-            if moyenne is None:  # « ns » dans TI02D
-                moyenne, mediane = group4
-                statut, base = IMPUTE, "groupe Professions intermédiaires (TI02C), PCS « ns »"
-        if moyenne is None or mediane is None:
-            raise ValueError(f"Niveau de vie manquant pour la PCS {code}")
-        records.append(
-            {
-                "code": code,
-                "niveau_vie_annuel_moyen_eur": moyenne,
-                "niveau_vie_annuel_median_eur": mediane,
-                "niveau_vie_statut": statut,
-                "niveau_vie_base": base,
-            }
-        )
-    return pd.DataFrame(records)
-
-
-def parse_hvp_montants(rows: Iterable[Sequence[Any]]) -> dict[str, tuple[float, float]]:
-    """Feuille « PCS » des montants -> ``{catégorie : (moyenne, médiane) du patrimoine brut}``.
-
-    Colonnes : libellé, moyenne brute, 1er décile, médiane brute, 9e décile, vide, puis le net.
-    """
-    table: dict[str, tuple[float, float]] = {}
-    for row in rows:
-        cells = list(row) + [None] * 4
-        moyenne, mediane = _number(cells[1]), _number(cells[3])
-        if cells[0] is not None and moyenne is not None and mediane is not None:
-            table[normalize_label(cells[0])] = (moyenne, mediane)
-    return table
+def retired_niveau_vie(table: Mapping[str, tuple[float | None, float | None]]) -> float:
+    """Niveau de vie mensuel médian des retraités (médiane annuelle publiée / 12)."""
+    median = table["retraites"][1]
+    if median is None:
+        raise ValueError("Médiane des retraités manquante dans l'ERFS")
+    return median / 12.0
 
 
 def parse_hvp_profil(rows: Iterable[Sequence[Any]]) -> dict[str, dict[str, float]]:
@@ -267,14 +162,14 @@ def parse_hvp_profil(rows: Iterable[Sequence[Any]]) -> dict[str, dict[str, float
 
 
 def parse_hvp_seuils(rows: Iterable[Sequence[Any]]) -> list[float]:
-    """Feuille « AGE » des montants -> seuils D1 à D9 du patrimoine brut, tous ménages.
+    """Feuille « AGE » des montants 2023-2024 -> seuils D1 à D9 du patrimoine brut, tous ménages.
 
     Première ligne « Ensemble » (le patrimoine net vient ensuite) ; colonnes : libellé, moyenne,
     D1, D2, D3, D4, médiane, D6, D7, D8, D9.
     """
     for row in rows:
         if row and row[0] is not None and normalize_label(row[0]) == "ensemble":
-            seuils = [_number(c) for c in list(row)[2:11]]
+            seuils = [number(c) for c in list(row)[2:11]]
             if len(seuils) != 9 or None in seuils or seuils != sorted(seuils):
                 raise ValueError(f"Seuils de déciles invalides : {seuils}")
             return [float(c) for c in seuils if c is not None]
@@ -308,7 +203,7 @@ def median_from_bands(
 def retired_median(
     profil: Mapping[str, Mapping[str, float]], seuils: Sequence[float]
 ) -> tuple[float, float, float]:
-    """Médiane estimée du patrimoine brut des ménages de retraités (4 catégories réunies)."""
+    """Médiane estimée du patrimoine brut des ménages de retraités, début 2024 (4 catégories)."""
     bands = [key for key in profil if key != "ensemble"][:10]
     if not (bands[0].startswith("inferieur au 1") and bands[9].startswith("superieur au 9")):
         raise ValueError(f"Tranches de déciles inattendues : {bands}")
@@ -316,127 +211,136 @@ def retired_median(
     return median_from_bands(shares, seuils)
 
 
-def _keur(euros: float) -> str:
-    """Montant en k€ pour un texte en français : 205100 -> « 205,1 »."""
-    return f"{euros / 1000:.1f}".replace(".", ",")
+def parse_hvp2021_medians(rows: Iterable[Sequence[Any]]) -> dict[str, float]:
+    """Feuille « AGE » des montants 2020-2021 -> ``{ligne : médiane brute}``.
+
+    Colonnes : libellé, moyenne brute, médiane brute, moyenne nette, médiane nette.
+    """
+    medians: dict[str, float] = {}
+    for row in rows:
+        if not row or not isinstance(row[0], str) or len(row) < 3:
+            continue
+        median = number(row[2])
+        if median is not None:
+            medians[normalize_label(row[0])] = median
+    return medians
 
 
-def patrimoine_table(
-    montants: Mapping[str, tuple[float, float]],
+def retired_wealth_from(
     profil: Mapping[str, Mapping[str, float]],
     seuils: Sequence[float],
-) -> pd.DataFrame:
-    """Patrimoine brut (euros) par PCS, avec le statut de chaque valeur."""
-    records: list[dict[str, Any]] = []
-    for label, codes in HVP_CATEGORIES.items():
-        moyenne, mediane = montants[label]
-        for code in codes:
-            records.append(
-                {
-                    "code": code,
-                    "patrimoine_moyen_eur": moyenne,
-                    "patrimoine_median_eur": mediane,
-                    "patrimoine_statut": PUBLIE_MENAGE if len(codes) == 1 else IMPUTE,
-                    "patrimoine_base": HVP_LABELS[label],
-                }
-            )
-    shares = [profil["ensemble"][label] for label in HVP_RETRAITES]
-    means = [montants[label][0] for label in HVP_RETRAITES]
-    moyenne_retraites = sum(s * m for s, m in zip(shares, means, strict=True)) / sum(shares)
-    mediane, borne_basse, borne_haute = retired_median(profil, seuils)
-    records.append(
-        {
-            "code": "7",
-            "patrimoine_moyen_eur": moyenne_retraites,
-            "patrimoine_median_eur": mediane,
-            "patrimoine_statut": CALCULE,
-            "patrimoine_base": (
-                f"4 catégories de retraités réunies, entre {_keur(borne_basse)} et "
-                f"{_keur(borne_haute)} k€"
-            ),
-        }
+    medians_2021: Mapping[str, float],
+) -> RetiredWealth:
+    """Calcule le patrimoine des retraités et conserve les repères publiés."""
+    median, low, high = retired_median(profil, seuils)
+    all_2024 = seuils[4]  # D5 de l'ensemble des ménages
+    all_2021 = medians_2021["total"]
+    return RetiredWealth(
+        value_keur=median * all_2021 / all_2024 / 1000.0,
+        median_2024_keur=median / 1000.0,
+        low_2024_keur=low / 1000.0,
+        high_2024_keur=high / 1000.0,
+        all_2021_keur=all_2021 / 1000.0,
+        all_2024_keur=all_2024 / 1000.0,
+        age_60_69_2021_keur=medians_2021["de 60 a 69 ans"] / 1000.0,
+        age_70_plus_2021_keur=medians_2021["70 ans ou plus"] / 1000.0,
     )
+
+
+def retired_note(retired: RetiredWealth) -> str:
+    return (
+        "Niveau de vie : médiane publiée par l'Insee pour les retraités (ERFS 2021). Patrimoine "
+        "CALCULÉ, non publié par l'Insee : médiane des ménages de retraités estimée à "
+        f"{french(retired.median_2024_keur)} k€ début 2024 par interpolation dans les déciles de "
+        f"HVP 2023-2024 (entre {french(retired.low_2024_keur)} et "
+        f"{french(retired.high_2024_keur)} k€), ramenée à début 2021 par le rapport des "
+        f"médianes de l'ensemble des ménages ({french(retired.all_2021_keur)} / "
+        f"{french(retired.all_2024_keur)})."
+    )
+
+
+ACTIVE_NOTE = (
+    "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière "
+    "2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : "
+    "nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé."
+)
+
+
+def combine(
+    values: Mapping[str, tuple[float, float]], niveau_vie_retraites: float, retired: RetiredWealth
+) -> pd.DataFrame:
+    """Une ligne par PCS (30), dans l'ordre de la nomenclature, avec statuts et notes."""
+    records: list[dict[str, Any]] = []
+    for code in PCS_CODES:
+        if code == RETIRED_CODE:
+            nv, pa = niveau_vie_retraites, retired.value_keur
+            status, note = CALCULATED, retired_note(retired)
+        else:
+            nv, pa = values[code]
+            status, note = PUBLISHED, ACTIVE_NOTE
+        records.append(
+            {
+                "code": code,
+                "group": group_of(code),
+                "niveau_vie_mensuel_eur": nv,
+                "patrimoine_keur": pa,
+                "niveau_vie_status": PUBLISHED,
+                "patrimoine_status": status,
+                "notes": note,
+            }
+        )
     return pd.DataFrame(records)
 
 
-def item_note(row: Mapping[str, Any]) -> str:
-    """Note explicite d'une PCS : ce qui est publié, ce qui est imputé ou calculé."""
-    parts: list[str] = []
-    statut_nv = row["niveau_vie_statut"]
-    if statut_nv == PUBLIE:
-        parts.append("Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022).")
-    elif row["code"] in ERFS_INDEPENDANTS_CODES:
-        parts.append(
-            "Niveau de vie IMPUTÉ, pas une donnée Insee à ce niveau : l'ERFS 2022 ne publie "
-            "qu'une ligne commune aux agriculteurs, artisans, commerçants et chefs d'entreprise, "
-            "appliquée ici à cette PCS."
-        )
-    else:
-        parts.append(
-            "Niveau de vie IMPUTÉ, pas une donnée Insee à ce niveau : l'ERFS 2022 publie « ns » "
-            "pour cette PCS ; la médiane du groupe Professions intermédiaires lui est appliquée "
-            "à défaut, sans garantie de représentativité."
-        )
-    statut_pa = row["patrimoine_statut"]
-    if statut_pa == PUBLIE_MENAGE:
-        parts.append(
-            "Patrimoine : médiane publiée par l'Insee pour les ménages dont la personne de "
-            "référence relève de cette catégorie (HVP 2023-2024), pas pour les individus."
-        )
-    elif statut_pa == CALCULE:
-        parts.append(
-            "Patrimoine CALCULÉ, non publié par l'Insee : médiane des ménages de retraités "
-            "estimée par interpolation linéaire à partir de leur répartition dans les déciles de "
-            f"patrimoine de HVP 2023-2024 ({row['patrimoine_base']})."
-        )
-    else:
-        parts.append(
-            "Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie "
-            f"« {row['patrimoine_base']} » (ménages selon la personne de référence, HVP "
-            "2023-2024), appliquée à toutes les PCS de cette catégorie."
-        )
-    return " ".join(parts)
-
-
-def combine(niveau_vie: pd.DataFrame, patrimoine: pd.DataFrame) -> pd.DataFrame:
-    """Assemble les deux tables en unités du schéma (30 lignes, ordre de la nomenclature)."""
-    df = niveau_vie.merge(patrimoine, on="code", how="outer", validate="one_to_one")
-    df = df.set_index("code").loc[list(PCS_CODES)].reset_index()
-    df["group"] = df["code"].map(group_of)
-    df["niveau_vie_mensuel_eur"] = df["niveau_vie_annuel_median_eur"] / 12.0
-    df["niveau_vie_moyen_mensuel_eur"] = df["niveau_vie_annuel_moyen_eur"] / 12.0
-    df["patrimoine_keur"] = df["patrimoine_median_eur"] / 1000.0
-    df["patrimoine_moyen_keur"] = df["patrimoine_moyen_eur"] / 1000.0
-    df["notes"] = [item_note(row) for row in df.to_dict("records")]
-    return df
+def _erfs_member(zip_path: Path, table: str) -> bytes:
+    """Contenu du tableau ``table`` (ex. ``ti02d``) du zip ERFS, sans tenir compte de la casse."""
+    with zipfile.ZipFile(zip_path) as archive:
+        for name in archive.namelist():
+            if name.lower().endswith(f"_{table}.xlsx"):
+                return archive.read(name)
+    raise FileNotFoundError(f"{table} absent de {zip_path}")
 
 
 def _paths() -> dict[str, Path]:
     return {
-        "erfs": cache_dir("insee_erfs2022") / ERFS_ZIP,
-        "montants": cache_dir("insee_hvp2023_2024") / HVP_MONTANTS,
-        "profil": cache_dir("insee_hvp2023_2024") / HVP_PROFIL,
+        "erfs": cache_dir("insee_erfs2021") / ERFS_ZIP,
+        "montants2024": cache_dir("insee_hvp2023_2024") / HVP2024_MONTANTS,
+        "profil2024": cache_dir("insee_hvp2023_2024") / HVP2024_PROFIL,
+        "montants2021": cache_dir("insee_hvp2020_2021") / HVP2021_MONTANTS,
     }
 
 
 def fetch(force: bool = False) -> None:
-    """Télécharge les tableaux ERFS et HVP dans le cache (quelques centaines de Ko)."""
+    """Télécharge les tableaux dans le cache (quelques centaines de Ko)."""
+    portraits.fetch(PORTRAIT_FILE, force=force)
     paths = _paths()
     download(ERFS_ZIP_URL, paths["erfs"], force=force)
-    download(HVP_MONTANTS_URL, paths["montants"], force=force)
-    download(HVP_PROFIL_URL, paths["profil"], force=force)
+    download(HVP2024_MONTANTS_URL, paths["montants2024"], force=force)
+    download(HVP2024_PROFIL_URL, paths["profil2024"], force=force)
+    download(HVP2021_MONTANTS_URL, paths["montants2021"], force=force)
+
+
+def retired_wealth() -> RetiredWealth:
+    """Patrimoine des retraités, à partir des fichiers en cache."""
+    paths = _paths()
+    return retired_wealth_from(
+        parse_hvp_profil(xlsx_rows(paths["profil2024"], "PCS")),
+        parse_hvp_seuils(xlsx_rows(paths["montants2024"], "AGE")),
+        parse_hvp2021_medians(xlsx_rows(paths["montants2021"], "AGE")),
+    )
+
+
+def household_shares() -> dict[str, float]:
+    """Part (%) de chaque catégorie dans l'ensemble des ménages, HVP 2023-2024."""
+    return parse_hvp_profil(xlsx_rows(_paths()["profil2024"], "PCS"))["ensemble"]
 
 
 def load() -> pd.DataFrame:
-    """DataFrame par PCS : médianes retenues, moyennes publiées, statuts et notes."""
+    """DataFrame par PCS : niveau de vie, patrimoine, statuts et notes."""
     fetch()
-    paths = _paths()
-    detail = parse_erfs_rows(_sheet_rows(_erfs_member(paths["erfs"], "ti02d"), max_col=5))
-    aggregate = parse_erfs_rows(_sheet_rows(_erfs_member(paths["erfs"], "ti02c"), max_col=5))
-    montants = parse_hvp_montants(_sheet_rows(paths["montants"], "PCS"))
-    seuils = parse_hvp_seuils(_sheet_rows(paths["montants"], "AGE"))
-    profil = parse_hvp_profil(_sheet_rows(paths["profil"], "PCS"))
-    return combine(niveau_vie_table(detail, aggregate), patrimoine_table(montants, profil, seuils))
+    values = portrait_values(portraits.read_book(portraits.path_of(PORTRAIT_FILE)))
+    erfs = parse_erfs_rows(xlsx_rows(_erfs_member(_paths()["erfs"], "ti02d"), max_col=5))
+    return combine(values, retired_niveau_vie(erfs), retired_wealth())
 
 
 def sources() -> list[dict[str, str]]:
@@ -444,33 +348,62 @@ def sources() -> list[dict[str, str]]:
     paths = _paths()
     return [
         source_ref(
+            SOURCE_ID_PORTRAIT,
+            "Situation financière des ménages en 2020-2021, Portraits des six groupes "
+            "socioprofessionnels, feuilles Ensemble",
+            portraits.url_of(PORTRAIT_FILE),
+            portraits.accessed(PORTRAIT_FILE),
+            publisher=portraits.PUBLISHER,
+            license=portraits.REUSE,
+            notes=(
+                "Source indiquée par le fichier : Insee, enquête Revenus fiscaux et sociaux 2021 "
+                "et Patrimoine histoire de vie, 2020-2021. Médianes pour les 29 PCS actives. "
+                "Champ : France hors Mayotte, personnes vivant en logement ordinaire, actives "
+                "ayant déjà travaillé (ménage au revenu positif en 2021 et dont la personne de "
+                f"référence n'est pas étudiante pour le niveau de vie). Page : "
+                f"{portraits.PORTRAITS_PAGE}."
+            ),
+        ),
+        source_ref(
             SOURCE_ID_ERFS,
-            "Niveau de vie et revenu annuel des individus en 2022, ERFS, Insee Résultats, "
-            "tableaux TI02D et TI02C",
+            "Niveau de vie et revenu annuel des individus en 2021, ERFS, Insee Résultats, "
+            "tableau TI02D",
             ERFS_PAGE,
             file_meta(paths["erfs"]).get("accessed"),
             publisher="Insee-DGFiP-Cnaf-Cnav-CCMSA",
             license=LICENCE_INSEE,
             notes=(
-                f"Fichier : {ERFS_ZIP_URL}. Médianes annuelles divisées par 12. Champ : individus "
-                "de 15 ans ou plus, ménages ordinaires de France métropolitaine dont la personne "
-                "de référence n'est pas étudiante, selon leur propre CS."
+                f"Fichier : {ERFS_ZIP_URL}. Ligne Retraités, médiane annuelle divisée par 12. "
+                "Données 2021 provisoires selon l'Insee. Champ : individus de 15 ans ou plus, "
+                "ménages ordinaires de France métropolitaine."
             ),
         ),
         source_ref(
-            SOURCE_ID_HVP,
+            SOURCE_ID_HVP2024,
             "Patrimoine et endettement des ménages en 2024, enquête Histoire de vie et "
             "Patrimoine 2023-2024, Insee Résultats",
-            HVP_PAGE,
-            file_meta(paths["montants"]).get("accessed"),
+            HVP2024_PAGE,
+            file_meta(paths["montants2024"]).get("accessed"),
             publisher="Insee",
             license=LICENCE_INSEE,
             notes=(
-                f"Fichiers : {HVP_MONTANTS_URL} (feuilles « PCS » et « AGE ») et {HVP_PROFIL_URL} "
-                "(feuille « PCS »). Patrimoine brut médian, début 2024. Champ : ménages en "
-                "logement ordinaire, France hors Mayotte, selon la CS de la personne de référence "
-                "(12 catégories, jamais les 29 postes) : la plupart des valeurs par PCS sont donc "
-                "imputées, voir notes."
+                f"Fichiers : {HVP2024_MONTANTS_URL} (feuille AGE) et {HVP2024_PROFIL_URL} (feuille "
+                "PCS). Sert au calcul du patrimoine des retraités et aux poids de ménages de la "
+                "composition des retraités."
+            ),
+        ),
+        source_ref(
+            SOURCE_ID_HVP2021,
+            "Patrimoine et endettement des ménages en 2021, enquête Histoire de vie et "
+            "Patrimoine 2020-2021, Insee Résultats",
+            HVP2021_PAGE,
+            file_meta(paths["montants2021"]).get("accessed"),
+            publisher="Insee",
+            license=LICENCE_INSEE,
+            notes=(
+                f"Fichier : {HVP2021_MONTANTS_URL} (feuille AGE, médiane de l'ensemble des "
+                "ménages), et tableaux de composition du patrimoine et de taux de détention par "
+                "catégorie de la personne de référence."
             ),
         ),
     ]

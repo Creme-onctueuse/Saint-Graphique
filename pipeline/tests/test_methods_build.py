@@ -20,6 +20,7 @@ from pipeline.model import (
     load_elections,
     load_methods_config,
     load_pcs,
+    load_pcs_config,
     read_json,
     validate_instance,
 )
@@ -92,8 +93,9 @@ def test_methods_build_documents_follow_the_schema(built: Path, method: str, tar
     # Somme des poids : 100 % à l'arrondi de publication près (1e-6 par PCS).
     assert sum(p["weight"] for p in document["pcs"]) == pytest.approx(100, abs=1e-4)
     assert sum(g["weight"] for g in document["groups"]) == pytest.approx(100, abs=1e-4)
+    # Les libellés viennent de config/pcs.yaml, pas des fichiers de données.
     labels = {p["code"]: p["label"] for p in document["pcs"]}
-    assert labels["23"] == "Chefs d'entreprise de 10 salariés ou plus"
+    assert labels == {str(i["code"]): i["label"] for i in load_pcs_config()["items"]}
     if target == "population":
         assert document["candidates"] == []
     else:

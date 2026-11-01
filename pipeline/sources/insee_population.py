@@ -1,9 +1,10 @@
 """Effectifs par PCS de niveau 2, France entière (hors Mayotte) — Insee, recensement 2022.
 
 Source : fichier détail du recensement 2022 « Individus localisés à la région » (voir
-``_rp2022_indreg``). Les tableaux détaillés communaux de 2022 ne donnent la catégorie
-socioprofessionnelle qu'en 8 groupes (POP6, ``STAT_GSEC``) ; seul le fichier détail porte la
-CS en 29 postes (``STAT_CS``) et permet aussi le croisement avec le diplôme.
+``_rp2022_indreg``). Au lieu de résidence, le tableau détaillé POP6 de 2022 ne donne la catégorie
+socioprofessionnelle qu'en 8 groupes (``STAT_GSEC``). Le tableau EMP3 donne bien les 29 postes,
+mais pour les emplois au lieu de travail. Le fichier détail porte la CS en 29 postes
+(``STAT_CS``) au lieu de résidence, chômeurs compris, et permet le croisement avec le diplôme.
 
 Champ des 30 points :
 

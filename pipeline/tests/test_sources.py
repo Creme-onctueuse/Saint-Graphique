@@ -15,7 +15,9 @@ import pytest
 from pipeline.model import load_elections, load_pcs, validate_instance
 from pipeline.sources import (
     _cache,
+    _nomenclature_pcs,
     _rp2022_indreg,
+    insee_composition_patrimoine,
     insee_diplomes,
     insee_population,
     insee_revenus_patrimoine,
@@ -30,6 +32,7 @@ from pipeline.sources._common import (
     load_elections_config,
     load_pcs_config,
 )
+from pipeline.sources._tables import normalize_label, number, table_by_label
 
 DATA = ROOT / "data"
 ELECTION_IDS = [e["id"] for e in load_elections_config()]
@@ -316,51 +319,82 @@ def test_diplomas_sum_to_100_without_students() -> None:
 # --- Revenus et patrimoine ------------------------------------------------------------------
 
 
-def _erfs_detail() -> dict[str, tuple[float | None, float | None]]:
-    rows: list[tuple[object, ...]] = [
-        ("TI02D - titre", None),
-        ("dont\xa0: Agriculteurs exploitants et assimilés, artisans", 2000, 4.5, 31000.0, 24000.0),
-    ]
-    for index, (code, label) in enumerate(insee_revenus_patrimoine.ERFS_LABELS.items()):
-        if code == "44":
-            rows.append(("   Ministres du culte et religieux consacrés", "ns", "ns", "ns", "ns"))
-        else:
-            rows.append((f"  {label} (1) ", 100, 1.0, 30000.0 + index, 25000.0 + index))
-    return insee_revenus_patrimoine.parse_erfs_rows(rows)
-
-
-def _niveau_vie() -> pd.DataFrame:
-    aggregate = insee_revenus_patrimoine.parse_erfs_rows(
-        [("Professions intermédiaires", 6980, 13.3, 30510.0, 28370.0)]
-    )
-    return insee_revenus_patrimoine.niveau_vie_table(_erfs_detail(), aggregate)
+def _portrait_sheets() -> dict[str, list[list[object]]]:
+    """Feuilles au format de DEC_POR_8 : titre, en-tête, ensembles, PCS, lecture, champ, source."""
+    sheets: dict[str, list[list[object]]] = {}
+    index = 0
+    for sheet, labels in _nomenclature_pcs.SHEETS.items():
+        rows: list[list[object]] = [
+            ["Situation financière"],
+            ["bouton radio", "Ensemble"],
+            ["", "Niveau de vie médian (euros)", "Patrimoine brut médian"],
+            ["Ensemble des personnes ayant déjà travaillé", 2110.75, 235.666, 10.8, 8.2],
+            ["Ensemble du groupe", 2000.0, 300.0, 10.0, 8.0],
+        ]
+        for prefix in labels:
+            index += 1
+            label = prefix.capitalize() + " (libellé)"
+            rows.append([label, 1500.0 + index, 50.0 + index, 1.0, 2.0])
+        rows.append(["Lecture : en 2021, ...", "", "", "", ""])
+        sheets[sheet] = rows
+    return sheets
 
 
 def test_normalize_label_handles_accents_and_notes() -> None:
-    label = "dont\xa0: Ingénieurs d’entreprise  (2) "
-    assert insee_revenus_patrimoine.normalize_label(label) == "ingenieurs d'entreprise"
+    assert normalize_label("dont\xa0: Ingénieurs d’entreprise  (2) ") == "ingenieurs d'entreprise"
 
 
-def test_ns_is_kept_as_missing() -> None:
-    detail = insee_revenus_patrimoine.parse_erfs_rows([("Clergé", "ns", "ns", "ns", "ns")])
-    assert detail == {"clerge": (None, None)}
+def test_number_reads_text_and_refuses_not_significant() -> None:
+    assert number("12,5") == 12.5
+    assert number(3) == 3.0
+    assert number("ns") is None
+    assert number("") is None
 
 
-def test_niveau_vie_imputations_are_flagged() -> None:
-    table = _niveau_vie().set_index("code")
-    imputed = table.index[table["niveau_vie_statut"] == insee_revenus_patrimoine.IMPUTE]
-    assert sorted(imputed) == ["10", "21", "22", "23", "44"]
-    assert table.loc["23", "niveau_vie_annuel_median_eur"] == 24000.0
-    assert table.loc["44", "niveau_vie_annuel_median_eur"] == 28370.0  # groupe, car « ns »
-    assert (table["niveau_vie_statut"] == insee_revenus_patrimoine.PUBLIE).sum() == 25
+def test_table_by_label_reads_header_and_keeps_ns_as_missing() -> None:
+    table = table_by_label(
+        [
+            ["Titre du tableau", None],
+            [None, "Colonne A", "Colonne B"],
+            ["Ligne une", 1.5, "ns"],
+            ["Champ : sans valeur", None, None],
+        ]
+    )
+    assert table == {"ligne une": {"colonne a": 1.5, "colonne b": None}}
 
 
-def test_missing_row_in_a_table_raises() -> None:
-    detail = _erfs_detail()
-    del detail["techniciens"]
-    aggregate = {"professions intermediaires": (1.0, 1.0)}
-    with pytest.raises(ValueError, match="techniciens"):
-        insee_revenus_patrimoine.niveau_vie_table(detail, aggregate)
+def test_portrait_values_cover_the_29_active_pcs() -> None:
+    values = insee_revenus_patrimoine.portrait_values(_portrait_sheets())
+    assert sorted(values) == sorted(ACTIVE_PCS_CODES)
+    assert values["10"] == (1501.0, 51.0)
+    assert values["69"] == (1529.0, 79.0)
+
+
+def test_portrait_values_reject_missing_pcs_and_unknown_row() -> None:
+    sheets = _portrait_sheets()
+    sheets["PInterm_E"] = [r for r in sheets["PInterm_E"] if not str(r[0]).startswith("Religieux")]
+    with pytest.raises(ValueError, match="44"):
+        insee_revenus_patrimoine.portrait_values(sheets)
+    sheets = _portrait_sheets()
+    sheets["Cadres_E"].append(["Ligne inconnue", 1.0, 2.0, 3.0, 4.0])
+    with pytest.raises(ValueError, match="non reconnue"):
+        insee_revenus_patrimoine.portrait_values(sheets)
+
+
+def test_values_by_pcs_allows_a_missing_pcs_for_the_caller_to_handle() -> None:
+    sheets = _portrait_sheets()
+    sheets["PInterm_E"] = [r for r in sheets["PInterm_E"] if not str(r[0]).startswith("Religieux")]
+    found = _nomenclature_pcs.values_by_pcs(sheets, [1])
+    assert "44" not in found
+    assert len(found) == 28
+
+
+def test_retired_niveau_vie_is_the_published_median_over_12() -> None:
+    table = insee_revenus_patrimoine.parse_erfs_rows(
+        [("Ministres du culte", "ns", "ns", "ns", "ns"), ("Retraités", 14939, 28.8, 26090, 23160)]
+    )
+    assert table["ministres du culte"] == (None, None)
+    assert insee_revenus_patrimoine.retired_niveau_vie(table) == 1930.0
 
 
 def test_median_from_bands_of_the_whole_population_is_d5() -> None:
@@ -384,25 +418,8 @@ def test_median_in_extreme_band_has_no_bound() -> None:
         insee_revenus_patrimoine.median_from_bands([90.0] + [1.0] * 9, seuils)
 
 
-def _hvp() -> pd.DataFrame:
-    labels = [
-        "Agriculteurs",
-        "Artisans, commerçants et chefs d'entreprise",
-        "Professions libérales",
-        "Cadres (autre que professions libérales)",
-        "Professions intermédiaires",
-        "Employés",
-        "Ouvriers",
-        "Retraités anciens agriculteurs, artisans, commerçants, chefs d'entreprise",
-        "Retraités anciens cadres ou professions libérales",
-        "Retraités anciennes professions intermédiaires ",
-        "Retraités anciens employés et ouvriers ",
-    ]
-    montants = insee_revenus_patrimoine.parse_hvp_montants(
-        [("Montants", None), (None, "moyen", "D1", "médian", "D9")]
-        + [(lab, 1000.0 * (i + 2), 1, 1000.0 * (i + 1), 9) for i, lab in enumerate(labels)]
-    )
-    retired = labels[7:]
+def _retired_wealth() -> insee_revenus_patrimoine.RetiredWealth:
+    retired = list(insee_revenus_patrimoine.HVP_RETRAITES)
     bands = [
         "Inférieur au 1ᵉʳ décile ",
         *[f"Entre le {i}ᵉ et le {i + 1}ᵉ décile" for i in range(1, 9)],
@@ -411,38 +428,145 @@ def _hvp() -> pd.DataFrame:
     ]
     rows: list[tuple[object, ...]] = [(None, *retired)]
     rows += [(band, 10.0, 10.0, 10.0, 10.0) for band in bands]
-    rows.append(("Ensemble", 1.0, 1.0, 1.0, 1.0))
+    rows.append(("Ensemble", 1.0, 2.0, 3.0, 4.0))
     profil = insee_revenus_patrimoine.parse_hvp_profil(rows)
     seuils = insee_revenus_patrimoine.parse_hvp_seuils(
-        [(None, "moyen"), ("Ensemble", 999.0, 1, 2, 3, 4, 5, 6, 7, 8, 9), ("Ensemble", 0, 0)]
+        [
+            (None, "moyen"),
+            ("Ensemble", 999.0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000),
+            ("Ensemble", 0, 0),
+        ]
     )
-    return insee_revenus_patrimoine.patrimoine_table(montants, profil, seuils)
+    medians = insee_revenus_patrimoine.parse_hvp2021_medians(
+        [
+            ("Titre",),
+            (None, "moyen", "médian"),
+            ("De 60 à 69 ans", 1.0, 30000.0),
+            ("70 ans ou plus", 1.0, 20000.0),
+            ("Total", 1.0, 25000.0),
+        ]
+    )
+    return insee_revenus_patrimoine.retired_wealth_from(profil, seuils, medians)
 
 
-def test_patrimoine_is_imputed_except_published_categories() -> None:
-    table = _hvp().set_index("code")
+def test_retired_wealth_is_rescaled_to_the_2021_wave() -> None:
+    retired = _retired_wealth()
+    # Répartition uniforme : médiane des retraités = D5 de 2024 = 50 k€.
+    assert retired.median_2024_keur == pytest.approx(50.0)
+    # Rapport des médianes d'ensemble : 25 / 50.
+    assert retired.value_keur == pytest.approx(25.0)
+    assert retired.low_keur == pytest.approx(20.0)
+    assert retired.high_keur == pytest.approx(25.0)
+    assert retired.age_60_69_2021_keur == 30.0
+
+
+def test_combine_flags_published_and_calculated_values() -> None:
+    values = insee_revenus_patrimoine.portrait_values(_portrait_sheets())
+    table = insee_revenus_patrimoine.combine(values, 1930.0, _retired_wealth()).set_index("code")
     assert sorted(table.index) == sorted(PCS_CODES)
-    published = table.index[table["patrimoine_statut"] == insee_revenus_patrimoine.PUBLIE_MENAGE]
-    assert sorted(published) == ["10", "31"]
-    assert table.loc["7", "patrimoine_statut"] == insee_revenus_patrimoine.CALCULE
-    assert (table["patrimoine_statut"] == insee_revenus_patrimoine.IMPUTE).sum() == 27
-    # La médiane de la catégorie est appliquée telle quelle à toutes ses PCS.
-    assert table.loc["33", "patrimoine_median_eur"] == table.loc["38", "patrimoine_median_eur"]
-    # Répartition uniforme dans les tranches : la médiane des retraités est D5.
-    assert table.loc["7", "patrimoine_median_eur"] == pytest.approx(5.0)
-    # Moyenne exacte des 4 catégories, à parts égales.
-    assert table.loc["7", "patrimoine_moyen_eur"] == pytest.approx(1000.0 * (9 + 10 + 11 + 12) / 4)
-
-
-def test_notes_never_present_imputed_values_as_insee_data() -> None:
-    table = insee_revenus_patrimoine.combine(_niveau_vie(), _hvp()).set_index("code")
-    assert "Niveau de vie IMPUTÉ, pas une donnée Insee" in table.loc["21", "notes"]
-    assert "Niveau de vie IMPUTÉ, pas une donnée Insee" in table.loc["44", "notes"]
-    assert "Patrimoine IMPUTÉ, pas une donnée Insee" in table.loc["37", "notes"]
+    assert (table["niveau_vie_status"] == "published").all()
+    assert (table.drop(index="7")["patrimoine_status"] == "published").all()
+    assert table.loc["7", "patrimoine_status"] == "calculated"
+    assert table.loc["7", "patrimoine_keur"] == pytest.approx(25.0)
+    assert table.loc["7", "niveau_vie_mensuel_eur"] == 1930.0
     assert "Patrimoine CALCULÉ, non publié" in table.loc["7", "notes"]
-    assert "Niveau de vie : médiane publiée" in table.loc["37", "notes"]
-    assert "pas pour les individus" in table.loc["10", "notes"]
-    assert table.loc["10", "niveau_vie_mensuel_eur"] == pytest.approx(24000.0 / 12)
+    assert "médianes publiées" in table.loc["37", "notes"]
+
+
+# --- Composition du patrimoine --------------------------------------------------------------
+
+
+def _composition_tables() -> tuple[dict, dict, dict, dict[str, float]]:
+    categories = list(insee_composition_patrimoine.CATEGORIES)
+    retired = list(insee_composition_patrimoine.RETIRED_CATEGORIES)
+    mean = insee_composition_patrimoine.MEAN_COLUMN
+    composition_cols = {
+        normalize_label(c): v
+        for c, v in zip(
+            insee_composition_patrimoine.COMPOSITION_COLUMNS.values(),
+            (60.0, 20.0, 15.0, 5.0),
+            strict=True,
+        )
+    }
+    composition = {label: {mean: 100.0, **composition_cols} for label in categories}
+    composition[retired[0]] = {mean: 100.0, **{k: 50.0 for k in composition_cols}}
+    composition[retired[1]] = {mean: 300.0, **{k: 10.0 for k in composition_cols}}
+    composition[retired[2]] = {mean: 100.0, **{k: 30.0 for k in composition_cols}}
+    detail_cols = {
+        normalize_label(c): 3.0 for c in insee_composition_patrimoine.DETAIL_COLUMNS.values()
+    }
+    detail = {label: dict(detail_cols) for label in categories + retired}
+    detention_cols = {
+        normalize_label(c): 40.0 for c in insee_composition_patrimoine.DETENTION_COLUMNS.values()
+    }
+    detention = {label: dict(detention_cols) for label in categories}
+    detention[retired[0]] = {k: 10.0 for k in detention_cols}
+    detention[retired[1]] = {k: 20.0 for k in detention_cols}
+    detention[retired[2]] = {k: 40.0 for k in detention_cols}
+    households = {
+        "retraites anciens agriculteurs, artisans, commercants, chefs d'entreprise": 1.0,
+        "retraites anciens cadres ou professions liberales": 1.0,
+        "retraites anciennes professions intermediaires": 1.0,
+        "retraites anciens employes et ouvriers": 1.0,
+    }
+    return composition, detail, detention, households
+
+
+def test_composition_status_reflects_the_published_level() -> None:
+    composition, detail, detention, households = _composition_tables()
+    result = insee_composition_patrimoine.build(
+        composition, detail, detention, households, {"37": 71.8}
+    )
+    assert sorted(result) == sorted(PCS_CODES)
+    assert result["10"]["status"] == "published"
+    assert result["31"]["status"] == "published"
+    assert result["37"]["status"] == "imputed"
+    assert result["7"]["status"] == "calculated"
+    assert "IMPUTÉE, pas une donnée Insee" in result["37"]["note"]
+    assert "CALCULÉE, non publiée" in result["7"]["note"]
+    assert "pas pour les individus" in result["10"]["note"]
+    assert result["37"]["composition"]["professionnel_pct"] == 15.0
+    assert result["37"]["composition"]["proprietaire_pct"] == 71.8
+    assert "proprietaire_pct" in result["37"]["note"]
+    assert "proprietaire_pct" not in result["33"]["composition"]
+    assert "proprietaire_pct" not in result["7"]["composition"]
+
+
+def test_retired_composition_weights_masses_and_households_differently() -> None:
+    composition, detail, detention, households = _composition_tables()
+    shares = insee_composition_patrimoine.retired_composition(
+        composition, detail, detention, households
+    )
+    # Masses : ménages × patrimoine moyen = 1 × 100, 1 × 300, 2 × 100.
+    assert shares["professionnel_pct"] == pytest.approx((100 * 50 + 300 * 10 + 200 * 30) / 600)
+    # Taux de détention : pondérés par les ménages seuls (1, 1, 2).
+    assert shares["detention_professionnel_pct"] == pytest.approx((10 + 20 + 2 * 40) / 4)
+
+
+def test_not_significant_values_are_left_out_not_invented() -> None:
+    composition, detail, detention, households = _composition_tables()
+    columns = insee_composition_patrimoine.DETENTION_COLUMNS
+    key = normalize_label(columns["detention_entreprise_pct"])
+    detention["agriculteurs"][key] = None
+    result = insee_composition_patrimoine.build(composition, detail, detention, households, {})
+    assert "detention_entreprise_pct" not in result["10"]["composition"]
+    assert "detention_entreprise_pct" in result["21"]["composition"]
+
+
+def test_owners_are_read_from_the_named_column() -> None:
+    sheets = {
+        name: [
+            ["", "Immigré", "Propriétaire", "Locataire"],
+            ["Ensemble des personnes ayant déjà travaillé", 12.1, 60.8, 23.7],
+            [prefix, 1.0, 70.0 + index, 2.0],
+        ]
+        for index, (name, labels) in enumerate(_nomenclature_pcs.SHEETS.items())
+        for prefix in list(labels)[:1]
+    }
+    owners = insee_composition_patrimoine.owners_from(sheets)
+    assert owners["10"] == 70.0
+    assert owners["21"] == 71.0
+    assert owners["62"] == 75.0
 
 
 # --- Construction ---------------------------------------------------------------------------
@@ -463,17 +587,25 @@ def test_build_pcs_follows_schema(monkeypatch: pytest.MonkeyPatch) -> None:
     build = _load_build_module()
     fake_source = {"id": "x", "title": "x", "url": "https://x.org", "accessed": "2026-10-31"}
     monkeypatch.setattr(insee_population, "sources", lambda: [fake_source])
-    monkeypatch.setattr(insee_revenus_patrimoine, "sources", lambda: [fake_source, fake_source])
+    monkeypatch.setattr(insee_revenus_patrimoine, "sources", lambda: [fake_source])
+    monkeypatch.setattr(insee_composition_patrimoine, "sources", lambda: [fake_source])
     agg = _fake_aggregate()
+    values = insee_revenus_patrimoine.portrait_values(_portrait_sheets())
+    composition = insee_composition_patrimoine.build(*_composition_tables(), {"37": 71.8})
     document = build.build_pcs(
         insee_population.population_from_aggregate(agg),
         insee_diplomes.diplomas_from_aggregate(agg),
-        insee_revenus_patrimoine.combine(_niveau_vie(), _hvp()),
+        insee_revenus_patrimoine.combine(values, 1930.0, _retired_wealth()),
+        composition,
     )
     validate_instance(document, "pcs.schema.json", "fixture")
     assert [i["code"] for i in document["items"]] == [
         str(i["code"]) for i in load_pcs_config()["items"]
     ]
+    item = next(i for i in document["items"] if i["code"] == "37")
+    assert item["patrimoine_composition"]["proprietaire_pct"] == 71.8
+    assert item["patrimoine_composition_status"] == "imputed"
+    assert build.ties_on_ratio(document["items"]) == []
 
 
 # --- Fichiers produits (versionnés dans data/, sans cache) ------------------------------------
@@ -511,27 +643,54 @@ def test_pcs_file_values_are_plausible() -> None:
     assert items["7"]["population"] > 15_000_000
 
 
-def test_pcs_file_marks_every_imputation_in_notes() -> None:
+def test_pcs_file_statuses_and_notes_agree() -> None:
+    """La page web lit les statuts sans analyser ``notes`` : ils doivent dire la même chose."""
     document = _pcs()
     ids = {s["id"] for s in document["sources"]}
     for item in document["items"]:
         code, notes = item["code"], item["notes"]
         assert set(item["source_refs"]) <= ids, code
-        if code in ("10", "21", "22", "23", "44"):
-            assert "Niveau de vie IMPUTÉ, pas une donnée Insee" in notes, code
-        else:
-            assert "Niveau de vie : médiane publiée" in notes, code
+        assert item["niveau_vie_status"] == "published", code
         if code == "7":
+            assert item["patrimoine_status"] == "calculated"
             assert "Patrimoine CALCULÉ, non publié" in notes
-        elif code in ("10", "31"):
-            assert "Patrimoine : médiane publiée" in notes, code
+            assert item["patrimoine_composition_status"] == "calculated"
+            assert "Composition du patrimoine CALCULÉE" in notes
         else:
-            assert "Patrimoine IMPUTÉ, pas une donnée Insee" in notes, code
+            assert item["patrimoine_status"] == "published", code
+            assert "médianes publiées" in notes, code
+            if code in ("10", "31"):
+                assert item["patrimoine_composition_status"] == "published", code
+            else:
+                assert item["patrimoine_composition_status"] == "imputed", code
+                assert "Composition du patrimoine IMPUTÉE, pas une donnée Insee" in notes, code
 
 
-def test_retired_wealth_lies_between_the_published_deciles() -> None:
+def test_pcs_file_has_no_tie_on_the_ratio() -> None:
+    assert _load_build_module().ties_on_ratio(_pcs()["items"]) == []
+
+
+def test_pcs_file_composition_shares_sum_to_about_100() -> None:
+    for item in _pcs()["items"]:
+        shares = item["patrimoine_composition"]
+        total = sum(shares[k] for k in insee_composition_patrimoine.COMPOSITION_COLUMNS)
+        assert total == pytest.approx(100.0, abs=1.0), item["code"]
+        assert shares["professionnel_entreprises_pct"] <= shares["professionnel_pct"] + 0.1
+
+
+def test_pcs_file_owner_share_is_only_where_published() -> None:
+    without = [
+        i["code"] for i in _pcs()["items"] if "proprietaire_pct" not in i["patrimoine_composition"]
+    ]
+    assert sorted(without) == ["44", "7"]
+
+
+def test_retired_values_follow_the_documented_calculation() -> None:
     item = next(i for i in _pcs()["items"] if i["code"] == "7")
-    assert 205.1 <= item["patrimoine_keur"] <= 283.2
+    assert item["niveau_vie_mensuel_eur"] == 1930.0
+    # 263,5 k€ début 2024, ramenés à 2021 : 177,2 / 205,1 ; bornes publiées 205,1 et 283,2.
+    assert item["patrimoine_keur"] == pytest.approx(263.5 * 177.2 / 205.1, abs=0.1)
+    assert 205.1 * 177.2 / 205.1 <= item["patrimoine_keur"] <= 283.2 * 177.2 / 205.1
     assert "205,1" in item["notes"] and "283,2" in item["notes"]
 
 
@@ -557,6 +716,15 @@ def test_election_compositions_sum_to_100(election_id: str) -> None:
         assert sum(shares.values()) == pytest.approx(100.0, abs=0.05), candidate_id
 
 
+@pytest.mark.parametrize("election_id", ELECTION_IDS)
+def test_ifop_licence_field_describes_the_use(election_id: str) -> None:
+    licence = _elections()[election_id]["sources"][0]["license"]
+    assert "Aucune publication totale ou partielle ne peut être faite" in licence
+    assert "Aucun accord n'a été demandé ni obtenu" in licence
+    assert "usage personnel et non commercial" in licence
+    assert "à trancher" not in licence
+
+
 def test_election_figures_match_the_transcribed_report() -> None:
     """Valeur vérifiée sur le PDF : 14,7 %, à ne pas confondre avec une coquille circulant."""
     table = sondages.load_table("2017_legislatives_t1")
@@ -567,7 +735,14 @@ def test_election_figures_match_the_transcribed_report() -> None:
 def test_sources_document_is_complete() -> None:
     text = (DATA / "SOURCES.md").read_text(encoding="utf-8")
     assert "## Données manquantes / TODO" in text
-    assert "Aucune publication totale ou partielle" in text
+    assert "Aucune publication totale ou partielle ne peut être faite sans l'accord exprès" in text
+    assert "## Données Ifop : usage personnel et non commercial" in text
+    assert "Aucun accord n'a été demandé ni obtenu" in text
+    assert "n'est pas un avis juridique" in text.replace("\n", " ")
+    assert "à trancher" not in text
+    assert "subordonnée au respect de l'intégrité" in text
+    assert "https://www.nomenclature-pcs.fr/uploads/tableaux/groupes/DEC_POR_8.xls" in text
+    assert "pas une validation indépendante" in text.replace("\n", " ")
     for heading in ("Jeu de données", "Source", "URL", "Accès", "Licence", "Limites"):
         assert heading in text
     documents = [_pcs(), *_elections().values()]
@@ -579,7 +754,7 @@ def test_sources_document_is_complete() -> None:
 def test_real_files_load_in_the_methods_model() -> None:
     pcs = load_pcs()
     assert len(pcs.items) == 30
-    assert pcs.nomenclature == "PCS2020-N2"
+    assert pcs.nomenclature == load_pcs_config()["nomenclature"] == "PCS2020-N2"
     assert {e.id for e in load_elections()} <= set(ELECTION_IDS)
 
 

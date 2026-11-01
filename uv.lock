@@ -745,6 +745,7 @@ dependencies = [
     { name = "pyyaml" },
     { name = "requests" },
     { name = "scikit-learn" },
+    { name = "xlrd" },
 ]
 
 [package.optional-dependencies]
@@ -778,6 +779,7 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.6" },
     { name = "scikit-learn", specifier = ">=1.5" },
     { name = "webvtt-py", marker = "extra == 'research'", specifier = ">=0.5" },
+    { name = "xlrd", specifier = ">=2.0.2" },
     { name = "yt-dlp", marker = "extra == 'research'", specifier = ">=2025.1.1" },
 ]
 provides-extras = ["research", "dev"]
@@ -924,6 +926,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/59/61/73deb5b00d5e12033572c6a3e6011bc511b0aac9afa7d5d78b5a47788655/webvtt_py-0.6.0.tar.gz", hash = "sha256:2f4ba359ab7e6bac98aa086fa7fc0ba1320ca7495f7d67f565baceac37f40aff", size = 102712, upload-time = "2026-10-25T18:20:01.764Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/85/01/a7bf5ade06c033507d73902ec0a96d89992bf87991f14efb3d570399152d/webvtt_py-0.6.0-py3-none-any.whl", hash = "sha256:9f158d5045c7302293bd773ad1e6a9d3c109350a91e07d9fa3b34f54fb0ece00", size = 40377, upload-time = "2026-10-25T18:20:00.422Z" },
+]
+
+[[package]]
+name = "xlrd"
+version = "2.0.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/07/5a/377161c2d3538d1990d7af382c79f3b2372e880b65de21b01b1a2b78691e/xlrd-2.0.2.tar.gz", hash = "sha256:08b5e25de58f21ce71dc7db3b3b8106c1fa776f3024c54e45b45b374e89234c9", size = 100167, upload-time = "2025-06-14T08:46:39.039Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1a/62/c8d562e7766786ba6587d09c5a8ba9f718ed3fa8af7f4553e8f91c36f302/xlrd-2.0.2-py2.py3-none-any.whl", hash = "sha256:ea762c3d29f4cca48d82df517b6d89fbce4db3107f9d78713e48cd321d5c9aa9", size = 96555, upload-time = "2025-06-14T08:46:37.766Z" },
 ]
 
 [[package]]

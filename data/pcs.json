@@ -12,13 +12,22 @@
       "notes": "Zip national https://www.insee.fr/fr/statistiques/fichier/8590183/RP2022_indreg.zip (France hors Mayotte, exploitation complémentaire, pondération IPONDI). Dictionnaire des variables : https://www.insee.fr/fr/statistiques/fichier/8590183/contenu_RP2022_indreg.pdf"
     },
     {
-      "id": "insee_erfs2022_ti02",
-      "title": "Niveau de vie et revenu annuel des individus en 2022, ERFS, Insee Résultats, tableaux TI02D et TI02C",
-      "url": "https://www.insee.fr/fr/statistiques/8278900",
+      "id": "nomenclature_pcs_dec_por_8",
+      "title": "Situation financière des ménages en 2020-2021, Portraits des six groupes socioprofessionnels, feuilles Ensemble",
+      "url": "https://www.nomenclature-pcs.fr/uploads/tableaux/groupes/DEC_POR_8.xls",
+      "accessed": "2026-11-01",
+      "publisher": "Insee, Progedo (CNRS), Cnam-CEET, laboratoire Printemps (UVSQ, CNRS)",
+      "license": "Mentions légales du site : données réutilisables « sans licence », réutilisation « subordonnée au respect de l'intégrité de l'information et des données et à la mention précise des sources » (https://www.nomenclature-pcs.fr/informations-pratiques/mentions-legales)",
+      "notes": "Source indiquée par le fichier : Insee, enquête Revenus fiscaux et sociaux 2021 et Patrimoine histoire de vie, 2020-2021. Médianes pour les 29 PCS actives. Champ : France hors Mayotte, personnes vivant en logement ordinaire, actives ayant déjà travaillé (ménage au revenu positif en 2021 et dont la personne de référence n'est pas étudiante pour le niveau de vie). Page : https://www.nomenclature-pcs.fr/decrire/portraits-des-six-groupes-soci."
+    },
+    {
+      "id": "insee_erfs2021_ti02d",
+      "title": "Niveau de vie et revenu annuel des individus en 2021, ERFS, Insee Résultats, tableau TI02D",
+      "url": "https://www.insee.fr/fr/statistiques/7766291",
       "accessed": "2026-11-01",
       "publisher": "Insee-DGFiP-Cnaf-Cnav-CCMSA",
       "license": "Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation",
-      "notes": "Fichier : https://www.insee.fr/fr/statistiques/fichier/8278900/irsocerfs2022_dd2_excel.zip. Médianes annuelles divisées par 12. Champ : individus de 15 ans ou plus, ménages ordinaires de France métropolitaine dont la personne de référence n'est pas étudiante, selon leur propre CS."
+      "notes": "Fichier : https://www.insee.fr/fr/statistiques/fichier/7766291/irsocerfs2021_dd2_excel.zip. Ligne Retraités, médiane annuelle divisée par 12. Données 2021 provisoires selon l'Insee. Champ : individus de 15 ans ou plus, ménages ordinaires de France métropolitaine."
     },
     {
       "id": "insee_hvp2023_2024",
@@ -27,7 +36,34 @@
       "accessed": "2026-11-01",
       "publisher": "Insee",
       "license": "Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation",
-      "notes": "Fichiers : https://www.insee.fr/fr/statistiques/fichier/8736842/hvp_mtmoymed_patbrut_patnet.xlsx (feuilles « PCS » et « AGE ») et https://www.insee.fr/fr/statistiques/fichier/8736842/hvp_profil_menages.xlsx (feuille « PCS »). Patrimoine brut médian, début 2024. Champ : ménages en logement ordinaire, France hors Mayotte, selon la CS de la personne de référence (12 catégories, jamais les 29 postes) : la plupart des valeurs par PCS sont donc imputées, voir notes."
+      "notes": "Fichiers : https://www.insee.fr/fr/statistiques/fichier/8736842/hvp_mtmoymed_patbrut_patnet.xlsx (feuille AGE) et https://www.insee.fr/fr/statistiques/fichier/8736842/hvp_profil_menages.xlsx (feuille PCS). Sert au calcul du patrimoine des retraités et aux poids de ménages de la composition des retraités."
+    },
+    {
+      "id": "insee_hvp2020_2021",
+      "title": "Patrimoine et endettement des ménages en 2021, enquête Histoire de vie et Patrimoine 2020-2021, Insee Résultats",
+      "url": "https://www.insee.fr/fr/statistiques/8262352",
+      "accessed": "2026-11-01",
+      "publisher": "Insee",
+      "license": "Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation",
+      "notes": "Fichier : https://www.insee.fr/fr/statistiques/fichier/8262352/hvp_mtmoymed_patbrut_patnet_fr.xlsx (feuille AGE, médiane de l'ensemble des ménages), et tableaux de composition du patrimoine et de taux de détention par catégorie de la personne de référence."
+    },
+    {
+      "id": "insee_hvp2020_2021_composition",
+      "title": "Composition du patrimoine brut et taux de détention selon la catégorie de la personne de référence, enquête Histoire de vie et Patrimoine 2020-2021, Insee Résultats",
+      "url": "https://www.insee.fr/fr/statistiques/8262352",
+      "accessed": "2026-11-01",
+      "publisher": "Insee",
+      "license": "Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation",
+      "notes": "Fichiers : https://www.insee.fr/fr/statistiques/fichier/8262352/hvp_mtpatbrut_composante_fr.xlsx, https://www.insee.fr/fr/statistiques/fichier/8262352/hvp_mtpatbrut_composante_det_fr.xlsx et https://www.insee.fr/fr/statistiques/fichier/8262352/hvp_txdetention_fr.xlsx (feuilles PCS). Le niveau le plus fin publié est de 11 catégories de ménages, pas le niveau 2 des PCS. Champ : ménages ordinaires résidant en France hors Mayotte."
+    },
+    {
+      "id": "nomenclature_pcs_dec_por_4",
+      "title": "Lien à la migration, taille d'unité urbaine et statut d'occupation du logement, Portraits des six groupes socioprofessionnels, feuilles Ensemble",
+      "url": "https://www.nomenclature-pcs.fr/uploads/tableaux/groupes/DEC_POR_4.xls",
+      "accessed": "2026-11-01",
+      "publisher": "Insee, Progedo (CNRS), Cnam-CEET, laboratoire Printemps (UVSQ, CNRS)",
+      "license": "Mentions légales du site : données réutilisables « sans licence », réutilisation « subordonnée au respect de l'intégrité de l'information et des données et à la mention précise des sources » (https://www.nomenclature-pcs.fr/informations-pratiques/mentions-legales)",
+      "notes": "Source indiquée par le fichier : Insee, enquête Emploi 2024. Colonne Propriétaire pour 28 PCS (ni la PCS 44 ni les retraités). Champ : France hors Mayotte, personnes vivant en logement ordinaire, actives ayant déjà travaillé."
     }
   ],
   "items": [
@@ -35,8 +71,8 @@
       "code": "10",
       "group": "1",
       "population": 389097,
-      "niveau_vie_mensuel_eur": 1981.7,
-      "patrimoine_keur": 903.1,
+      "niveau_vie_mensuel_eur": 2172.33,
+      "patrimoine_keur": 668.272,
       "diplomes": {
         "bac5": 4.61,
         "bac3": 5.46,
@@ -46,19 +82,36 @@
         "brevet": 3.92,
         "certif_aucun": 8.58
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 18.5,
+        "financier_pct": 8.4,
+        "professionnel_pct": 71.3,
+        "autre_pct": 1.9,
+        "professionnel_entreprises_pct": 59.6,
+        "valeurs_mobilieres_pct": 0.6,
+        "detention_immobilier_pct": 91.4,
+        "detention_financier_pct": 91.1,
+        "detention_professionnel_pct": 97.1,
+        "detention_entreprise_pct": 91.5,
+        "proprietaire_pct": 86.9
+      },
+      "patrimoine_composition_status": "published",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie IMPUTÉ, pas une donnée Insee à ce niveau : l'ERFS 2022 ne publie qu'une ligne commune aux agriculteurs, artisans, commerçants et chefs d'entreprise, appliquée ici à cette PCS. Patrimoine : médiane publiée par l'Insee pour les ménages dont la personne de référence relève de cette catégorie (HVP 2023-2024), pas pour les individus. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine : publiée par l'Insee pour les ménages dont la personne de référence relève de la catégorie « Agriculteurs » (HVP 2020-2021), pas pour les individus. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "21",
       "group": "2",
       "population": 1021160,
-      "niveau_vie_mensuel_eur": 1981.7,
-      "patrimoine_keur": 436.9,
+      "niveau_vie_mensuel_eur": 1786.33,
+      "patrimoine_keur": 359.551,
       "diplomes": {
         "bac5": 4.41,
         "bac3": 5.77,
@@ -68,19 +121,36 @@
         "brevet": 3.38,
         "certif_aucun": 11.99
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 49.2,
+        "financier_pct": 14.1,
+        "professionnel_pct": 32.9,
+        "autre_pct": 3.8,
+        "professionnel_entreprises_pct": 31.2,
+        "valeurs_mobilieres_pct": 2.6,
+        "detention_immobilier_pct": 70.4,
+        "detention_financier_pct": 89.4,
+        "detention_professionnel_pct": 78.2,
+        "detention_entreprise_pct": 76.4,
+        "proprietaire_pct": 70.3
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie IMPUTÉ, pas une donnée Insee à ce niveau : l'ERFS 2022 ne publie qu'une ligne commune aux agriculteurs, artisans, commerçants et chefs d'entreprise, appliquée ici à cette PCS. Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Artisans, commerçants et chefs d'entreprise » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Artisans, commerçants et chefs d'entreprise » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "22",
       "group": "2",
       "population": 772052,
-      "niveau_vie_mensuel_eur": 1981.7,
-      "patrimoine_keur": 436.9,
+      "niveau_vie_mensuel_eur": 2085.92,
+      "patrimoine_keur": 444.831,
       "diplomes": {
         "bac5": 12.99,
         "bac3": 12.97,
@@ -90,19 +160,36 @@
         "brevet": 4.43,
         "certif_aucun": 10.88
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 49.2,
+        "financier_pct": 14.1,
+        "professionnel_pct": 32.9,
+        "autre_pct": 3.8,
+        "professionnel_entreprises_pct": 31.2,
+        "valeurs_mobilieres_pct": 2.6,
+        "detention_immobilier_pct": 70.4,
+        "detention_financier_pct": 89.4,
+        "detention_professionnel_pct": 78.2,
+        "detention_entreprise_pct": 76.4,
+        "proprietaire_pct": 67.6
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie IMPUTÉ, pas une donnée Insee à ce niveau : l'ERFS 2022 ne publie qu'une ligne commune aux agriculteurs, artisans, commerçants et chefs d'entreprise, appliquée ici à cette PCS. Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Artisans, commerçants et chefs d'entreprise » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Artisans, commerçants et chefs d'entreprise » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "23",
       "group": "2",
       "population": 238069,
-      "niveau_vie_mensuel_eur": 1981.7,
-      "patrimoine_keur": 436.9,
+      "niveau_vie_mensuel_eur": 3503.83,
+      "patrimoine_keur": 1532.262,
       "diplomes": {
         "bac5": 27.39,
         "bac3": 13.79,
@@ -112,19 +199,36 @@
         "brevet": 2.7,
         "certif_aucun": 6.31
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 49.2,
+        "financier_pct": 14.1,
+        "professionnel_pct": 32.9,
+        "autre_pct": 3.8,
+        "professionnel_entreprises_pct": 31.2,
+        "valeurs_mobilieres_pct": 2.6,
+        "detention_immobilier_pct": 70.4,
+        "detention_financier_pct": 89.4,
+        "detention_professionnel_pct": 78.2,
+        "detention_entreprise_pct": 76.4,
+        "proprietaire_pct": 88.9
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie IMPUTÉ, pas une donnée Insee à ce niveau : l'ERFS 2022 ne publie qu'une ligne commune aux agriculteurs, artisans, commerçants et chefs d'entreprise, appliquée ici à cette PCS. Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Artisans, commerçants et chefs d'entreprise » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Artisans, commerçants et chefs d'entreprise » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "31",
       "group": "3",
       "population": 721473,
-      "niveau_vie_mensuel_eur": 3448.3,
-      "patrimoine_keur": 772.0,
+      "niveau_vie_mensuel_eur": 3566.92,
+      "patrimoine_keur": 583.019,
       "diplomes": {
         "bac5": 73.91,
         "bac3": 8.57,
@@ -134,19 +238,36 @@
         "brevet": 0.8,
         "certif_aucun": 1.97
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 59.9,
+        "financier_pct": 21.8,
+        "professionnel_pct": 14.3,
+        "autre_pct": 4.0,
+        "professionnel_entreprises_pct": 13.3,
+        "valeurs_mobilieres_pct": 4.5,
+        "detention_immobilier_pct": 85.7,
+        "detention_financier_pct": 95.9,
+        "detention_professionnel_pct": 68.9,
+        "detention_entreprise_pct": 65.0,
+        "proprietaire_pct": 75.1
+      },
+      "patrimoine_composition_status": "published",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine : médiane publiée par l'Insee pour les ménages dont la personne de référence relève de cette catégorie (HVP 2023-2024), pas pour les individus. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine : publiée par l'Insee pour les ménages dont la personne de référence relève de la catégorie « Professions libérales » (HVP 2020-2021), pas pour les individus. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "33",
       "group": "3",
       "population": 523201,
-      "niveau_vie_mensuel_eur": 3088.3,
-      "patrimoine_keur": 416.2,
+      "niveau_vie_mensuel_eur": 2918.83,
+      "patrimoine_keur": 449.187,
       "diplomes": {
         "bac5": 50.02,
         "bac3": 21.83,
@@ -156,19 +277,36 @@
         "brevet": 1.17,
         "certif_aucun": 1.9
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 70.2,
+        "financier_pct": 21.5,
+        "professionnel_pct": 3.0,
+        "autre_pct": 5.3,
+        "professionnel_entreprises_pct": 2.3,
+        "valeurs_mobilieres_pct": 2.8,
+        "detention_immobilier_pct": 75.9,
+        "detention_financier_pct": 98.1,
+        "detention_professionnel_pct": 13.8,
+        "detention_entreprise_pct": 9.1,
+        "proprietaire_pct": 70.5
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "34",
       "group": "3",
       "population": 908266,
-      "niveau_vie_mensuel_eur": 3030.0,
-      "patrimoine_keur": 416.2,
+      "niveau_vie_mensuel_eur": 2853.83,
+      "patrimoine_keur": 405.544,
       "diplomes": {
         "bac5": 67.25,
         "bac3": 24.12,
@@ -178,19 +316,36 @@
         "brevet": 0.3,
         "certif_aucun": 1.18
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 70.2,
+        "financier_pct": 21.5,
+        "professionnel_pct": 3.0,
+        "autre_pct": 5.3,
+        "professionnel_entreprises_pct": 2.3,
+        "valeurs_mobilieres_pct": 2.8,
+        "detention_immobilier_pct": 75.9,
+        "detention_financier_pct": 98.1,
+        "detention_professionnel_pct": 13.8,
+        "detention_entreprise_pct": 9.1,
+        "proprietaire_pct": 69.1
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "35",
       "group": "3",
       "population": 410038,
-      "niveau_vie_mensuel_eur": 2387.5,
-      "patrimoine_keur": 416.2,
+      "niveau_vie_mensuel_eur": 2238.25,
+      "patrimoine_keur": 278.415,
       "diplomes": {
         "bac5": 33.04,
         "bac3": 26.73,
@@ -200,19 +355,36 @@
         "brevet": 2.76,
         "certif_aucun": 3.62
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 70.2,
+        "financier_pct": 21.5,
+        "professionnel_pct": 3.0,
+        "autre_pct": 5.3,
+        "professionnel_entreprises_pct": 2.3,
+        "valeurs_mobilieres_pct": 2.8,
+        "detention_immobilier_pct": 75.9,
+        "detention_financier_pct": 98.1,
+        "detention_professionnel_pct": 13.8,
+        "detention_entreprise_pct": 9.1,
+        "proprietaire_pct": 60.7
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "37",
       "group": "3",
       "population": 1687972,
-      "niveau_vie_mensuel_eur": 3323.3,
-      "patrimoine_keur": 416.2,
+      "niveau_vie_mensuel_eur": 3135.08,
+      "patrimoine_keur": 551.005,
       "diplomes": {
         "bac5": 51.32,
         "bac3": 17.09,
@@ -222,19 +394,36 @@
         "brevet": 0.95,
         "certif_aucun": 1.41
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 70.2,
+        "financier_pct": 21.5,
+        "professionnel_pct": 3.0,
+        "autre_pct": 5.3,
+        "professionnel_entreprises_pct": 2.3,
+        "valeurs_mobilieres_pct": 2.8,
+        "detention_immobilier_pct": 75.9,
+        "detention_financier_pct": 98.1,
+        "detention_professionnel_pct": 13.8,
+        "detention_entreprise_pct": 9.1,
+        "proprietaire_pct": 71.8
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "38",
       "group": "3",
       "population": 1716872,
-      "niveau_vie_mensuel_eur": 3160.0,
-      "patrimoine_keur": 416.2,
+      "niveau_vie_mensuel_eur": 2987.75,
+      "patrimoine_keur": 385.945,
       "diplomes": {
         "bac5": 61.18,
         "bac3": 12.42,
@@ -244,19 +433,36 @@
         "brevet": 0.71,
         "certif_aucun": 1.31
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 70.2,
+        "financier_pct": 21.5,
+        "professionnel_pct": 3.0,
+        "autre_pct": 5.3,
+        "professionnel_entreprises_pct": 2.3,
+        "valeurs_mobilieres_pct": 2.8,
+        "detention_immobilier_pct": 75.9,
+        "detention_financier_pct": 98.1,
+        "detention_professionnel_pct": 13.8,
+        "detention_entreprise_pct": 9.1,
+        "proprietaire_pct": 69.9
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Cadres (autre que professions libérales) » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "42",
       "group": "4",
       "population": 1069728,
-      "niveau_vie_mensuel_eur": 2248.3,
-      "patrimoine_keur": 226.1,
+      "niveau_vie_mensuel_eur": 2177.92,
+      "patrimoine_keur": 270.103,
       "diplomes": {
         "bac5": 30.11,
         "bac3": 34.05,
@@ -266,19 +472,36 @@
         "brevet": 1.27,
         "certif_aucun": 2.2
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 69.2,
+        "financier_pct": 15.9,
+        "professionnel_pct": 6.1,
+        "autre_pct": 8.8,
+        "professionnel_entreprises_pct": 4.5,
+        "valeurs_mobilieres_pct": 0.8,
+        "detention_immobilier_pct": 63.0,
+        "detention_financier_pct": 95.5,
+        "detention_professionnel_pct": 13.3,
+        "detention_entreprise_pct": 9.2,
+        "proprietaire_pct": 67.7
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "43",
       "group": "4",
       "population": 1823771,
-      "niveau_vie_mensuel_eur": 2429.2,
-      "patrimoine_keur": 226.1,
+      "niveau_vie_mensuel_eur": 2321.75,
+      "patrimoine_keur": 255.3,
       "diplomes": {
         "bac5": 11.68,
         "bac3": 39.92,
@@ -288,19 +511,36 @@
         "brevet": 1.18,
         "certif_aucun": 2.13
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 69.2,
+        "financier_pct": 15.9,
+        "professionnel_pct": 6.1,
+        "autre_pct": 8.8,
+        "professionnel_entreprises_pct": 4.5,
+        "valeurs_mobilieres_pct": 0.8,
+        "detention_immobilier_pct": 63.0,
+        "detention_financier_pct": 95.5,
+        "detention_professionnel_pct": 13.3,
+        "detention_entreprise_pct": 9.2,
+        "proprietaire_pct": 70.4
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "44",
       "group": "4",
       "population": 22922,
-      "niveau_vie_mensuel_eur": 2364.2,
-      "patrimoine_keur": 226.1,
+      "niveau_vie_mensuel_eur": 1448.92,
+      "patrimoine_keur": 213.52,
       "diplomes": {
         "bac5": 24.75,
         "bac3": 19.04,
@@ -310,19 +550,34 @@
         "brevet": 2.82,
         "certif_aucun": 20.0
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 69.2,
+        "financier_pct": 15.9,
+        "professionnel_pct": 6.1,
+        "autre_pct": 8.8,
+        "professionnel_entreprises_pct": 4.5,
+        "valeurs_mobilieres_pct": 0.8,
+        "detention_immobilier_pct": 63.0,
+        "detention_financier_pct": 95.5,
+        "detention_professionnel_pct": 13.3,
+        "detention_entreprise_pct": 9.2
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition"
       ],
-      "notes": "Niveau de vie IMPUTÉ, pas une donnée Insee à ce niveau : l'ERFS 2022 publie « ns » pour cette PCS ; la médiane du groupe Professions intermédiaires lui est appliquée à défaut, sans garantie de représentativité. Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "45",
       "group": "4",
       "population": 519171,
-      "niveau_vie_mensuel_eur": 2446.7,
-      "patrimoine_keur": 226.1,
+      "niveau_vie_mensuel_eur": 2285.42,
+      "patrimoine_keur": 267.53,
       "diplomes": {
         "bac5": 9.97,
         "bac3": 17.58,
@@ -332,19 +587,36 @@
         "brevet": 3.48,
         "certif_aucun": 3.17
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 69.2,
+        "financier_pct": 15.9,
+        "professionnel_pct": 6.1,
+        "autre_pct": 8.8,
+        "professionnel_entreprises_pct": 4.5,
+        "valeurs_mobilieres_pct": 0.8,
+        "detention_immobilier_pct": 63.0,
+        "detention_financier_pct": 95.5,
+        "detention_professionnel_pct": 13.3,
+        "detention_entreprise_pct": 9.2,
+        "proprietaire_pct": 67.3
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "46",
       "group": "4",
       "population": 2662032,
-      "niveau_vie_mensuel_eur": 2330.8,
-      "patrimoine_keur": 226.1,
+      "niveau_vie_mensuel_eur": 2239.5,
+      "patrimoine_keur": 263.879,
       "diplomes": {
         "bac5": 14.93,
         "bac3": 17.56,
@@ -354,19 +626,36 @@
         "brevet": 2.49,
         "certif_aucun": 3.57
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 69.2,
+        "financier_pct": 15.9,
+        "professionnel_pct": 6.1,
+        "autre_pct": 8.8,
+        "professionnel_entreprises_pct": 4.5,
+        "valeurs_mobilieres_pct": 0.8,
+        "detention_immobilier_pct": 63.0,
+        "detention_financier_pct": 95.5,
+        "detention_professionnel_pct": 13.3,
+        "detention_entreprise_pct": 9.2,
+        "proprietaire_pct": 63.0
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "47",
       "group": "4",
       "population": 1311257,
-      "niveau_vie_mensuel_eur": 2341.7,
-      "patrimoine_keur": 226.1,
+      "niveau_vie_mensuel_eur": 2223.0,
+      "patrimoine_keur": 247.872,
       "diplomes": {
         "bac5": 7.36,
         "bac3": 14.7,
@@ -376,19 +665,36 @@
         "brevet": 2.01,
         "certif_aucun": 4.34
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 69.2,
+        "financier_pct": 15.9,
+        "professionnel_pct": 6.1,
+        "autre_pct": 8.8,
+        "professionnel_entreprises_pct": 4.5,
+        "valeurs_mobilieres_pct": 0.8,
+        "detention_immobilier_pct": 63.0,
+        "detention_financier_pct": 95.5,
+        "detention_professionnel_pct": 13.3,
+        "detention_entreprise_pct": 9.2,
+        "proprietaire_pct": 67.0
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "48",
       "group": "4",
       "population": 636772,
-      "niveau_vie_mensuel_eur": 2449.2,
-      "patrimoine_keur": 226.1,
+      "niveau_vie_mensuel_eur": 2226.67,
+      "patrimoine_keur": 246.633,
       "diplomes": {
         "bac5": 4.77,
         "bac3": 8.05,
@@ -398,19 +704,36 @@
         "brevet": 3.12,
         "certif_aucun": 7.66
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 69.2,
+        "financier_pct": 15.9,
+        "professionnel_pct": 6.1,
+        "autre_pct": 8.8,
+        "professionnel_entreprises_pct": 4.5,
+        "valeurs_mobilieres_pct": 0.8,
+        "detention_immobilier_pct": 63.0,
+        "detention_financier_pct": 95.5,
+        "detention_professionnel_pct": 13.3,
+        "detention_entreprise_pct": 9.2,
+        "proprietaire_pct": 69.1
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Professions intermédiaires » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "52",
       "group": "5",
       "population": 2551217,
-      "niveau_vie_mensuel_eur": 1980.0,
-      "patrimoine_keur": 46.2,
+      "niveau_vie_mensuel_eur": 1859.0,
+      "patrimoine_keur": 159.12,
       "diplomes": {
         "bac5": 2.84,
         "bac3": 5.59,
@@ -420,19 +743,36 @@
         "brevet": 5.21,
         "certif_aucun": 11.23
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 65.2,
+        "financier_pct": 15.6,
+        "professionnel_pct": 8.1,
+        "autre_pct": 11.2,
+        "professionnel_entreprises_pct": 6.0,
+        "valeurs_mobilieres_pct": 0.7,
+        "detention_immobilier_pct": 40.7,
+        "detention_financier_pct": 88.3,
+        "detention_professionnel_pct": 8.9,
+        "detention_entreprise_pct": 5.0,
+        "proprietaire_pct": 54.1
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Employés » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Employés » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "53",
       "group": "5",
       "population": 630321,
-      "niveau_vie_mensuel_eur": 2176.7,
-      "patrimoine_keur": 46.2,
+      "niveau_vie_mensuel_eur": 1970.42,
+      "patrimoine_keur": 205.555,
       "diplomes": {
         "bac5": 3.32,
         "bac3": 6.84,
@@ -442,19 +782,36 @@
         "brevet": 6.44,
         "certif_aucun": 9.03
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 65.2,
+        "financier_pct": 15.6,
+        "professionnel_pct": 8.1,
+        "autre_pct": 11.2,
+        "professionnel_entreprises_pct": 6.0,
+        "valeurs_mobilieres_pct": 0.7,
+        "detention_immobilier_pct": 40.7,
+        "detention_financier_pct": 88.3,
+        "detention_professionnel_pct": 8.9,
+        "detention_entreprise_pct": 5.0,
+        "proprietaire_pct": 50.1
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Employés » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Employés » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "54",
       "group": "5",
       "population": 1954058,
-      "niveau_vie_mensuel_eur": 2190.0,
-      "patrimoine_keur": 46.2,
+      "niveau_vie_mensuel_eur": 2083.33,
+      "patrimoine_keur": 265.127,
       "diplomes": {
         "bac5": 8.21,
         "bac3": 13.69,
@@ -464,19 +821,36 @@
         "brevet": 3.07,
         "certif_aucun": 4.7
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 65.2,
+        "financier_pct": 15.6,
+        "professionnel_pct": 8.1,
+        "autre_pct": 11.2,
+        "professionnel_entreprises_pct": 6.0,
+        "valeurs_mobilieres_pct": 0.7,
+        "detention_immobilier_pct": 40.7,
+        "detention_financier_pct": 88.3,
+        "detention_professionnel_pct": 8.9,
+        "detention_entreprise_pct": 5.0,
+        "proprietaire_pct": 62.8
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Employés » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Employés » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "55",
       "group": "5",
       "population": 1424475,
-      "niveau_vie_mensuel_eur": 1853.3,
-      "patrimoine_keur": 46.2,
+      "niveau_vie_mensuel_eur": 1770.08,
+      "patrimoine_keur": 56.68,
       "diplomes": {
         "bac5": 3.41,
         "bac3": 6.6,
@@ -486,19 +860,36 @@
         "brevet": 5.86,
         "certif_aucun": 11.23
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 65.2,
+        "financier_pct": 15.6,
+        "professionnel_pct": 8.1,
+        "autre_pct": 11.2,
+        "professionnel_entreprises_pct": 6.0,
+        "valeurs_mobilieres_pct": 0.7,
+        "detention_immobilier_pct": 40.7,
+        "detention_financier_pct": 88.3,
+        "detention_professionnel_pct": 8.9,
+        "detention_entreprise_pct": 5.0,
+        "proprietaire_pct": 47.2
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Employés » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Employés » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "56",
       "group": "5",
       "population": 2015854,
-      "niveau_vie_mensuel_eur": 1677.5,
-      "patrimoine_keur": 46.2,
+      "niveau_vie_mensuel_eur": 1585.33,
+      "patrimoine_keur": 62.821,
       "diplomes": {
         "bac5": 2.78,
         "bac3": 4.89,
@@ -508,19 +899,36 @@
         "brevet": 6.74,
         "certif_aucun": 20.22
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 65.2,
+        "financier_pct": 15.6,
+        "professionnel_pct": 8.1,
+        "autre_pct": 11.2,
+        "professionnel_entreprises_pct": 6.0,
+        "valeurs_mobilieres_pct": 0.7,
+        "detention_immobilier_pct": 40.7,
+        "detention_financier_pct": 88.3,
+        "detention_professionnel_pct": 8.9,
+        "detention_entreprise_pct": 5.0,
+        "proprietaire_pct": 47.0
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Employés » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Employés » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "62",
       "group": "6",
       "population": 955838,
-      "niveau_vie_mensuel_eur": 2044.2,
-      "patrimoine_keur": 44.4,
+      "niveau_vie_mensuel_eur": 1933.17,
+      "patrimoine_keur": 177.196,
       "diplomes": {
         "bac5": 1.59,
         "bac3": 3.02,
@@ -530,19 +938,36 @@
         "brevet": 4.33,
         "certif_aucun": 13.57
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 68.9,
+        "financier_pct": 15.1,
+        "professionnel_pct": 3.7,
+        "autre_pct": 12.3,
+        "professionnel_entreprises_pct": 2.6,
+        "valeurs_mobilieres_pct": 0.5,
+        "detention_immobilier_pct": 43.7,
+        "detention_financier_pct": 86.9,
+        "detention_professionnel_pct": 7.7,
+        "detention_entreprise_pct": 3.2,
+        "proprietaire_pct": 62.3
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "63",
       "group": "6",
       "population": 1665764,
-      "niveau_vie_mensuel_eur": 1880.8,
-      "patrimoine_keur": 44.4,
+      "niveau_vie_mensuel_eur": 1790.0,
+      "patrimoine_keur": 190.4,
       "diplomes": {
         "bac5": 2.05,
         "bac3": 2.9,
@@ -552,19 +977,36 @@
         "brevet": 3.66,
         "certif_aucun": 17.07
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 68.9,
+        "financier_pct": 15.1,
+        "professionnel_pct": 3.7,
+        "autre_pct": 12.3,
+        "professionnel_entreprises_pct": 2.6,
+        "valeurs_mobilieres_pct": 0.5,
+        "detention_immobilier_pct": 43.7,
+        "detention_financier_pct": 86.9,
+        "detention_professionnel_pct": 7.7,
+        "detention_entreprise_pct": 3.2,
+        "proprietaire_pct": 54.3
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "64",
       "group": "6",
       "population": 776397,
-      "niveau_vie_mensuel_eur": 1945.0,
-      "patrimoine_keur": 44.4,
+      "niveau_vie_mensuel_eur": 1815.5,
+      "patrimoine_keur": 199.676,
       "diplomes": {
         "bac5": 1.61,
         "bac3": 2.63,
@@ -574,19 +1016,36 @@
         "brevet": 6.1,
         "certif_aucun": 18.67
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 68.9,
+        "financier_pct": 15.1,
+        "professionnel_pct": 3.7,
+        "autre_pct": 12.3,
+        "professionnel_entreprises_pct": 2.6,
+        "valeurs_mobilieres_pct": 0.5,
+        "detention_immobilier_pct": 43.7,
+        "detention_financier_pct": 86.9,
+        "detention_professionnel_pct": 7.7,
+        "detention_entreprise_pct": 3.2,
+        "proprietaire_pct": 53.3
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "65",
       "group": "6",
       "population": 420533,
-      "niveau_vie_mensuel_eur": 1933.3,
-      "patrimoine_keur": 44.4,
+      "niveau_vie_mensuel_eur": 1819.0,
+      "patrimoine_keur": 55.484,
       "diplomes": {
         "bac5": 1.64,
         "bac3": 2.9,
@@ -596,19 +1055,36 @@
         "brevet": 6.04,
         "certif_aucun": 17.84
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 68.9,
+        "financier_pct": 15.1,
+        "professionnel_pct": 3.7,
+        "autre_pct": 12.3,
+        "professionnel_entreprises_pct": 2.6,
+        "valeurs_mobilieres_pct": 0.5,
+        "detention_immobilier_pct": 43.7,
+        "detention_financier_pct": 86.9,
+        "detention_professionnel_pct": 7.7,
+        "detention_entreprise_pct": 3.2,
+        "proprietaire_pct": 52.7
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "67",
       "group": "6",
       "population": 1410285,
-      "niveau_vie_mensuel_eur": 1773.3,
-      "patrimoine_keur": 44.4,
+      "niveau_vie_mensuel_eur": 1742.58,
+      "patrimoine_keur": 31.917,
       "diplomes": {
         "bac5": 1.71,
         "bac3": 2.92,
@@ -618,19 +1094,36 @@
         "brevet": 6.63,
         "certif_aucun": 24.42
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 68.9,
+        "financier_pct": 15.1,
+        "professionnel_pct": 3.7,
+        "autre_pct": 12.3,
+        "professionnel_entreprises_pct": 2.6,
+        "valeurs_mobilieres_pct": 0.5,
+        "detention_immobilier_pct": 43.7,
+        "detention_financier_pct": 86.9,
+        "detention_professionnel_pct": 7.7,
+        "detention_entreprise_pct": 3.2,
+        "proprietaire_pct": 49.0
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "68",
       "group": "6",
       "population": 992161,
-      "niveau_vie_mensuel_eur": 1604.2,
-      "patrimoine_keur": 44.4,
+      "niveau_vie_mensuel_eur": 1498.5,
+      "patrimoine_keur": 102.265,
       "diplomes": {
         "bac5": 2.06,
         "bac3": 2.65,
@@ -640,19 +1133,36 @@
         "brevet": 6.12,
         "certif_aucun": 35.57
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 68.9,
+        "financier_pct": 15.1,
+        "professionnel_pct": 3.7,
+        "autre_pct": 12.3,
+        "professionnel_entreprises_pct": 2.6,
+        "valeurs_mobilieres_pct": 0.5,
+        "detention_immobilier_pct": 43.7,
+        "detention_financier_pct": 86.9,
+        "detention_professionnel_pct": 7.7,
+        "detention_entreprise_pct": 3.2,
+        "proprietaire_pct": 40.9
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "69",
       "group": "6",
       "population": 297443,
-      "niveau_vie_mensuel_eur": 1822.5,
-      "patrimoine_keur": 44.4,
+      "niveau_vie_mensuel_eur": 1764.75,
+      "patrimoine_keur": 87.202,
       "diplomes": {
         "bac5": 2.37,
         "bac3": 3.6,
@@ -662,19 +1172,36 @@
         "brevet": 5.77,
         "certif_aucun": 23.93
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "published",
+      "patrimoine_composition": {
+        "immobilier_pct": 68.9,
+        "financier_pct": 15.1,
+        "professionnel_pct": 3.7,
+        "autre_pct": 12.3,
+        "professionnel_entreprises_pct": 2.6,
+        "valeurs_mobilieres_pct": 0.5,
+        "detention_immobilier_pct": 43.7,
+        "detention_financier_pct": 86.9,
+        "detention_professionnel_pct": 7.7,
+        "detention_entreprise_pct": 3.2,
+        "proprietaire_pct": 63.7
+      },
+      "patrimoine_composition_status": "imputed",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "nomenclature_pcs_dec_por_8",
+        "insee_hvp2020_2021_composition",
+        "nomenclature_pcs_dec_por_4"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine IMPUTÉ, pas une donnée Insee à ce niveau : médiane de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2023-2024), appliquée à toutes les PCS de cette catégorie. Effectif et diplômes : recensement 2022, fichier détail."
+      "notes": "Niveau de vie et patrimoine : médianes publiées pour cette PCS, situation financière 2020-2021 (source indiquée : Insee, ERFS 2021 et HVP 2020-2021 ; publication : nomenclature-pcs.fr), pour les personnes actives ayant déjà travaillé. Composition du patrimoine IMPUTÉE, pas une donnée Insee à ce niveau : valeurs de la catégorie « Ouvriers » (ménages selon la personne de référence, HVP 2020-2021), appliquées à toutes ses PCS. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. proprietaire_pct : part de propriétaires de leur logement, publiée pour cette PCS (enquête Emploi 2024, nomenclature-pcs.fr). Effectif et diplômes : recensement 2022, fichier détail."
     },
     {
       "code": "7",
       "group": "7",
       "population": 15575052,
-      "niveau_vie_mensuel_eur": 1994.2,
-      "patrimoine_keur": 263.5,
+      "niveau_vie_mensuel_eur": 1930.0,
+      "patrimoine_keur": 227.658,
       "diplomes": {
         "bac5": 5.59,
         "bac3": 6.15,
@@ -684,12 +1211,29 @@
         "brevet": 7.84,
         "certif_aucun": 34.49
       },
+      "niveau_vie_status": "published",
+      "patrimoine_status": "calculated",
+      "patrimoine_composition": {
+        "immobilier_pct": 63.04,
+        "financier_pct": 27.23,
+        "professionnel_pct": 3.19,
+        "autre_pct": 6.52,
+        "professionnel_entreprises_pct": 0.8,
+        "valeurs_mobilieres_pct": 4.06,
+        "detention_immobilier_pct": 71.27,
+        "detention_financier_pct": 87.98,
+        "detention_professionnel_pct": 12.02,
+        "detention_entreprise_pct": 1.12
+      },
+      "patrimoine_composition_status": "calculated",
       "source_refs": [
         "insee_rp2022_fd_indreg",
-        "insee_erfs2022_ti02",
-        "insee_hvp2023_2024"
+        "insee_erfs2021_ti02d",
+        "insee_hvp2023_2024",
+        "insee_hvp2020_2021",
+        "insee_hvp2020_2021_composition"
       ],
-      "notes": "Niveau de vie : médiane publiée par l'Insee pour cette PCS (ERFS 2022). Patrimoine CALCULÉ, non publié par l'Insee : médiane des ménages de retraités estimée par interpolation linéaire à partir de leur répartition dans les déciles de patrimoine de HVP 2023-2024 (4 catégories de retraités réunies, entre 205,1 et 283,2 k€). Effectif et diplômes : recensement 2022, fichier détail. Diplômes réels des retraités ; la méthode ranks_chris_v1 les remplace par un score fixe."
+      "notes": "Niveau de vie : médiane publiée par l'Insee pour les retraités (ERFS 2021). Patrimoine CALCULÉ, non publié par l'Insee : médiane des ménages de retraités estimée à 263,5 k€ début 2024 par interpolation dans les déciles de HVP 2023-2024 (entre 205,1 et 283,2 k€), ramenée à début 2021 par le rapport des médianes de l'ensemble des ménages (177,2 / 205,1). Composition du patrimoine CALCULÉE, non publiée par l'Insee : agrégation des 3 catégories de retraités de HVP 2020-2021, avec les parts de ménages de HVP 2023-2024, faute de publication en 2020-2021. professionnel_pct, immobilier_pct, financier_pct, autre_pct, professionnel_entreprises_pct et valeurs_mobilieres_pct : parts de la masse du patrimoine brut ; detention_*_pct : taux de détention, en % des ménages. Effectif et diplômes : recensement 2022, fichier détail. Diplômes réels des retraités ; la méthode ranks_chris_v1 les remplace par un score fixe."
     }
   ]
 }
