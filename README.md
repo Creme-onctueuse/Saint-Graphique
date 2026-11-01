@@ -6,7 +6,7 @@ Le Saint-Graphique a été créé par **Chris et la PaduTeam**. Ce projet est di
 
 > **Projet non officiel.** Il n'a aucun lien avec Positions Revue ni avec la PaduTeam. L'algorithme original n'a pas été publié : ce dépôt en propose une **reconstruction**, calée sur les vidéos publiques et documentée, sans prétendre à l'identité exacte.
 
-**Statut :** en construction (v0.x). Voir la [feuille de route](#feuille-de-route).
+**Statut :** en construction (v0.x). Voir la [feuille de route](#feuille-de-route). **À régler avant toute publication :** [la mention de l'Ifop](#question-ouverte--la-mention-de-lifop).
 
 ## Le principe
 
@@ -60,9 +60,19 @@ research/    matériel local NON publié (vidéos, transcriptions, captures) : g
 Toutes les données publiées proviennent de **sources primaires citées**, recensées dans [`data/SOURCES.md`](data/SOURCES.md) :
 
 - INSEE / data.gouv.fr (Licence Ouverte Etalab 2.0) : effectifs, diplômes, revenus et patrimoine ;
-- sondages de sortie des urnes publiés : composition sociale des électorats.
+- rapports de sondage Ifop du jour du vote : composition sociale des électorats.
 
 Les vidéos, transcriptions et captures servent uniquement à l'analyse locale. Elles ne sont **pas redistribuées**. Seuls des chiffres dérivés sont publiés, chacun cité avec l'identifiant de la vidéo et l'horodatage.
+
+### Question ouverte : la mention de l'Ifop
+
+Les rapports Ifop dont sont tirées les 7 élections indiquent : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » **Aucun accord n'est documenté à ce jour.** Sont concernés `data/elections/`, `pipeline/sources/manual/` et les coordonnées d'électorats de `data/computed/`, donc aussi la page construite.
+
+Le code reste sous licence MIT, mais ces données n'y sont pas soumises. La question reste à trancher avant toute publication : obtenir l'accord de l'Ifop, s'appuyer sur d'autres sources, ou ne publier que le code et les données INSEE. Pour cette raison, le déploiement sur GitHub Pages n'est lancé que manuellement.
+
+### Limite actuelle de l'axe X
+
+Le patrimoine et une partie du niveau de vie ne sont pas toujours publiés au niveau de détail des 30 PCS. Quand une valeur est imputée ou calculée, `data/SOURCES.md` et la page l'indiquent, et l'ordre des PCS concernées sur l'axe X ne doit pas être lu comme une mesure.
 
 ## Feuille de route
 
@@ -74,7 +84,7 @@ Les vidéos, transcriptions et captures servent uniquement à l'analyse locale. 
 
 1. Pousser le dépôt sur GitHub.
 2. Dans *Settings → Pages → Build and deployment*, choisir *Source* = **GitHub Actions**.
-3. Le workflow `.github/workflows/pages.yml` publie `web/dist/index.html` à chaque push sur `main`.
+3. Une fois [la question de l'Ifop](#question-ouverte--la-mention-de-lifop) réglée, lancer manuellement le workflow `.github/workflows/pages.yml` (onglet *Actions*). Il publie `web/dist/index.html`.
 
 ## Contribuer
 

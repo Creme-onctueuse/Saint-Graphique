@@ -2,10 +2,9 @@
 # Prérequis (une fois) : Settings > Pages > Build and deployment > Source = « GitHub Actions ».
 name: Pages
 
+# Lancement manuel uniquement : la page contient des coordonnées tirées de rapports Ifop,
+# dont la publication reste à trancher (voir README, « la mention de l'Ifop »).
 on:
-  push:
-    branches: [main]
-    paths: ["web/**", "data/computed/**", ".github/workflows/pages.yml"]
   workflow_dispatch:
 
 permissions:

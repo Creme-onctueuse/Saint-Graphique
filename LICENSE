@@ -21,6 +21,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 ---
-Les données dans data/ restent soumises à la licence de leur source
-(INSEE : Licence Ouverte Etalab 2.0 ; instituts de sondage : citation obligatoire).
-Voir data/SOURCES.md.
+La licence MIT ci-dessus couvre le code. Elle ne couvre PAS les données, qui restent
+soumises aux conditions de leur source (voir data/SOURCES.md) :
+
+- INSEE : Licence Ouverte / Open Licence 2.0 (Etalab), avec citation de la source.
+- Ifop : les rapports dont sont tirés data/elections/, les coordonnées d'électorats de
+  data/computed/ et pipeline/sources/manual/ indiquent : « Aucune publication totale ou
+  partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'est
+  documenté à ce jour : ces fichiers ne sont pas placés sous licence libre et leur
+  publication reste une question ouverte.
