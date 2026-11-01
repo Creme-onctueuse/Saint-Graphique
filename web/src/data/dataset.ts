@@ -31,6 +31,8 @@ export interface MethodInfo {
   description: string;
   /** Paramètres par défaut (index.json ou config), sinon ceux du premier fichier calculé. */
   params: Record<string, unknown> | null;
+  /** Méthode exploratoire : signalée comme telle dans l'interface. */
+  exploratory: boolean;
   /** Élections disposant de coordonnées précalculées pour cette méthode. */
   elections: Set<string>;
 }
@@ -98,6 +100,10 @@ const METHOD_LABELS: Record<string, string> = {
   continuous: 'Valeurs continues',
   mca: 'ACM (terciles)',
 };
+
+/** Méthodes exploratoires, en plus de celles que index.json marque `exploratory: true`. */
+const EXPLORATORY_METHODS: ReadonlySet<string> = new Set(['mca']);
+const EXPLORATORY_SUFFIX = ' (exploratoire)';
 
 const DEFAULT_GROUP_LABELS: Record<string, string> = {
   '1': 'Agriculteurs exploitants',
@@ -292,14 +298,19 @@ export function asRawPcs(v: unknown): RawPcsData | null {
     if (!code || !group || population === null || nv === null || pat === null || !diplomes) {
       return null;
     }
-    items.push({
+    const item: RawPcsItem = {
       code,
       group,
       population,
       niveau_vie_mensuel_eur: nv,
       patrimoine_keur: pat,
       diplomes,
-    });
+    };
+    const nvStatus = str(it['niveau_vie_status']);
+    if (nvStatus) item.niveau_vie_status = nvStatus;
+    const patStatus = str(it['patrimoine_status']);
+    if (patStatus) item.patrimoine_status = patStatus;
+    items.push(item);
   }
   return {
     nomenclature: str(v['nomenclature']) ?? '',
@@ -477,6 +488,7 @@ export function buildDataset(files: Readonly<Record<string, unknown>>): Dataset 
         label: METHOD_LABELS[id] ?? humanize(id),
         description: '',
         params: null,
+        exploratory: EXPLORATORY_METHODS.has(id),
         elections: new Set(),
       };
       methodMap.set(id, m);
@@ -489,6 +501,7 @@ export function buildDataset(files: Readonly<Record<string, unknown>>): Dataset 
     if (label) m.label = label;
     const description = str(r['description']);
     if (description) m.description = description;
+    if (r['exploratory'] === true) m.exploratory = true;
     if (isRec(r['params'])) m.params = r['params'];
     else if ('y_weights' in r || 'x_score' in r) m.params = r;
   };
@@ -500,6 +513,9 @@ export function buildDataset(files: Readonly<Record<string, unknown>>): Dataset 
     const m = ensureMethod(file.method);
     m.elections.add(file.election_id);
     if (!m.params && Object.keys(file.params).length > 0) m.params = file.params;
+  }
+  for (const m of methodMap.values()) {
+    if (m.exploratory && !m.label.includes('exploratoire')) m.label += EXPLORATORY_SUFFIX;
   }
   const declared = new Set(indexMethodEntries.map((e) => e.id));
   const methods = [...methodMap.values()].sort((a, b) => {

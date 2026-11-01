@@ -41,6 +41,8 @@ export interface ExportMeta {
   /** Avertissement à faire figurer sur l'image (données fictives). */
   warning: string | null;
   legend: LegendEntry[];
+  /** Réserves et sources : une image circule sans la page, elle doit les porter elle-même. */
+  notes: string[];
   credit: string;
 }
 
@@ -223,8 +225,17 @@ export function buildExportSvg(source: SVGSVGElement, meta: ExportMeta): Exporte
     cursorX += w;
   }
 
-  // Crédits
+  // Réserves et sources
   setFont(11, 400);
+  y += 8;
+  for (const note of meta.notes) {
+    for (const line of wrap(measure, note, 11, inner)) {
+      y += 15;
+      parts.push(svgEl('text', { x: pad, y, fill: ink, 'font-size': 11 }, line));
+    }
+  }
+
+  // Crédits
   y += 8;
   for (const line of wrap(measure, meta.credit, 11, inner)) {
     y += 15;

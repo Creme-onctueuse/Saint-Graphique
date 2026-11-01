@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { circlePenetration, placeLabels, rectsOverlap, type LabelItem } from './labels.ts';
+import {
+  circlePenetration,
+  LABEL_LINE_HEIGHT,
+  placeLabels,
+  rectsOverlap,
+  segmentHitsRect,
+  segmentsCross,
+  type LabelItem,
+  type Obstacle,
+} from './labels.ts';
 import { diamondPath } from './shapes.ts';
 
 const bounds = { x: 0, y: 0, w: 400, h: 400 };
@@ -32,7 +41,7 @@ describe('placeLabels', () => {
     const placed = [...placeLabels(items, [], bounds, measure).values()].filter((p) => p.visible);
     expect(placed.length).toBeGreaterThan(1);
     const w = measure('Libellé', 12);
-    const h = 12 * 1.2;
+    const h = 12 * LABEL_LINE_HEIGHT;
     for (let i = 0; i < placed.length; i++) {
       for (let j = i + 1; j < placed.length; j++) {
         const a = placed[i];
@@ -62,12 +71,127 @@ describe('placeLabels', () => {
   });
 });
 
+describe('groupe dense (cas de la présidentielle)', () => {
+  // Treize repères serrés, comme les électorats au centre du graphique.
+  const positions: [number, number][] = [
+    [200, 200],
+    [210, 190],
+    [190, 210],
+    [220, 205],
+    [185, 190],
+    [205, 215],
+    [215, 180],
+    [195, 180],
+    [225, 195],
+    [180, 205],
+    [200, 225],
+    [230, 215],
+    [175, 180],
+  ];
+  const items: LabelItem[] = positions.map(([cx, cy], i) => ({
+    ...label(`c${i}`, cx, cy, 100 - i),
+    reach: 152,
+    weight: 650,
+  }));
+  const obstacles: Obstacle[] = items.map((it) => ({
+    key: it.key,
+    cx: it.cx,
+    cy: it.cy,
+    r: it.r,
+    strong: true,
+  }));
+  const w = measure('Libellé', 12);
+  const h = 12 * LABEL_LINE_HEIGHT;
+  const placed = [...placeLabels(items, obstacles, bounds, measure).values()];
+
+  it('place tous les libellés, sans aucun chevauchement', () => {
+    expect(placed.every((p) => p.visible)).toBe(true);
+    for (let i = 0; i < placed.length; i++) {
+      for (let j = i + 1; j < placed.length; j++) {
+        const a = placed[i];
+        const b = placed[j];
+        if (a && b) expect(rectsOverlap(boxOf(a, w, h), boxOf(b, w, h))).toBe(false);
+      }
+    }
+  });
+
+  it('ne recouvre aucun losange du groupe', () => {
+    for (const p of placed) {
+      const box = boxOf(p, w, h);
+      for (const o of obstacles) expect(circlePenetration(o, box)).toBe(0);
+    }
+  });
+
+  it('relie les libellés écartés à leur repère par une ligne de rappel', () => {
+    const withLeader = placed.filter((p) => p.leader !== null);
+    expect(withLeader.length).toBeGreaterThan(0);
+    for (const p of withLeader) {
+      const it = items.find((i) => i.key === p.key);
+      if (!it || !p.leader) continue;
+      // La ligne part du bord du repère et arrive sur le libellé.
+      expect(Math.hypot(p.leader.x1 - it.cx, p.leader.y1 - it.cy)).toBeCloseTo(it.r, 6);
+      expect(
+        circlePenetration({ cx: p.leader.x2, cy: p.leader.y2, r: 0.01 }, boxOf(p, w, h)),
+      ).toBeGreaterThan(0);
+    }
+  });
+
+  it('évite que les lignes de rappel se croisent', () => {
+    const leaders = placed.flatMap((p) => (p.leader ? [p.leader] : []));
+    let crossings = 0;
+    for (let i = 0; i < leaders.length; i++) {
+      for (let j = i + 1; j < leaders.length; j++) {
+        const a = leaders[i];
+        const b = leaders[j];
+        if (a && b && segmentsCross(a, b)) crossings++;
+      }
+    }
+    expect(crossings).toBe(0);
+  });
+
+  it('est déterministe', () => {
+    const again = [...placeLabels(items, obstacles, bounds, measure).values()];
+    expect(again).toEqual(placed);
+  });
+
+  it('reste valide sans passe de déplacement (pendant un zoom)', () => {
+    const quick = [...placeLabels(items, obstacles, bounds, measure, { passes: 0 }).values()];
+    expect(quick.filter((p) => p.visible).length).toBeGreaterThan(0);
+  });
+});
+
+describe('lignes de rappel', () => {
+  it('n’en met pas quand le libellé touche son repère', () => {
+    const p = placeLabels([{ ...label('a', 100, 100), reach: 152 }], [], bounds, measure).get('a');
+    expect(p?.leader).toBeNull();
+  });
+
+  it('respecte la portée : sans portée, le libellé reste au contact ou se masque', () => {
+    const cloud = Array.from({ length: 30 }, (_, i) => label(`l${i}`, 200, 200, 30 - i));
+    const result = [...placeLabels(cloud, [], bounds, measure).values()];
+    expect(result.every((p) => p.leader === null)).toBe(true);
+  });
+});
+
 describe('utilitaires géométriques', () => {
+  it('détecte le croisement de deux segments', () => {
+    const a = { x1: 0, y1: 0, x2: 10, y2: 10 };
+    expect(segmentsCross(a, { x1: 0, y1: 10, x2: 10, y2: 0 })).toBe(true);
+    expect(segmentsCross(a, { x1: 20, y1: 0, x2: 30, y2: 10 })).toBe(false);
+  });
+
+  it('détecte un segment qui traverse un rectangle', () => {
+    const r = { x: 10, y: 10, w: 10, h: 10 };
+    expect(segmentHitsRect({ x1: 0, y1: 15, x2: 30, y2: 15 }, r)).toBe(true);
+    expect(segmentHitsRect({ x1: 0, y1: 0, x2: 5, y2: 5 }, r)).toBe(false);
+    expect(segmentHitsRect({ x1: 0, y1: 5, x2: 30, y2: 5 }, r)).toBe(false);
+  });
+
   it('mesure la pénétration d’un disque dans un rectangle', () => {
     const rect = { x: 10, y: 10, w: 10, h: 10 };
-    expect(circlePenetration({ key: 'a', cx: 0, cy: 15, r: 5 }, rect)).toBe(0);
-    expect(circlePenetration({ key: 'a', cx: 7, cy: 15, r: 5 }, rect)).toBe(2);
-    expect(circlePenetration({ key: 'a', cx: 15, cy: 15, r: 5 }, rect)).toBe(5);
+    expect(circlePenetration({ cx: 0, cy: 15, r: 5 }, rect)).toBe(0);
+    expect(circlePenetration({ cx: 7, cy: 15, r: 5 }, rect)).toBe(2);
+    expect(circlePenetration({ cx: 15, cy: 15, r: 5 }, rect)).toBe(5);
   });
 
   it('dessine un losange centré', () => {

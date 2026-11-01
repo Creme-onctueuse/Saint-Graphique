@@ -5,7 +5,7 @@
  * computeLayout() s'occupe du reste : scores, parts de population, barycentre de la population,
  * coordonnées des PCS de niveau 1 et des électorats.
  *
- * Ajouter une méthode : appeler registerClientMethod({ id, label, placeAxis }) avec le même `id`
+ * Ajouter une méthode : appeler registerClientMethod({ id, label, ranked, placeAxis }) avec le même `id`
  * que dans config/methods.yaml, puis ajouter un cas de parité (pipeline/build.py, PARITY_METHODS).
  *
  * Algorithme reconstruit par JnthnBS (https://github.com/JnthnBS/saint-graphique), réimplémenté
@@ -50,6 +50,8 @@ export interface MethodParams {
 export interface ClientMethod {
   readonly id: string;
   readonly label: string;
+  /** Vrai si le placement passe par des rangs : l'ordre des ex æquo y est alors arbitraire. */
+  readonly ranked: boolean;
   /** Projette les scores bruts d'un axe sur l'intervalle `range`. */
   placeAxis(items: readonly ScoredItem[], range: Range): Map<string, number>;
 }
@@ -128,12 +130,14 @@ export function getClientMethod(id: string): ClientMethod | undefined {
 registerClientMethod({
   id: 'ranks_chris_v1',
   label: 'Rangs (réplique Chris v1)',
+  ranked: true,
   placeAxis: (items, range) => rankCoords(items, range),
 });
 
 registerClientMethod({
   id: 'continuous',
   label: 'Valeurs continues',
+  ranked: false,
   placeAxis: (items, range) => continuousCoords(items, range),
 });
 

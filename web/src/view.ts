@@ -12,13 +12,15 @@ import type { ChartCandidate, ChartModel, ChartPcs } from './chart/chart.ts';
 import {
   computeLayout,
   defaultParamsFor,
+  getClientMethod,
   isClientComputable,
   normalizeParams,
   RETIRED_CODE,
   type Layout,
   type MethodParams,
 } from './core/methods.ts';
-import { sameWeights } from './core/scores.ts';
+import { countStatuses, findTies, parseStatus, xAxisReserve, type Tie } from './core/reserves.ts';
+import { computeScores, sameWeights } from './core/scores.ts';
 import type { AppState } from './core/state.ts';
 import {
   POPULATION_ID,
@@ -26,6 +28,7 @@ import {
   type Point,
   type RawCandidate,
   type RawElection,
+  type SourceRef,
 } from './core/types.ts';
 import { computedKey, type Dataset, type MethodInfo } from './data/dataset.ts';
 
@@ -51,6 +54,10 @@ export interface ResolvedView {
   rawElection: RawElection | null;
   /** Informations à montrer à l'utilisateur. */
   notes: string[];
+  /** Réserves visibles en permanence à côté du graphique. */
+  reserves: string[];
+  /** Sources lues dans les données brutes : sondage de l'élection, données sur les PCS. */
+  sources: { poll: SourceRef[]; pcs: SourceRef[] };
 }
 
 /** Méthodes utilisables : avec fichiers précalculés, ou recalculables depuis les données brutes. */
@@ -127,7 +134,48 @@ function groupLabel(ds: Dataset, code: string): string {
   return ds.groups.get(code)?.label ?? `Groupe ${code}`;
 }
 
-function pcsFromFile(ds: Dataset, file: ComputedFile): ChartPcs[] {
+type PcsExtras = (code: string) => Pick<ChartPcs, 'status' | 'notes'>;
+
+function nameList(names: readonly string[]): string {
+  if (names.length < 2) return names.join('');
+  return `${names.slice(0, -1).join(', ')} et ${names.at(-1) ?? ''}`;
+}
+
+function axisName(ds: Dataset, tie: Tie): string {
+  return tie.axis === 'x' ? ds.axes.xLabel : ds.axes.yLabel;
+}
+
+/** Ex æquo de la méthode affichée, calculés depuis les scores et les poids effectifs. */
+function tiesOf(ds: Dataset, method: MethodInfo, params: MethodParams): Tie[] {
+  if (!ds.rawPcs || !isClientComputable(method.id, params)) return [];
+  try {
+    return findTies(computeScores(ds.rawPcs.items, params.y_weights, params.retired_y_override));
+  } catch {
+    return [];
+  }
+}
+
+function pcsName(ds: Dataset, code: string): string {
+  return ds.pcsMeta.get(code)?.short ?? code;
+}
+
+function tieReserve(ds: Dataset, tie: Tie, ranked: boolean): string {
+  const names = nameList(tie.codes.map((c) => pcsName(ds, c)));
+  const consequence = ranked
+    ? 'leur ordre est arbitraire (départage par code PCS)'
+    : 'elles ont donc la même position sur cet axe';
+  return `Ex æquo sur l'axe ${axisName(ds, tie)} : ${names} ont le même score ; ${consequence}.`;
+}
+
+function tieNote(ds: Dataset, tie: Tie, code: string, ranked: boolean): string {
+  const others = nameList(tie.codes.filter((c) => c !== code).map((c) => pcsName(ds, c)));
+  const consequence = ranked
+    ? 'ordre arbitraire (départage par code PCS)'
+    : 'même position sur cet axe';
+  return `Ex æquo sur l'axe ${axisName(ds, tie)} avec ${others} : ${consequence}.`;
+}
+
+function pcsFromFile(ds: Dataset, file: ComputedFile, extras: PcsExtras): ChartPcs[] {
   return file.pcs.map((p) => {
     const meta = ds.pcsMeta.get(p.code);
     return {
@@ -140,11 +188,12 @@ function pcsFromFile(ds: Dataset, file: ComputedFile): ChartPcs[] {
       x: p.x,
       y: p.y,
       weight: p.weight,
+      ...extras(p.code),
     };
   });
 }
 
-function pcsFromLayout(ds: Dataset, layout: Layout): ChartPcs[] {
+function pcsFromLayout(ds: Dataset, layout: Layout, extras: PcsExtras): ChartPcs[] {
   return layout.pcs.map((p) => {
     const meta = ds.pcsMeta.get(p.code);
     const label = meta?.label ?? p.code;
@@ -158,6 +207,7 @@ function pcsFromLayout(ds: Dataset, layout: Layout): ChartPcs[] {
       x: p.x,
       y: p.y,
       weight: p.weight,
+      ...extras(p.code),
     };
   });
 }
@@ -240,12 +290,35 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
     ? ds.populationLabel
     : (ds.elections.find((e) => e.id === electionId)?.label ?? electionId);
 
+  // Réserves : statuts comptés dans les données brutes, ex æquo calculés depuis les scores.
+  const rawItems = new Map((ds.rawPcs?.items ?? []).map((it) => [it.code, it]));
+  const ties = tiesOf(ds, method, params);
+  const ranked = getClientMethod(method.id)?.ranked ?? false;
+  const extras: PcsExtras = (code) => {
+    const raw = rawItems.get(code);
+    return {
+      status: {
+        patrimoine: parseStatus(raw?.patrimoine_status),
+        niveauVie: parseStatus(raw?.niveau_vie_status),
+      },
+      notes: ties.filter((t) => t.codes.includes(code)).map((t) => tieNote(ds, t, code, ranked)),
+    };
+  };
+  const axisReserve = xAxisReserve(
+    ds.rawPcs ? countStatuses(ds.rawPcs.items) : null,
+    ds.axes.xLabel,
+  );
+  const reserves = [
+    ...(axisReserve ? [axisReserve] : []),
+    ...ties.map((t) => tieReserve(ds, t, ranked)),
+  ];
+
   let pcs: ChartPcs[];
   let candidates: ChartCandidate[] = [];
   let barycenter: Point | null;
   let range: [number, number];
   if (layout) {
-    pcs = pcsFromLayout(ds, layout);
+    pcs = pcsFromLayout(ds, layout, extras);
     barycenter = layout.population_barycenter;
     range = [params.range[0], params.range[1]];
     if (rawElection) {
@@ -259,7 +332,7 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
       notes.push('Ellipses de confiance masquées : elles ne valent que pour les poids d’origine.');
     }
   } else if (fallbackFile) {
-    pcs = pcsFromFile(ds, fallbackFile);
+    pcs = pcsFromFile(ds, fallbackFile, extras);
     barycenter = fallbackFile.population_barycenter;
     range = fallbackFile.axes.range;
     if (exact) {
@@ -310,5 +383,7 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
     hasEllipses: candidates.some((c) => c.ellipse !== null),
     rawElection,
     notes,
+    reserves,
+    sources: { poll: rawElection?.sources ?? [], pcs: ds.rawPcs?.sources ?? [] },
   };
 }

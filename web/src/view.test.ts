@@ -146,6 +146,8 @@ describe('sans données brutes (index.json de WP3 seul)', () => {
     expect(view?.source).toBe('precomputed');
     expect(view?.canRecompute).toBe(false);
     expect(view?.recomputeBlock).toMatch(/brutes/);
+    expect(view?.reserves[0]).toContain('statut inconnu');
+    expect(view?.sources).toEqual({ poll: [], pcs: [] });
     expect(view?.hasEllipses).toBe(true);
     expect(view?.model.candidates[0]?.composition).toBeNull();
   });
@@ -169,6 +171,82 @@ describe('recalcul quand le fichier précalculé manque', () => {
     expect(view?.source).toBe('client');
     expect(view?.customized).toBe(false);
     expect(view?.model.candidates.length).toBeGreaterThan(0);
+  });
+});
+
+describe('réserves de la page', () => {
+  it('compte les statuts de la fixture et signale les valeurs imputées', () => {
+    const view = buildView(ds, state());
+    expect(view?.reserves[0]).toMatch(/axe Exploitation : \d+ valeurs? imputées?/);
+    const p = view?.model.pcs[0];
+    expect(['published', 'imputed']).toContain(p?.status.patrimoine);
+  });
+
+  it('calcule les ex æquo depuis les scores, avec un ordre arbitraire pour les rangs', () => {
+    const view = buildView(ds, state());
+    const reserve = view?.reserves.find((r) => r.startsWith('Ex æquo'));
+    expect(reserve).toContain('axe Exploitation');
+    expect(reserve).toContain('OQ industriels');
+    expect(reserve).toContain('OQ artisanaux');
+    expect(reserve).toContain('arbitraire (départage par code PCS)');
+    const tied = view?.model.pcs.find((p) => p.code === '63');
+    expect(tied?.notes[0]).toContain('OQ industriels');
+    expect(tied?.notes[0]).toContain('arbitraire');
+    expect(view?.model.pcs.find((p) => p.code === '10')?.notes).toEqual([]);
+  });
+
+  it('n’annonce pas d’ordre arbitraire pour une méthode sans rangs', () => {
+    const view = buildView(ds, state({ method: 'continuous' }));
+    const reserve = view?.reserves.find((r) => r.startsWith('Ex æquo'));
+    expect(reserve).toContain('même position');
+    expect(reserve).not.toContain('arbitraire');
+  });
+
+  it('recalcule les ex æquo avec les poids de l’utilisateur', () => {
+    const nul = { bac5: 0, bac3: 0, bac2: 0, bac: 0, cap: 0, brevet: 0, certif_aucun: 0 };
+    const view = buildView(ds, state({ weights: nul }));
+    expect(view?.reserves.some((r) => r.includes('axe Domination'))).toBe(true);
+  });
+
+  it('expose les sources du sondage et celles des PCS, lues dans les données', () => {
+    const view = buildView(ds, state());
+    expect(view?.sources.poll.length).toBeGreaterThan(0);
+    expect(view?.sources.pcs.length).toBeGreaterThan(0);
+    expect(buildView(ds, state({ election: 'population' }))?.sources.poll).toEqual([]);
+  });
+
+  it('fait disparaître la réserve de l’axe X sans valeur imputée', () => {
+    const raw = files['_raw/pcs.json'] as { items: Record<string, unknown>[] };
+    const clean = {
+      ...raw,
+      items: raw.items.map((it) => ({
+        ...it,
+        patrimoine_status: 'published',
+        niveau_vie_status: 'calculated',
+      })),
+    };
+    const view = buildView(buildDataset({ ...files, '_raw/pcs.json': clean }), state());
+    expect(view?.reserves.some((r) => r.startsWith('Réserve'))).toBe(false);
+    expect(view?.model.pcs[0]?.status.niveauVie).toBe('calculated');
+  });
+
+  it('signale « statut inconnu » tant que les champs manquent, sans rien inventer', () => {
+    const raw = files['_raw/pcs.json'] as { items: Record<string, unknown>[] };
+    const bare = {
+      ...raw,
+      items: raw.items.map(({ patrimoine_status: _p, niveau_vie_status: _n, ...rest }) => rest),
+    };
+    const view = buildView(buildDataset({ ...files, '_raw/pcs.json': bare }), state());
+    expect(view?.reserves[0]).toContain('statut inconnu');
+    expect(view?.model.pcs[0]?.status).toEqual({ patrimoine: 'unknown', niveauVie: 'unknown' });
+  });
+
+  it('marque l’ACM « exploratoire » dans son libellé', () => {
+    const d = buildDataset({ 'index.json': { methods: [{ id: 'mca', label: 'ACM (terciles)' }] } });
+    const mca = d.methods.find((m) => m.id === 'mca');
+    expect(mca?.label).toBe('ACM (terciles) (exploratoire)');
+    expect(mca?.exploratory).toBe(true);
+    expect(ds.methods.find((m) => m.id === 'ranks_chris_v1')?.exploratory).toBe(false);
   });
 });
 

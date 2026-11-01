@@ -1,5 +1,6 @@
 /** Tableaux des données : même information que le graphique, sans dépendre de la vue ni du survol. */
 import { formatNumber, formatPct } from '../core/format.ts';
+import { formatStatus } from '../core/reserves.ts';
 import type { ResolvedView } from '../view.ts';
 import { el } from './dom.ts';
 
@@ -37,6 +38,8 @@ export function renderTables(host: HTMLElement, view: ResolvedView): void {
       ['Part de la population', true],
       [x, true],
       [y, true],
+      ['Patrimoine', false],
+      ['Niveau de vie', false],
     ]),
     el(
       'tbody',
@@ -53,6 +56,8 @@ export function renderTables(host: HTMLElement, view: ResolvedView): void {
             cell(formatPct(p.weight), true),
             cell(formatNumber(p.x), true),
             cell(formatNumber(p.y), true),
+            cell(formatStatus(p.status.patrimoine)),
+            cell(formatStatus(p.status.niveauVie)),
           ),
         ),
     ),

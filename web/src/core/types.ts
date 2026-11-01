@@ -48,6 +48,9 @@ export interface RawPcsItem {
   niveau_vie_mensuel_eur: number;
   patrimoine_keur: number;
   diplomes: DiplomaShares;
+  /** Statut de la valeur : published, imputed ou calculated (schemas/pcs.schema.json). */
+  niveau_vie_status?: string;
+  patrimoine_status?: string;
   source_refs?: string[];
   notes?: string;
 }

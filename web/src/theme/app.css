@@ -285,6 +285,29 @@ p {
   width: 8px;
 }
 
+.sg-reserves {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 10px;
+  border-left: 3px solid var(--sg-warning-border);
+  background: var(--sg-warning-bg);
+  color: var(--sg-warning-text);
+  font-size: 0.84rem;
+}
+
+.sg-sources {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: var(--sg-text-muted);
+  font-size: 0.82rem;
+}
+
+.sg-sources__label {
+  font-weight: 650;
+}
+
 .sg-hint,
 .sg-status {
   color: var(--sg-text-muted);
@@ -402,6 +425,12 @@ p {
   fill: var(--sg-barycenter);
 }
 
+.sg-leader {
+  stroke: var(--sg-leader);
+  stroke-width: 1;
+  pointer-events: none;
+}
+
 .sg-label {
   fill: var(--sg-label);
   font-size: 11.5px;
@@ -463,6 +492,12 @@ p {
 
 .sg-tooltip__section {
   margin-top: 6px;
+}
+
+.sg-tooltip__note {
+  margin-top: 6px;
+  color: var(--sg-tooltip-muted);
+  font-size: 0.76rem;
 }
 
 .sg-tooltip__rows {

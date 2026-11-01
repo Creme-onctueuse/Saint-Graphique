@@ -20,8 +20,9 @@ import {
   type ZoomTransform,
 } from 'd3-zoom';
 import { formatNumber, formatPct } from '../core/format.ts';
+import { formatStatus, type ValueStatus } from '../core/reserves.ts';
 import type { Ellipse, Point } from '../core/types.ts';
-import { placeLabels, type Anchor, type LabelItem, type Obstacle } from './labels.ts';
+import { placeLabels, type Anchor, type LabelItem, type Obstacle, type Segment } from './labels.ts';
 import { clamp, diamondPath } from './shapes.ts';
 import { CHART_STYLE, CHART_TEXT } from './style.ts';
 import { Tooltip, type TooltipContent } from './tooltip.ts';
@@ -38,6 +39,10 @@ export interface ChartPcs {
   y: number;
   /** Part de la population (%). */
   weight: number;
+  /** Statut des valeurs qui fondent l'axe X. */
+  status: { patrimoine: ValueStatus; niveauVie: ValueStatus };
+  /** Réserves propres à cette PCS (ex æquo), affichées dans l'infobulle. */
+  notes: string[];
 }
 
 export interface ChartCandidate {
@@ -104,6 +109,7 @@ interface LabelDatum {
   visible: boolean;
   font: number;
   candidate: boolean;
+  leader: Segment | null;
 }
 
 interface Tick {
@@ -175,6 +181,7 @@ export class SaintChart {
   private readonly pcsLayer: G;
   private readonly baryLayer: G;
   private readonly candLayer: G;
+  private readonly leaderLayer: G;
   private readonly labelLayer: G;
   private readonly axes: G;
   private readonly above: G;
@@ -198,6 +205,8 @@ export class SaintChart {
   private focusedKey: string | null = null;
   private hoverKey: string | null = null;
   private measureCtx: CanvasRenderingContext2D | null | undefined;
+  private readonly textWidths = new Map<string, number>();
+  private zooming = false;
   private fontFamily = 'sans-serif';
 
   constructor(host: HTMLElement) {
@@ -250,6 +259,11 @@ export class SaintChart {
       .attr('class', 'sg-cand-layer')
       .attr('role', 'group')
       .attr('aria-label', 'Électorats');
+    this.leaderLayer = this.plot
+      .append('g')
+      .attr('class', 'sg-leaders')
+      .attr('clip-path', clip)
+      .attr('aria-hidden', 'true');
     this.labelLayer = this.plot
       .append('g')
       .attr('class', 'sg-labels')
@@ -268,6 +282,14 @@ export class SaintChart {
     this.zoomBehavior = zoom<SVGGElement, unknown>()
       .scaleExtent(CHART_STYLE.zoomExtent)
       .filter((event: Event) => this.zoomFilter(event))
+      .on('start', () => {
+        this.zooming = true;
+      })
+      .on('end', () => {
+        // Le placement complet des libellés est refait quand le geste est fini.
+        this.zooming = false;
+        this.draw('fast');
+      })
       .on('zoom', (event: D3ZoomEvent<SVGGElement, unknown>) => {
         this.transform = event.transform;
         // Une fois zoomé, un doigt déplace le graphique ; sinon il fait défiler la page.
@@ -679,7 +701,9 @@ export class SaintChart {
         'aria-label',
         (d) =>
           `${d.label} (${d.groupLabel}) : ${formatPct(d.weight)} de la population, ` +
-          `${model?.xLabel ?? 'x'} ${formatNumber(d.x)}, ${model?.yLabel ?? 'y'} ${formatNumber(d.y)}`,
+          `${model?.xLabel ?? 'x'} ${formatNumber(d.x)}, ${model?.yLabel ?? 'y'} ${formatNumber(d.y)}` +
+          `, patrimoine : ${formatStatus(d.status.patrimoine)}` +
+          `, niveau de vie : ${formatStatus(d.status.niveauVie)}`,
       )
       .style('fill', (d) => `var(--sg-group-${d.group}, ${d.color})`);
     setAttrs(all, duration, {
@@ -754,6 +778,15 @@ export class SaintChart {
   }
 
   private measure = (text: string, font: number, weight: number): number => {
+    const key = `${weight}|${font}|${this.fontFamily}|${text}`;
+    const known = this.textWidths.get(key);
+    if (known !== undefined) return known;
+    const width = this.measureText(text, font, weight);
+    this.textWidths.set(key, width);
+    return width;
+  };
+
+  private measureText(text: string, font: number, weight: number): number {
     if (this.measureCtx === undefined) {
       try {
         this.measureCtx = document.createElement('canvas').getContext('2d');
@@ -765,7 +798,7 @@ export class SaintChart {
     if (!ctx) return text.length * font * (weight >= 600 ? 0.6 : 0.55);
     ctx.font = `${weight} ${font}px ${this.fontFamily}`;
     return ctx.measureText(text).width;
-  };
+  }
 
   private drawLabels(
     pcs: ChartPcs[],
@@ -792,6 +825,7 @@ export class SaintChart {
         cx: x(c.x),
         cy: y(c.y),
         r: this.candHalf(c) * 0.85,
+        strong: true,
       })),
     ];
     const items: LabelItem[] = [];
@@ -808,6 +842,7 @@ export class SaintChart {
         priority: 1000 + (c.share ?? 0),
         font: candFont,
         weight: 650,
+        reach: small ? CHART_STYLE.candidateLabelReachSmall : CHART_STYLE.candidateLabelReach,
       });
     }
     for (const p of pcs) {
@@ -823,9 +858,12 @@ export class SaintChart {
         priority: p.weight,
         font: pcsFont,
         weight: 400,
+        reach: small ? CHART_STYLE.pcsLabelReachSmall : CHART_STYLE.pcsLabelReach,
       });
     }
-    const placed = placeLabels(items, obstacles, { x: 0, y: 0, w: side, h: side }, this.measure);
+    const placed = placeLabels(items, obstacles, { x: 0, y: 0, w: side, h: side }, this.measure, {
+      passes: this.zooming ? 0 : CHART_STYLE.labelPasses,
+    });
     const data: LabelDatum[] = items.map((it) => {
       const p = placed.get(it.key);
       return {
@@ -837,7 +875,28 @@ export class SaintChart {
         visible: p?.visible ?? false,
         font: it.font,
         candidate: it.key.startsWith('c:'),
+        leader: p?.visible ? p.leader : null,
       };
+    });
+
+    const leaders = this.leaderLayer.selectAll<SVGLineElement, LabelDatum>('line.sg-leader').data(
+      data.filter((d) => d.leader !== null),
+      (d) => d.key,
+    );
+    exitSel(leaders.exit<LabelDatum>(), 'sg-leader', duration);
+    const enteredLeaders = leaders
+      .enter()
+      .append('line')
+      .attr('class', 'sg-leader')
+      .attr('x1', (d) => d.leader?.x1 ?? 0)
+      .attr('y1', (d) => d.leader?.y1 ?? 0)
+      .attr('x2', (d) => d.leader?.x1 ?? 0)
+      .attr('y2', (d) => d.leader?.y1 ?? 0);
+    setAttrs(enteredLeaders.merge(leaders), duration, {
+      x1: (d) => d.leader?.x1 ?? 0,
+      y1: (d) => d.leader?.y1 ?? 0,
+      x2: (d) => d.leader?.x2 ?? 0,
+      y2: (d) => d.leader?.y2 ?? 0,
     });
 
     const sel = this.labelLayer
@@ -1045,7 +1104,10 @@ export class SaintChart {
         ['Part de la population', formatPct(d.weight)],
         [m?.xLabel ?? 'x', formatNumber(d.x)],
         [m?.yLabel ?? 'y', formatNumber(d.y)],
+        ['Patrimoine', formatStatus(d.status.patrimoine)],
+        ['Niveau de vie', formatStatus(d.status.niveauVie)],
       ],
+      notes: d.notes,
     };
   }
 

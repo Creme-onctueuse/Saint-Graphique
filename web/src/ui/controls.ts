@@ -25,6 +25,8 @@ export class Controls {
   sync(view: ResolvedView): void {
     this.election.value = view.electionId;
     this.method.value = view.method.id;
-    this.description.textContent = view.method.description;
+    this.description.textContent = view.method.exploratory
+      ? `Méthode exploratoire. ${view.method.description}`
+      : view.method.description;
   }
 }

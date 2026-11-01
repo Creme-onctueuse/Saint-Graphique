@@ -14,6 +14,7 @@ import { buildExportSvg, downloadBlob, pngBlob, svgBlob, type ExportMeta } from 
 import { Filters } from './ui/filters.ts';
 import { Legend } from './ui/legend.ts';
 import { MethodPanel } from './ui/methodPanel.ts';
+import { renderSources, sourceText } from './ui/sources.ts';
 import { renderTables } from './ui/table.ts';
 import { applyTheme, storedTheme, ThemeSwitch } from './ui/theme.ts';
 import { buildView, type ResolvedView } from './view.ts';
@@ -52,6 +53,8 @@ export function startApp(): void {
   const status = byId('sg-status');
   const live = byId('sg-live');
   const tables = byId('sg-data-tables');
+  const reserves = byId('sg-reserves');
+  const sources = byId('sg-sources');
 
   banner.textContent = SAMPLE_WARNING;
   banner.hidden = !ds.isSample;
@@ -149,6 +152,9 @@ export function startApp(): void {
     renderTables(tables, next);
     heading.textContent = next.electionLabel;
     status.textContent = next.notes.join(' ');
+    reserves.replaceChildren(...next.reserves.map((text) => el('p', { text })));
+    reserves.hidden = next.reserves.length === 0;
+    renderSources(sources, next);
     if (selectionChanged) live.textContent = `Affichage : ${next.model.title}.`;
     writeUrl();
   }
@@ -179,6 +185,12 @@ export function startApp(): void {
       subtitle: `Méthode : ${current.method.label}${current.customized ? ' (poids modifiés)' : ''}`,
       warning: ds.isSample ? SAMPLE_WARNING : null,
       credit: CREDIT,
+      notes: [
+        ...current.reserves,
+        ...[...current.sources.poll, ...current.sources.pcs].map(
+          (s) => `Source : ${sourceText(s)}`,
+        ),
+      ],
       legend: [
         ...[...groups.values()]
           .filter((p) => !hiddenGroups.has(p.group))

@@ -10,6 +10,8 @@ export interface TooltipContent {
   /** Mini-barres (ex. composition d'un électorat). */
   bars?: { label: string; value: number; display: string }[];
   barsTitle?: string;
+  /** Réserves affichées en fin d'infobulle. */
+  notes?: string[];
 }
 
 /** Rectangle du repère, en coordonnées de l'élément hôte. */
@@ -112,6 +114,12 @@ export class Tooltip {
         list.append(li);
       }
       nodes.push(list);
+    }
+    for (const text of c.notes ?? []) {
+      const note = document.createElement('p');
+      note.className = 'sg-tooltip__note';
+      note.textContent = text;
+      nodes.push(note);
     }
     this.el.replaceChildren(...nodes);
   }

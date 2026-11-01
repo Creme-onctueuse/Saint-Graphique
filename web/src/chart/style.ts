@@ -27,6 +27,13 @@ export const CHART_STYLE = {
   labelFontSmall: 10,
   candidateLabelFont: 12,
   candidateLabelFontSmall: 10.5,
+  /** Éloignement maximal des libellés, avec ligne de rappel (px). */
+  candidateLabelReach: 152,
+  candidateLabelReachSmall: 106,
+  pcsLabelReach: 26,
+  pcsLabelReachSmall: 16,
+  /** Passes de déplacement itératif des libellés (0 pendant un zoom, pour rester fluide). */
+  labelPasses: 2,
   axisFont: 11,
   axisTitleFont: 13,
   /** Distance (px) à laquelle le pointeur « attrape » un repère. */

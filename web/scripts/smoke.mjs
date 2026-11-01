@@ -169,6 +169,20 @@ async function main() {
     });
     writeFileSync(join(outDir, `${name}.png`), Buffer.from(data, 'base64'));
   };
+  /** Capture agrandie d'un élément, pour juger la lisibilité. */
+  const shotOf = async (name, selector, scale) => {
+    if (!outDir) return;
+    const clip = await evaluate(`(() => {
+      const r = document.querySelector('${selector}').getBoundingClientRect();
+      return { x: r.x + scrollX, y: r.y + scrollY, width: r.width, height: r.height };
+    })()`);
+    const { data } = await cdp.send('Page.captureScreenshot', {
+      format: 'png',
+      captureBeyondViewport: false,
+      clip: { ...clip, scale },
+    });
+    writeFileSync(join(outDir, `${name}.png`), Buffer.from(data, 'base64'));
+  };
   const navigate = async (url) => {
     const loaded = new Promise((ok) => cdp.on('Page.loadEventFired', ok));
     await cdp.send('Page.navigate', { url });
@@ -212,6 +226,40 @@ async function main() {
     initial.overlay === devMode,
   );
   await shot('01-clair');
+
+  // --- Réserves et sources visibles sans ouvrir de panneau ----------------------------------------
+  const reserved = await evaluate(`(() => {
+    const box = document.getElementById('sg-reserves');
+    const sources = document.getElementById('sg-sources');
+    const chart = document.getElementById('sg-chart-host').getBoundingClientRect();
+    const r = box.getBoundingClientRect();
+    const s = sources.getBoundingClientRect();
+    return {
+      reserveText: box.textContent,
+      reserveVisible: !box.hidden && r.height > 0,
+      aboveChart: r.bottom <= chart.top + 1,
+      sourcesBelow: s.top >= chart.bottom - 1,
+      links: [...sources.querySelectorAll('a')].map((a) => a.href),
+      sourcesText: sources.textContent,
+      fictional: !document.getElementById('sg-banner').hidden,
+      mca: [...document.querySelectorAll('#sg-method option')].find((o) => o.value === 'mca')?.textContent ?? null,
+    };
+  })()`);
+  check(
+    'réserve sur l’axe X au contact du graphique',
+    !reserved.reserveVisible || (reserved.aboveChart && /axe/.test(reserved.reserveText)),
+    reserved.reserveText,
+  );
+  check(
+    'sources sous le graphique, avec liens',
+    // La fixture fictive n'a pas d'URL : ses sources s'affichent en texte, sans lien.
+    reserved.sourcesBelow &&
+      reserved.sourcesText.length > 0 &&
+      (reserved.fictional || reserved.links.length >= 2),
+    reserved.sourcesText,
+  );
+  if (reserved.mca !== null)
+    check('ACM marquée exploratoire', reserved.mca.includes('exploratoire'), reserved.mca);
 
   // --- Mode calque (dev) : dépôt d'une image, puis calage en deux clics ---------------------------
   if (devMode) {
@@ -341,9 +389,83 @@ async function main() {
     tooltip.visible && tooltip.first.includes('Part de la population'),
     tooltip.first,
   );
+  check(
+    'statuts dans l’infobulle',
+    tooltip.first.includes('Patrimoine') && tooltip.first.includes('Niveau de vie'),
+    tooltip.first,
+  );
   check('flèches du clavier', tooltip.moved && tooltip.first !== tooltip.second);
   check('tabindex itinérant', tooltip.roving === 1, String(tooltip.roving));
   check('Échap masque l’infobulle', tooltip.hidden);
+
+  // Statuts et ex æquo : on parcourt toutes les infobulles de PCS réellement affichées.
+  const notes = await evaluate(`(() => {
+    const reserve = document.getElementById('sg-reserves').textContent;
+    const tip = document.querySelector('.sg-tooltip');
+    let tied = 0;
+    let imputed = 0;
+    let unknown = 0;
+    let firstTied = null;
+    let longest = null;
+    let longestLength = 0;
+    const overflowing = [];
+    const chart = document.querySelector('.sg-chart').getBoundingClientRect();
+    for (const point of document.querySelectorAll('.sg-pcs')) {
+      point.focus();
+      const text = tip.textContent;
+      const r = tip.getBoundingClientRect();
+      if (r.left < chart.left - 1 || r.right > chart.right + 1 || r.top < chart.top - 1 || r.bottom > chart.bottom + 1) {
+        overflowing.push(point.getAttribute('data-key'));
+      }
+      if (text.length > longestLength) {
+        longestLength = text.length;
+        longest = point.getAttribute('data-key');
+      }
+      if (text.includes('Ex æquo')) {
+        tied++;
+        firstTied ??= point.getAttribute('data-key');
+      }
+      if (text.includes('≈ imputé')) imputed++;
+      if (text.includes('statut inconnu')) unknown++;
+    }
+    document.activeElement.blur();
+    return {
+      tied,
+      imputed,
+      unknown,
+      firstTied,
+      longest,
+      overflowing,
+      reserveShown: !document.getElementById('sg-reserves').hidden,
+      reserveTies: reserve.includes('Ex æquo'),
+      reserveImputed: /valeurs? imputées?/.test(reserve),
+    };
+  })()`);
+  console.log(
+    `[smoke] infobulles : ${notes.imputed} PCS avec valeur imputée, ` +
+      `${notes.unknown} de statut inconnu, ${notes.tied} ex æquo ; ` +
+      `réserve ${notes.reserveShown ? 'affichée' : 'absente'}`,
+  );
+  // La réserve dépend des données : elle doit suivre ce que disent les infobulles, dans les deux sens.
+  check(
+    'réserve affichée si et seulement s’il y a imputation, statut inconnu ou ex æquo',
+    notes.reserveShown === (notes.imputed > 0 || notes.unknown > 0 || notes.tied > 0),
+    JSON.stringify(notes),
+  );
+  check('ex æquo dans l’infobulle si la réserve en annonce', !notes.reserveTies || notes.tied >= 2);
+  check('marqueur « imputé » si la réserve en annonce', !notes.reserveImputed || notes.imputed > 0);
+  check(
+    'infobulles contenues dans le graphique',
+    notes.overflowing.length === 0,
+    notes.overflowing.join(', '),
+  );
+  // Capture de l'infobulle la plus chargée : ex æquo s'il y en a, sinon le plus long libellé.
+  await evaluate(
+    `document.querySelector('.sg-pcs[data-key="${notes.firstTied ?? notes.longest}"]').focus()`,
+  );
+  await sleep(100);
+  await shot('03b-infobulle-pcs', false);
+  await evaluate('document.activeElement.blur()');
 
   // Survol réel à la souris d'un petit disque, puis d'un losange
   const hover = await evaluate(`(() => {
@@ -529,6 +651,68 @@ async function main() {
   await evaluate(`document.querySelectorAll('details').forEach((d) => { d.open = true; })`);
   await sleep(100);
   await shot('07-panneaux');
+
+  // --- Lisibilité : chevauchement réel des libellés rendus, à 1400 et 400 px --------------------
+  const labelAudit = `(() => {
+    const labels = [...document.querySelectorAll('.sg-label:not(.sg-exiting)')].filter((l) => Number(l.getAttribute('opacity')) > 0);
+    const boxes = labels.map((l) => ({ text: l.textContent, cand: l.classList.contains('sg-label--cand'), box: l.getBBox() }));
+    const overlaps = [];
+    for (let i = 0; i < boxes.length; i++) {
+      for (let j = i + 1; j < boxes.length; j++) {
+        const a = boxes[i].box;
+        const b = boxes[j].box;
+        if (a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height) {
+          overlaps.push(boxes[i].text + ' / ' + boxes[j].text);
+        }
+      }
+    }
+    const cands = document.querySelectorAll('.sg-cand').length;
+    return {
+      overlaps,
+      visibleCandidates: boxes.filter((b) => b.cand).length,
+      candidates: cands,
+      visiblePcs: boxes.filter((b) => !b.cand).length,
+      leaders: document.querySelectorAll('.sg-leader:not(.sg-exiting)').length,
+      hiddenCandidates: [...document.querySelectorAll('.sg-label--cand')].filter((l) => Number(l.getAttribute('opacity')) === 0).map((l) => l.textContent),
+    };
+  })()`;
+  await evaluate(`(() => {
+    document.querySelectorAll('details').forEach((d) => { d.open = false; });
+    const e = document.getElementById('sg-election');
+    const wanted = [...e.options].find((o) => o.value === '2022_presidentielle_t1') ?? e.options[e.options.length - 1];
+    e.value = wanted.value;
+    e.dispatchEvent(new Event('change', { bubbles: true }));
+    const m = document.getElementById('sg-method');
+    m.value = m.options[0].value;
+    m.dispatchEvent(new Event('change', { bubbles: true }));
+  })()`);
+  for (const [width, height, name] of [
+    [1400, 1500, '08-1400px'],
+    [400, 1300, '09-400px'],
+  ]) {
+    await setViewport(width, height);
+    await settle();
+    await shotOf(`${name}-graphique`, '.sg-svg', width >= 1000 ? 2 : 3);
+    const audit = await evaluate(labelAudit);
+    check(
+      `aucun libellé superposé à ${width} px`,
+      audit.overlaps.length === 0,
+      audit.overlaps.join(' | '),
+    );
+    if (width >= 1000)
+      check(
+        `tous les électorats étiquetés à ${width} px`,
+        audit.hiddenCandidates.length === 0,
+        audit.hiddenCandidates.join(', '),
+      );
+    console.log(
+      `[smoke] ${width} px : ${audit.visibleCandidates}/${audit.candidates} électorats étiquetés, ${audit.visiblePcs} PCS étiquetées, ${audit.leaders} lignes de rappel, ${audit.overlaps.length} superposition(s)` +
+        (audit.hiddenCandidates.length ? `, masqués : ${audit.hiddenCandidates.join(', ')}` : ''),
+    );
+    await shot(name);
+  }
+  await setViewport(1280, 1400);
+  await settle();
 
   // --- Bilan ------------------------------------------------------------------------------------
   check('aucune erreur ni avertissement en console', problems.length === 0, problems.join(' | '));

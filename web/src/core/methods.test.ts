@@ -107,6 +107,7 @@ describe('registre des méthodes', () => {
     registerClientMethod({
       id: 'test_axe_plat',
       label: 'Test',
+      ranked: false,
       placeAxis: (items) => new Map(items.map((it) => [it.code, 1])),
     });
     expect(getClientMethod('test_axe_plat')?.label).toBe('Test');

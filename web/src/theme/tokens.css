@@ -58,6 +58,7 @@
   --sg-label: #2a2a27;
   --sg-label-halo: #fcfcfb;
   --sg-ring: #fcfcfb;
+  --sg-leader: #85847d;
   --sg-cand-ring: #fcfcfb; /* contour clair en sombre : les couleurs de candidats sont imposées */
   --sg-pcs-opacity: 0.92;
   --sg-abstention: #2f2f2c;
@@ -112,6 +113,7 @@
     --sg-label: #e8e7e2;
     --sg-label-halo: #1a1a19;
     --sg-ring: #1a1a19;
+    --sg-leader: #8f8e87;
     --sg-cand-ring: #d8d7d0;
     --sg-abstention: #d8d7d0;
     --sg-barycenter: #f0efec;
@@ -155,6 +157,7 @@
   --sg-label: #e8e7e2;
   --sg-label-halo: #1a1a19;
   --sg-ring: #1a1a19;
+  --sg-leader: #8f8e87;
   --sg-cand-ring: #d8d7d0;
   --sg-abstention: #d8d7d0;
   --sg-barycenter: #f0efec;

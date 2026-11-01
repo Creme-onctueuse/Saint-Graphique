@@ -117,9 +117,19 @@ const items: RawPcsItem[] = pcsYaml.items.map((meta) => {
     niveau_vie_mensuel_eur: round(jitter(p.niveauVie, 0.25)),
     patrimoine_keur: round(jitter(p.patrimoine, 0.45)),
     diplomes: diplomas(p.diplomes),
+    patrimoine_status: rand() < 0.4 ? 'imputed' : 'published',
+    niveau_vie_status: rand() < 0.2 ? 'calculated' : 'published',
     source_refs: [FICTIONAL_SOURCE.id],
   };
 });
+
+// Ex æquo volontaire sur l'axe X, pour exercer la réserve correspondante.
+const tiedA = items.find((it) => it.code === '62');
+const tiedB = items.find((it) => it.code === '63');
+if (tiedA && tiedB) {
+  tiedB.niveau_vie_mensuel_eur = tiedA.niveau_vie_mensuel_eur;
+  tiedB.patrimoine_keur = tiedA.patrimoine_keur;
+}
 const rawPcs: RawPcsData = {
   nomenclature: 'PCS2003-N2',
   reference_year: 2099,
