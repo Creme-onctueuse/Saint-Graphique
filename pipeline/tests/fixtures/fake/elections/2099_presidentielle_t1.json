@@ -1,0 +1,100 @@
+{
+  "id": "2099_presidentielle_t1",
+  "type": "presidentielle",
+  "year": 2099,
+  "round": 1,
+  "label": "Présidentielle fictive 2099 (1er tour)",
+  "pcs_level": 1,
+  "sources": [
+    {
+      "id": "fake",
+      "title": "Données fictives générées par scripts/fake_data.py",
+      "publisher": "Saint-Graphique",
+      "url": "scripts/fake_data.py",
+      "accessed": "2026-10-31",
+      "license": "MIT",
+      "notes": "Chiffres inventés, uniquement pour les tests. Ne pas interpréter."
+    }
+  ],
+  "margin_pts": 3.0,
+  "candidates": [
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "is_abstention": true,
+      "national_share_pct": 25.3
+    },
+    {
+      "id": "candidat-a",
+      "label": "Candidat A",
+      "color": "#c9191e",
+      "national_share_pct": 23.3
+    },
+    {
+      "id": "candidate-b",
+      "label": "Candidate B",
+      "color": "#ffb000",
+      "national_share_pct": 20.4
+    },
+    {
+      "id": "candidat-c",
+      "label": "Candidat C",
+      "color": "#0066cc",
+      "national_share_pct": 33.0
+    },
+    {
+      "id": "candidate-d",
+      "label": "Candidate D",
+      "color": "#2e8b57",
+      "national_share_pct": 23.3
+    }
+  ],
+  "composition": {
+    "abstention": {
+      "1": 2.2,
+      "2": 7.4,
+      "3": 11.4,
+      "4": 24.0,
+      "5": 10.9,
+      "6": 14.7,
+      "7": 29.4
+    },
+    "candidat-a": {
+      "1": 1.0,
+      "2": 5.8,
+      "3": 4.5,
+      "4": 14.4,
+      "5": 24.0,
+      "6": 23.4,
+      "7": 26.9
+    },
+    "candidate-b": {
+      "1": 1.1,
+      "2": 2.9,
+      "3": 18.2,
+      "4": 4.4,
+      "5": 7.0,
+      "6": 7.8,
+      "7": 58.6
+    },
+    "candidat-c": {
+      "1": 1.2,
+      "2": 7.3,
+      "3": 3.7,
+      "4": 14.7,
+      "5": 7.8,
+      "6": 8.1,
+      "7": 57.2
+    },
+    "candidate-d": {
+      "1": 0.0,
+      "2": 3.3,
+      "3": 21.5,
+      "4": 26.5,
+      "5": 16.5,
+      "6": 7.4,
+      "7": 24.8
+    }
+  }
+}

@@ -1,0 +1,589 @@
+{
+  "nomenclature": "PCS2003-N2",
+  "reference_year": 2099,
+  "sources": [
+    {
+      "id": "fake",
+      "title": "Données fictives générées par scripts/fake_data.py",
+      "publisher": "Saint-Graphique",
+      "url": "scripts/fake_data.py",
+      "accessed": "2026-10-31",
+      "license": "MIT",
+      "notes": "Chiffres inventés, uniquement pour les tests. Ne pas interpréter."
+    }
+  ],
+  "items": [
+    {
+      "code": "10",
+      "group": "1",
+      "population": 476000,
+      "niveau_vie_mensuel_eur": 1974.0,
+      "patrimoine_keur": 595.2,
+      "diplomes": {
+        "bac5": 7.8,
+        "bac3": 4.4,
+        "bac2": 16.7,
+        "bac": 24.4,
+        "cap": 26.7,
+        "brevet": 3.3,
+        "certif_aucun": 16.7
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "21",
+      "group": "2",
+      "population": 924000,
+      "niveau_vie_mensuel_eur": 2288.0,
+      "patrimoine_keur": 508.5,
+      "diplomes": {
+        "bac5": 9.0,
+        "bac3": 9.8,
+        "bac2": 6.1,
+        "bac": 14.7,
+        "cap": 34.3,
+        "brevet": 4.9,
+        "certif_aucun": 21.2
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "22",
+      "group": "2",
+      "population": 714000,
+      "niveau_vie_mensuel_eur": 2420.0,
+      "patrimoine_keur": 351.0,
+      "diplomes": {
+        "bac5": 6.2,
+        "bac3": 14.5,
+        "bac2": 10.9,
+        "bac": 29.0,
+        "cap": 15.6,
+        "brevet": 3.1,
+        "certif_aucun": 20.7
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "23",
+      "group": "2",
+      "population": 462000,
+      "niveau_vie_mensuel_eur": 3531.0,
+      "patrimoine_keur": 1260.0,
+      "diplomes": {
+        "bac5": 4.8,
+        "bac3": 7.7,
+        "bac2": 8.7,
+        "bac": 29.0,
+        "cap": 29.0,
+        "brevet": 7.3,
+        "certif_aucun": 13.5
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "31",
+      "group": "3",
+      "population": 648000,
+      "niveau_vie_mensuel_eur": 3852.0,
+      "patrimoine_keur": 590.9,
+      "diplomes": {
+        "bac5": 46.7,
+        "bac3": 25.3,
+        "bac2": 8.6,
+        "bac": 8.6,
+        "cap": 3.9,
+        "brevet": 5.0,
+        "certif_aucun": 1.9
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "33",
+      "group": "3",
+      "population": 1572000,
+      "niveau_vie_mensuel_eur": 3120.0,
+      "patrimoine_keur": 477.0,
+      "diplomes": {
+        "bac5": 41.8,
+        "bac3": 31.4,
+        "bac2": 6.7,
+        "bac": 7.5,
+        "cap": 3.4,
+        "brevet": 4.6,
+        "certif_aucun": 4.6
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "34",
+      "group": "3",
+      "population": 1356000,
+      "niveau_vie_mensuel_eur": 3270.0,
+      "patrimoine_keur": 436.5,
+      "diplomes": {
+        "bac5": 44.6,
+        "bac3": 19.1,
+        "bac2": 10.2,
+        "bac": 14.0,
+        "cap": 3.2,
+        "brevet": 5.7,
+        "certif_aucun": 3.2
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "35",
+      "group": "3",
+      "population": 1032000,
+      "niveau_vie_mensuel_eur": 2820.0,
+      "patrimoine_keur": 409.5,
+      "diplomes": {
+        "bac5": 46.5,
+        "bac3": 25.2,
+        "bac2": 11.6,
+        "bac": 5.4,
+        "cap": 5.8,
+        "brevet": 2.0,
+        "certif_aucun": 3.5
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "37",
+      "group": "3",
+      "population": 1428000,
+      "niveau_vie_mensuel_eur": 2760.0,
+      "patrimoine_keur": 427.5,
+      "diplomes": {
+        "bac5": 48.7,
+        "bac3": 17.7,
+        "bac2": 7.9,
+        "bac": 10.6,
+        "cap": 4.9,
+        "brevet": 4.0,
+        "certif_aucun": 6.2
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "38",
+      "group": "3",
+      "population": 1620000,
+      "niveau_vie_mensuel_eur": 3060.0,
+      "patrimoine_keur": 378.0,
+      "diplomes": {
+        "bac5": 59.6,
+        "bac3": 11.5,
+        "bac2": 4.6,
+        "bac": 13.7,
+        "cap": 2.3,
+        "brevet": 4.6,
+        "certif_aucun": 3.7
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "42",
+      "group": "4",
+      "population": 793000,
+      "niveau_vie_mensuel_eur": 2475.0,
+      "patrimoine_keur": 202.8,
+      "diplomes": {
+        "bac5": 10.1,
+        "bac3": 14.2,
+        "bac2": 20.3,
+        "bac": 38.1,
+        "cap": 7.6,
+        "brevet": 4.6,
+        "certif_aucun": 5.1
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "43",
+      "group": "4",
+      "population": 1040000,
+      "niveau_vie_mensuel_eur": 2385.0,
+      "patrimoine_keur": 293.8,
+      "diplomes": {
+        "bac5": 5.2,
+        "bac3": 14.6,
+        "bac2": 36.5,
+        "bac": 28.6,
+        "cap": 7.8,
+        "brevet": 2.6,
+        "certif_aucun": 4.7
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "44",
+      "group": "4",
+      "population": 949000,
+      "niveau_vie_mensuel_eur": 2340.0,
+      "patrimoine_keur": 275.6,
+      "diplomes": {
+        "bac5": 14.1,
+        "bac3": 18.8,
+        "bac2": 23.5,
+        "bac": 20.6,
+        "cap": 10.6,
+        "brevet": 7.7,
+        "certif_aucun": 4.7
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "45",
+      "group": "4",
+      "population": 1066000,
+      "niveau_vie_mensuel_eur": 2092.5,
+      "patrimoine_keur": 262.6,
+      "diplomes": {
+        "bac5": 3.9,
+        "bac3": 23.4,
+        "bac2": 27.2,
+        "bac": 23.4,
+        "cap": 10.5,
+        "brevet": 5.8,
+        "certif_aucun": 5.8
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "46",
+      "group": "4",
+      "population": 832000,
+      "niveau_vie_mensuel_eur": 2205.0,
+      "patrimoine_keur": 265.2,
+      "diplomes": {
+        "bac5": 9.0,
+        "bac3": 24.7,
+        "bac2": 28.8,
+        "bac": 20.6,
+        "cap": 9.9,
+        "brevet": 3.7,
+        "certif_aucun": 3.3
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "47",
+      "group": "4",
+      "population": 897000,
+      "niveau_vie_mensuel_eur": 2160.0,
+      "patrimoine_keur": 208.0,
+      "diplomes": {
+        "bac5": 11.0,
+        "bac3": 20.3,
+        "bac2": 15.6,
+        "bac": 29.3,
+        "cap": 15.2,
+        "brevet": 3.9,
+        "certif_aucun": 4.7
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "48",
+      "group": "4",
+      "population": 1326000,
+      "niveau_vie_mensuel_eur": 2452.5,
+      "patrimoine_keur": 270.4,
+      "diplomes": {
+        "bac5": 5.8,
+        "bac3": 13.3,
+        "bac2": 29.2,
+        "bac": 27.1,
+        "cap": 16.3,
+        "brevet": 6.2,
+        "certif_aucun": 2.1
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "52",
+      "group": "5",
+      "population": 1496000,
+      "niveau_vie_mensuel_eur": 1739.0,
+      "patrimoine_keur": 204.8,
+      "diplomes": {
+        "bac5": 4.2,
+        "bac3": 7.9,
+        "bac2": 10.5,
+        "bac": 20.9,
+        "cap": 15.7,
+        "brevet": 11.5,
+        "certif_aucun": 29.3
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "53",
+      "group": "5",
+      "population": 2516000,
+      "niveau_vie_mensuel_eur": 1794.5,
+      "patrimoine_keur": 137.6,
+      "diplomes": {
+        "bac5": 6.2,
+        "bac3": 3.3,
+        "bac2": 11.6,
+        "bac": 24.9,
+        "cap": 22.4,
+        "brevet": 10.0,
+        "certif_aucun": 21.6
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "54",
+      "group": "5",
+      "population": 2108000,
+      "niveau_vie_mensuel_eur": 1813.0,
+      "patrimoine_keur": 126.4,
+      "diplomes": {
+        "bac5": 7.2,
+        "bac3": 2.4,
+        "bac2": 9.5,
+        "bac": 23.8,
+        "cap": 25.7,
+        "brevet": 14.3,
+        "certif_aucun": 17.1
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "55",
+      "group": "5",
+      "population": 1785000,
+      "niveau_vie_mensuel_eur": 1720.5,
+      "patrimoine_keur": 120.0,
+      "diplomes": {
+        "bac5": 5.2,
+        "bac3": 5.8,
+        "bac2": 17.2,
+        "bac": 25.9,
+        "cap": 24.1,
+        "brevet": 10.3,
+        "certif_aucun": 11.5
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "56",
+      "group": "5",
+      "population": 2346000,
+      "niveau_vie_mensuel_eur": 2035.0,
+      "patrimoine_keur": 158.4,
+      "diplomes": {
+        "bac5": 4.3,
+        "bac3": 6.0,
+        "bac2": 6.0,
+        "bac": 27.9,
+        "cap": 36.0,
+        "brevet": 11.2,
+        "certif_aucun": 8.6
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "62",
+      "group": "6",
+      "population": 738000,
+      "niveau_vie_mensuel_eur": 1785.0,
+      "patrimoine_keur": 141.6,
+      "diplomes": {
+        "bac5": 5.3,
+        "bac3": 2.5,
+        "bac2": 3.9,
+        "bac": 17.1,
+        "cap": 34.2,
+        "brevet": 7.1,
+        "certif_aucun": 29.9
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "63",
+      "group": "6",
+      "population": 1323000,
+      "niveau_vie_mensuel_eur": 1785.0,
+      "patrimoine_keur": 141.6,
+      "diplomes": {
+        "bac5": 5.4,
+        "bac3": 6.0,
+        "bac2": 4.4,
+        "bac": 13.1,
+        "cap": 39.1,
+        "brevet": 13.0,
+        "certif_aucun": 19.0
+      },
+      "source_refs": [
+        "fake"
+      ],
+      "notes": "Revenus copiés de la PCS 62 : ex æquo volontaire en x."
+    },
+    {
+      "code": "64",
+      "group": "6",
+      "population": 837000,
+      "niveau_vie_mensuel_eur": 1715.0,
+      "patrimoine_keur": 142.8,
+      "diplomes": {
+        "bac5": 3.8,
+        "bac3": 2.3,
+        "bac2": 5.4,
+        "bac": 23.0,
+        "cap": 24.5,
+        "brevet": 11.5,
+        "certif_aucun": 29.5
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "65",
+      "group": "6",
+      "population": 1080000,
+      "niveau_vie_mensuel_eur": 1680.0,
+      "patrimoine_keur": 105.6,
+      "diplomes": {
+        "bac5": 1.7,
+        "bac3": 3.9,
+        "bac2": 3.5,
+        "bac": 16.9,
+        "cap": 33.8,
+        "brevet": 10.6,
+        "certif_aucun": 29.6
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "67",
+      "group": "6",
+      "population": 594000,
+      "niveau_vie_mensuel_eur": 1820.0,
+      "patrimoine_keur": 134.4,
+      "diplomes": {
+        "bac5": 6.7,
+        "bac3": 7.7,
+        "bac2": 5.1,
+        "bac": 12.3,
+        "cap": 45.1,
+        "brevet": 5.1,
+        "certif_aucun": 18.0
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "68",
+      "group": "6",
+      "population": 594000,
+      "niveau_vie_mensuel_eur": 1732.5,
+      "patrimoine_keur": 145.2,
+      "diplomes": {
+        "bac5": 6.7,
+        "bac3": 7.7,
+        "bac2": 5.1,
+        "bac": 12.3,
+        "cap": 45.1,
+        "brevet": 5.1,
+        "certif_aucun": 18.0
+      },
+      "source_refs": [
+        "fake"
+      ],
+      "notes": "Diplômes copiés de la PCS 67 : ex æquo volontaire en y."
+    },
+    {
+      "code": "69",
+      "group": "6",
+      "population": 540000,
+      "niveau_vie_mensuel_eur": 1872.5,
+      "patrimoine_keur": 116.4,
+      "diplomes": {
+        "bac5": 4.7,
+        "bac3": 4.1,
+        "bac2": 4.1,
+        "bac": 12.4,
+        "cap": 33.2,
+        "brevet": 5.2,
+        "certif_aucun": 36.3
+      },
+      "source_refs": [
+        "fake"
+      ]
+    },
+    {
+      "code": "7",
+      "group": "7",
+      "population": 8550000,
+      "niveau_vie_mensuel_eur": 2125.5,
+      "patrimoine_keur": 271.4,
+      "diplomes": {
+        "bac5": 6.3,
+        "bac3": 3.2,
+        "bac2": 9.5,
+        "bac": 10.1,
+        "cap": 25.3,
+        "brevet": 10.1,
+        "certif_aucun": 35.5
+      },
+      "source_refs": [
+        "fake"
+      ]
+    }
+  ]
+}
