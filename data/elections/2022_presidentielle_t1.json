@@ -12,7 +12,7 @@
       "url": "https://www.ifop.com/wp-content/uploads/2022/04/118997-Rapport-JDV-PRE22-T1-DET-11.04-1.pdf",
       "accessed": "2026-10-31",
       "publisher": "Ifop-Fiducial",
-      "license": "Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'est documenté dans ce dépôt, voir data/SOURCES.md.",
+      "license": "Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu : usage personnel et non commercial, données non publiées, voir data/SOURCES.md.",
       "notes": "Échantillon : 3 784 inscrits, extraits d'un échantillon de 4 066 personnes. Terrain : en ligne, le 10 avril 2022, de 11 h à 18 h. Tableaux : colonnes de groupes, vote en composition p. 30 (PDF 31) et abstention en composition p. 15 (PDF 16) ; national_share_pct, ligne ENSEMBLE du vote p. 27 (PDF 28) et de la participation p. 13 (PDF 14). Groupes : 2=Artisan ou commerçant; 3=Cadre et prof. int. sup.; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif. Le rapport n'isole pas les agriculteurs : la clé « 1 » est absente, et on ignore s'ils sont comptés dans le groupe 2. « Autre inactif » (groupe 8) est retiré et les parts ramenées à 100 sur les groupes restants ; les parts publiées sont dans pipeline/sources/manual. national_share_pct : ligne ensemble du sondage (abstention en % des inscrits), pas le résultat officiel. Transcription manuelle ; « - » reproduit le tiret du rapport. Parts publiées en nombres entiers."
     }
   ],

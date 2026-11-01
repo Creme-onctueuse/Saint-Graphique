@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-01T14:05:25+00:00",
+  "generated_at": "2026-11-01T23:56:13+00:00",
   "path_template": "{method}/{election}.json",
   "axes": {
     "x_label": "Exploitation",

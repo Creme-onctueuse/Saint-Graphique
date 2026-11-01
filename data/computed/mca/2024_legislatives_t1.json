@@ -36,10 +36,10 @@
     {
       "code": "10",
       "group": "1",
-      "label": "Agriculteurs exploitants",
+      "label": "Exploitants de l'agriculture, sylviculture, pêche et aquaculture",
       "short": "Agriculteurs",
-      "x": -0.188913,
-      "y": 1.879955,
+      "x": -1.330773,
+      "y": -3.92817,
       "weight": 0.826051
     },
     {
@@ -47,8 +47,8 @@
       "group": "2",
       "label": "Artisans",
       "short": "Artisans",
-      "x": 0.041866,
-      "y": -3.22656,
+      "x": -3.22582,
+      "y": 7.474339,
       "weight": 2.167918
     },
     {
@@ -56,17 +56,17 @@
       "group": "2",
       "label": "Commerçants et assimilés",
       "short": "Commerçants",
-      "x": -0.188913,
-      "y": 1.879955,
+      "x": -1.330773,
+      "y": -3.92817,
       "weight": 1.639063
     },
     {
       "code": "23",
       "group": "2",
-      "label": "Chefs d'entreprise de 10 salariés ou plus",
+      "label": "Chefs d'entreprise de plus de 10 personnes",
       "short": "Chefs d'entreprise",
-      "x": 5.221933,
-      "y": 0.046148,
+      "x": 10.0,
+      "y": 2.826904,
       "weight": 0.505419
     },
     {
@@ -75,43 +75,43 @@
       "label": "Professions libérales",
       "short": "Prof. libérales",
       "x": 10.0,
-      "y": 6.232247,
+      "y": 2.826904,
       "weight": 1.531684
     },
     {
       "code": "33",
       "group": "3",
-      "label": "Cadres de la fonction publique",
+      "label": "Cadres administratifs et techniques de la fonction publique",
       "short": "Cadres FP",
       "x": 10.0,
-      "y": 6.232247,
+      "y": 2.826904,
       "weight": 1.110753
     },
     {
       "code": "34",
       "group": "3",
-      "label": "Professeurs, professions scientifiques",
+      "label": "Professeurs et professions scientifiques supérieures",
       "short": "Professeurs",
       "x": 10.0,
-      "y": 6.232247,
+      "y": 2.826904,
       "weight": 1.928245
     },
     {
       "code": "35",
       "group": "3",
-      "label": "Professions de l'information, des arts et du spectacle",
+      "label": "Professions de l'information, de l'art et des spectacles",
       "short": "Info/arts",
       "x": 10.0,
-      "y": 6.232247,
+      "y": 2.826904,
       "weight": 0.870509
     },
     {
       "code": "37",
       "group": "3",
-      "label": "Cadres administratifs et commerciaux d'entreprise",
+      "label": "Cadres des services administratifs et commerciaux d'entreprise",
       "short": "Cadres admin.",
       "x": 10.0,
-      "y": 6.232247,
+      "y": 2.826904,
       "weight": 3.583557
     },
     {
@@ -120,16 +120,16 @@
       "label": "Ingénieurs et cadres techniques d'entreprise",
       "short": "Ingénieurs",
       "x": 10.0,
-      "y": 6.232247,
+      "y": 2.826904,
       "weight": 3.644912
     },
     {
       "code": "42",
       "group": "4",
-      "label": "Professeurs des écoles, instituteurs et assimilés",
+      "label": "Professions de l'enseignement primaire et professionnel, de la formation continue et du sport",
       "short": "Prof. des écoles",
-      "x": 1.216205,
-      "y": -6.727292,
+      "x": -0.149206,
+      "y": -7.73403,
       "weight": 2.271028
     },
     {
@@ -137,26 +137,26 @@
       "group": "4",
       "label": "Professions intermédiaires de la santé et du travail social",
       "short": "PI santé/social",
-      "x": 5.994272,
-      "y": -0.541193,
+      "x": 5.579014,
+      "y": -3.244926,
       "weight": 3.871858
     },
     {
       "code": "44",
       "group": "4",
-      "label": "Clergé, religieux",
+      "label": "Ministres du culte et religieux consacrés",
       "short": "Clergé",
-      "x": 0.583426,
-      "y": 1.292614,
+      "x": -7.099344,
+      "y": 0.08701,
       "weight": 0.048663
     },
     {
       "code": "45",
       "group": "4",
-      "label": "Professions intermédiaires administratives de la fonction publique",
+      "label": "Professions intermédiaires de la fonction publique (administration, sécurité)",
       "short": "PI admin. FP",
-      "x": 0.583426,
-      "y": 1.292614,
+      "x": -0.023539,
+      "y": -5.510896,
       "weight": 1.102198
     },
     {
@@ -164,8 +164,8 @@
       "group": "4",
       "label": "Professions intermédiaires administratives et commerciales des entreprises",
       "short": "PI admin. entr.",
-      "x": 1.216205,
-      "y": -6.727292,
+      "x": 5.579014,
+      "y": -3.244926,
       "weight": 5.651483
     },
     {
@@ -173,35 +173,35 @@
       "group": "4",
       "label": "Techniciens",
       "short": "Techniciens",
-      "x": -4.194641,
-      "y": -4.893485,
+      "x": -5.751759,
+      "y": -10.0,
       "weight": 2.783793
     },
     {
       "code": "48",
       "group": "4",
-      "label": "Contremaîtres, agents de maîtrise",
+      "label": "Agents de maîtrise (hors maîtrise administrative)",
       "short": "Contremaîtres",
-      "x": 0.583426,
-      "y": 1.292614,
+      "x": -5.751759,
+      "y": -10.0,
       "weight": 1.351864
     },
     {
       "code": "52",
       "group": "5",
-      "label": "Employés civils et agents de service de la fonction publique",
+      "label": "Employés administratifs de la fonction publique, agents de service et auxiliaires de santé",
       "short": "Employés FP",
-      "x": -10.0,
-      "y": 10.0,
+      "x": -8.104953,
+      "y": -1.402509,
       "weight": 5.416223
     },
     {
       "code": "53",
       "group": "5",
-      "label": "Policiers et militaires",
+      "label": "Policiers, militaires, pompiers, agents de sécurité privée",
       "short": "Policiers/militaires",
-      "x": -7.197501,
-      "y": 2.457579,
+      "x": -5.751759,
+      "y": -10.0,
       "weight": 1.338169
     },
     {
@@ -209,8 +209,8 @@
       "group": "5",
       "label": "Employés administratifs d'entreprise",
       "short": "Employés admin.",
-      "x": -7.197501,
-      "y": 2.457579,
+      "x": -5.751759,
+      "y": -10.0,
       "weight": 4.148457
     },
     {
@@ -218,8 +218,8 @@
       "group": "5",
       "label": "Employés de commerce",
       "short": "Employés commerce",
-      "x": -10.0,
-      "y": 10.0,
+      "x": -9.452538,
+      "y": 8.684501,
       "weight": 3.024154
     },
     {
@@ -227,8 +227,8 @@
       "group": "5",
       "label": "Personnels des services directs aux particuliers",
       "short": "Services particuliers",
-      "x": -9.769221,
-      "y": 4.893485,
+      "x": -10.0,
+      "y": 10.0,
       "weight": 4.279649
     },
     {
@@ -236,8 +236,8 @@
       "group": "6",
       "label": "Ouvriers qualifiés de type industriel",
       "short": "OQ industriels",
-      "x": -6.966722,
-      "y": -2.648936,
+      "x": -8.652415,
+      "y": -0.08701,
       "weight": 2.02924
     },
     {
@@ -245,53 +245,53 @@
       "group": "6",
       "label": "Ouvriers qualifiés de type artisanal",
       "short": "OQ artisanaux",
-      "x": -9.769221,
-      "y": 4.893485,
+      "x": -10.0,
+      "y": 10.0,
       "weight": 3.53641
     },
     {
       "code": "64",
       "group": "6",
-      "label": "Chauffeurs",
+      "label": "Conducteurs de véhicules de transport, chauffeurs-livreurs, coursiers",
       "short": "Chauffeurs",
-      "x": -9.769221,
-      "y": 4.893485,
+      "x": -10.0,
+      "y": 10.0,
       "weight": 1.648288
     },
     {
       "code": "65",
       "group": "6",
-      "label": "Ouvriers qualifiés de la manutention, du magasinage et du transport",
+      "label": "Conducteurs d'engins, caristes, magasiniers et ouvriers du transport (non routier)",
       "short": "OQ manutention",
-      "x": -9.769221,
-      "y": 4.893485,
+      "x": -10.0,
+      "y": 10.0,
       "weight": 0.89279
     },
     {
       "code": "67",
       "group": "6",
-      "label": "Ouvriers non qualifiés de type industriel",
+      "label": "Ouvriers peu qualifiés de type industriel",
       "short": "ONQ industriels",
-      "x": -9.769221,
-      "y": 4.893485,
+      "x": -10.0,
+      "y": 10.0,
       "weight": 2.994029
     },
     {
       "code": "68",
       "group": "6",
-      "label": "Ouvriers non qualifiés de type artisanal",
+      "label": "Ouvriers peu qualifiés de type artisanal",
       "short": "ONQ artisanaux",
-      "x": -9.769221,
-      "y": 4.893485,
+      "x": -10.0,
+      "y": 10.0,
       "weight": 2.106354
     },
     {
       "code": "69",
       "group": "6",
-      "label": "Ouvriers agricoles",
+      "label": "Ouvriers agricoles, des travaux forestiers, de la pêche et de l'aquaculture",
       "short": "Ouvriers agricoles",
-      "x": -9.769221,
-      "y": 4.893485,
+      "x": -10.0,
+      "y": 10.0,
       "weight": 0.63147
     },
     {
@@ -299,8 +299,8 @@
       "group": "7",
       "label": "Retraités",
       "short": "Retraités",
-      "x": -3.963862,
-      "y": -10.0,
+      "x": -6.29922,
+      "y": -8.684501,
       "weight": 33.065769
     }
   ],
@@ -309,16 +309,16 @@
       "code": "1",
       "label": "Agriculteurs exploitants",
       "color": "#6b8e23",
-      "x": -0.188913,
-      "y": 1.879955,
+      "x": -1.330773,
+      "y": -3.92817,
       "weight": 0.826051
     },
     {
       "code": "2",
       "label": "Artisans, commerçants et chefs d'entreprise",
       "color": "#b8860b",
-      "x": 0.561263,
-      "y": -0.902103,
+      "x": -0.955463,
+      "y": 2.595772,
       "weight": 4.312401
     },
     {
@@ -326,39 +326,39 @@
       "label": "Cadres et professions intellectuelles supérieures",
       "color": "#4b0082",
       "x": 10.0,
-      "y": 6.232247,
+      "y": 2.826904,
       "weight": 12.669661
     },
     {
       "code": "4",
       "label": "Professions intermédiaires",
       "color": "#1f77b4",
-      "x": 1.324727,
-      "y": -3.85108,
+      "x": 1.676334,
+      "y": -5.614063,
       "weight": 17.080887
     },
     {
       "code": "5",
       "label": "Employés",
       "color": "#d62728",
-      "x": -9.101212,
-      "y": 6.526735,
+      "x": -8.065097,
+      "y": 0.362351,
       "weight": 18.206652
     },
     {
       "code": "6",
       "label": "Ouvriers",
       "color": "#8c2d04",
-      "x": -9.358272,
-      "y": 3.787491,
+      "x": -9.802395,
+      "y": 8.520877,
       "weight": 13.83858
     },
     {
       "code": "7",
       "label": "Retraités",
       "color": "#7f7f7f",
-      "x": -3.963862,
-      "y": -10.0,
+      "x": -6.29922,
+      "y": -8.684501,
       "weight": 33.065769
     }
   ],
@@ -367,8 +367,8 @@
       "id": "extreme-gauche",
       "label": "Extrême gauche",
       "color": "#7b1113",
-      "x": -1.11305,
-      "y": 0.324538,
+      "x": -1.694982,
+      "y": -0.933969,
       "is_abstention": false,
       "national_share_pct": 1.1
     },
@@ -376,8 +376,8 @@
       "id": "nfp",
       "label": "Nouveau Front populaire et divers NFP",
       "color": "#e5383b",
-      "x": -2.023672,
-      "y": -1.393901,
+      "x": -2.547746,
+      "y": -2.273947,
       "is_abstention": false,
       "national_share_pct": 28.1
     },
@@ -385,8 +385,8 @@
       "id": "divers-gauche",
       "label": "Divers gauche",
       "color": "#ef9a9a",
-      "x": -1.887455,
-      "y": -4.807346,
+      "x": -3.354815,
+      "y": -3.711866,
       "is_abstention": false,
       "national_share_pct": 1.6
     },
@@ -394,8 +394,8 @@
       "id": "ensemble",
       "label": "Majorité présidentielle et divers majorité",
       "color": "#f9a825",
-      "x": -1.997092,
-      "y": -3.870974,
+      "x": -3.14099,
+      "y": -4.01017,
       "is_abstention": false,
       "national_share_pct": 21.3
     },
@@ -403,8 +403,8 @@
       "id": "divers-centre",
       "label": "Divers centre",
       "color": "#ffcc80",
-      "x": -2.50736,
-      "y": -2.233443,
+      "x": -3.310862,
+      "y": -3.113726,
       "is_abstention": false,
       "national_share_pct": 1.2
     },
@@ -412,8 +412,8 @@
       "id": "lr-dvd",
       "label": "Les Républicains ou divers droite",
       "color": "#1565c0",
-      "x": -2.706399,
-      "y": -2.303142,
+      "x": -3.57146,
+      "y": -2.696496,
       "is_abstention": false,
       "national_share_pct": 10.2
     },
@@ -421,8 +421,8 @@
       "id": "rn",
       "label": "Investi ou soutenu par le Rassemblement national",
       "color": "#0d1b4c",
-      "x": -3.870582,
-      "y": -0.916914,
+      "x": -4.474848,
+      "y": -1.239716,
       "is_abstention": false,
       "national_share_pct": 33.2
     },
@@ -430,8 +430,8 @@
       "id": "reconquete",
       "label": "Reconquête",
       "color": "#3e2723",
-      "x": -0.049116,
-      "y": -3.167743,
+      "x": -0.91987,
+      "y": -4.058669,
       "is_abstention": false,
       "national_share_pct": 0.7
     },
@@ -439,8 +439,8 @@
       "id": "divers",
       "label": "Divers",
       "color": "#8e8e8e",
-      "x": -3.34298,
-      "y": -1.790489,
+      "x": -4.065989,
+      "y": -2.080848,
       "is_abstention": false,
       "national_share_pct": 2.6
     },
@@ -448,14 +448,14 @@
       "id": "abstention",
       "label": "Abstention",
       "color": "#000000",
-      "x": -3.607517,
-      "y": -0.608257,
+      "x": -4.119454,
+      "y": -1.099045,
       "is_abstention": true,
       "national_share_pct": 33.3
     }
   ],
   "population_barycenter": {
-    "x": -2.746875,
-    "y": -1.485709
+    "x": -3.406679,
+    "y": -2.147738
   }
 }
