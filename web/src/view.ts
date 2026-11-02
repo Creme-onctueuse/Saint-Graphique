@@ -14,6 +14,7 @@ import {
   defaultParamsFor,
   getClientMethod,
   isClientComputable,
+  methodScores,
   normalizeParams,
   RETIRED_CODE,
   type Layout,
@@ -22,6 +23,7 @@ import {
 import {
   countStatuses,
   findTies,
+  METHOD_RESERVES,
   parseStatus,
   PROJECTION_RESERVE,
   PROJECTION_RESERVE_SUMMARY,
@@ -29,6 +31,7 @@ import {
   COMPUTED_RESERVE_SUMMARY,
   READ_POSITIONS_RESERVE,
   READ_POSITIONS_RESERVE_SUMMARY,
+  wealthReserve,
   X_DEFINITION_RESERVE,
   xAxisReserve,
   type Tie,
@@ -42,7 +45,7 @@ import {
   verdictSentence,
   type ProjectionFile,
 } from './core/projection.ts';
-import { computeScores, sameWeights } from './core/scores.ts';
+import { sameWeights } from './core/scores.ts';
 import type { AppState, Scenario } from './core/state.ts';
 import {
   POPULATION_ID,
@@ -174,15 +177,18 @@ function nameList(names: readonly string[]): string {
   return `${names.slice(0, -1).join(', ')} et ${names.at(-1) ?? ''}`;
 }
 
-function axisName(ds: Dataset, tie: Tie): string {
-  return tie.axis === 'x' ? ds.axes.xLabel : ds.axes.yLabel;
+/** Libellés des axes affichés : ceux de la méthode si elle en a, sinon les axes communs. */
+type AxisLabels = Pick<Dataset['axes'], 'xLabel' | 'yLabel'>;
+
+function axisName(axes: AxisLabels, tie: Tie): string {
+  return tie.axis === 'x' ? axes.xLabel : axes.yLabel;
 }
 
 /** Ex æquo de la méthode affichée, calculés depuis les scores et les poids effectifs. */
 function tiesOf(ds: Dataset, method: MethodInfo, params: MethodParams): Tie[] {
   if (!ds.rawPcs || !isClientComputable(method.id, params)) return [];
   try {
-    return findTies(computeScores(ds.rawPcs.items, params.y_weights, params.retired_y_override));
+    return findTies(methodScores(method.id, ds.rawPcs.items, params));
   } catch {
     return [];
   }
@@ -192,20 +198,20 @@ function pcsName(ds: Dataset, code: string): string {
   return ds.pcsMeta.get(code)?.short ?? code;
 }
 
-function tieReserve(ds: Dataset, tie: Tie, ranked: boolean): string {
+function tieReserve(ds: Dataset, axes: AxisLabels, tie: Tie, ranked: boolean): string {
   const names = nameList(tie.codes.map((c) => pcsName(ds, c)));
   const consequence = ranked
     ? 'leur ordre est arbitraire (départage par code PCS)'
     : 'elles ont donc la même position sur cet axe';
-  return `Ex æquo sur l'axe ${axisName(ds, tie)} : ${names} ont le même score ; ${consequence}.`;
+  return `Ex æquo sur l'axe ${axisName(axes, tie)} : ${names} ont le même score ; ${consequence}.`;
 }
 
-function tieNote(ds: Dataset, tie: Tie, code: string, ranked: boolean): string {
+function tieNote(ds: Dataset, axes: AxisLabels, tie: Tie, code: string, ranked: boolean): string {
   const others = nameList(tie.codes.filter((c) => c !== code).map((c) => pcsName(ds, c)));
   const consequence = ranked
     ? 'ordre arbitraire (départage par code PCS)'
     : 'même position sur cet axe';
-  return `Ex æquo sur l'axe ${axisName(ds, tie)} avec ${others} : ${consequence}.`;
+  return `Ex æquo sur l'axe ${axisName(axes, tie)} avec ${others} : ${consequence}.`;
 }
 
 function pcsFromFile(ds: Dataset, file: ComputedFile, extras: PcsExtras): ChartPcs[] {
@@ -330,7 +336,12 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
   const exact = ds.computed.get(computedKey(method.id, electionId)) ?? null;
   const fallbackFile = exact ?? anyFileOf(ds, method.id);
   const defaults = methodDefaults(method, fallbackFile);
-  const { params, customized } = effectiveParams(defaults, state);
+  // Sans score imposé aux retraités, un réglage fait sur une autre méthode reste sans objet ici.
+  const hasRetiredOverride = getClientMethod(method.id)?.retiredOverride !== false;
+  const { params, customized } = effectiveParams(
+    defaults,
+    hasRetiredOverride ? state : { weights: state.weights, retired: 'default' },
+  );
   const rawElection = isPopulation ? null : (ds.rawElections.get(electionId) ?? null);
 
   let recomputeBlock: string | null = null;
@@ -369,27 +380,33 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
   const ties = tiesOf(ds, method, params);
   const ranked = getClientMethod(method.id)?.ranked ?? false;
   const isRead = method.id === READ_POSITIONS_METHOD;
+  const axes: AxisLabels = method.axes ?? ds.axes;
+  const ownReserve = METHOD_RESERVES[method.id] ?? null;
   const extras: PcsExtras = (code) => {
-    if (isRead) return { status: null, notes: [] };
+    if (isRead || ownReserve?.usesWealth === false) return { status: null, notes: [] };
     const raw = rawItems.get(code);
     return {
       status: {
         patrimoine: parseStatus(raw?.patrimoine_status),
         niveauVie: parseStatus(raw?.niveau_vie_status),
       },
-      notes: ties.filter((t) => t.codes.includes(code)).map((t) => tieNote(ds, t, code, ranked)),
+      notes: ties
+        .filter((t) => t.codes.includes(code))
+        .map((t) => tieNote(ds, axes, t, code, ranked)),
     };
   };
-  const axisReserve = xAxisReserve(
-    ds.rawPcs ? countStatuses(ds.rawPcs.items) : null,
-    ds.axes.xLabel,
-  );
+  const counts = ds.rawPcs ? countStatuses(ds.rawPcs.items) : null;
+  const axisReserve = ownReserve
+    ? ownReserve.usesWealth
+      ? wealthReserve(counts, 'Réserve sur le capital économique :')
+      : null
+    : xAxisReserve(counts, ds.axes.xLabel);
   const reserves = isRead
     ? [READ_POSITIONS_RESERVE]
     : [
-        X_DEFINITION_RESERVE,
+        ownReserve?.text ?? X_DEFINITION_RESERVE,
         ...(axisReserve ? [axisReserve] : []),
-        ...ties.map((t) => tieReserve(ds, t, ranked)),
+        ...ties.map((t) => tieReserve(ds, axes, t, ranked)),
       ];
 
   let pcs: ChartPcs[];
@@ -451,13 +468,15 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
     description:
       `Nuage de ${pcs.length} catégories socioprofessionnelles` +
       (candidates.length > 0 ? ` et de ${candidates.length} électorats` : '') +
-      ` sur deux axes : ${ds.axes.xLabel} en abscisse, ${ds.axes.yLabel} en ordonnée.`,
-    xLabel: ds.axes.xLabel,
-    yLabel: ds.axes.yLabel,
+      ` sur deux axes : ${axes.xLabel} en abscisse, ${axes.yLabel} en ordonnée.`,
+    xLabel: axes.xLabel,
+    yLabel: axes.yLabel,
     range,
     pcs,
     candidates,
     barycenter,
+    // Ni diagonale ni noms de régions : ils ne valent que pour les axes communs.
+    ...(method.axes ? { axes: { plain: true, ends: method.axes.ends } } : {}),
   };
 
   return applyCrossing(ds, state, {
@@ -488,7 +507,7 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
       ? PROJECTION_RESERVE_SUMMARY
       : isRead
         ? READ_POSITIONS_RESERVE_SUMMARY
-        : COMPUTED_RESERVE_SUMMARY,
+        : (ownReserve?.summary ?? COMPUTED_RESERVE_SUMMARY),
     projection,
     sources: {
       poll: projection ? allPollSources(ds) : (rawElection?.sources ?? []),

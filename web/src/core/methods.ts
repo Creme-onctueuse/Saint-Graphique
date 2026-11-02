@@ -3,7 +3,8 @@
  *
  * Une méthode client ne fait qu'une chose : projeter des scores bruts sur un axe (`placeAxis`).
  * computeLayout() s'occupe du reste : scores, parts de population, barycentre de la population,
- * coordonnées des PCS de niveau 1 et des électorats.
+ * coordonnées des PCS de niveau 1 et des électorats. Une méthode peut fournir ses propres scores
+ * (`scores`) si ses axes ne sont pas le ratio patrimoine / niveau de vie et le score de diplômes.
  *
  * Ajouter une méthode : appeler registerClientMethod({ id, label, ranked, placeAxis }) avec le même `id`
  * que dans config/methods.yaml, puis ajouter un cas de parité (pipeline/build.py, PARITY_METHODS).
@@ -18,7 +19,13 @@ import {
   type WeightedPoint,
 } from './barycenter.ts';
 import { DEFAULT_RANGE, rankCoords, type ScoredItem } from './ranks.ts';
-import { computeScores, DEFAULT_Y_WEIGHTS, type ScoreOverride } from './scores.ts';
+import {
+  computeScores,
+  DEFAULT_Y_WEIGHTS,
+  yScore,
+  type PcsScores,
+  type ScoreOverride,
+} from './scores.ts';
 import {
   DIPLOMA_KEYS,
   type Composition,
@@ -52,6 +59,12 @@ export interface ClientMethod {
   readonly ranked: boolean;
   /** Projette les scores bruts d'un axe sur l'intervalle `range`. */
   placeAxis(items: readonly ScoredItem[], range: Range): Map<string, number>;
+  /** Scores bruts propres à la méthode ; à défaut, ceux de core/scores.ts. */
+  readonly scores?: (items: readonly RawPcsItem[], params: MethodParams) => PcsScores[];
+  /** Ce que règlent les curseurs du panneau Méthode, si ce n'est pas le texte commun. */
+  readonly tuningNote?: string;
+  /** Faux si la méthode n'a pas de score imposé aux retraités : l'option est alors retirée. */
+  readonly retiredOverride?: boolean;
 }
 
 const BASE_PARAMS: MethodParams = {
@@ -62,10 +75,22 @@ const BASE_PARAMS: MethodParams = {
   range: DEFAULT_RANGE,
 };
 
+/** Durée théorique des études, en années par rapport au bac (config/methods.yaml, espace_social). */
+export const STUDY_YEARS: Readonly<DiplomaWeights> = Object.freeze({
+  bac5: 5,
+  bac3: 3.5,
+  bac2: 2,
+  bac: 0,
+  cap: -1,
+  brevet: -3,
+  certif_aucun: -4,
+});
+
 /** Paramètres par défaut si les données n'en fournissent pas (miroir de config/methods.yaml). */
 const DEFAULT_PARAMS: Record<string, MethodParams> = {
   ranks: { ...BASE_PARAMS, retired_y_override: { code: RETIRED_CODE, score: -180 } },
   continuous: { ...BASE_PARAMS },
+  espace_social: { ...BASE_PARAMS, y_weights: { ...STUDY_YEARS } },
 };
 
 export function cloneParams(p: MethodParams): MethodParams {
@@ -114,6 +139,63 @@ export function continuousCoords(
   return out;
 }
 
+/**
+ * Centre-réduit avec la moyenne et l'écart-type pondérés. Un poids nul exclut la valeur de la
+ * référence, pas du résultat : elle reçoit son z-score sur l'échelle des autres.
+ */
+export function weightedStandardize(
+  values: readonly number[],
+  weights: readonly number[],
+): number[] {
+  if (values.some((v) => !Number.isFinite(v))) throw new RangeError('Valeur non finie');
+  const total = weights.reduce((acc, w) => acc + w, 0);
+  if (!(total > 0)) throw new RangeError('Poids total nul');
+  const mean = values.reduce((acc, v, i) => acc + (weights[i] ?? 0) * v, 0) / total;
+  const variance =
+    values.reduce((acc, v, i) => acc + (weights[i] ?? 0) * (v - mean) ** 2, 0) / total;
+  const sd = Math.sqrt(variance);
+  return sd > 0 ? values.map((v) => (v - mean) / sd) : values.map(() => 0);
+}
+
+/**
+ * Espace social (pipeline/methods/espace_social.py). Capital économique E : z(z(ln patrimoine) +
+ * z(ln niveau de vie)). Capital culturel C : z(score de diplômes). Les z-scores sont pondérés par
+ * la population, hors retraités : ils gardent leurs valeurs, mais ne fixent pas l'échelle.
+ * Score X : structure E − C. Score Y : volume E + C.
+ */
+export function espaceSocialScores(
+  items: readonly RawPcsItem[],
+  weights: DiplomaWeights,
+): PcsScores[] {
+  for (const it of items) {
+    if (!(it.patrimoine_keur > 0) || !(it.niveau_vie_mensuel_eur > 0)) {
+      throw new RangeError(`Patrimoine ou niveau de vie nul pour la PCS ${it.code}`);
+    }
+  }
+  const reference = items.map((it) => (it.code === RETIRED_CODE ? 0 : it.population));
+  const wealth = weightedStandardize(
+    items.map((it) => Math.log(it.patrimoine_keur)),
+    reference,
+  );
+  const living = weightedStandardize(
+    items.map((it) => Math.log(it.niveau_vie_mensuel_eur)),
+    reference,
+  );
+  const economic = weightedStandardize(
+    wealth.map((w, i) => w + (living[i] ?? 0)),
+    reference,
+  );
+  const cultural = weightedStandardize(
+    items.map((it) => yScore(it.diplomes, weights)),
+    reference,
+  );
+  return items.map((it, i) => ({
+    code: it.code,
+    x: (economic[i] ?? 0) - (cultural[i] ?? 0),
+    y: (economic[i] ?? 0) + (cultural[i] ?? 0),
+  }));
+}
+
 const registry = new Map<string, ClientMethod>();
 
 /** Enregistre (ou remplace) une méthode calculable côté client. */
@@ -138,6 +220,32 @@ registerClientMethod({
   ranked: false,
   placeAxis: (items, range) => continuousCoords(items, range),
 });
+
+registerClientMethod({
+  id: 'espace_social',
+  label: 'Espace social (Bourdieu)',
+  ranked: false,
+  placeAxis: (items, range) => continuousCoords(items, range),
+  scores: (items, params) => espaceSocialScores(items, params.y_weights),
+  tuningNote:
+    'Les poids ci-dessous règlent le capital culturel : la somme des parts de diplômes, multipliées ' +
+    'par ces poids, par défaut les années d’études par rapport au bac. Le capital économique, tiré ' +
+    'du patrimoine et du niveau de vie, n’a pas de réglage. Structure (économique − culturel) et ' +
+    'volume (économique + culturel) sont ensuite placés sur [−10, 10].',
+  retiredOverride: false,
+});
+
+/** Scores bruts d'une méthode, ceux de core/scores.ts si elle n'en définit pas d'autres. */
+export function methodScores(
+  methodId: string,
+  items: readonly RawPcsItem[],
+  params: MethodParams,
+): PcsScores[] {
+  const own = registry.get(methodId)?.scores;
+  return own
+    ? own(items, params)
+    : computeScores(items, params.y_weights, params.retired_y_override);
+}
 
 /** Vrai si la méthode peut être recalculée dans le navigateur avec ces paramètres. */
 export function isClientComputable(methodId: string, params: MethodParams): boolean {
@@ -285,7 +393,7 @@ export function computeLayout(methodId: string, params: MethodParams, input: Lay
   if (input.pcs.length === 0) throw new Error('Aucune PCS dans les données brutes');
 
   const range = params.range;
-  const scores = computeScores(input.pcs, params.y_weights, params.retired_y_override);
+  const scores = methodScores(methodId, input.pcs, params);
   const xs = method.placeAxis(
     scores.map((s) => ({ code: s.code, score: s.x })),
     range,

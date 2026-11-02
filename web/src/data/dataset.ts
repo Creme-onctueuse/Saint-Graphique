@@ -26,10 +26,20 @@ import {
 } from '../core/types.ts';
 import { asProjectionFile, type ProjectionFile } from '../core/projection.ts';
 
+/** Axes propres à une méthode (config/methods.yaml, methods.<id>.axes). */
+export interface MethodAxes {
+  xLabel: string;
+  yLabel: string;
+  /** Textes des extrémités des axes. */
+  ends: { xLow: string; xHigh: string; yLow: string; yHigh: string };
+}
+
 export interface MethodInfo {
   id: string;
   label: string;
   description: string;
+  /** Null : la méthode garde les axes communs. */
+  axes: MethodAxes | null;
   /** Paramètres par défaut (index.json ou config), sinon ceux du premier fichier calculé. */
   params: Record<string, unknown> | null;
   /** Méthode exploratoire : signalée comme telle dans l'interface. */
@@ -129,6 +139,7 @@ const METHOD_LABELS: Record<string, string> = {
   ranks: 'Rangs reconstruits',
   continuous: 'Valeurs continues',
   mca: 'ACM (terciles)',
+  espace_social: 'Espace social (Bourdieu)',
 };
 
 /** Méthodes exploratoires, en plus de celles que index.json marque `exploratory: true`. */
@@ -488,6 +499,20 @@ function rawElectionRefs(v: unknown): { id: string | null; ref: unknown }[] {
   return out;
 }
 
+/** Lit methods.<id>.axes ; null s'il manque un libellé ou une extrémité. */
+function asMethodAxes(v: unknown): MethodAxes | null {
+  const x = rec(rec(v)['x']);
+  const y = rec(rec(v)['y']);
+  const xLabel = str(x['label']);
+  const yLabel = str(y['label']);
+  const xLow = str(x['low']);
+  const xHigh = str(x['high']);
+  const yLow = str(y['low']);
+  const yHigh = str(y['high']);
+  if (!xLabel || !yLabel || !xLow || !xHigh || !yLow || !yHigh) return null;
+  return { xLabel, yLabel, ends: { xLow, xHigh, yLow, yHigh } };
+}
+
 function humanize(id: string): string {
   return id.replace(/[_-]+/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
 }
@@ -580,6 +605,7 @@ export function buildDataset(files: Readonly<Record<string, unknown>>): Dataset 
         id,
         label: METHOD_LABELS[id] ?? humanize(id),
         description: '',
+        axes: null,
         params: null,
         exploratory: EXPLORATORY_METHODS.has(id),
         elections: new Set(),
@@ -594,6 +620,7 @@ export function buildDataset(files: Readonly<Record<string, unknown>>): Dataset 
     if (label) m.label = label;
     const description = str(r['description']);
     if (description) m.description = description;
+    m.axes = asMethodAxes(r['axes']) ?? m.axes;
     if (r['exploratory'] === true) m.exploratory = true;
     if (isRec(r['params'])) m.params = r['params'];
     else if ('y_weights' in r || 'x_score' in r) m.params = r;
