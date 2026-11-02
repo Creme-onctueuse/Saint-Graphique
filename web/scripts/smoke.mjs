@@ -438,7 +438,9 @@ async function main() {
       overflowing,
       reserveShown: !document.getElementById('sg-reserves').hidden,
       reserveTies: reserve.includes('Ex æquo'),
-      reserveImputed: /valeurs? imputées?/.test(reserve),
+      reserveImputed: /[1-9]\d* valeurs? imputées?/.test(reserve),
+      reserveDefinition: reserve.includes('composition du patrimoine'),
+      reserveStatus: /Réserve sur l'axe/.test(reserve),
     };
   })()`);
   console.log(
@@ -446,12 +448,18 @@ async function main() {
       `${notes.unknown} de statut inconnu, ${notes.tied} ex æquo ; ` +
       `réserve ${notes.reserveShown ? 'affichée' : 'absente'}`,
   );
-  // La réserve dépend des données : elle doit suivre ce que disent les infobulles, dans les deux sens.
+  // La définition de l'axe X reste affichée ; les autres réserves suivent ce que disent les infobulles.
   check(
-    'réserve affichée si et seulement s’il y a imputation, statut inconnu ou ex æquo',
-    notes.reserveShown === (notes.imputed > 0 || notes.unknown > 0 || notes.tied > 0),
+    'définition de l’axe X toujours affichée',
+    notes.reserveShown && notes.reserveDefinition,
     JSON.stringify(notes),
   );
+  check(
+    'réserve de statut s’il y a imputation ou statut inconnu',
+    !(notes.imputed > 0 || notes.unknown > 0) || notes.reserveStatus,
+    JSON.stringify(notes),
+  );
+  check('réserve d’ex æquo s’il y en a', notes.tied === 0 || notes.reserveTies);
   check('ex æquo dans l’infobulle si la réserve en annonce', !notes.reserveTies || notes.tied >= 2);
   check('marqueur « imputé » si la réserve en annonce', !notes.reserveImputed || notes.imputed > 0);
   check(

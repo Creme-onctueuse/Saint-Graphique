@@ -81,9 +81,18 @@ describe('xAxisReserve', () => {
     expect(text).toContain('niveau de vie : 0 imputée, 1 calculée');
   });
 
-  it('disparaît si aucune valeur n’est imputée', () => {
+  it('reste affichée pour une valeur calculée', () => {
     const counts = countStatuses([
-      { patrimoine_status: 'published', niveau_vie_status: 'calculated' },
+      { patrimoine_status: 'calculated', niveau_vie_status: 'published' },
+    ]);
+    const text = xAxisReserve(counts, 'Exploitation');
+    expect(text).toContain('0 valeur imputée et 1 calculée sur 2');
+    expect(text).toContain('patrimoine : 0 imputée, 1 calculée');
+  });
+
+  it('disparaît si toutes les valeurs sont publiées', () => {
+    const counts = countStatuses([
+      { patrimoine_status: 'published', niveau_vie_status: 'published' },
     ]);
     expect(xAxisReserve(counts, 'Exploitation')).toBeNull();
   });

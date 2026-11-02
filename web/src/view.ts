@@ -19,7 +19,14 @@ import {
   type Layout,
   type MethodParams,
 } from './core/methods.ts';
-import { countStatuses, findTies, parseStatus, xAxisReserve, type Tie } from './core/reserves.ts';
+import {
+  countStatuses,
+  findTies,
+  parseStatus,
+  X_DEFINITION_RESERVE,
+  xAxisReserve,
+  type Tie,
+} from './core/reserves.ts';
 import { computeScores, sameWeights } from './core/scores.ts';
 import type { AppState } from './core/state.ts';
 import {
@@ -309,6 +316,7 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
     ds.axes.xLabel,
   );
   const reserves = [
+    X_DEFINITION_RESERVE,
     ...(axisReserve ? [axisReserve] : []),
     ...ties.map((t) => tieReserve(ds, t, ranked)),
   ];

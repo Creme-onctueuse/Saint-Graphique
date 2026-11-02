@@ -146,7 +146,7 @@ describe('sans données brutes (index.json de WP3 seul)', () => {
     expect(view?.source).toBe('precomputed');
     expect(view?.canRecompute).toBe(false);
     expect(view?.recomputeBlock).toMatch(/brutes/);
-    expect(view?.reserves[0]).toContain('statut inconnu');
+    expect(view?.reserves[1]).toContain('statut inconnu');
     expect(view?.sources).toEqual({ poll: [], pcs: [] });
     expect(view?.hasEllipses).toBe(true);
     expect(view?.model.candidates[0]?.composition).toBeNull();
@@ -177,7 +177,7 @@ describe('recalcul quand le fichier précalculé manque', () => {
 describe('réserves de la page', () => {
   it('compte les statuts de la fixture et signale les valeurs imputées', () => {
     const view = buildView(ds, state());
-    expect(view?.reserves[0]).toMatch(/axe Exploitation : \d+ valeurs? imputées?/);
+    expect(view?.reserves[1]).toMatch(/axe Exploitation : \d+ valeurs? imputées?/);
     const p = view?.model.pcs[0];
     expect(['published', 'imputed']).toContain(p?.status.patrimoine);
   });
@@ -215,19 +215,29 @@ describe('réserves de la page', () => {
     expect(buildView(ds, state({ election: 'population' }))?.sources.poll).toEqual([]);
   });
 
-  it('fait disparaître la réserve de l’axe X sans valeur imputée', () => {
+  it('garde la définition de l’axe X et retire la réserve si tout est publié', () => {
     const raw = files['_raw/pcs.json'] as { items: Record<string, unknown>[] };
-    const clean = {
-      ...raw,
-      items: raw.items.map((it) => ({
-        ...it,
-        patrimoine_status: 'published',
-        niveau_vie_status: 'calculated',
-      })),
-    };
-    const view = buildView(buildDataset({ ...files, '_raw/pcs.json': clean }), state());
-    expect(view?.reserves.some((r) => r.startsWith('Réserve'))).toBe(false);
-    expect(view?.model.pcs[0]?.status.niveauVie).toBe('calculated');
+    const withStatus = (niveauVie: string): ReturnType<typeof buildView> =>
+      buildView(
+        buildDataset({
+          ...files,
+          '_raw/pcs.json': {
+            ...raw,
+            items: raw.items.map((it) => ({
+              ...it,
+              patrimoine_status: 'published',
+              niveau_vie_status: niveauVie,
+            })),
+          },
+        }),
+        state(),
+      );
+    const published = withStatus('published');
+    expect(published?.reserves[0]).toContain('composition du patrimoine');
+    expect(published?.reserves.some((r) => r.startsWith('Réserve'))).toBe(false);
+    const calculated = withStatus('calculated');
+    expect(calculated?.reserves.some((r) => r.startsWith('Réserve'))).toBe(true);
+    expect(calculated?.model.pcs[0]?.status.niveauVie).toBe('calculated');
   });
 
   it('signale « statut inconnu » tant que les champs manquent, sans rien inventer', () => {
@@ -237,7 +247,7 @@ describe('réserves de la page', () => {
       items: raw.items.map(({ patrimoine_status: _p, niveau_vie_status: _n, ...rest }) => rest),
     };
     const view = buildView(buildDataset({ ...files, '_raw/pcs.json': bare }), state());
-    expect(view?.reserves[0]).toContain('statut inconnu');
+    expect(view?.reserves[1]).toContain('statut inconnu');
     expect(view?.model.pcs[0]?.status).toEqual({ patrimoine: 'unknown', niveauVie: 'unknown' });
   });
 

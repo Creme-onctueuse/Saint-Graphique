@@ -81,7 +81,17 @@ function tallyDetail(t: StatusTally): string {
 }
 
 /**
- * Réserve sur l'axe X, ou null s'il n'y a rien à signaler : aucune valeur imputée et tous les
+ * Rappel permanent : aucune méthode de la page n'utilise la définition de l'axe X donnée par Chris.
+ * Il dépend du choix de méthode, pas des données : il reste affiché quelles que soient les valeurs.
+ */
+export const X_DEFINITION_RESERVE =
+  "Définition de l'axe X : cette page classe les PCS d'après leur patrimoine et leur niveau de vie " +
+  '(reconstruction de JnthnBS). Chris définit cet axe par la composition du patrimoine de chaque ' +
+  'PCS, une donnée introuvable à ce niveau dans les sources consultées : les positions peuvent ' +
+  'différer de son graphique.';
+
+/**
+ * Réserve sur l'axe X, ou null s'il n'y a rien à signaler : toutes les valeurs publiées et tous les
  * statuts connus. Sans statuts dans les données (`counts` null ou champs absents), elle le dit sans
  * rien supposer sur la nature des valeurs.
  */
@@ -96,7 +106,7 @@ export function xAxisReserve(counts: StatusCounts | null, axisLabel: string): st
   const { all, patrimoine, niveauVie } = counts;
   const unknownNote =
     all.unknown > 0 ? ` ${count(all.unknown, 'valeur', 'valeurs')} de statut inconnu.` : '';
-  if (all.imputed > 0) {
+  if (all.imputed > 0 || all.calculated > 0) {
     return (
       `${prefix} ${count(all.imputed, 'valeur imputée', 'valeurs imputées')} et ` +
       `${count(all.calculated, 'calculée', 'calculées')} sur ${all.total} ` +
