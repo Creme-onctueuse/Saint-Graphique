@@ -438,7 +438,7 @@ async function main() {
       overflowing,
       reserveShown: !document.getElementById('sg-reserves').hidden,
       reserveTies: reserve.includes('Ex æquo'),
-      reserveImputed: /[1-9]\d* valeurs? imputées?/.test(reserve),
+      reserveImputed: /[1-9][0-9]* valeurs? imputées?/.test(reserve),
       reserveDefinition: reserve.includes('composition du patrimoine'),
       reserveStatus: /Réserve sur l'axe/.test(reserve),
     };
