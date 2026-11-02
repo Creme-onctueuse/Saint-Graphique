@@ -86,6 +86,14 @@ def test_key_2_covers_farmers_and_self_employed() -> None:
     assert result.groups["2"].x != pytest.approx(expected)
 
 
+def test_key_2_is_the_self_employed_alone_when_farmers_are_published() -> None:
+    result = METHOD.compute((), election({"1": 10.0, "2": 90.0}), PARAMS)
+    expected_x = 0.1 * result.groups["1"].x + 0.9 * result.groups["2"].x
+    expected_y = 0.1 * result.groups["1"].y + 0.9 * result.groups["2"].y
+    assert result.candidates["a"].x == pytest.approx(expected_x)
+    assert result.candidates["a"].y == pytest.approx(expected_y)
+
+
 def test_level_two_election_is_read_with_the_data_codes() -> None:
     fake = read_items()[:3]  # 11, 12, 13 : groupe 1 dans la nomenclature fournie
     result = METHOD.compute(fake, election({"11": 40.0, "12": 60.0}, level=2), {"merge_groups": {}})

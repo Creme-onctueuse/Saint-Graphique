@@ -1,0 +1,29 @@
+# source_id: csa_1995_presidentielle_t1
+# title: CSA pour Le Parisien-Aujourd'hui, France 3, Radio France et L'Express, Sondage sortie des urnes, 23 avril 1995
+# publisher: CSA
+# url: https://www.ipsos.com/fr-fr/sondage-sortie-des-urnes-0
+# accessed: 2026-11-02
+# cache_file: csa_1995_pres_t1.html
+# license: Mentions légales d'Ipsos (https://www.ipsos.com/fr-fr/mentions-legales) : les sondages du site sont réputés dans le domaine public et réutilisables en tout ou partie, avec attribution, en notant si possible la date, le commanditaire, la méthode et un lien vers le site d'Ipsos. Page d'archive d'un sondage CSA.
+# kind: vote
+# weights_census: 1999
+# merged_groups: 7=7+8
+# min_placed_share: 1
+# tables: colonnes de groupes, questions 8 et 9 « Qui a voté pour qui au 1er tour » ; pas de ligne ensemble ni de vote par groupe sur l'abstention
+# sample: 3 765 personnes, représentatives de l'électorat venant de voter au premier tour
+# fieldwork: sortie des bureaux de vote, le 23 avril 1995
+# group_labels: 1=Agriculteur; 2=Patron de l'industrie et du commerce; 3=Cadre supérieur, profession libérale; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité/Inactif (ligne unique du sondage)
+# national_note: national_share_pct : résultat officiel, Conseil constitutionnel, décision n° 95-79 PDR du 26 avril 1995 (votes divisés par les 30 462 633 suffrages exprimés), car la page ne publie pas de ligne ensemble ; abstention : 1 - 31 345 794 votants / 39 992 912 inscrits.
+# official_source: conseil_constitutionnel_1995_t1 | Conseil constitutionnel, décision n° 95-79 PDR du 26 avril 1995, résultats du premier tour | https://www.conseil-constitutionnel.fr/decision/1995/9579pdr.htm | 2026-11-02
+# notes: Transcription manuelle ; le tiret reproduit le rapport et la colonne chomeur, publiée, n'est pas utilisée. Le sondage réunit retraités et inactifs sur une ligne : cette ligne représente ici les retraités (groupe 7), avec le seul poids des anciens actifs, ce qui suppose que les autres inactifs votent comme eux ; le contrôle sur les scores nationaux lui donne le poids des deux. Les candidats sous 1 % restent listés, sans composition : leurs parts arrondies à l'entier ne disent rien.
+candidate_id,label,famille,national_share_pct,is_abstention,1,2,3,4,5,6,7,chomeur
+laguiller,Arlette Laguiller,exg,5.30,,2,4,5,6,7,7,3,10
+hue,Robert Hue,pcf,8.64,,4,2,5,9,10,14,8,7
+jospin,Lionel Jospin,ps,23.30,,21,13,30,29,26,23,21,23
+voynet,Dominique Voynet,ecologie,3.32,,0,3,5,5,4,4,2,4
+balladur,Édouard Balladur,dvd,18.58,,25,25,19,14,13,9,27,6
+chirac,Jacques Chirac,lr,20.84,,25,33,25,21,19,15,18,15
+de-villiers,Philippe de Villiers,mpf,4.74,,10,7,5,3,5,5,5,4
+le-pen,Jean-Marie Le Pen,rn,15.00,,13,12,6,13,16,22,16,31
+cheminade,Jacques Cheminade,divers,0.28,,0,1,0,0,0,1,0,0
+abstention,Abstention,abstention,21.62,true,,,,,,,,

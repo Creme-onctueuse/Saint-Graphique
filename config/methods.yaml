@@ -7,7 +7,7 @@ axes:
 methods:
   read_positions:
     description: "Réplique : les 41 catégories sont placées là où le graphique de Chris les affiche (lecture de ses vidéos, grille de 0,5). Les électorats en sont les barycentres."
-    merge_groups: { "2": ["1", "2"] }  # les sondages n'isolent pas les agriculteurs
+    merge_groups: { "2": ["1", "2"] }  # sauf si le sondage isole les agriculteurs (1995, 2002)
   ranks:
     description: "Calculée sur données ouvertes : rangs 1..N normalisés sur [-10,10]. Elle s'écarte du graphique de Chris, notamment pour les retraités."
     x_score: patrimoine_over_niveau_vie      # score = patrimoine / niveau_vie

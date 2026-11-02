@@ -1,5 +1,10 @@
 # Élections couvertes. id = <année>_<type>[_t<tour>]. Ajouter une ligne + un fichier data/elections/<id>.json.
 elections:
+  - { id: 1995_presidentielle_t1, type: presidentielle, year: 1995, round: 1, label: "Présidentielle 1995 (1er tour)" }
+  - { id: 2002_presidentielle_t1, type: presidentielle, year: 2002, round: 1, label: "Présidentielle 2002 (1er tour)" }
+  - { id: 2007_presidentielle_t1, type: presidentielle, year: 2007, round: 1, label: "Présidentielle 2007 (1er tour)" }
+  - { id: 2012_presidentielle_t1, type: presidentielle, year: 2012, round: 1, label: "Présidentielle 2012 (1er tour)" }
+  - { id: 2014_europeennes, type: europeennes, year: 2014, round: 1, label: "Européennes 2014" }
   - { id: 2017_presidentielle_t1, type: presidentielle, year: 2017, round: 1, label: "Présidentielle 2017 (1er tour)" }
   - { id: 2017_legislatives_t1, type: legislatives, year: 2017, round: 1, label: "Législatives 2017 (1er tour)" }
   - { id: 2019_europeennes, type: europeennes, year: 2019, round: 1, label: "Européennes 2019" }

@@ -10,74 +10,74 @@
     "parties": [
       {
         "phi": 0.0,
-        "n": 17,
-        "position_mean": 0.4726,
-        "position_worst": 0.9459,
-        "score_mean": 6.2176,
+        "n": 38,
+        "position_mean": 0.8133,
+        "position_worst": 3.5635,
+        "score_mean": 6.0118,
         "score_worst": 15.7
       },
       {
         "phi": 0.25,
-        "n": 17,
-        "position_mean": 0.5013,
-        "position_worst": 0.9798,
-        "score_mean": 6.4697,
-        "score_worst": 19.0369
+        "n": 38,
+        "position_mean": 0.8198,
+        "position_worst": 3.5861,
+        "score_mean": 6.1253,
+        "score_worst": 15.9193
       },
       {
         "phi": 0.5,
-        "n": 17,
-        "position_mean": 0.5491,
-        "position_worst": 1.2458,
-        "score_mean": 7.11,
-        "score_worst": 22.3738
+        "n": 38,
+        "position_mean": 0.8325,
+        "position_worst": 3.6089,
+        "score_mean": 6.2388,
+        "score_worst": 16.1386
       },
       {
         "phi": 1.0,
-        "n": 17,
-        "position_mean": 0.6712,
-        "position_worst": 1.9975,
-        "score_mean": 8.3993,
-        "score_worst": 29.0476
+        "n": 38,
+        "position_mean": 0.8678,
+        "position_worst": 3.6547,
+        "score_mean": 6.4658,
+        "score_worst": 16.5771
       }
     ],
     "blocs": [
       {
         "phi": 0.0,
-        "n": 16,
-        "position_mean": 0.3828,
-        "position_worst": 0.9482,
-        "score_mean": 4.8375,
-        "score_worst": 12.6
+        "n": 35,
+        "position_mean": 0.5386,
+        "position_worst": 1.3581,
+        "score_mean": 5.9403,
+        "score_worst": 14.5
       },
       {
         "phi": 0.25,
-        "n": 16,
-        "position_mean": 0.4038,
-        "position_worst": 0.9063,
-        "score_mean": 4.5859,
-        "score_worst": 11.9006
+        "n": 35,
+        "position_mean": 0.5409,
+        "position_worst": 1.3662,
+        "score_mean": 5.9035,
+        "score_worst": 14.4099
       },
       {
         "phi": 0.5,
-        "n": 16,
-        "position_mean": 0.4347,
-        "position_worst": 0.8816,
-        "score_mean": 4.9649,
-        "score_worst": 11.2011
+        "n": 35,
+        "position_mean": 0.5439,
+        "position_worst": 1.3742,
+        "score_mean": 5.8667,
+        "score_worst": 14.3198
       },
       {
         "phi": 1.0,
-        "n": 16,
-        "position_mean": 0.5029,
-        "position_worst": 1.2039,
-        "score_mean": 5.9647,
-        "score_worst": 14.904
+        "n": 35,
+        "position_mean": 0.5527,
+        "position_worst": 1.4011,
+        "score_mean": 5.8132,
+        "score_worst": 14.1395
       }
     ],
     "verdict": {
       "trend_worse_position": true,
-      "trend_worse_score": true
+      "trend_worse_score": false
     }
   },
   "families": [
@@ -86,29 +86,29 @@
       "label": "France insoumise",
       "color": "#e5383b",
       "last_election": "2024_europeennes",
-      "points": 5,
+      "points": 6,
       "still": {
         "x": -5.6501,
         "y": -2.9932
       },
       "trend": {
-        "x": -5.6128,
-        "y": -2.8278
+        "x": -5.5926,
+        "y": -2.7733
       },
       "error": {
         "still": {
-          "n": 2,
-          "position_mean": 0.4138,
+          "n": 3,
+          "position_mean": 0.3219,
           "position_worst": 0.6094,
-          "score_mean": 13.9,
+          "score_mean": 10.8333,
           "score_worst": 15.7
         },
         "trend": {
-          "n": 2,
-          "position_mean": 0.5449,
-          "position_worst": 0.6451,
-          "score_mean": 21.7809,
-          "score_worst": 29.0476
+          "n": 3,
+          "position_mean": 0.3203,
+          "position_worst": 0.4935,
+          "score_mean": 12.1193,
+          "score_worst": 16.5771
         }
       }
     },
@@ -117,29 +117,29 @@
       "label": "Rassemblement national",
       "color": "#0d1b4c",
       "last_election": "2024_legislatives_t1",
-      "points": 7,
+      "points": 12,
       "still": {
         "x": -5.6692,
         "y": -4.5125
       },
       "trend": {
-        "x": -5.587,
-        "y": -4.2739
+        "x": -5.6505,
+        "y": -4.4557
       },
       "error": {
         "still": {
-          "n": 4,
-          "position_mean": 0.4807,
-          "position_worst": 0.9018,
-          "score_mean": 4.7,
+          "n": 9,
+          "position_mean": 0.477,
+          "position_worst": 1.1202,
+          "score_mean": 6.1733,
           "score_worst": 12.4
         },
         "trend": {
-          "n": 4,
-          "position_mean": 0.5621,
-          "position_worst": 1.2227,
-          "score_mean": 6.4895,
-          "score_worst": 11.0681
+          "n": 9,
+          "position_mean": 0.4807,
+          "position_worst": 1.2907,
+          "score_mean": 6.4567,
+          "score_worst": 11.8371
         }
       }
     },
@@ -179,29 +179,29 @@
       "label": "Les Républicains",
       "color": "#1565c0",
       "last_election": "2024_legislatives_t1",
-      "points": 7,
+      "points": 12,
       "still": {
         "x": -5.2741,
         "y": -4.2173
       },
       "trend": {
-        "x": -5.2653,
-        "y": -3.6162
+        "x": -5.2494,
+        "y": -4.2483
       },
       "error": {
         "still": {
-          "n": 4,
-          "position_mean": 0.7288,
-          "position_worst": 0.9459,
-          "score_mean": 4.275,
-          "score_worst": 6.6
+          "n": 9,
+          "position_mean": 0.6704,
+          "position_worst": 1.0225,
+          "score_mean": 4.4633,
+          "score_worst": 10.7
         },
         "trend": {
-          "n": 4,
-          "position_mean": 0.786,
-          "position_worst": 0.9929,
-          "score_mean": 5.7483,
-          "score_worst": 12.7258
+          "n": 9,
+          "position_mean": 0.7105,
+          "position_worst": 0.9616,
+          "score_mean": 4.8888,
+          "score_worst": 10.6084
         }
       }
     },
@@ -210,29 +210,29 @@
       "label": "Parti socialiste",
       "color": "#f06292",
       "last_election": "2024_europeennes",
-      "points": 5,
+      "points": 10,
       "still": {
         "x": -5.3347,
         "y": -3.4621
       },
       "trend": {
-        "x": -5.4347,
-        "y": -3.6313
+        "x": -5.2987,
+        "y": -3.3985
       },
       "error": {
         "still": {
-          "n": 2,
-          "position_mean": 0.5754,
-          "position_worst": 0.6165,
-          "score_mean": 8.3,
-          "score_worst": 12.1
+          "n": 7,
+          "position_mean": 1.3625,
+          "position_worst": 3.4251,
+          "score_mean": 6.1414,
+          "score_worst": 13.93
         },
         "trend": {
-          "n": 2,
-          "position_mean": 1.4545,
-          "position_worst": 1.9975,
-          "score_mean": 8.9765,
-          "score_worst": 14.2994
+          "n": 7,
+          "position_mean": 1.3925,
+          "position_worst": 3.5191,
+          "score_mean": 5.9472,
+          "score_worst": 14.7397
         }
       }
     },
@@ -241,29 +241,29 @@
       "label": "Écologistes",
       "color": "#2e9e4f",
       "last_election": "2024_europeennes",
-      "points": 4,
+      "points": 9,
       "still": {
         "x": -5.093,
         "y": -1.7721
       },
       "trend": {
-        "x": -4.9742,
-        "y": -2.4244
+        "x": -5.0404,
+        "y": -1.5841
       },
       "error": {
         "still": {
-          "n": 1,
-          "position_mean": 0.3475,
-          "position_worst": 0.3475,
-          "score_mean": 0.9,
-          "score_worst": 0.9
+          "n": 6,
+          "position_mean": 1.5339,
+          "position_worst": 3.5635,
+          "score_mean": 5.455,
+          "score_worst": 9.7
         },
         "trend": {
-          "n": 1,
-          "position_mean": 0.4991,
-          "position_worst": 0.4991,
-          "score_mean": 0.8793,
-          "score_worst": 0.8793
+          "n": 6,
+          "position_mean": 1.6709,
+          "position_worst": 3.6547,
+          "score_mean": 5.6937,
+          "score_worst": 9.5653
         }
       }
     }
@@ -274,39 +274,39 @@
       "label": "Gauche",
       "tested": true,
       "last_election": "2024_legislatives_t1",
-      "points": 7,
+      "points": 12,
       "still": {
         "x": -5.3941,
         "y": -3.0222
       },
       "trend": {
-        "x": -5.338,
-        "y": -2.9764
+        "x": -5.355,
+        "y": -2.904
       },
       "error": {
         "still": {
-          "n": 4,
-          "position_mean": 0.2278,
-          "position_worst": 0.5101,
-          "score_mean": 0.95,
-          "score_worst": 1.7
+          "n": 9,
+          "position_mean": 0.5081,
+          "position_worst": 1.3581,
+          "score_mean": 3.5111,
+          "score_worst": 9.22
         },
         "trend": {
-          "n": 4,
-          "position_mean": 0.3862,
-          "position_worst": 1.1405,
-          "score_mean": 2.3,
-          "score_worst": 6.4307
+          "n": 9,
+          "position_mean": 0.5236,
+          "position_worst": 1.3905,
+          "score_mean": 4.014,
+          "score_worst": 9.3023
         }
       },
       "score_range": {
         "still": [
-          29.9,
-          31.8
+          27.3,
+          34.3
         ],
         "trend": [
-          29.8,
-          34.4
+          25.5,
+          33.6
         ]
       }
     },
@@ -315,39 +315,39 @@
       "label": "Centre",
       "tested": true,
       "last_election": "2024_legislatives_t1",
-      "points": 7,
+      "points": 11,
       "still": {
         "x": -5.1151,
         "y": -4.2947
       },
       "trend": {
-        "x": -5.1201,
-        "y": -4.5861
+        "x": -5.1254,
+        "y": -4.4624
       },
       "error": {
         "still": {
-          "n": 4,
-          "position_mean": 0.2077,
-          "position_worst": 0.3303,
-          "score_mean": 5.825,
-          "score_worst": 11.3
+          "n": 8,
+          "position_mean": 0.5454,
+          "position_worst": 1.2997,
+          "score_mean": 6.7137,
+          "score_worst": 12.7
         },
         "trend": {
-          "n": 4,
-          "position_mean": 0.37,
-          "position_worst": 0.9645,
-          "score_mean": 6.6946,
-          "score_worst": 10.8281
+          "n": 8,
+          "position_mean": 0.562,
+          "position_worst": 1.4011,
+          "score_mean": 6.9299,
+          "score_worst": 13.1922
         }
       },
       "score_range": {
         "still": [
-          16.7,
-          28.3
+          15.8,
+          29.2
         ],
         "trend": [
-          12.7,
-          26.1
+          17.3,
+          31.2
         ]
       }
     },
@@ -356,39 +356,39 @@
       "label": "Droite",
       "tested": true,
       "last_election": "2024_legislatives_t1",
-      "points": 7,
+      "points": 12,
       "still": {
         "x": -5.2741,
         "y": -4.2173
       },
       "trend": {
-        "x": -5.2775,
-        "y": -3.7005
+        "x": -5.2629,
+        "y": -4.2445
       },
       "error": {
         "still": {
-          "n": 4,
-          "position_mean": 0.7173,
-          "position_worst": 0.9482,
-          "score_mean": 5.725,
-          "score_worst": 9.5
+          "n": 9,
+          "position_mean": 0.6017,
+          "position_worst": 0.9573,
+          "score_mean": 5.6189,
+          "score_worst": 14.1
         },
         "trend": {
-          "n": 4,
-          "position_mean": 0.8391,
-          "position_worst": 1.2039,
-          "score_mean": 7.7177,
-          "score_worst": 14.904
+          "n": 9,
+          "position_mean": 0.6337,
+          "position_worst": 1.0246,
+          "score_mean": 4.2118,
+          "score_worst": 12.757
         }
       },
       "score_range": {
         "still": [
-          4.5,
-          15.9
+          4.6,
+          15.8
         ],
         "trend": [
-          0.0,
-          13.5
+          3.1,
+          11.5
         ]
       }
     },
@@ -397,39 +397,39 @@
       "label": "Extrême droite",
       "tested": true,
       "last_election": "2024_legislatives_t1",
-      "points": 7,
+      "points": 12,
       "still": {
         "x": -5.6505,
         "y": -4.4653
       },
       "trend": {
-        "x": -5.5644,
-        "y": -4.2259
+        "x": -5.6305,
+        "y": -4.4019
       },
       "error": {
         "still": {
-          "n": 4,
-          "position_mean": 0.3784,
-          "position_worst": 0.7374,
-          "score_mean": 6.85,
-          "score_worst": 12.6
+          "n": 9,
+          "position_mean": 0.5002,
+          "position_worst": 1.0325,
+          "score_mean": 8.0033,
+          "score_worst": 14.5
         },
         "trend": {
-          "n": 4,
-          "position_mean": 0.4164,
-          "position_worst": 0.7515,
-          "score_mean": 7.1464,
-          "score_worst": 9.8023
+          "n": 9,
+          "position_mean": 0.4927,
+          "position_worst": 1.1808,
+          "score_mean": 8.2211,
+          "score_worst": 14.1395
         }
       },
       "score_range": {
         "still": [
-          27.1,
-          40.8
+          25.9,
+          41.9
         ],
         "trend": [
-          31.8,
-          46.1
+          27.2,
+          43.7
         ]
       }
     },
@@ -438,39 +438,39 @@
       "label": "Abstention",
       "tested": false,
       "last_election": "2024_legislatives_t1",
-      "points": 7,
+      "points": 9,
       "still": {
         "x": -5.631,
         "y": -4.1086
       },
       "trend": {
-        "x": -5.5985,
-        "y": -4.2197
+        "x": -5.6226,
+        "y": -4.1034
       },
       "error": {
         "still": {
-          "n": 4,
-          "position_mean": 0.5384,
+          "n": 6,
+          "position_mean": 0.5434,
           "position_worst": 1.0888,
-          "score_mean": 17.025,
-          "score_worst": 26.2
+          "score_mean": 16.3833,
+          "score_worst": 29.4
         },
         "trend": {
-          "n": 4,
-          "position_mean": 0.7435,
-          "position_worst": 1.9592,
-          "score_mean": 22.8316,
-          "score_worst": 45.615
+          "n": 6,
+          "position_mean": 0.5589,
+          "position_worst": 1.1923,
+          "score_mean": 17.2511,
+          "score_worst": 29.343
         }
       },
       "score_range": {
         "still": [
-          16.3,
-          50.3
+          16.9,
+          49.7
         ],
         "trend": [
-          11.8,
-          57.4
+          17.2,
+          51.7
         ]
       }
     }

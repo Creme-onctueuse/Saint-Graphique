@@ -14,6 +14,9 @@ d'en avoir au moins ``MIN_HISTORY``. Il dit ce que vaut chaque scénario sur le 
 résultat à afficher avec la projection, quel qu'il soit. Les paramètres ne sont pas ajustés sur ce
 test.
 
+Seuls les scrutins connus par un sondage y entrent : une étape marquée ``estimated`` dans
+``data/elections/`` en est écartée, comme de la pente et du dernier point connu.
+
 Usage :
     uv run python scripts/analyze/projection.py           # écrit data/computed/_projection/
     uv run python scripts/analyze/projection.py --check   # échoue si les fichiers sont périmés
@@ -33,6 +36,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 COMPUTED = ROOT / "data" / "computed"
+ELECTIONS = ROOT / "data" / "elections"
 CONFIG = ROOT / "config" / "families.yaml"
 OUT_DIR = COMPUTED / "_projection"
 
@@ -77,6 +81,35 @@ def read_documents(
     return docs
 
 
+def read_elections(
+    dates: Mapping[str, float], directory: Path = ELECTIONS
+) -> dict[str, dict[str, Any]]:
+    """Fichiers bruts des élections datées : ils portent tous les scores, placés ou non."""
+    return {
+        election: json.loads((directory / f"{election}.json").read_text(encoding="utf-8"))
+        for election in dates
+    }
+
+
+def poll_based(
+    dates: Mapping[str, float], elections: Mapping[str, Mapping[str, Any]]
+) -> dict[str, float]:
+    """Dates des seuls scrutins connus par un sondage, sans les étapes estimées."""
+    return {e: d for e, d in dates.items() if elections[e].get("estimated") is not True}
+
+
+def raw_scores(elections: Mapping[str, Mapping[str, Any]]) -> dict[str, dict[str, float]]:
+    """Score de chaque candidat, y compris ceux qui n'ont pas de composition."""
+    return {
+        election: {
+            c["id"]: c["national_share_pct"]
+            for c in document["candidates"]
+            if "national_share_pct" in c
+        }
+        for election, document in elections.items()
+    }
+
+
 def _candidates(doc: Mapping[str, Any]) -> dict[str, Mapping[str, Any]]:
     return {c["id"]: c for c in doc["candidates"]}
 
@@ -89,6 +122,8 @@ def family_series(
     """Trajectoire d'une famille. Une élection sans électorat de la famille n'y figure pas."""
     points = []
     for election, candidate_id in family["candidates"].items():
+        if election not in docs:
+            continue
         c = _candidates(docs[election])[candidate_id]
         points.append(
             Point(election, dates[election], c["x"], c["y"], c["national_share_pct"])
@@ -100,17 +135,25 @@ def bloc_series(
     bloc: Mapping[str, Any],
     docs: Mapping[str, Mapping[str, Any]],
     dates: Mapping[str, float],
+    scores: Mapping[str, Mapping[str, float]] | None = None,
 ) -> list[Point]:
-    """Trajectoire d'un bloc : barycentre de ses électorats, pondéré par leurs scores."""
+    """Trajectoire d'un bloc : barycentre de ses électorats, pondéré par leurs scores.
+
+    ``scores`` compte aussi les candidats sans composition, trop petits pour être placés : ils
+    pèsent dans le score du bloc, pas dans sa position.
+    """
     members = set(bloc["candidates"])
     points = []
     for election, doc in docs.items():
         rows = [c for c in doc["candidates"] if c["id"] in members]
-        score = sum(c["national_share_pct"] for c in rows)
-        if score <= 0:
+        placed = sum(c["national_share_pct"] for c in rows)
+        if placed <= 0:
             continue
-        x = sum(c["x"] * c["national_share_pct"] for c in rows) / score
-        y = sum(c["y"] * c["national_share_pct"] for c in rows) / score
+        x = sum(c["x"] * c["national_share_pct"] for c in rows) / placed
+        y = sum(c["y"] * c["national_share_pct"] for c in rows) / placed
+        score = placed
+        if scores is not None:
+            score = sum(v for k, v in scores[election].items() if k in members)
         points.append(Point(election, dates[election], x, y, score))
     return sorted(points, key=lambda p: p.date)
 
@@ -241,13 +284,16 @@ def _last_color(family: Mapping[str, Any], docs: Mapping[str, Mapping[str, Any]]
 
 
 def build_document(
-    method: str, config: Mapping[str, Any], docs: Mapping[str, Mapping[str, Any]]
+    method: str,
+    config: Mapping[str, Any],
+    docs: Mapping[str, Mapping[str, Any]],
+    scores: Mapping[str, Mapping[str, float]] | None = None,
 ) -> dict[str, Any]:
     """Document ``schemas/projection.schema.json`` d'une méthode."""
-    dates = config["dates"]
+    dates = {e: d for e, d in config["dates"].items() if e in docs}
     families = {k: v for k, v in config["families"].items() if v.get("projection") is True}
     party_series = {k: family_series(v, docs, dates) for k, v in families.items()}
-    all_blocs = {k: bloc_series(v, docs, dates) for k, v in config["blocs"].items()}
+    all_blocs = {k: bloc_series(v, docs, dates, scores) for k, v in config["blocs"].items()}
     # L'abstention est projetée, mais hors du tableau : elle suit le type d'élection, pas le temps.
     tested_blocs = {k: v for k, v in all_blocs.items() if k != ABSTENTION}
 
@@ -319,9 +365,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--check", action="store_true", help="vérifie sans écrire")
     args = parser.parse_args(argv)
     config = read_config()
+    elections = read_elections(config["dates"])
+    dates = poll_based(config["dates"], elections)
+    scores = raw_scores(elections)
     stale = []
     for method in METHODS:
-        doc = build_document(method, config, read_documents(method, config["dates"]))
+        doc = build_document(method, config, read_documents(method, dates), scores)
         path = OUT_DIR / f"{method}.json"
         text = serialized(doc)
         if args.check:

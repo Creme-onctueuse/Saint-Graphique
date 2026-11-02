@@ -1,0 +1,172 @@
+{
+  "id": "1995_presidentielle_t1",
+  "type": "presidentielle",
+  "year": 1995,
+  "round": 1,
+  "label": "Présidentielle 1995 (1er tour)",
+  "pcs_level": 1,
+  "sources": [
+    {
+      "id": "csa_1995_presidentielle_t1",
+      "title": "CSA pour Le Parisien-Aujourd'hui, France 3, Radio France et L'Express, Sondage sortie des urnes, 23 avril 1995",
+      "url": "https://www.ipsos.com/fr-fr/sondage-sortie-des-urnes-0",
+      "accessed": "2026-11-02",
+      "publisher": "CSA",
+      "license": "Mentions légales d'Ipsos (https://www.ipsos.com/fr-fr/mentions-legales) : les sondages du site sont réputés dans le domaine public et réutilisables en tout ou partie, avec attribution, en notant si possible la date, le commanditaire, la méthode et un lien vers le site d'Ipsos. Page d'archive d'un sondage CSA.",
+      "notes": "Échantillon : 3 765 personnes, représentatives de l'électorat venant de voter au premier tour. Terrain : sortie des bureaux de vote, le 23 avril 1995. Tableaux : colonnes de groupes, questions 8 et 9 « Qui a voté pour qui au 1er tour » ; pas de ligne ensemble ni de vote par groupe sur l'abstention. Groupes : 1=Agriculteur; 2=Patron de l'industrie et du commerce; 3=Cadre supérieur, profession libérale; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité/Inactif (ligne unique du sondage). Le tableau isole les agriculteurs : ils sont sous la clé « 1 ». Tableau du vote de chaque groupe, converti en composition avec les effectifs du recensement de 1999 (Français de 18 ans ou plus). national_share_pct : résultat officiel, Conseil constitutionnel, décision n° 95-79 PDR du 26 avril 1995 (votes divisés par les 30 462 633 suffrages exprimés), car la page ne publie pas de ligne ensemble ; abstention : 1 - 31 345 794 votants / 39 992 912 inscrits. Transcription manuelle ; le tiret reproduit le rapport et la colonne chomeur, publiée, n'est pas utilisée. Le sondage réunit retraités et inactifs sur une ligne : cette ligne représente ici les retraités (groupe 7), avec le seul poids des anciens actifs, ce qui suppose que les autres inactifs votent comme eux ; le contrôle sur les scores nationaux lui donne le poids des deux. Les candidats sous 1 % restent listés, sans composition : leurs parts arrondies à l'entier ne disent rien."
+    },
+    {
+      "id": "conseil_constitutionnel_1995_t1",
+      "title": "Conseil constitutionnel, décision n° 95-79 PDR du 26 avril 1995, résultats du premier tour",
+      "url": "https://www.conseil-constitutionnel.fr/decision/1995/9579pdr.htm",
+      "accessed": "2026-11-02",
+      "publisher": "Conseil constitutionnel"
+    },
+    {
+      "id": "insee_rp_harmonises_1968_2022",
+      "title": "Données harmonisées des recensements de la population 1968-2022, fichier détail",
+      "url": "https://www.insee.fr/fr/statistiques/8672621?sommaire=2414232",
+      "accessed": "2026-11-02",
+      "publisher": "Insee",
+      "license": "Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation",
+      "notes": "Fichier https://www.insee.fr/fr/statistiques/fichier/8672621/RP1968-2022.parquet, empreinte SHA-256 e4f2967a54c39fb3a32ca6ebae6d3e8d0f728651d5b54ebac6af29ca38be75ce. Champ : Français de 18 ans ou plus (NATIO 000 ou 001, AGE_REV d'au moins 18), somme de POND. France métropolitaine, et DOM à partir de 1990. Groupes : 1 à 6 = CSP 1 à 6, personnes en emploi ou au chômage ayant déjà travaillé ; 7 = CSP 8, anciens actifs ; 8 = CSP 9, inactifs et chômeurs n'ayant jamais travaillé."
+    }
+  ],
+  "candidates": [
+    {
+      "id": "laguiller",
+      "label": "Arlette Laguiller",
+      "color": "#7b1113",
+      "national_share_pct": 5.3
+    },
+    {
+      "id": "hue",
+      "label": "Robert Hue",
+      "color": "#c8102e",
+      "national_share_pct": 8.64
+    },
+    {
+      "id": "jospin",
+      "label": "Lionel Jospin",
+      "color": "#f06292",
+      "national_share_pct": 23.3
+    },
+    {
+      "id": "voynet",
+      "label": "Dominique Voynet",
+      "color": "#2e9e4f",
+      "national_share_pct": 3.32
+    },
+    {
+      "id": "balladur",
+      "label": "Édouard Balladur",
+      "color": "#6f9fd8",
+      "national_share_pct": 18.58
+    },
+    {
+      "id": "chirac",
+      "label": "Jacques Chirac",
+      "color": "#1565c0",
+      "national_share_pct": 20.84
+    },
+    {
+      "id": "de-villiers",
+      "label": "Philippe de Villiers",
+      "color": "#3949ab",
+      "national_share_pct": 4.74
+    },
+    {
+      "id": "le-pen",
+      "label": "Jean-Marie Le Pen",
+      "color": "#0d1b4c",
+      "national_share_pct": 15.0
+    },
+    {
+      "id": "cheminade",
+      "label": "Jacques Cheminade",
+      "color": "#8e8e8e",
+      "national_share_pct": 0.28
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "national_share_pct": 21.62,
+      "is_abstention": true
+    }
+  ],
+  "composition": {
+    "laguiller": {
+      "1": 0.69,
+      "2": 3.42,
+      "3": 8.26,
+      "4": 18.32,
+      "5": 28.53,
+      "6": 24.05,
+      "7": 16.73
+    },
+    "hue": {
+      "1": 0.81,
+      "2": 0.99,
+      "3": 4.8,
+      "4": 15.95,
+      "5": 23.65,
+      "6": 27.92,
+      "7": 25.89
+    },
+    "jospin": {
+      "1": 1.59,
+      "2": 2.42,
+      "3": 10.81,
+      "4": 19.31,
+      "5": 23.11,
+      "6": 17.23,
+      "7": 25.53
+    },
+    "voynet": {
+      "1": 0.0,
+      "2": 3.81,
+      "3": 12.28,
+      "4": 22.69,
+      "5": 24.23,
+      "6": 20.42,
+      "7": 16.57
+    },
+    "balladur": {
+      "1": 2.56,
+      "2": 6.31,
+      "3": 9.27,
+      "4": 12.63,
+      "5": 15.65,
+      "6": 9.13,
+      "7": 44.46
+    },
+    "chirac": {
+      "1": 2.33,
+      "2": 7.58,
+      "3": 11.12,
+      "4": 17.26,
+      "5": 20.84,
+      "6": 13.87,
+      "7": 27.01
+    },
+    "de-villiers": {
+      "1": 3.76,
+      "2": 6.48,
+      "3": 8.95,
+      "4": 9.93,
+      "5": 22.08,
+      "6": 18.61,
+      "7": 30.2
+    },
+    "le-pen": {
+      "1": 1.53,
+      "2": 3.48,
+      "3": 3.37,
+      "4": 13.49,
+      "5": 22.15,
+      "6": 25.68,
+      "7": 30.3
+    }
+  }
+}

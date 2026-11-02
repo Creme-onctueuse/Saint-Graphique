@@ -5,9 +5,10 @@ reprend les 41 positions lues sur ses vidéos (``data/positions_chris.json``, ch
 citée par vidéo et horodatage), puis calcule les électorats comme lui, par barycentre des
 groupes de niveau 1.
 
-Les sondages utilisés n'isolent pas les agriculteurs : la clé « 2 » couvre donc les
-agriculteurs et les indépendants, comme la ligne « Agriculteurs et prof. indépendantes » de
-la matrice v11. ``merge_groups`` fixe ce regroupement.
+La plupart des sondages utilisés n'isolent pas les agriculteurs : la clé « 2 » couvre alors
+les agriculteurs et les indépendants, comme la ligne « Agriculteurs et prof. indépendantes »
+de la matrice v11. ``merge_groups`` fixe ce regroupement, qui ne s'applique pas à un sondage
+publiant les agriculteurs à part (1995, 2002).
 
 Saint-Graphique original : Chris et la PaduTeam.
 """
@@ -86,6 +87,18 @@ def _merged_anchors(
     return anchors
 
 
+def _needed_merges(
+    election: Election, merge_groups: Mapping[str, Sequence[str]]
+) -> dict[str, Sequence[str]]:
+    """Regroupements utiles à cette élection : aucun si le sondage publie ces groupes à part."""
+    published = {key for shares in election.composition.values() for key in shares}
+    return {
+        target: members
+        for target, members in merge_groups.items()
+        if not published & (set(members) - {target})
+    }
+
+
 def _by_group(election: Election, pcs: Sequence[Pcs]) -> Election:
     """Élection ramenée au niveau 1, avec les codes de la nomenclature des données."""
     group_of = {p.code: p.group for p in pcs}
@@ -144,6 +157,7 @@ class ReadPositions:
         if election is None:
             return result
         level_one = _by_group(election, pcs) if election.pcs_level == 2 else election
-        anchors = _merged_anchors(result.groups, items, p["merge_groups"])
+        merges = _needed_merges(level_one, p["merge_groups"])
+        anchors = _merged_anchors(result.groups, items, merges)
         candidates = candidate_points(level_one, items, result.pcs, anchors, 1)
         return dataclasses.replace(result, election_id=election.id, candidates=candidates)

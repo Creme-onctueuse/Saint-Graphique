@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-02T08:03:46+00:00",
+  "generated_at": "2026-11-02T20:36:10+00:00",
   "path_template": "{method}/{election}.json",
   "axes": {
     "x_label": "Exploitation",
@@ -20,6 +20,11 @@
       "ellipses": true,
       "elections": [
         "population",
+        "1995_presidentielle_t1",
+        "2002_presidentielle_t1",
+        "2007_presidentielle_t1",
+        "2012_presidentielle_t1",
+        "2014_europeennes",
         "2017_presidentielle_t1",
         "2017_legislatives_t1",
         "2019_europeennes",
@@ -36,6 +41,11 @@
       "ellipses": true,
       "elections": [
         "population",
+        "1995_presidentielle_t1",
+        "2002_presidentielle_t1",
+        "2007_presidentielle_t1",
+        "2012_presidentielle_t1",
+        "2014_europeennes",
         "2017_presidentielle_t1",
         "2017_legislatives_t1",
         "2019_europeennes",
@@ -52,6 +62,11 @@
       "ellipses": true,
       "elections": [
         "population",
+        "1995_presidentielle_t1",
+        "2002_presidentielle_t1",
+        "2007_presidentielle_t1",
+        "2012_presidentielle_t1",
+        "2014_europeennes",
         "2017_presidentielle_t1",
         "2017_legislatives_t1",
         "2019_europeennes",
@@ -68,6 +83,11 @@
       "ellipses": false,
       "elections": [
         "population",
+        "1995_presidentielle_t1",
+        "2002_presidentielle_t1",
+        "2007_presidentielle_t1",
+        "2012_presidentielle_t1",
+        "2014_europeennes",
         "2017_presidentielle_t1",
         "2017_legislatives_t1",
         "2019_europeennes",
@@ -84,6 +104,41 @@
       "label": "Population (sans élection)",
       "type": "population",
       "year": 2022
+    },
+    {
+      "id": "1995_presidentielle_t1",
+      "label": "Présidentielle 1995 (1er tour)",
+      "type": "presidentielle",
+      "year": 1995,
+      "round": 1
+    },
+    {
+      "id": "2002_presidentielle_t1",
+      "label": "Présidentielle 2002 (1er tour)",
+      "type": "presidentielle",
+      "year": 2002,
+      "round": 1
+    },
+    {
+      "id": "2007_presidentielle_t1",
+      "label": "Présidentielle 2007 (1er tour)",
+      "type": "presidentielle",
+      "year": 2007,
+      "round": 1
+    },
+    {
+      "id": "2012_presidentielle_t1",
+      "label": "Présidentielle 2012 (1er tour)",
+      "type": "presidentielle",
+      "year": 2012,
+      "round": 1
+    },
+    {
+      "id": "2014_europeennes",
+      "label": "Européennes 2014",
+      "type": "europeennes",
+      "year": 2014,
+      "round": 1
     },
     {
       "id": "2017_presidentielle_t1",

@@ -157,6 +157,38 @@ def _status_counts(items: list[dict[str, Any]], field: str) -> str:
     return ", ".join(f"{counts[s]} {s}" for s in statuses if counts[s])
 
 
+def election_limits(table: sondages.PollTable) -> str:
+    """Limites d'un tableau d'élection, pour la colonne du même nom."""
+    parts: list[str] = []
+    if table.kind == "vote":
+        parts.append(
+            "Composition calculée, pas publiée : vote de chaque groupe, en entiers, converti avec "
+            f"le recensement de {table.meta['weights_census']}"
+        )
+    if "8" in table.groups:
+        parts.append("Parts ramenées à 100 sans « Autre inactif »")
+    if "1" in table.groups:
+        parts.append("agriculteurs publiés (clé « 1 »)")
+    else:
+        parts.append("agriculteurs non publiés (clé « 1 » absente)")
+    if merged := sondages.merged_groups(table):
+        parts.append(
+            f"retraités et inactifs réunis par le sondage (colonne {', '.join(merged)}), rattachés "
+            "aux retraités"
+        )
+    if "min_placed_share" in table.meta:
+        parts.append(f"candidats sous {table.meta['min_placed_share']} % sans composition")
+    if not sondages.placed_rows(table)[table.rows["is_abstention"]].any():
+        parts.append("abstention officielle, sans détail par groupe")
+    parts.append("petits électorats très imprécis. Détails dans `sources[].notes`.")
+    return " ; ".join(parts)
+
+
+def ifop_elections(elections: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Élections dont le sondage vient de l'Ifop."""
+    return [e for e in elections if e["sources"][0].get("publisher", "").startswith("Ifop")]
+
+
 def positions_source_lines() -> list[str]:
     """Vidéos dont viennent les positions lues, sous forme de liste Markdown."""
     path = DATA / "positions_chris.json"
@@ -176,6 +208,9 @@ def render_sources(
     elections: list[dict[str, Any]],
     control: pd.DataFrame,
     missing: list[dict[str, Any]],
+    control_2007: pd.DataFrame | None = None,
+    national_checks: Mapping[str, pd.DataFrame] | None = None,
+    tables: Mapping[str, sondages.PollTable] | None = None,
 ) -> str:
     """Rédige data/SOURCES.md à partir des références réellement utilisées."""
     refs = {source["id"]: source for source in pcs["sources"]}
@@ -197,14 +232,16 @@ def render_sources(
         "Fichier généré par `scripts/build_data.py`, à ne pas modifier à la main.",
         "",
         "`data/` contient des chiffres issus de publications primaires (Insee, "
-        "nomenclature-pcs.fr, Ifop) ou calculés à partir d'elles par une méthode décrite ici, et "
+        "nomenclature-pcs.fr, Conseil constitutionnel, Ifop, Ipsos, CSA) ou calculés à partir "
+        "d'elles par une méthode décrite ici, et "
         "les positions lues sur les vidéos de la PaduTeam (`data/positions_chris.json`). "
         "Aucune donnée de la reproduction citée dans les crédits n'y figure : son dépôt, sans "
         "licence, n'a servi que de contrôle local.",
         "",
         "## Données Ifop : projet libre et non commercial",
         "",
-        "Les 7 fichiers d'élections reposent sur des rapports Ifop, et chacun indique : « Aucune "
+        f"{len(ifop_elections(elections))} fichiers d'élections reposent sur des rapports Ifop, "
+        "et chacun indique : « Aucune "
         "publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » "
         "Aucun accord n'a été demandé ni obtenu.",
         "",
@@ -212,6 +249,14 @@ def render_sources(
         "citant chacun d'eux : `data/elections/`, `pipeline/sources/manual/` et les coordonnées "
         "d'électorats de `data/computed/`. Si l'Ifop demande leur retrait, ils seront retirés. "
         "Ces lignes décrivent un usage, ce n'est pas un avis juridique.",
+        "",
+        "## Autres instituts",
+        "",
+        "Les autres élections ont une mention propre, reprise dans le champ `license` de leur "
+        "source et dans le tableau ci-dessous. Les sondages du site d'Ipsos sont réutilisables "
+        "avec attribution, d'après ses mentions légales : c'est aussi le cas de la page d'archive "
+        "du sondage CSA de 1995. Le rapport CSA-Cisco de 2007 ne porte aucune mention de "
+        "réutilisation.",
         "",
         "## Jeux de données",
         "",
@@ -281,8 +326,10 @@ def render_sources(
             "ni les retraités.",
         ],
     ]
+    tables = tables or {}
     for election in elections:
         source = election["sources"][0]
+        table = tables.get(election["id"])
         rows.append(
             [
                 f"`elections/{election['id']}.json`",
@@ -290,8 +337,28 @@ def render_sources(
                 source["url"],
                 source["accessed"],
                 source.get("license", "non indiquée"),
-                "Parts ramenées à 100 sans « Autre inactif » ; agriculteurs non publiés (clé "
+                election_limits(table)
+                if table is not None
+                else "Parts ramenées à 100 sans « Autre inactif » ; agriculteurs non publiés (clé "
                 "« 1 » absente) ; petits électorats très imprécis. Détails dans `sources[].notes`.",
+            ]
+        )
+    # Résultats officiels et effectifs : une ligne par source, citée par plusieurs élections.
+    support: dict[str, tuple[dict[str, Any], list[str]]] = {}
+    for election in elections:
+        for source in election["sources"][1:]:
+            support.setdefault(source["id"], (source, []))[1].append(election["id"])
+    for source, ids in support.values():
+        rows.append(
+            [
+                "`elections/` : " + ", ".join(f"`{i}`" for i in ids),
+                source["title"],
+                source["url"],
+                source["accessed"],
+                source.get("license", "non indiquée"),
+                "Résultats officiels du scrutin."
+                if source["id"].startswith("conseil_constitutionnel")
+                else "Effectifs par groupe, pour la conversion : voir plus bas.",
             ]
         )
     lines += _table(
@@ -396,18 +463,27 @@ def render_sources(
         "",
         "## Composition des électorats",
         "",
-        "- Les rapports Ifop publient directement la composition de chaque électorat : aucune "
-        "conversion de Bayes n'entre dans `data/`. Les tableaux sont transcrits dans "
+        "- De 2017 à 2024, les rapports Ifop publient directement la composition de chaque "
+        "électorat, et CSA aussi en 2007 : aucune conversion n'entre dans ces fichiers. En 1995, "
+        "2002, 2012 et 2014, le sondage publie le vote de chaque groupe : la composition de "
+        "`data/` est alors calculée (voir plus bas). Les tableaux sont transcrits dans "
         "`pipeline/sources/manual/`, avec les pages et l'empreinte SHA-256 du PDF.",
         "- « Autre inactif » (étudiants, personnes au foyer...) est hors des 30 PCS : il est "
         "retiré et les parts sont ramenées à 100 sur les groupes restants. Les parts publiées "
         "restent dans les CSV.",
+        "- En 1995 et 2002, le sondage isole les agriculteurs : ils ont leur clé « 1 ». En 1995, "
+        "il réunit retraités et inactifs sur une ligne, rattachée ici aux retraités.",
+        "- Une abstention sans détail par groupe (1995, 2007, 2012) garde le taux officiel, sans "
+        "composition : elle n'a pas de point sur la carte. Les candidats sous 1 % de ces tableaux "
+        "non plus : dans un tableau en entiers, leurs parts ne sont que des arrondis.",
         "- La ligne « Artisan ou commerçant » (« Travailleur indépendant » en 2017) est rattachée "
         "au groupe 2. Le tiret des rapports est lu comme 0. Aucun rapport ne dit où sont comptés "
         "les agriculteurs. Parmi les inscrits, cette ligne pèse environ 4,5 à 5 %, plus proche des "
         "groupes 1 et 2 réunis du recensement (4,5 %) que du groupe 2 seul (3,7 %) : ils y sont "
         "peut-être inclus, sans certitude.",
-        "- `national_share_pct` reprend la ligne ensemble du sondage, pas le résultat officiel.",
+        "- `national_share_pct` reprend la ligne ensemble du sondage, pas le résultat officiel, "
+        "sauf en 1995 où la page n'en publie pas : les scores y sont ceux du Conseil "
+        "constitutionnel.",
         "- `margin_pts` n'est pas renseigné. Les méthodes l'utilisent comme marge de chaque "
         "électorat, or la marge de l'échantillon total la sous-estimerait fortement : un électorat "
         "ne représente qu'une fraction de l'échantillon. La taille d'échantillon est dans "
@@ -419,12 +495,58 @@ def render_sources(
         "- Législatives 2024 : enquête réalisée du 26 au 29 juin, avant le scrutin, puis redressée "
         "sur les résultats officiels. Ce n'est pas un sondage du jour du vote.",
         "",
+        "## Conversion du vote par groupe en composition",
+        "",
+        "**Poids.** `pipeline/sources/manual/poids_recensements.csv` donne les Français de 18 ans "
+        "ou plus par groupe, à chaque recensement, d'après les données harmonisées de l'Insee "
+        "(fichier de 255 Mo, lu par `scripts/collect/poids_recensements.py`, non nécessaire à la "
+        "construction). Chaque tableau utilise le recensement le plus proche : 1999 pour 1995 et "
+        "2002, 2011 pour 2012, 2016 pour 2014. Ce calcul retrouve les effectifs de 2022 obtenus "
+        "par ailleurs à partir du fichier détail du recensement. Quand le sondage publie "
+        "l'abstention par groupe (2002, 2014), le poids d'un groupe parmi les votants tient compte "
+        "de sa participation.",
+        "",
+        "**Contrôle sur les scores nationaux.** Le vote des groupes, pondéré par ces effectifs, "
+        "doit redonner le score national du tableau (`sondages.national_check`, en points) :",
+        "",
+    ]
+    checks = national_checks or {}
+    lines += _table(
+        ["Élection", "Candidats", "Écart moyen (points)", "Écart maximal (points)"],
+        [
+            [
+                eid,
+                len(check),
+                f"{check['ecart'].abs().mean():.2f}",
+                f"{check['ecart'].abs().max():.2f}",
+            ]
+            for eid, check in checks.items()
+        ],
+    )
+    lines += [
+        "",
+        "**Contrôle sur une composition publiée.** CSA publie les deux tableaux en 2007 : la "
+        "composition convertie depuis le vote, avec le recensement de 2006, est comparée à la "
+        "composition publiée, sur les groupes communs ramenés à 100.",
+        "",
+    ]
+    if control_2007 is not None:
+        lines += _table(
+            ["Électorat", "Écart moyen (points)", "Écart maximal (points)"],
+            [
+                [cid, f"{row['ecart_moyen_pts']:.1f}", f"{row['ecart_max_pts']:.1f}"]
+                for cid, row in control_2007.iterrows()
+            ],
+        )
+    lines += [
+        "",
         "## Contrôle de la conversion de Bayes",
         "",
-        "La conversion (`sondages.bayes_composition`) est contrôlée sur la présidentielle 2022 : "
+        "La conversion (`sondages.bayes_composition`) est aussi contrôlée sur la présidentielle "
+        "2022 : "
         "le vote par profession publié par Ipsos, converti avec les effectifs du recensement "
         "(Français de 18 ans ou plus) et l'abstention par groupe, est comparé à la composition "
-        "publiée par l'Ifop, sur les 5 groupes communs ramenés à 100. Ipsos ne sert qu'à ce "
+        "publiée par l'Ifop, sur les 5 groupes communs ramenés à 100. Ipsos 2022 ne sert qu'à ce "
         "contrôle.",
         "",
     ]
@@ -448,8 +570,11 @@ def render_sources(
         "fichier détail de l'enquête Patrimoine trouvé en accès libre.",
         "- **Patrimoine et niveau de vie des retraités en 2020-2021.** Aucun ensemble publié ; le "
         "patrimoine reste un calcul.",
-        "- **Vote des agriculteurs (groupe 1).** Non isolé dans les rapports Ifop et Ipsos "
-        "consultés. Elabe, Harris Interactive et OpinionWay n'ont pas été consultés.",
+        "- **Vote des agriculteurs (groupe 1).** Isolé seulement en 1995 (CSA) et en 2002 "
+        "(Ipsos), pas dans les rapports Ifop et CSA 2007. Elabe, Harris Interactive et OpinionWay "
+        "n'ont pas été consultés.",
+        "- **Avant 1995 et législatives de 2012.** Aucun tableau complet du vote par profession "
+        "trouvé au premier tour : voir docs/methodologie.md, section 7.",
         "- **Scores nationaux officiels.** Remplacer la ligne ensemble des sondages par les "
         "résultats du ministère de l'Intérieur, en tenant compte des agrégats propres à l'Ifop "
         "aux législatives.",
@@ -504,8 +629,10 @@ def main(argv: list[str] | None = None) -> int:
 
     elections: list[dict[str, Any]] = []
     produced: set[str] = set()
+    tables: dict[str, sondages.PollTable] = {}
     for config in sondages.available_elections():
-        document = sondages.election_document(config, sondages.load_table(config["id"]))
+        tables[config["id"]] = sondages.load_table(config["id"])
+        document = sondages.election_document(config, tables[config["id"]])
         write_json(DATA / "elections" / f"{config['id']}.json", document)
         elections.append(document)
         produced.add(config["id"])
@@ -521,8 +648,21 @@ def main(argv: list[str] | None = None) -> int:
         sondages.load_table("2022_presidentielle_t1"),
         insee_population.load_electorate(),
     )
+    control_2007 = sondages.compare_with_bayes(
+        sondages.control_table_2007(),
+        sondages.load_table("2007_presidentielle_t1"),
+        sondages.census_weights(2006),
+    )
+    checks = {t.election_id: sondages.national_check(t) for t in sondages.vote_tables()}
     text = render_sources(
-        pcs, insee_revenus_patrimoine.retired_wealth(), elections, control, missing
+        pcs,
+        insee_revenus_patrimoine.retired_wealth(),
+        elections,
+        control,
+        missing,
+        control_2007,
+        checks,
+        tables,
     )
     (DATA / "SOURCES.md").write_text(text, encoding="utf-8", newline="\n")
     print(f"data/SOURCES.md : {len(elections)} élections, {len(missing)} manquante(s)")
@@ -531,6 +671,11 @@ def main(argv: list[str] | None = None) -> int:
         f"{control['ecart_moyen_pts'].mean():.1f} points, maximum "
         f"{control['ecart_max_pts'].max():.1f} points"
     )
+    for election_id, check in checks.items():
+        print(
+            f"Contrôle des scores nationaux, {election_id} : écart moyen "
+            f"{check['ecart'].abs().mean():.2f} point, maximum {check['ecart'].abs().max():.2f}"
+        )
     return 0
 
 

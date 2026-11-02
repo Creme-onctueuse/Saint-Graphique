@@ -1,0 +1,29 @@
+# source_id: ifop_2012_presidentielle_t1
+# title: Ifop-Fiducial pour Europe 1, Paris Match et Public Sénat, Premier tour de l'élection présidentielle 2012 : profil des électeurs et clés du scrutin, 22 avril 2012
+# publisher: Ifop-Fiducial
+# url: https://www.ifop.com/wp-content/uploads/2018/03/1848-1-study_file.pdf
+# accessed: 2026-11-02
+# cache_file: ifop_2012_pres_t1.pdf
+# sha256: cfe8d935c52216c8c7f7473267e51a5ce7271a02340ea89c139fcdbcfb2ec28a
+# kind: vote
+# weights_census: 2011
+# min_placed_share: 1
+# tables: colonnes de groupes, vote selon la profession p. 9 et 10 ; national_share_pct, ligne ENSEMBLE des mêmes pages
+# sample: 3 509 personnes, représentatives des inscrits de 18 ans ou plus
+# fieldwork: en ligne, le 22 avril 2012
+# group_labels: 2=Artisan ou commerçant; 3=Profession libérale, cadre supérieur; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif
+# national_note: national_share_pct : ligne ensemble du sondage, en % des exprimés, pas le résultat officiel ; abstention : résultat officiel, Conseil constitutionnel, décision n° 2012-152 PDR du 25 avril 2012 (1 - 36 584 399 votants / 46 028 542 inscrits), car le rapport ne publie pas l'abstention.
+# official_source: conseil_constitutionnel_2012_t1 | Conseil constitutionnel, décision n° 2012-152 PDR du 25 avril 2012, résultats du premier tour | https://www.conseil-constitutionnel.fr/decision/2012/2012152PDR.htm | 2026-11-02
+# notes: Transcription manuelle ; « - » reproduit le tiret du rapport. Ce rapport publie le vote de chaque groupe en entiers, pas la composition des électorats comme ceux de 2017 à 2024 : sans abstention par groupe, le poids d'un groupe parmi les votants reste celui du recensement. Le rapport signale les effectifs inférieurs à 40 individus. Les candidats sous 1 % restent listés, sans composition : leurs parts arrondies à l'entier ne disent rien.
+candidate_id,label,famille,national_share_pct,is_abstention,2,3,4,5,6,7,8
+arthaud,Nathalie Arthaud,exg,0.56,,-,-,-,1,2,-,-
+poutou,Philippe Poutou,npa,1.16,,2,1,1,2,2,-,2
+melenchon,Jean-Luc Mélenchon,lfi,11.29,,7,9,14,11,18,9,12
+hollande,François Hollande,ps,28.13,,9,31,31,28,21,32,29
+joly,Eva Joly,ecologie,2.28,,3,4,2,1,2,2,4
+bayrou,François Bayrou,centre,9.19,,12,14,10,8,6,9,8
+sarkozy,Nicolas Sarkozy,lr,27.04,,43,27,21,19,14,37,24
+dupont-aignan,Nicolas Dupont-Aignan,dlf,1.82,,6,1,2,2,2,1,2
+le-pen,Marine Le Pen,rn,18.3,,17,13,19,28,33,10,19
+cheminade,Jacques Cheminade,divers,0.25,,1,-,-,-,-,-,-
+abstention,Abstention,abstention,20.52,true,,,,,,,

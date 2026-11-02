@@ -1,0 +1,34 @@
+# source_id: ipsos_2002_presidentielle_t1
+# title: Ipsos pour Vizzavi, Le Figaro, France 2, Europe 1 et Le Point, 1er tour présidentielle 2002 : comprendre le vote des Français, qui a voté quoi ?, 22 avril 2002
+# publisher: Ipsos
+# url: https://www.ipsos.com/fr-fr/1er-tour-presidentielle-2002comprendre-le-vote-des-francais-qui-vote-quoi-les-motivations-de-vote
+# accessed: 2026-11-02
+# cache_file: ipsos_2002_pres_t1.html
+# license: Mentions légales d'Ipsos (https://www.ipsos.com/fr-fr/mentions-legales) : les sondages du site sont réputés dans le domaine public et réutilisables en tout ou partie, avec attribution, en notant si possible la date, le commanditaire, la méthode et un lien vers le site d'Ipsos.
+# kind: vote
+# weights_census: 1999
+# min_placed_share: 1
+# tables: colonnes de groupes, « La sociologie des électorats », blocs Profession et Statut, et « Qui sont les abstentionnistes ? » ; national_share_pct, ligne ENSEMBLE des mêmes tableaux
+# sample: 4 044 personnes, représentatives des inscrits de 18 ans ou plus
+# fieldwork: par téléphone, le 21 avril 2002
+# group_labels: 1=Agriculteurs; 2=Artisans, Commerçants; 3=Professions libérales, Cadres Sup.; 4=Professions intermédiaires; 5=Employés; 6=Ouvriers; 7=Retraités (bloc Statut de l'interviewé)
+# national_note: national_share_pct : ligne ensemble du sondage (abstention : 27 % des inscrits, contre 28,40 % officiels), pas le résultat officiel.
+# notes: Transcription manuelle. La fiche technique ne nomme pas l'institut : la page est publiée par Ipsos, qui y présente les chiffres et résultats complets du sondage. Les colonnes chomeur et etudiant, publiées, ne sont pas utilisées. Les six lignes de profession semblent porter sur les actifs : la page ne le dit pas, mais leur vote est plus proche de celui des salariés que de celui des retraités. Les candidats sous 1 % restent listés, sans composition : leurs parts arrondies à l'entier ne disent rien.
+candidate_id,label,famille,national_share_pct,is_abstention,1,2,3,4,5,6,7,chomeur,etudiant
+laguiller,Arlette Laguiller,exg,5.8,,5,1,4,7,9,10,3,5,3
+besancenot,Olivier Besancenot,npa,4.3,,10,1,3,7,7,6,1,2,7
+gluckstein,Daniel Gluckstein,exg,0.5,,0,0,1,1,1,0,1,0,1
+hue,Robert Hue,pcf,3.4,,3,2,3,2,4,3,5,0,3
+jospin,Lionel Jospin,ps,15.9,,2,9,18,13,15,15,19,13,15
+taubira,Christiane Taubira,dvg,2.1,,0,2,4,2,2,1,1,1,5
+mamere,Noël Mamère,ecologie,5.3,,2,3,7,10,5,4,1,7,12
+chevenement,Jean-Pierre Chevènement,dvg,5.4,,5,5,7,7,5,4,6,4,5
+lepage,Corinne Lepage,centre,1.9,,4,2,3,3,2,1,2,3,1
+saint-josse,Jean Saint-Josse,divers,4.3,,3,8,1,4,6,6,4,5,3
+bayrou,François Bayrou,centre,6.9,,17,8,14,8,5,2,7,7,8
+madelin,Alain Madelin,dvd,4,,8,11,7,5,3,1,3,0,6
+chirac,Jacques Chirac,lr,19.4,,15,27,17,16,15,14,28,12,12
+boutin,Christine Boutin,dvd,1.2,,0,2,2,0,1,0,1,1,2
+le-pen,Jean-Marie Le Pen,rn,17.2,,20,19,8,14,16,30,16,38,15
+megret,Bruno Mégret,mnr,2.4,,6,0,1,1,4,3,2,2,2
+abstention,Abstention,abstention,27,true,31,21,23,29,29,27,21,46,39

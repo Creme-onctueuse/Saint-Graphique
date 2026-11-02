@@ -1,18 +1,25 @@
 """Composition sociale des électorats, d'après des sondages publiés.
 
-Les rapports étant des PDF, leurs tableaux sont transcrits à la main dans
+Les rapports étant des PDF ou des pages web, leurs tableaux sont transcrits à la main dans
 ``pipeline/sources/manual/<election>.csv``, avec la source, les pages et l'empreinte du PDF en
 en-tête. Deux formes de tableaux coexistent, indiquées par ``# kind:`` :
 
 - ``composition`` : le sondage publie directement la part de chaque groupe dans l'électorat
-  (Ifop, « en composition »). Aucune conversion : c'est la source retenue pour ``data/`` ;
-- ``vote`` : le sondage publie le vote de chaque groupe (Ipsos). La conversion de Bayes donne
+  (Ifop de 2017 à 2024, CSA en 2007, « en composition »). Aucune conversion ;
+- ``vote`` : le sondage publie le vote de chaque groupe (CSA en 1995, Ipsos en 2002, Ifop en 2012 et
+  2014). La conversion de Bayes donne
   ``composition[c][g] = vote[g][c]·poids[g] / Σ_g vote[g][c]·poids[g]``, où ``poids`` est
-  l'effectif du groupe parmi les inscrits, multiplié par sa participation pour un candidat.
+  l'effectif du groupe parmi les inscrits, multiplié par sa participation pour un candidat. Les
+  effectifs viennent du recensement désigné par ``# weights_census:``
+  (``manual/poids_recensements.csv``), et ``national_check`` les éprouve sur les scores nationaux.
 
 Les parts publiées incluent « Autre inactif » (groupe 8), hors des 30 PCS : il est retiré et les
-parts sont ramenées à 100 sur les groupes restants. Aucun sondage consulté n'isole les
-agriculteurs : la clé « 1 » est absente plutôt que fixée à une valeur fictive.
+parts sont ramenées à 100 sur les groupes restants. La plupart des sondages n'isolent pas les
+agriculteurs : la clé « 1 » est alors absente plutôt que fixée à une valeur fictive.
+
+Une ligne sans chiffres de groupe (l'abstention d'un sondage qui ne la publie pas) garde son score
+national, sans composition. ``# min_placed_share:`` retire aussi la composition des candidats
+sous ce score : dans un tableau en entiers, leurs parts ne sont que des arrondis.
 """
 
 from __future__ import annotations
@@ -26,6 +33,7 @@ from typing import Any
 import pandas as pd
 
 from pipeline.sources._common import (
+    LICENCE_INSEE,
     MANUAL_DIR,
     cache_dir,
     download,
@@ -36,6 +44,7 @@ from pipeline.sources._common import (
 GROUPS_IN_CHART: tuple[str, ...] = ("1", "2", "3", "4", "5", "6", "7")
 ALL_GROUPS: tuple[str, ...] = (*GROUPS_IN_CHART, "8")
 CONTROL_DIR = MANUAL_DIR / "controle"
+CENSUS_PATH = MANUAL_DIR / "poids_recensements.csv"
 
 #: Couleurs partisanes usuelles, choisies pour ce projet (repères visuels, pas des données).
 FAMILY_COLORS: dict[str, str] = {
@@ -57,6 +66,8 @@ FAMILY_COLORS: dict[str, str] = {
     "patriotes": "#283593",
     "rn": "#0d1b4c",
     "reconquete": "#3e2723",
+    "mpf": "#3949ab",
+    "mnr": "#1a237e",
     "lassalle": "#8d8d5a",
     "upr": "#00897b",
     "alliance_jaune": "#fdd835",
@@ -129,6 +140,76 @@ def parse_manual_csv(path: Path, election_id: str | None = None) -> PollTable:
     return PollTable(election_id or path.stem, meta, rows, groups)
 
 
+def census_table(path: Path = CENSUS_PATH) -> tuple[Mapping[str, str], pd.DataFrame]:
+    """En-tête et effectifs par recensement : une ligne par année, une colonne par groupe."""
+    meta: dict[str, str] = {}
+    body: list[str] = []
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        if line.startswith("#"):
+            key, _, value = line[1:].partition(":")
+            meta[key.strip()] = value.strip()
+        elif line.strip():
+            body.append(line)
+    table = pd.read_csv(io.StringIO("\n".join(body)), dtype={"annee": int}).set_index("annee")
+    table.columns = table.columns.astype(str)
+    return meta, table.astype(float)
+
+
+def census_weights(year: int) -> pd.Series:
+    """Français de 18 ans ou plus par groupe ``'1'``..``'8'``, au recensement ``year``."""
+    _, table = census_table()
+    if year not in table.index:
+        raise ValueError(f"Recensement inconnu : {year}")
+    return table.loc[year]
+
+
+def census_source() -> dict[str, str]:
+    """Référence du fichier d'effectifs utilisé par les conversions."""
+    meta, _ = census_table()
+    return source_ref(
+        meta["source_id"],
+        meta["title"],
+        meta["url"],
+        meta["accessed"],
+        publisher=meta["publisher"],
+        license=LICENCE_INSEE,
+        notes=(
+            f"Fichier {meta['data_url']}, empreinte SHA-256 {meta['sha256']}. "
+            f"Champ : {meta['champ']} Groupes : {meta['groupes']}."
+        ),
+    )
+
+
+def has_breakdown(table: PollTable) -> pd.Series:
+    """Lignes dont les chiffres de groupe sont publiés."""
+    return table.rows[list(table.groups)].notna().all(axis=1)
+
+
+def placed_rows(table: PollTable) -> pd.Series:
+    """Lignes qui reçoivent une composition : chiffres publiés, score au moins égal au seuil."""
+    threshold = float(table.meta.get("min_placed_share", 0))
+    big_enough = table.rows["is_abstention"] | (table.rows["national_share_pct"] >= threshold)
+    return has_breakdown(table) & big_enough
+
+
+def merged_groups(table: PollTable) -> dict[str, list[str]]:
+    """``7=7+8`` : la colonne 7 du tableau réunit, dans le sondage, les groupes 7 et 8."""
+    out: dict[str, list[str]] = {}
+    for part in filter(None, table.meta.get("merged_groups", "").split(";")):
+        target, _, members = part.partition("=")
+        out[target.strip()] = [m.strip() for m in members.split("+")]
+    return out
+
+
+def table_weights(table: PollTable, inscrits: pd.Series | None = None) -> pd.Series:
+    """Effectifs des groupes : ceux donnés, sinon le recensement désigné par le tableau."""
+    if inscrits is not None:
+        return inscrits
+    if "weights_census" not in table.meta:
+        raise ValueError("Un tableau « vote » demande les effectifs d'inscrits par groupe")
+    return census_weights(int(table.meta["weights_census"]))
+
+
 def bayes_composition(vote: pd.DataFrame, weights: pd.Series) -> pd.DataFrame:
     """Vote par groupe -> composition des électorats (en %, somme 100 par candidat).
 
@@ -158,8 +239,9 @@ def composition_from_vote(table: PollTable, inscrits: pd.Series) -> pd.DataFrame
     candidat est ``inscrits[g]·(1 - abstention[g])``, celui de l'abstention ``inscrits[g]``.
     """
     groups = list(table.groups)
-    matrix = table.rows[groups].astype(float)
-    is_abstention = table.rows["is_abstention"]
+    placed = placed_rows(table)
+    matrix = table.rows.loc[placed, groups].astype(float)
+    is_abstention = table.rows.loc[placed, "is_abstention"]
     out = []
     if is_abstention.any():
         abstention = matrix[is_abstention].iloc[0]
@@ -168,13 +250,38 @@ def composition_from_vote(table: PollTable, inscrits: pd.Series) -> pd.DataFrame
         out.append(bayes_composition(matrix[is_abstention], inscrits))
     else:
         out.append(bayes_composition(matrix, inscrits))
-    return pd.concat(out).loc[table.rows.index]
+    return pd.concat(out).loc[matrix.index]
+
+
+def national_check(table: PollTable, inscrits: pd.Series | None = None) -> pd.DataFrame:
+    """Score national recalculé depuis le vote de chaque groupe, comparé au score retenu.
+
+    Ce contrôle éprouve les effectifs, sans passer par la composition : le score recalculé est la
+    moyenne du vote des groupes, pondérée par leurs votants. Tous les candidats y figurent, et une
+    colonne qui réunit plusieurs groupes reçoit le poids de tous.
+    """
+    if table.kind != "vote":
+        raise ValueError("Le contrôle porte sur un tableau « vote »")
+    groups = list(table.groups)
+    census = table_weights(table, inscrits)
+    weights = census.reindex(groups).copy()
+    for target, members in merged_groups(table).items():
+        weights[target] = census.reindex(members).sum()
+    known = has_breakdown(table)
+    is_abstention = table.rows["is_abstention"] & known
+    if is_abstention.any():
+        abstention = table.rows.loc[is_abstention, groups].astype(float).iloc[0]
+        weights = weights * (1.0 - abstention / 100.0)
+    candidates = known & ~table.rows["is_abstention"]
+    implied = implied_national_shares(table.rows.loc[candidates, groups].astype(float), weights)
+    national = table.rows.loc[candidates, "national_share_pct"].astype(float)
+    return pd.DataFrame({"national": national, "recalcule": implied, "ecart": implied - national})
 
 
 def published_composition(table: PollTable) -> pd.DataFrame:
     """Parts publiées, ramenées à 100 sur les groupes du graphique (sans « Autre inactif »)."""
     groups = [g for g in table.groups if g in GROUPS_IN_CHART]
-    matrix = table.rows[groups].astype(float)
+    matrix = table.rows.loc[placed_rows(table), groups].astype(float)
     return matrix.div(matrix.sum(axis=1), axis=0) * 100.0
 
 
@@ -182,10 +289,10 @@ def table_composition(table: PollTable, inscrits: pd.Series | None = None) -> pd
     """Composition en % d'un tableau, quelle que soit sa forme."""
     if table.kind == "composition":
         return published_composition(table)
-    if inscrits is None:
-        raise ValueError("Un tableau « vote » demande les effectifs d'inscrits par groupe")
-    result = composition_from_vote(table, inscrits)
-    return result[[g for g in table.groups if g in GROUPS_IN_CHART]]
+    result = composition_from_vote(table, table_weights(table, inscrits))
+    # Les inactifs retirés, chaque électorat est ramené à 100 sur les groupes du graphique.
+    kept = result[[g for g in table.groups if g in GROUPS_IN_CHART]]
+    return kept.div(kept.sum(axis=1), axis=0) * 100.0
 
 
 def manual_path(election_id: str) -> Path:
@@ -218,13 +325,36 @@ def source_of(table: PollTable) -> dict[str, str]:
         f"Terrain : {meta.get('fieldwork', 'non précisé')}.",
         f"Tableaux : {meta.get('tables', 'non précisés')}.",
         f"Groupes : {meta['group_labels']}.",
-        "Le rapport n'isole pas les agriculteurs : la clé « 1 » est absente, et on ignore s'ils "
-        "sont comptés dans le groupe 2.",
-        "« Autre inactif » (groupe 8) est retiré et les parts ramenées à 100 sur les groupes "
-        "restants ; les parts publiées sont dans pipeline/sources/manual.",
-        "national_share_pct : ligne ensemble du sondage (abstention en % des inscrits), pas le "
-        "résultat officiel.",
     ]
+    if "1" in table.groups:
+        notes.append("Le tableau isole les agriculteurs : ils sont sous la clé « 1 ».")
+    else:
+        notes.append(
+            "Le rapport n'isole pas les agriculteurs : la clé « 1 » est absente, et on ignore "
+            "s'ils sont comptés dans le groupe 2."
+        )
+    if "8" in table.groups:
+        notes.append(
+            "« Autre inactif » (groupe 8) est retiré et les parts ramenées à 100 sur les groupes "
+            "restants ; les parts publiées sont dans pipeline/sources/manual."
+        )
+    if table.kind == "vote":
+        turnout = (
+            ", multipliés par la participation de chaque groupe publiée par le sondage"
+            if (table.rows["is_abstention"] & has_breakdown(table)).any()
+            else ""
+        )
+        notes.append(
+            "Tableau du vote de chaque groupe, converti en composition avec les effectifs du "
+            f"recensement de {meta['weights_census']} (Français de 18 ans ou plus){turnout}."
+        )
+    notes.append(
+        meta.get(
+            "national_note",
+            "national_share_pct : ligne ensemble du sondage (abstention en % des inscrits), pas le "
+            "résultat officiel.",
+        )
+    )
     if meta.get("notes"):
         notes.append(meta["notes"])
     return source_ref(
@@ -233,9 +363,29 @@ def source_of(table: PollTable) -> dict[str, str]:
         meta["url"],
         meta["accessed"],
         publisher=meta.get("publisher"),
-        license=_reuse_notice(meta.get("publisher", "")),
+        license=meta.get("license") or _reuse_notice(meta.get("publisher", "")),
         notes=" ".join(notes),
     )
+
+
+def official_source(table: PollTable) -> dict[str, str] | None:
+    """Résultats officiels cités par le tableau : ``identifiant | titre | url | date d'accès``."""
+    raw = table.meta.get("official_source")
+    if not raw:
+        return None
+    source_id, title, url, accessed = (part.strip() for part in raw.split("|"))
+    return source_ref(source_id, title, url, accessed, publisher="Conseil constitutionnel")
+
+
+def election_sources(table: PollTable) -> list[dict[str, str]]:
+    """Sources d'une élection : le sondage d'abord, puis résultats et effectifs utilisés."""
+    sources = [source_of(table)]
+    official = official_source(table)
+    if official:
+        sources.append(official)
+    if table.kind == "vote":
+        sources.append(census_source())
+    return sources
 
 
 def election_document(
@@ -261,7 +411,7 @@ def election_document(
         "round": config.get("round", 1),
         "label": config["label"],
         "pcs_level": 1,
-        "sources": [source_of(table)],
+        "sources": election_sources(table),
         "candidates": candidates,
         "composition": {
             str(candidate_id): {g: round(float(v), 2) for g, v in shares.items()}
@@ -308,6 +458,19 @@ def control_table() -> PollTable:
     return parse_manual_csv(
         CONTROL_DIR / "ipsos_2022_presidentielle_t1.csv", "2022_presidentielle_t1"
     )
+
+
+def control_table_2007() -> PollTable:
+    """Vote de chaque groupe publié par CSA en 2007, à comparer à sa composition publiée."""
+    return parse_manual_csv(
+        CONTROL_DIR / "csa_2007_presidentielle_t1_vote.csv", "2007_presidentielle_t1"
+    )
+
+
+def vote_tables() -> list[PollTable]:
+    """Tableaux convertis qui alimentent ``data/``."""
+    tables = [load_table(e["id"]) for e in available_elections()]
+    return [table for table in tables if table.kind == "vote"]
 
 
 def fetch(force: bool = False) -> list[str]:

@@ -2,13 +2,17 @@
 
 Fichier généré par `scripts/build_data.py`, à ne pas modifier à la main.
 
-`data/` contient des chiffres issus de publications primaires (Insee, nomenclature-pcs.fr, Ifop) ou calculés à partir d'elles par une méthode décrite ici, et les positions lues sur les vidéos de la PaduTeam (`data/positions_chris.json`). Aucune donnée de la reproduction citée dans les crédits n'y figure : son dépôt, sans licence, n'a servi que de contrôle local.
+`data/` contient des chiffres issus de publications primaires (Insee, nomenclature-pcs.fr, Conseil constitutionnel, Ifop, Ipsos, CSA) ou calculés à partir d'elles par une méthode décrite ici, et les positions lues sur les vidéos de la PaduTeam (`data/positions_chris.json`). Aucune donnée de la reproduction citée dans les crédits n'y figure : son dépôt, sans licence, n'a servi que de contrôle local.
 
 ## Données Ifop : projet libre et non commercial
 
-Les 7 fichiers d'élections reposent sur des rapports Ifop, et chacun indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu.
+9 fichiers d'élections reposent sur des rapports Ifop, et chacun indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu.
 
 Ce projet est libre et non commercial. Il publie les chiffres tirés de ces rapports en citant chacun d'eux : `data/elections/`, `pipeline/sources/manual/` et les coordonnées d'électorats de `data/computed/`. Si l'Ifop demande leur retrait, ils seront retirés. Ces lignes décrivent un usage, ce n'est pas un avis juridique.
+
+## Autres instituts
+
+Les autres élections ont une mention propre, reprise dans le champ `license` de leur source et dans le tableau ci-dessous. Les sondages du site d'Ipsos sont réutilisables avec attribution, d'après ses mentions légales : c'est aussi le cas de la page d'archive du sondage CSA de 1995. Le rapport CSA-Cisco de 2007 ne porte aucune mention de réutilisation.
 
 ## Jeux de données
 
@@ -21,6 +25,11 @@ Ce projet est libre et non commercial. Il publie les chiffres tirés de ces rapp
 | `pcs.json` : patrimoine des retraités | Patrimoine et endettement des ménages en 2024, enquête Histoire de vie et Patrimoine 2023-2024, Insee Résultats | https://www.insee.fr/fr/statistiques/8736842 | 2026-11-01 | Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation | Valeur calculée, non publiée : voir plus bas. |
 | `pcs.json` : composition du patrimoine | Composition du patrimoine brut et taux de détention selon la catégorie de la personne de référence, enquête Histoire de vie et Patrimoine 2020-2021, Insee Résultats | https://www.insee.fr/fr/statistiques/8262352 | 2026-11-01 | Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation | 11 catégories de ménages, pas le niveau 2 : voir plus bas. |
 | `pcs.json` : part de propriétaires | Lien à la migration, taille d'unité urbaine et statut d'occupation du logement, Portraits des six groupes socioprofessionnels, feuilles Ensemble | https://www.nomenclature-pcs.fr/uploads/tableaux/groupes/DEC_POR_4.xls | 2026-11-01 | Mentions légales du site : données réutilisables « sans licence », réutilisation « subordonnée au respect de l'intégrité de l'information et des données et à la mention précise des sources » (https://www.nomenclature-pcs.fr/informations-pratiques/mentions-legales) | Seul indicateur de détention publié en 29 postes. Enquête Emploi 2024. Ni la PCS 44 ni les retraités. |
+| `elections/1995_presidentielle_t1.json` | CSA pour Le Parisien-Aujourd'hui, France 3, Radio France et L'Express, Sondage sortie des urnes, 23 avril 1995 | https://www.ipsos.com/fr-fr/sondage-sortie-des-urnes-0 | 2026-11-02 | Mentions légales d'Ipsos (https://www.ipsos.com/fr-fr/mentions-legales) : les sondages du site sont réputés dans le domaine public et réutilisables en tout ou partie, avec attribution, en notant si possible la date, le commanditaire, la méthode et un lien vers le site d'Ipsos. Page d'archive d'un sondage CSA. | Composition calculée, pas publiée : vote de chaque groupe, en entiers, converti avec le recensement de 1999 ; agriculteurs publiés (clé « 1 ») ; retraités et inactifs réunis par le sondage (colonne 7), rattachés aux retraités ; candidats sous 1 % sans composition ; abstention officielle, sans détail par groupe ; petits électorats très imprécis. Détails dans `sources[].notes`. |
+| `elections/2002_presidentielle_t1.json` | Ipsos pour Vizzavi, Le Figaro, France 2, Europe 1 et Le Point, 1er tour présidentielle 2002 : comprendre le vote des Français, qui a voté quoi ?, 22 avril 2002 | https://www.ipsos.com/fr-fr/1er-tour-presidentielle-2002comprendre-le-vote-des-francais-qui-vote-quoi-les-motivations-de-vote | 2026-11-02 | Mentions légales d'Ipsos (https://www.ipsos.com/fr-fr/mentions-legales) : les sondages du site sont réputés dans le domaine public et réutilisables en tout ou partie, avec attribution, en notant si possible la date, le commanditaire, la méthode et un lien vers le site d'Ipsos. | Composition calculée, pas publiée : vote de chaque groupe, en entiers, converti avec le recensement de 1999 ; agriculteurs publiés (clé « 1 ») ; candidats sous 1 % sans composition ; petits électorats très imprécis. Détails dans `sources[].notes`. |
+| `elections/2007_presidentielle_t1.json` | CSA-Cisco pour France 3, France Inter, France Info, Le Parisien et Aujourd'hui en France, L'élection présidentielle : explication du vote et perspectives politiques, sondage sortie des urnes, avril 2007 | https://www.cisco.com/web/FR/csa/sondage_sortie_urnes.pdf | 2026-11-02 | Rapport publié sur cisco.com, sans mention de réutilisation. Chiffres cités, projet libre et non commercial, retirés sur demande. | Parts ramenées à 100 sans « Autre inactif » ; agriculteurs non publiés (clé « 1 » absente) ; candidats sous 1 % sans composition ; abstention officielle, sans détail par groupe ; petits électorats très imprécis. Détails dans `sources[].notes`. |
+| `elections/2012_presidentielle_t1.json` | Ifop-Fiducial pour Europe 1, Paris Match et Public Sénat, Premier tour de l'élection présidentielle 2012 : profil des électeurs et clés du scrutin, 22 avril 2012 | https://www.ifop.com/wp-content/uploads/2018/03/1848-1-study_file.pdf | 2026-11-02 | Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu : projet libre et non commercial, chiffres cités et retirés sur demande, voir data/SOURCES.md. | Composition calculée, pas publiée : vote de chaque groupe, en entiers, converti avec le recensement de 2011 ; Parts ramenées à 100 sans « Autre inactif » ; agriculteurs non publiés (clé « 1 » absente) ; candidats sous 1 % sans composition ; abstention officielle, sans détail par groupe ; petits électorats très imprécis. Détails dans `sources[].notes`. |
+| `elections/2014_europeennes.json` | Ifop-Fiducial pour i>TELE, Paris Match et Sud Radio, Sondage Jour du Vote : profil des électeurs et clefs du scrutin européen, 25 mai 2014 | https://www.ifop.com/wp-content/uploads/2018/03/2670-1-study_file.pdf | 2026-11-02 | Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu : projet libre et non commercial, chiffres cités et retirés sur demande, voir data/SOURCES.md. | Composition calculée, pas publiée : vote de chaque groupe, en entiers, converti avec le recensement de 2016 ; Parts ramenées à 100 sans « Autre inactif » ; agriculteurs non publiés (clé « 1 » absente) ; candidats sous 1 % sans composition ; petits électorats très imprécis. Détails dans `sources[].notes`. |
 | `elections/2017_presidentielle_t1.json` | Ifop et Fiducial pour Paris Match, CNews et Sud Radio, Le profil des électeurs et les clefs du premier tour de l'élection présidentielle, 23 avril 2017 | https://www.ifop.com/wp-content/uploads/2018/03/3749-1-study_file.pdf | 2026-10-31 | Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu : projet libre et non commercial, chiffres cités et retirés sur demande, voir data/SOURCES.md. | Parts ramenées à 100 sans « Autre inactif » ; agriculteurs non publiés (clé « 1 » absente) ; petits électorats très imprécis. Détails dans `sources[].notes`. |
 | `elections/2017_legislatives_t1.json` | Ifop et Fiducial pour Paris Match, CNews et Sud Radio, Le profil des électeurs et les clefs du premier tour des élections législatives, 11 juin 2017 | https://www.ifop.com/wp-content/uploads/2018/03/3791-1-study_file.pdf | 2026-10-31 | Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu : projet libre et non commercial, chiffres cités et retirés sur demande, voir data/SOURCES.md. | Parts ramenées à 100 sans « Autre inactif » ; agriculteurs non publiés (clé « 1 » absente) ; petits électorats très imprécis. Détails dans `sources[].notes`. |
 | `elections/2019_europeennes.json` | Ifop-Fiducial pour Paris Match, CNEWS et Sud Radio, Européennes 2019 : profil des électeurs et clefs du scrutin, 27 mai 2019 | https://www.ifop.com/wp-content/uploads/2019/05/116339-rapport-jdv-complet-detaille_2019_05.27.pdf | 2026-10-31 | Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu : projet libre et non commercial, chiffres cités et retirés sur demande, voir data/SOURCES.md. | Parts ramenées à 100 sans « Autre inactif » ; agriculteurs non publiés (clé « 1 » absente) ; petits électorats très imprécis. Détails dans `sources[].notes`. |
@@ -28,6 +37,10 @@ Ce projet est libre et non commercial. Il publie les chiffres tirés de ces rapp
 | `elections/2022_legislatives_t1.json` | Ifop-Fiducial pour TF1, LCI, Paris Match et Sud Radio, Législatives 2022, sondage jour du vote : profil des électeurs et clés du scrutin (1er tour), 12 juin 2022 | https://www.ifop.com/wp-content/uploads/2022/06/119150-Rapport-JDV-LEG22-T1-v1-12.06.2022-22h25-COMPLET.pdf | 2026-10-31 | Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu : projet libre et non commercial, chiffres cités et retirés sur demande, voir data/SOURCES.md. | Parts ramenées à 100 sans « Autre inactif » ; agriculteurs non publiés (clé « 1 » absente) ; petits électorats très imprécis. Détails dans `sources[].notes`. |
 | `elections/2024_europeennes.json` | Ifop-Fiducial pour LCI, Le Figaro et Sud Radio, Européennes 2024, sondage jour du vote : profil des électeurs et clés du scrutin, 9 juin 2024 | https://www.ifop.com/wp-content/uploads/2024/06/DET-120537-Rapport-JDV-EUR24-10.06.2024.pdf | 2026-10-31 | Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu : projet libre et non commercial, chiffres cités et retirés sur demande, voir data/SOURCES.md. | Parts ramenées à 100 sans « Autre inactif » ; agriculteurs non publiés (clé « 1 » absente) ; petits électorats très imprécis. Détails dans `sources[].notes`. |
 | `elections/2024_legislatives_t1.json` | Ifop pour TF1 et LCI, Analyse du premier tour des élections législatives 2024 : participation et structuration des électorats, juin 2024 (n° 120976) | https://www.ifop.com/wp-content/uploads/2024/07/120976-Resultats.pdf | 2026-10-31 | Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu : projet libre et non commercial, chiffres cités et retirés sur demande, voir data/SOURCES.md. | Parts ramenées à 100 sans « Autre inactif » ; agriculteurs non publiés (clé « 1 » absente) ; petits électorats très imprécis. Détails dans `sources[].notes`. |
+| `elections/` : `1995_presidentielle_t1` | Conseil constitutionnel, décision n° 95-79 PDR du 26 avril 1995, résultats du premier tour | https://www.conseil-constitutionnel.fr/decision/1995/9579pdr.htm | 2026-11-02 | non indiquée | Résultats officiels du scrutin. |
+| `elections/` : `1995_presidentielle_t1`, `2002_presidentielle_t1`, `2012_presidentielle_t1`, `2014_europeennes` | Données harmonisées des recensements de la population 1968-2022, fichier détail | https://www.insee.fr/fr/statistiques/8672621?sommaire=2414232 | 2026-11-02 | Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation | Effectifs par groupe, pour la conversion : voir plus bas. |
+| `elections/` : `2007_presidentielle_t1` | Conseil constitutionnel, décision n° 2007-139 PDR du 25 avril 2007, résultats du premier tour | https://www.conseil-constitutionnel.fr/decision/2007/2007139PDR.htm | 2026-11-02 | non indiquée | Résultats officiels du scrutin. |
+| `elections/` : `2012_presidentielle_t1` | Conseil constitutionnel, décision n° 2012-152 PDR du 25 avril 2012, résultats du premier tour | https://www.conseil-constitutionnel.fr/decision/2012/2012152PDR.htm | 2026-11-02 | non indiquée | Résultats officiels du scrutin. |
 
 ## Niveau de vie et patrimoine
 
@@ -89,17 +102,49 @@ Chris définit l'axe Exploitation par la composition du patrimoine des PCS : de 
 
 ## Composition des électorats
 
-- Les rapports Ifop publient directement la composition de chaque électorat : aucune conversion de Bayes n'entre dans `data/`. Les tableaux sont transcrits dans `pipeline/sources/manual/`, avec les pages et l'empreinte SHA-256 du PDF.
+- De 2017 à 2024, les rapports Ifop publient directement la composition de chaque électorat, et CSA aussi en 2007 : aucune conversion n'entre dans ces fichiers. En 1995, 2002, 2012 et 2014, le sondage publie le vote de chaque groupe : la composition de `data/` est alors calculée (voir plus bas). Les tableaux sont transcrits dans `pipeline/sources/manual/`, avec les pages et l'empreinte SHA-256 du PDF.
 - « Autre inactif » (étudiants, personnes au foyer...) est hors des 30 PCS : il est retiré et les parts sont ramenées à 100 sur les groupes restants. Les parts publiées restent dans les CSV.
+- En 1995 et 2002, le sondage isole les agriculteurs : ils ont leur clé « 1 ». En 1995, il réunit retraités et inactifs sur une ligne, rattachée ici aux retraités.
+- Une abstention sans détail par groupe (1995, 2007, 2012) garde le taux officiel, sans composition : elle n'a pas de point sur la carte. Les candidats sous 1 % de ces tableaux non plus : dans un tableau en entiers, leurs parts ne sont que des arrondis.
 - La ligne « Artisan ou commerçant » (« Travailleur indépendant » en 2017) est rattachée au groupe 2. Le tiret des rapports est lu comme 0. Aucun rapport ne dit où sont comptés les agriculteurs. Parmi les inscrits, cette ligne pèse environ 4,5 à 5 %, plus proche des groupes 1 et 2 réunis du recensement (4,5 %) que du groupe 2 seul (3,7 %) : ils y sont peut-être inclus, sans certitude.
-- `national_share_pct` reprend la ligne ensemble du sondage, pas le résultat officiel.
+- `national_share_pct` reprend la ligne ensemble du sondage, pas le résultat officiel, sauf en 1995 où la page n'en publie pas : les scores y sont ceux du Conseil constitutionnel.
 - `margin_pts` n'est pas renseigné. Les méthodes l'utilisent comme marge de chaque électorat, or la marge de l'échantillon total la sous-estimerait fortement : un électorat ne représente qu'une fraction de l'échantillon. La taille d'échantillon est dans `sources[].notes`.
 - Européennes 2019 : pour quelques listes, « Catégorie supérieure » dépasse la somme de ses deux sous-lignes, sans explication dans le rapport. Cette part n'est rattachée à aucun groupe. Cette année-là, « Artisan ou commerçant » ne pèse que 3,4 % des inscrits : l'écart correspond peut-être aux agriculteurs, sans certitude.
 - Législatives 2024 : enquête réalisée du 26 au 29 juin, avant le scrutin, puis redressée sur les résultats officiels. Ce n'est pas un sondage du jour du vote.
 
+## Conversion du vote par groupe en composition
+
+**Poids.** `pipeline/sources/manual/poids_recensements.csv` donne les Français de 18 ans ou plus par groupe, à chaque recensement, d'après les données harmonisées de l'Insee (fichier de 255 Mo, lu par `scripts/collect/poids_recensements.py`, non nécessaire à la construction). Chaque tableau utilise le recensement le plus proche : 1999 pour 1995 et 2002, 2011 pour 2012, 2016 pour 2014. Ce calcul retrouve les effectifs de 2022 obtenus par ailleurs à partir du fichier détail du recensement. Quand le sondage publie l'abstention par groupe (2002, 2014), le poids d'un groupe parmi les votants tient compte de sa participation.
+
+**Contrôle sur les scores nationaux.** Le vote des groupes, pondéré par ces effectifs, doit redonner le score national du tableau (`sondages.national_check`, en points) :
+
+| Élection | Candidats | Écart moyen (points) | Écart maximal (points) |
+| --- | --- | --- | --- |
+| 1995_presidentielle_t1 | 9 | 0.48 | 1.56 |
+| 2002_presidentielle_t1 | 16 | 0.31 | 0.92 |
+| 2012_presidentielle_t1 | 10 | 0.32 | 1.06 |
+| 2014_europeennes | 15 | 0.14 | 0.53 |
+
+**Contrôle sur une composition publiée.** CSA publie les deux tableaux en 2007 : la composition convertie depuis le vote, avec le recensement de 2006, est comparée à la composition publiée, sur les groupes communs ramenés à 100.
+
+| Électorat | Écart moyen (points) | Écart maximal (points) |
+| --- | --- | --- |
+| schivardi | 10.0 | 28.3 |
+| laguiller | 3.0 | 10.3 |
+| besancenot | 1.0 | 2.4 |
+| bove | 2.3 | 4.7 |
+| buffet | 2.8 | 6.3 |
+| voynet | 2.1 | 5.3 |
+| royal | 0.6 | 1.2 |
+| nihous | 3.5 | 7.1 |
+| bayrou | 0.3 | 0.7 |
+| sarkozy | 0.3 | 0.6 |
+| de-villiers | 2.1 | 4.0 |
+| le-pen | 0.5 | 1.2 |
+
 ## Contrôle de la conversion de Bayes
 
-La conversion (`sondages.bayes_composition`) est contrôlée sur la présidentielle 2022 : le vote par profession publié par Ipsos, converti avec les effectifs du recensement (Français de 18 ans ou plus) et l'abstention par groupe, est comparé à la composition publiée par l'Ifop, sur les 5 groupes communs ramenés à 100. Ipsos ne sert qu'à ce contrôle.
+La conversion (`sondages.bayes_composition`) est aussi contrôlée sur la présidentielle 2022 : le vote par profession publié par Ipsos, converti avec les effectifs du recensement (Français de 18 ans ou plus) et l'abstention par groupe, est comparé à la composition publiée par l'Ifop, sur les 5 groupes communs ramenés à 100. Ipsos 2022 ne sert qu'à ce contrôle.
 
 | Électorat | Écart moyen (points) | Écart maximal (points) |
 | --- | --- | --- |
@@ -119,7 +164,8 @@ La conversion (`sondages.bayes_composition`) est contrôlée sur la présidentie
 
 - **Composition du patrimoine par PCS de niveau 2.** Introuvable : voir plus haut. Aucun fichier détail de l'enquête Patrimoine trouvé en accès libre.
 - **Patrimoine et niveau de vie des retraités en 2020-2021.** Aucun ensemble publié ; le patrimoine reste un calcul.
-- **Vote des agriculteurs (groupe 1).** Non isolé dans les rapports Ifop et Ipsos consultés. Elabe, Harris Interactive et OpinionWay n'ont pas été consultés.
+- **Vote des agriculteurs (groupe 1).** Isolé seulement en 1995 (CSA) et en 2002 (Ipsos), pas dans les rapports Ifop et CSA 2007. Elabe, Harris Interactive et OpinionWay n'ont pas été consultés.
+- **Avant 1995 et législatives de 2012.** Aucun tableau complet du vote par profession trouvé au premier tour : voir docs/methodologie.md, section 7.
 - **Scores nationaux officiels.** Remplacer la ligne ensemble des sondages par les résultats du ministère de l'Intérieur, en tenant compte des agrégats propres à l'Ifop aux législatives.
 
 ## Positions lues sur le graphique de Chris

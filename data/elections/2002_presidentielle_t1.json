@@ -1,0 +1,279 @@
+{
+  "id": "2002_presidentielle_t1",
+  "type": "presidentielle",
+  "year": 2002,
+  "round": 1,
+  "label": "Présidentielle 2002 (1er tour)",
+  "pcs_level": 1,
+  "sources": [
+    {
+      "id": "ipsos_2002_presidentielle_t1",
+      "title": "Ipsos pour Vizzavi, Le Figaro, France 2, Europe 1 et Le Point, 1er tour présidentielle 2002 : comprendre le vote des Français, qui a voté quoi ?, 22 avril 2002",
+      "url": "https://www.ipsos.com/fr-fr/1er-tour-presidentielle-2002comprendre-le-vote-des-francais-qui-vote-quoi-les-motivations-de-vote",
+      "accessed": "2026-11-02",
+      "publisher": "Ipsos",
+      "license": "Mentions légales d'Ipsos (https://www.ipsos.com/fr-fr/mentions-legales) : les sondages du site sont réputés dans le domaine public et réutilisables en tout ou partie, avec attribution, en notant si possible la date, le commanditaire, la méthode et un lien vers le site d'Ipsos.",
+      "notes": "Échantillon : 4 044 personnes, représentatives des inscrits de 18 ans ou plus. Terrain : par téléphone, le 21 avril 2002. Tableaux : colonnes de groupes, « La sociologie des électorats », blocs Profession et Statut, et « Qui sont les abstentionnistes ? » ; national_share_pct, ligne ENSEMBLE des mêmes tableaux. Groupes : 1=Agriculteurs; 2=Artisans, Commerçants; 3=Professions libérales, Cadres Sup.; 4=Professions intermédiaires; 5=Employés; 6=Ouvriers; 7=Retraités (bloc Statut de l'interviewé). Le tableau isole les agriculteurs : ils sont sous la clé « 1 ». Tableau du vote de chaque groupe, converti en composition avec les effectifs du recensement de 1999 (Français de 18 ans ou plus), multipliés par la participation de chaque groupe publiée par le sondage. national_share_pct : ligne ensemble du sondage (abstention : 27 % des inscrits, contre 28,40 % officiels), pas le résultat officiel. Transcription manuelle. La fiche technique ne nomme pas l'institut : la page est publiée par Ipsos, qui y présente les chiffres et résultats complets du sondage. Les colonnes chomeur et etudiant, publiées, ne sont pas utilisées. Les six lignes de profession semblent porter sur les actifs : la page ne le dit pas, mais leur vote est plus proche de celui des salariés que de celui des retraités. Les candidats sous 1 % restent listés, sans composition : leurs parts arrondies à l'entier ne disent rien."
+    },
+    {
+      "id": "insee_rp_harmonises_1968_2022",
+      "title": "Données harmonisées des recensements de la population 1968-2022, fichier détail",
+      "url": "https://www.insee.fr/fr/statistiques/8672621?sommaire=2414232",
+      "accessed": "2026-11-02",
+      "publisher": "Insee",
+      "license": "Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation",
+      "notes": "Fichier https://www.insee.fr/fr/statistiques/fichier/8672621/RP1968-2022.parquet, empreinte SHA-256 e4f2967a54c39fb3a32ca6ebae6d3e8d0f728651d5b54ebac6af29ca38be75ce. Champ : Français de 18 ans ou plus (NATIO 000 ou 001, AGE_REV d'au moins 18), somme de POND. France métropolitaine, et DOM à partir de 1990. Groupes : 1 à 6 = CSP 1 à 6, personnes en emploi ou au chômage ayant déjà travaillé ; 7 = CSP 8, anciens actifs ; 8 = CSP 9, inactifs et chômeurs n'ayant jamais travaillé."
+    }
+  ],
+  "candidates": [
+    {
+      "id": "laguiller",
+      "label": "Arlette Laguiller",
+      "color": "#7b1113",
+      "national_share_pct": 5.8
+    },
+    {
+      "id": "besancenot",
+      "label": "Olivier Besancenot",
+      "color": "#b3261e",
+      "national_share_pct": 4.3
+    },
+    {
+      "id": "gluckstein",
+      "label": "Daniel Gluckstein",
+      "color": "#7b1113",
+      "national_share_pct": 0.5
+    },
+    {
+      "id": "hue",
+      "label": "Robert Hue",
+      "color": "#c8102e",
+      "national_share_pct": 3.4
+    },
+    {
+      "id": "jospin",
+      "label": "Lionel Jospin",
+      "color": "#f06292",
+      "national_share_pct": 15.9
+    },
+    {
+      "id": "taubira",
+      "label": "Christiane Taubira",
+      "color": "#ef9a9a",
+      "national_share_pct": 2.1
+    },
+    {
+      "id": "mamere",
+      "label": "Noël Mamère",
+      "color": "#2e9e4f",
+      "national_share_pct": 5.3
+    },
+    {
+      "id": "chevenement",
+      "label": "Jean-Pierre Chevènement",
+      "color": "#ef9a9a",
+      "national_share_pct": 5.4
+    },
+    {
+      "id": "lepage",
+      "label": "Corinne Lepage",
+      "color": "#ffcc80",
+      "national_share_pct": 1.9
+    },
+    {
+      "id": "saint-josse",
+      "label": "Jean Saint-Josse",
+      "color": "#8e8e8e",
+      "national_share_pct": 4.3
+    },
+    {
+      "id": "bayrou",
+      "label": "François Bayrou",
+      "color": "#ffcc80",
+      "national_share_pct": 6.9
+    },
+    {
+      "id": "madelin",
+      "label": "Alain Madelin",
+      "color": "#6f9fd8",
+      "national_share_pct": 4.0
+    },
+    {
+      "id": "chirac",
+      "label": "Jacques Chirac",
+      "color": "#1565c0",
+      "national_share_pct": 19.4
+    },
+    {
+      "id": "boutin",
+      "label": "Christine Boutin",
+      "color": "#6f9fd8",
+      "national_share_pct": 1.2
+    },
+    {
+      "id": "le-pen",
+      "label": "Jean-Marie Le Pen",
+      "color": "#0d1b4c",
+      "national_share_pct": 17.2
+    },
+    {
+      "id": "megret",
+      "label": "Bruno Mégret",
+      "color": "#1a237e",
+      "national_share_pct": 2.4
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "national_share_pct": 27.0,
+      "is_abstention": true
+    }
+  ],
+  "composition": {
+    "laguiller": {
+      "1": 1.38,
+      "2": 0.78,
+      "3": 5.89,
+      "4": 17.55,
+      "5": 30.11,
+      "6": 29.0,
+      "7": 15.28
+    },
+    "besancenot": {
+      "1": 3.87,
+      "2": 1.09,
+      "3": 6.18,
+      "4": 24.57,
+      "5": 32.79,
+      "6": 24.36,
+      "7": 7.13
+    },
+    "hue": {
+      "1": 1.4,
+      "2": 2.63,
+      "3": 7.43,
+      "4": 8.45,
+      "5": 22.54,
+      "6": 14.66,
+      "7": 42.9
+    },
+    "jospin": {
+      "1": 0.22,
+      "2": 2.73,
+      "3": 10.3,
+      "4": 12.68,
+      "5": 19.52,
+      "6": 16.92,
+      "7": 37.64
+    },
+    "taubira": {
+      "1": 0.0,
+      "2": 5.75,
+      "3": 21.68,
+      "4": 18.47,
+      "5": 24.65,
+      "6": 10.68,
+      "7": 18.76
+    },
+    "mamere": {
+      "1": 0.77,
+      "2": 3.26,
+      "3": 14.37,
+      "4": 34.97,
+      "5": 23.34,
+      "6": 16.18,
+      "7": 7.1
+    },
+    "chevenement": {
+      "1": 1.5,
+      "2": 4.24,
+      "3": 11.19,
+      "4": 19.07,
+      "5": 18.18,
+      "6": 12.61,
+      "7": 33.21
+    },
+    "lepage": {
+      "1": 3.22,
+      "2": 4.54,
+      "3": 12.84,
+      "4": 21.88,
+      "5": 19.46,
+      "6": 8.44,
+      "7": 29.63
+    },
+    "saint-josse": {
+      "1": 1.09,
+      "2": 8.17,
+      "3": 1.93,
+      "4": 13.12,
+      "5": 26.27,
+      "6": 22.77,
+      "7": 26.66
+    },
+    "bayrou": {
+      "1": 4.29,
+      "2": 5.69,
+      "3": 18.76,
+      "4": 18.27,
+      "5": 15.24,
+      "6": 5.28,
+      "7": 32.48
+    },
+    "madelin": {
+      "1": 3.58,
+      "2": 13.88,
+      "3": 16.65,
+      "4": 20.27,
+      "5": 16.23,
+      "6": 4.69,
+      "7": 24.71
+    },
+    "chirac": {
+      "1": 1.28,
+      "2": 6.51,
+      "3": 7.73,
+      "4": 12.39,
+      "5": 15.5,
+      "6": 12.54,
+      "7": 44.05
+    },
+    "boutin": {
+      "1": 0.0,
+      "2": 12.06,
+      "3": 22.74,
+      "4": 0.0,
+      "5": 25.85,
+      "6": 0.0,
+      "7": 39.36
+    },
+    "le-pen": {
+      "1": 1.91,
+      "2": 5.12,
+      "3": 4.07,
+      "4": 12.13,
+      "5": 18.51,
+      "6": 30.08,
+      "7": 28.17
+    },
+    "megret": {
+      "1": 4.38,
+      "2": 0.0,
+      "3": 3.88,
+      "4": 6.61,
+      "5": 35.3,
+      "6": 22.95,
+      "7": 26.87
+    },
+    "abstention": {
+      "1": 2.23,
+      "2": 3.71,
+      "3": 7.86,
+      "4": 18.32,
+      "5": 24.45,
+      "6": 19.19,
+      "7": 24.23
+    }
+  }
+}
