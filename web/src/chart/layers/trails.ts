@@ -40,6 +40,31 @@ interface DotDatum extends TrailPoint {
   tag: string;
 }
 
+/** Écart minimal entre deux noms d'étapes (px) : assez pour lire « 2022 P » sans chevauchement. */
+const TAG_GAP_X = 38;
+const TAG_GAP_Y = 13;
+
+/**
+ * Noms d'étapes à afficher : sans zoom, les étapes se serrent et leurs noms se recouvrent. Les plus
+ * récentes passent d'abord. Le point reste visible ; seul son nom disparaît.
+ */
+export function thinTags<T extends { px: number; py: number }>(
+  items: readonly T[],
+  gapX = TAG_GAP_X,
+  gapY = TAG_GAP_Y,
+): T[] {
+  const kept: T[] = [];
+  for (let i = items.length - 1; i >= 0; i--) {
+    const item = items[i];
+    if (!item) continue;
+    const free = kept.every(
+      (o) => Math.abs(o.px - item.px) >= gapX || Math.abs(o.py - item.py) >= gapY,
+    );
+    if (free) kept.push(item);
+  }
+  return kept;
+}
+
 export class TrailsLayer implements Feature {
   private readonly chart: SaintChart;
   private readonly ds: Dataset;
@@ -172,11 +197,11 @@ export class TrailsLayer implements Feature {
       .style('fill', (d) => d.color);
     this.tags
       .selectAll<SVGTextElement, DotDatum>('text.sg-trail-tag')
-      .data(dots, (d) => d.key)
+      .data(thinTags(dots.map((d) => ({ ...d, px: x(d.x), py: y(d.y) }))), (d) => d.key)
       .join('text')
       .attr('class', 'sg-trail-tag')
-      .attr('x', (d) => x(d.x))
-      .attr('y', (d) => y(d.y) - 8)
+      .attr('x', (d) => d.px)
+      .attr('y', (d) => d.py - 8)
       .attr('text-anchor', 'middle')
       .text((d) => d.tag);
   }

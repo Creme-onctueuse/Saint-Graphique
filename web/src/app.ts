@@ -14,6 +14,7 @@ import { Spokes } from './chart/layers/spokes.ts';
 import { sameWeights } from './core/scores.ts';
 import { selectionPatch } from './core/selection.ts';
 import { parseState, serializeState, type AppState } from './core/state.ts';
+import { carrySelection } from './core/timeline.ts';
 import { loadDataset } from './data/load.ts';
 import { initAbout } from './ui/about.ts';
 import type { AppActions, Feature } from './ui/actions.ts';
@@ -60,7 +61,7 @@ function toggled(list: readonly string[], id: string, visible: boolean): string[
 }
 
 /** Petite aide affichée à la première visite, jusqu'au premier geste sur la carte. */
-function installHint(chart: SaintChart): void {
+function installHint(): void {
   const hint = byId('sg-hint');
   try {
     if (window.localStorage.getItem(HINT_STORAGE_KEY)) return;
@@ -76,8 +77,9 @@ function installHint(chart: SaintChart): void {
       // Sans stockage, l'aide réapparaîtra à la prochaine visite.
     }
   };
-  chart.svg.addEventListener('pointerdown', dismiss, { once: true });
-  chart.svg.addEventListener('wheel', dismiss, { once: true, passive: true });
+  document.addEventListener('pointerdown', dismiss, { once: true });
+  document.addEventListener('wheel', dismiss, { once: true, passive: true });
+  document.addEventListener('keydown', dismiss, { once: true });
 }
 
 export function startApp(): void {
@@ -129,7 +131,7 @@ export function startApp(): void {
       update(patch, animation);
     },
     setElection(id) {
-      update({ election: id }, 'normal');
+      update({ election: id, selected: carrySelection(ds.families, id, state.selected) }, 'normal');
     },
     setMethod(id) {
       update({ method: id }, 'normal');
@@ -197,7 +199,7 @@ export function startApp(): void {
       actions,
     ),
     new CrossPanel(byId('sg-cross-panel'), ds, actions, () => chart.resetZoom()),
-    new Inspector(byId('sg-inspector'), actions),
+    new Inspector(byId('sg-inspector'), ds, actions),
     new Spokes(chart),
     new Game(byId('sg-game-panel'), ds, actions, chart),
     new Shell(actions, (insets) => chart.setInsets(insets)),
@@ -331,7 +333,7 @@ export function startApp(): void {
   });
 
   render('none');
-  installHint(chart);
+  installHint();
 
   // Mode calque : réservé au développement, absent du build de production.
   if (import.meta.env.DEV) {

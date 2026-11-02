@@ -6,7 +6,7 @@ Le Saint-Graphique a été créé par **Chris et la PaduTeam**. Voir [Crédits e
 
 > **Projet non officiel.** Il n'a aucun lien avec Positions Revue ni avec la PaduTeam. L'algorithme original n'a pas été publié : ce dépôt reprend les **positions lues** sur les vidéos publiques et propose des méthodes de calcul ouvertes, sans prétendre à l'identité exacte.
 
-**Statut :** v1.0.0, réplique du tableau de Chris de février 2026 ([fidélité mesurée](#fidélité-de-la-réplique), [feuille de route](#feuille-de-route)). **Usage personnel et non commercial :** les données tirées des rapports Ifop ne sont pas publiées ([détails](#données-ifop--usage-personnel-et-non-commercial)).
+**Statut :** v1.1 en cours, une carte interactive construite sur la réplique du tableau de Chris de février 2026 ([fidélité mesurée](#fidélité-de-la-réplique), [feuille de route](#feuille-de-route)). **Usage personnel et non commercial :** les données tirées des rapports Ifop ne sont pas publiées ([détails](#données-ifop--usage-personnel-et-non-commercial)).
 
 ## Le principe
 
@@ -26,6 +26,20 @@ Plusieurs **méthodes** coexistent et se choisissent dans l'interface :
 - `continuous` : les mêmes scores en valeurs continues, sans l'effet « escalier » des rangs ;
 - `mca` : une analyse des correspondances multiples, à titre exploratoire ;
 - ellipses de confiance par bootstrap sur les marges d'erreur des sondages.
+
+## La carte
+
+La page est une carte plein écran. La molette zoome, le glisser déplace, un clic croise les données.
+
+- **Électorat :** les lignes vers chaque groupe social, ceux qui y sont surreprésentés, les électorats les plus ressemblants, et son historique de scrutin en scrutin.
+- **Catégorie :** comment vote son groupe. Les losanges se redimensionnent pour le montrer. Les sondages ne détaillent que six groupes : c'est le vote du groupe entier, ce que la page précise.
+- **Duel :** Maj + clic compare deux électorats, en composition et en distance sur la carte.
+- **Croiser :** des axes libres parmi une dizaine de variables de l'Insee, et une carte de proximité où la distance dit la ressemblance des compositions.
+- **Frise :** une lecture de 2017 à 2024 avec les trajectoires des familles politiques et le vote de chaque groupe en anneaux. Seuls les électorats bougent : les catégories gardent la même position à toutes les élections.
+- **Projection 2027 :** deux scénarios, « rien ne bouge » et « la tendance continue ». Testée sur le passé, la tendance prédit moins bien : la page affiche ce résultat à côté de la projection, qui n'est pas une prévision (voir la [méthodologie](docs/methodologie.md)).
+- **Le saviez-vous ? et Qui est-ce ? :** des constats calculés sur les données, et un petit jeu.
+
+La carte s'étire pour remplir l'écran, si bien que les deux axes n'ont pas la même échelle. L'option « Proportions d'origine » rétablit le format carré. Les distances citées sont toujours mesurées en unités de la carte, jamais à l'écran.
 
 ## Démarrage rapide
 
@@ -71,7 +85,7 @@ Les vidéos, transcriptions et captures servent uniquement à l'analyse locale. 
 
 Les rapports Ifop dont sont tirées les 7 élections indiquent : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu.
 
-Ce projet a donc un usage **personnel et non commercial**, et les données tirées de ces rapports **ne sont pas publiées**. Sont concernés `data/elections/`, `pipeline/sources/manual/`, les coordonnées d'électorats de `data/computed/`, et donc la page construite à partir d'elles. La source Ifop reste citée sur la page et dans `data/SOURCES.md`.
+Ce projet a donc un usage **personnel et non commercial**, et les données tirées de ces rapports **ne sont pas publiées**. Sont concernés `data/elections/`, `pipeline/sources/manual/`, les coordonnées d'électorats de `data/computed/`, la projection de `data/computed/_projection/`, les chiffres vérifiés par `web/src/core/facts.test.ts` et cités dans `web/src/core/facts.ts` et `docs/methodologie.md`, et donc la page construite à partir d'elles. La source Ifop reste citée sur la page et dans `data/SOURCES.md`.
 
 Le code reste sous licence MIT, mais ces données n'y sont pas soumises. Le dépôt n'a pas de dépôt distant public, et le workflow GitHub Pages n'est pas lancé.
 
@@ -109,7 +123,8 @@ Ce que ces chiffres disent, et ne disent pas :
 
 - **v1 : réplique (faite).** Méthode `read_positions`, écart mesuré et documenté.
 - **v2 : rigueur.** Une méthode calculée sur données ouvertes qui se rapproche de ces positions : retraités par ancienne catégorie, 41 postes, définition de X confrontée aux lectures. Sont déjà en place les valeurs continues, l'ACM exploratoire, les ellipses et les sources affichées.
-- **v3 : exploration.** Évolution animée d'une élection à l'autre, comparaison des méthodes côte à côte, sous-groupes (âge, territoire), version anglaise.
+- **v1.1 : carte interactive (en cours).** Carte plein écran, croisements, frise animée, projection 2027, constats et jeu.
+- **v3 : exploration.** Comparaison des méthodes côte à côte, sous-groupes (âge, territoire), version anglaise.
 
 ## Publication
 

@@ -391,7 +391,9 @@ async function main() {
     const s = document.getElementById('sg-method');
     s.value = [...s.options].at(-1).value;
     s.dispatchEvent(new Event('change', { bubbles: true }));
-    [...document.querySelectorAll('#sg-timeline input[type="radio"]')].at(-1).click();
+    // Une étape différente de l'élection affichée : le clic doit changer quelque chose.
+    const stops = [...document.querySelectorAll('#sg-timeline input[type="radio"]')];
+    stops.filter((o) => !o.checked && o.value !== 'projection_2027').at(-1).click();
   })()`);
   await settle();
   const moved = await evaluate(`({
@@ -675,19 +677,331 @@ async function main() {
   const selected = await evaluate(`(async () => {
     const point = document.querySelector('.sg-cand');
     const key = point.getAttribute('data-key');
-    const r = point.getBoundingClientRect();
-    const click = (extra = {}) => point.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2, ...extra }));
+    const click = () => {
+      const r = point.getBoundingClientRect();
+      point.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 }));
+    };
     click();
-    await new Promise((res) => setTimeout(res, 300));
+    await new Promise((res) => setTimeout(res, 600));
     const marked = document.querySelectorAll('.sg-point--selected').length;
     const hash = location.hash;
     click();
-    await new Promise((res) => setTimeout(res, 300));
+    await new Promise((res) => setTimeout(res, 600));
     return { key, marked, hash, after: document.querySelectorAll('.sg-point--selected').length };
   })()`);
   check('clic : repère sélectionné', selected.marked === 1, JSON.stringify(selected));
   check('sélection dans l’URL', selected.hash.includes('s=c'), selected.hash);
   check('second clic : sélection retirée', selected.after === 0, JSON.stringify(selected));
+
+  // --- Croisements : un électorat, une catégorie, un duel --------------------------------------------
+  // Les données d'exemple n'ont ni familles ni projection : ces parcours visent les vraies données.
+  const hasRealData = await evaluate(`document.getElementById('sg-banner').hidden`);
+  if (hasRealData) {
+    await chooseElection('2022_presidentielle_t1');
+    const selectKey = async (key) => {
+      await evaluate(
+        `location.hash = ${JSON.stringify(`e=2022_presidentielle_t1&s=${encodeURIComponent(key)}`)}`,
+      );
+      await settle();
+    };
+    await selectKey('c:macron');
+    const electorate = await evaluate(`({
+      open: !document.getElementById('sg-inspector').hidden,
+      spokes: document.querySelectorAll('.sg-spoke').length,
+      rows: document.querySelectorAll('#sg-inspector-representation li').length,
+      neighbors: document.querySelectorAll('#sg-inspector-neighbors .sg-neighbors__row').length,
+      history: document.querySelectorAll('#sg-inspector-history .sg-history__row').length,
+      current: document.querySelector('#sg-inspector-history [aria-current="true"]')?.dataset.election,
+      dim: document.querySelectorAll('.sg-dim').length,
+    })`);
+    check('électorat : inspecteur ouvert', electorate.open);
+    check('électorat : lignes vers les groupes', electorate.spokes >= 5, String(electorate.spokes));
+    check(
+      'électorat : sur- et sous-représentation',
+      electorate.rows === 6,
+      String(electorate.rows),
+    );
+    check('électorat : voisins', electorate.neighbors > 0);
+    check(
+      'électorat : historique de la famille',
+      electorate.history === 7,
+      String(electorate.history),
+    );
+    check('électorat : scrutin courant marqué', electorate.current === '2022_presidentielle_t1');
+    check('électorat : le reste s’estompe', electorate.dim > 0);
+    await shot('10-electorat', false);
+
+    await evaluate(
+      `document.querySelector('#sg-inspector-history [data-election="2017_presidentielle_t1"]').click()`,
+    );
+    await settle();
+    const moved = await evaluate(
+      `({ hash: location.hash, shown: document.querySelector('#sg-timeline input:checked')?.value })`,
+    );
+    check(
+      'historique : la ligne mène au scrutin',
+      moved.shown === '2017_presidentielle_t1',
+      moved.shown,
+    );
+    await selectKey('c:macron');
+
+    await evaluate(`document.querySelector('#sg-inspector-neighbors [data-compare]').click()`);
+    await settle();
+    const duel = await evaluate(`({
+      rows: document.querySelectorAll('#sg-inspector-duel .sg-duel__row').length,
+      gap: document.getElementById('sg-duel-gap')?.textContent ?? '',
+      distance: document.getElementById('sg-duel-distance')?.textContent ?? '',
+    })`);
+    check(
+      'duel : barres et écarts',
+      duel.rows === 6 && duel.gap.length > 0 && duel.distance.length > 0,
+      JSON.stringify(duel),
+    );
+    await shot('11-duel', false);
+
+    await selectKey('p:62');
+    const lens = await evaluate(`({
+      banner: !document.getElementById('sg-lens-banner').hidden,
+      votes: document.querySelectorAll('#sg-inspector-votes li').length,
+      note: document.getElementById('sg-inspector-vote-note')?.textContent ?? '',
+    })`);
+    check('catégorie : vue depuis le groupe', lens.banner, JSON.stringify(lens));
+    check('catégorie : vote du groupe', lens.votes > 5, String(lens.votes));
+    check('catégorie : le vote est celui du groupe', /groupe/.test(lens.note), lens.note);
+    await shot('12-vue-depuis-un-groupe', false);
+    await evaluate(`document.getElementById('sg-lens-reset').click()`);
+    await settle();
+    const lensClosed = await evaluate(
+      `document.getElementById('sg-lens-banner').hidden && document.getElementById('sg-inspector').hidden`,
+    );
+    check('catégorie : retour à la carte', lensClosed);
+
+    await selectKey('p:81');
+    const noVote = await evaluate(`!!document.getElementById('sg-inspector-novote')`);
+    check('groupe sans donnée de vote signalé', noVote);
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1'`);
+    await settle();
+
+    // --- Croiser : axes libres et carte de proximité -----------------------------------------------
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1&p=cross&ax=niveau_vie&ay=bac5'`);
+    await settle();
+    const free = await evaluate(`({
+      pcs: document.querySelectorAll('.sg-pcs').length,
+      note: document.getElementById('sg-cross-note')?.textContent ?? '',
+      diagonal: getComputedStyle(document.querySelector('.sg-diagonal')).display,
+      title: [...document.querySelectorAll('.sg-axis-title')].map((t) => t.textContent).join(' / '),
+    })`);
+    check(
+      'axes libres : 30 catégories, annoncées',
+      free.pcs === 30 && /30/.test(free.note),
+      JSON.stringify(free),
+    );
+    check('axes libres : titres des variables', !/Exploitation/.test(free.title), free.title);
+    await shot('13-axes-libres', false);
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1&vue=prox&p=cross'`);
+    await settle();
+    const proximity = await evaluate(
+      `({ pcs: document.querySelectorAll('.sg-pcs').length, cands: document.querySelectorAll('.sg-cand').length, ticks: document.querySelectorAll('.sg-tick-x').length })`,
+    );
+    check(
+      'proximité : électorats seuls, sans axes',
+      proximity.pcs === 0 && proximity.cands > 0 && proximity.ticks === 0,
+      JSON.stringify(proximity),
+    );
+    await shot('14-proximite', false);
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1'`);
+    await settle();
+
+    // --- Frise : lecture, trajectoires, anneaux -----------------------------------------------------
+    const played = await evaluate(`(async () => {
+      const seen = new Set();
+      const button = document.getElementById('sg-timeline-play');
+      document.querySelector('#sg-timeline input[value="2017_presidentielle_t1"]').click();
+      await new Promise((r) => setTimeout(r, 300));
+      button.click();
+      for (let i = 0; i < 120 && button.getAttribute('aria-pressed') === 'true'; i++) {
+        seen.add(document.querySelector('#sg-timeline input:checked')?.value);
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      // La lecture s'arrête en arrivant sur la dernière étape, avant le relevé suivant.
+      seen.add(document.querySelector('#sg-timeline input:checked')?.value);
+      const stops = [...document.querySelectorAll('#sg-timeline input[type="radio"]')].map((o) => o.value).filter((v) => v !== 'population');
+      return { seen: [...seen], stops, stopped: button.getAttribute('aria-pressed') !== 'true' };
+    })()`);
+    check('lecture : s’arrête en fin de frise', played.stopped, JSON.stringify(played.seen));
+    check(
+      'lecture : passe par chaque étape',
+      played.stops.every((s) => played.seen.includes(s)),
+      `vues ${played.seen.join(', ')} ; attendues ${played.stops.join(', ')}`,
+    );
+    await evaluate(`document.getElementById('sg-zoom-reset').click()`);
+    await evaluate(`location.hash = 'e=2024_legislatives_t1&rg=1&s=c%3Arn'`);
+    await settle();
+    const trails = await evaluate(`({
+      trails: document.querySelectorAll('path.sg-trail').length,
+      strong: document.querySelectorAll('path.sg-trail--strong').length,
+      rings: document.querySelectorAll('.sg-ring[data-group]').length,
+      key: !document.getElementById('sg-rings-key').hidden,
+    })`);
+    check(
+      'trajectoires dessinées, celle du choix appuyée',
+      trails.trails > 0 && trails.strong > 0,
+      JSON.stringify(trails),
+    );
+    check(
+      'anneaux : six groupes et leur légende',
+      trails.rings === 6 && trails.key,
+      JSON.stringify(trails),
+    );
+    await shot('15-trajectoires-anneaux', false);
+
+    // --- Projection 2027 ---------------------------------------------------------------------------
+    await evaluate(`location.hash = 'e=projection_2027'`);
+    await settle();
+    const project = await evaluate(`(() => {
+      const verdict = document.getElementById('sg-projection-verdict');
+      const r = verdict.getBoundingClientRect();
+      return {
+        text: verdict.textContent,
+        visible: r.width > 0 && r.height > 0 && r.bottom <= innerHeight,
+        ranges: document.querySelectorAll('.sg-range[data-bloc]').length,
+        errors: document.querySelectorAll('.sg-projection-error').length,
+        arrows: document.querySelectorAll('.sg-projection-arrow').length,
+        heading: document.getElementById('sg-chart-heading').textContent,
+        summary: document.getElementById('sg-caveat-text').textContent,
+      };
+    })()`);
+    check(
+      '2027 : résultat du test visible',
+      project.visible && /moins bien/.test(project.text),
+      project.text,
+    );
+    check(
+      '2027 : chiffres du test',
+      /0,81/.test(project.text) && /0,62/.test(project.text),
+      project.text,
+    );
+    check(
+      '2027 : données arrêtées en juillet 2024',
+      /juillet 2024/.test(project.text),
+      project.text,
+    );
+    check('2027 : fourchettes par bloc', project.ranges === 5, String(project.ranges));
+    check(
+      '2027 : flèches et cercles d’erreur',
+      project.arrows > 0 && project.errors > 0,
+      JSON.stringify(project),
+    );
+    check(
+      '2027 : présentée comme une projection',
+      /Projection 2027/.test(project.heading),
+      project.heading,
+    );
+    await shot('16-projection-immobile', false);
+    const scenario = await evaluate(`(async () => {
+      const before = document.querySelector('.sg-cand').getAttribute('transform');
+      document.querySelector('#sg-scenario input[value="trend"]').click();
+      await new Promise((r) => setTimeout(r, 900));
+      return { before, after: document.querySelector('.sg-cand').getAttribute('transform'), hash: location.hash };
+    })()`);
+    check(
+      '2027 : le scénario déplace les électorats',
+      scenario.before !== scenario.after,
+      JSON.stringify(scenario),
+    );
+    check('2027 : scénario dans l’URL', scenario.hash.includes('sc=trend'), scenario.hash);
+    await shot('17-projection-tendance', false);
+    await evaluate(`location.hash = 'e=projection_2027&s=c%3Arn'`);
+    await settle();
+    const family = await evaluate(`({
+      projection: !!document.getElementById('sg-inspector-projection'),
+      history: document.querySelectorAll('#sg-inspector-history .sg-history__row').length,
+      compare: !!document.getElementById('sg-inspector-compare'),
+      tags: document.querySelectorAll('.sg-trail-tag').length,
+    })`);
+    check(
+      '2027 : détail de la famille dans l’inspecteur',
+      family.projection && family.history === 7,
+      JSON.stringify(family),
+    );
+    check('2027 : pas de duel sans composition', !family.compare, JSON.stringify(family));
+    await shot('18-projection-famille', false);
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1'`);
+    await settle();
+
+    // --- « Le saviez-vous ? » -------------------------------------------------------------------------
+    const fact = await evaluate(`(() => {
+      const host = document.getElementById('sg-fact');
+      const shown = !host.hidden && !host.classList.contains('sg-fact--compact');
+      const first = host.dataset.fact;
+      const text = document.querySelector('.sg-fact__text').textContent;
+      document.getElementById('sg-fact-next').click();
+      return { shown, first, text, second: host.dataset.fact, caveat: document.querySelector('.sg-fact__caveat').textContent };
+    })()`);
+    check(
+      'constat affiché, avec sa réserve',
+      fact.shown && fact.text.length > 20 && fact.caveat.length > 0,
+      JSON.stringify(fact),
+    );
+    check('« Une autre » change de constat', fact.first !== fact.second, JSON.stringify(fact));
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1&s=c%3Amacron'`);
+    await settle();
+    await sleep(800);
+    const compact = await evaluate(
+      `document.getElementById('sg-fact').classList.contains('sg-fact--compact')`,
+    );
+    check('le constat se réduit quand on explore', compact);
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1'`);
+    await settle();
+    await sleep(800);
+    const backOpen = await evaluate(
+      `!document.getElementById('sg-fact').classList.contains('sg-fact--compact')`,
+    );
+    check('le constat revient après l’exploration', backOpen);
+    const shown = await evaluate(`(async () => {
+      while (document.getElementById('sg-fact').dataset.fact !== 'zemmour-macron') document.getElementById('sg-fact-next').click();
+      document.getElementById('sg-fact-show').click();
+      await new Promise((r) => setTimeout(r, 1200));
+      const card = document.getElementById('sg-fact');
+      return { hash: location.hash, duel: !!document.getElementById('sg-inspector-duel'), open: !card.classList.contains('sg-fact--compact') };
+    })()`);
+    check(
+      '« Voir sur la carte » ouvre le duel du constat',
+      shown.duel && shown.hash.includes('s=c'),
+      JSON.stringify(shown),
+    );
+    check('le constat reste ouvert après « Voir sur la carte »', shown.open, JSON.stringify(shown));
+    await shot('19-constat-sur-la-carte', false);
+    await evaluate(
+      `document.getElementById('sg-zoom-reset').click(); location.hash = 'e=2022_presidentielle_t1'`,
+    );
+    await settle();
+
+    // --- « Qui est-ce ? » ----------------------------------------------------------------------------
+    await openPanel('game');
+    await sleep(300);
+    const game = await evaluate(`(async () => {
+      const options = [...document.querySelectorAll('[data-game-option]')];
+      const bars = document.querySelectorAll('#sg-game-bars li, #sg-game-bars > *').length;
+      const selected = document.querySelectorAll('.sg-point--selected').length;
+      const inspector = !document.getElementById('sg-inspector').hidden;
+      const hiding = document.body.classList.contains('sg-game-round');
+      options[0].click();
+      await new Promise((r) => setTimeout(r, 200));
+      return { options: options.length, bars, selected, inspector, hiding, feedback: document.getElementById('sg-game-feedback').textContent, score: document.getElementById('sg-game-score').textContent };
+    })()`);
+    check('jeu : trois noms proposés', game.options === 3, JSON.stringify(game));
+    check('jeu : composition affichée', game.bars > 0, JSON.stringify(game));
+    check('jeu : réponse non révélée', !game.inspector && game.hiding, JSON.stringify(game));
+    check(
+      'jeu : réaction et score',
+      game.feedback.length > 0 && game.score.length > 0,
+      JSON.stringify(game),
+    );
+    await shot('20-jeu', false);
+    await openPanel('game');
+    await settle();
+  }
 
   // --- À propos : crédits exigés -------------------------------------------------------------------
   const about = await evaluate(`(() => {

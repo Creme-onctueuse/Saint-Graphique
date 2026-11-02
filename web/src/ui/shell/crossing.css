@@ -380,9 +380,7 @@ body:has(#sg-color-legend:not([hidden])) .sg-hint {
   align-items: center;
   gap: 7px;
   min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 .sg-num {
@@ -604,4 +602,104 @@ body:has(#sg-color-legend:not([hidden])) .sg-hint {
   .sg-scale__step {
     width: 16px;
   }
+}
+
+/* La légende des anneaux occupe le coin : le bandeau de la vue depuis un groupe se range à côté */
+body:has(#sg-rings-key:not([hidden])) .sg-lens-banner {
+  left: calc(var(--sg-inset-left, 84px) + 46px + 240px + 12px);
+  transform: none;
+}
+
+body:has(#sg-rings-key:not([hidden])) .sg-lens-banner__more {
+  display: none;
+}
+
+/* Les lignes d'un électorat nomment déjà les groupes : les anneaux taisent leur nom */
+body:has(.sg-spoke) .sg-ring__name {
+  display: none;
+}
+
+/* Historique d'une famille */
+.sg-history {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sg-history__row {
+  display: grid;
+  grid-template-columns: 50px 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 24px;
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--sg-text);
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sg-history__row:hover {
+  background: var(--sg-hover);
+}
+
+.sg-history__row[aria-current='true'] {
+  background: var(--sg-active);
+  font-weight: 650;
+}
+
+.sg-history__tag {
+  color: var(--sg-text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sg-history__row[aria-current='true'] .sg-history__tag {
+  color: var(--sg-text);
+}
+
+.sg-history__score {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.sg-history__bar {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  min-width: 0;
+}
+
+.sg-history__seg {
+  flex-basis: 0;
+  min-width: 2px;
+  border-radius: 2px;
+}
+
+/* Faits de la projection */
+.sg-factlist {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 12px;
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.sg-factlist dt {
+  color: var(--sg-text-muted);
+}
+
+.sg-factlist dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }

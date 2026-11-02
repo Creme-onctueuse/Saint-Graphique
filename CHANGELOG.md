@@ -4,7 +4,18 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnage [
 
 ## [Unreleased]
 
+### Ajouté
+
+- Carte plein écran, sans défilement : échelles X et Y indépendantes, option « Proportions d'origine », navigation à la molette et au glisser, cadrage des électorats, mini-carte, halos des groupes, légende toujours visible.
+- Croisements : détail d'un électorat ou d'une catégorie, vue depuis un groupe, duel, axes libres sur les variables de l'Insee, carte de proximité par écart de composition.
+- Frise : lecture de 2017 à 2024, filtre par type de scrutin, trajectoires des familles politiques (`config/families.yaml`), anneaux de vote par groupe, historique d'une famille.
+- Projection 2027 à deux scénarios (`scripts/analyze/projection.py`), avec le résultat du test sur le passé : la tendance prédit moins bien que « rien ne bouge ».
+- « Le saviez-vous ? » : des constats calculés sur les données, soumis à des règles testées. Jeu « Qui est-ce ? ».
+- Nouveau logo et jeu d'icônes dessinés pour le projet.
+
 ### Modifié
+
+- La réserve se résume en une ligne toujours visible et les sources tiennent sur une ligne en fin de page ; chacune s'ouvre sur son détail. Les catégories ne sont nommées que si elles sont grandes ou ont de la place, et le zoom fait apparaître les autres.
 
 - La méthode des rangs s'appelle désormais `ranks` et s'affiche sous le libellé « Rangs reconstruits » : l'auteur de la reconstruction n'est plus cité que dans les crédits.
 

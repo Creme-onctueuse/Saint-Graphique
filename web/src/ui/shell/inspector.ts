@@ -10,12 +10,15 @@ import { compositionByGroup, compositionGap, representation } from '../../core/c
 import { formatNumber, formatPct, MINUS, NBSP } from '../../core/format.ts';
 import { GROUP_SHORT_NAMES } from '../../core/groups.ts';
 import type { AppState } from '../../core/state.ts';
+import { familyOfCandidate } from '../../core/timeline.ts';
 import type { Point, RawElection } from '../../core/types.ts';
+import type { Dataset } from '../../data/dataset.ts';
 import type { ResolvedView } from '../../view.ts';
 import { lensForPcs, type CrossingInfo, type LensInfo } from '../../viewCrossing.ts';
 import type { AppActions, Feature } from '../actions.ts';
 import { el } from '../dom.ts';
 import { icon } from '../icons.ts';
+import { familyHistorySection, projectionSection } from './familySection.ts';
 
 /** Voisins affichés. */
 const NEIGHBOR_COUNT = 5;
@@ -80,6 +83,7 @@ function rankedBar(share: number, max: number, color: string): HTMLSpanElement {
 
 export class Inspector implements Feature {
   private readonly host: HTMLElement;
+  private readonly ds: Dataset;
   private readonly actions: AppActions;
   private readonly banner: HTMLElement;
   private readonly bannerText = el('span', { attrs: { id: 'sg-lens-text' } });
@@ -92,8 +96,9 @@ export class Inspector implements Feature {
   private renderKey = '';
   private compareOpen = false;
 
-  constructor(host: HTMLElement, actions: AppActions) {
+  constructor(host: HTMLElement, ds: Dataset, actions: AppActions) {
     this.host = host;
+    this.ds = ds;
     this.actions = actions;
     const reset = el('button', {
       class: 'sg-btn sg-lens-banner__reset',
@@ -145,6 +150,7 @@ export class Inspector implements Feature {
       view.electionId,
       view.method.id,
       crossing.mode,
+      state.scenario,
       view.model.candidates.map((c) => `${c.id}:${c.x}:${c.y}`).join(','),
       this.compareOpen,
     ].join('|');
@@ -239,7 +245,8 @@ export class Inspector implements Feature {
       ];
     }
     if (selected.kind === 'candidate') {
-      if (compared?.kind === 'candidate') {
+      // La projection n'a pas de composition à comparer : pas de duel à ce stade.
+      if (compared?.kind === 'candidate' && !view.projection) {
         return this.candidateDuel(view, crossing, selected.candidate, compared.candidate);
       }
       return this.candidateDetail(view, crossing, selected.candidate);
@@ -253,14 +260,17 @@ export class Inspector implements Feature {
   // --- Électorat ------------------------------------------------------------------------------
 
   private candidateDetail(view: ResolvedView, crossing: CrossingInfo, c: ChartCandidate): Node[] {
-    const subtitle =
-      c.share === null
+    const projected = view.projection?.families.find((f) => f.id === c.id) ?? null;
+    const subtitle = projected
+      ? 'Famille politique, projection'
+      : c.share === null
         ? ''
         : c.isAbstention
           ? `${formatPct(c.share)} des inscrits`
           : `${formatPct(c.share)} des suffrages exprimés`;
     const body = el('div', { class: 'sg-ins__body' });
     const election = view.rawElection;
+    if (projected) body.append(projectionSection(projected, this.state?.scenario ?? 'still'));
     if (this.compareOpen) body.append(this.compareList(view, c.id));
     if (election) {
       const rows = representation(election, c.id, crossing.groupOf);
@@ -303,7 +313,18 @@ export class Inspector implements Feature {
         ),
       );
     }
-    return [this.head(c.label, subtitle, swatch(candidateColor(c), 'diamond'), true), body];
+    const families = this.ds.families;
+    const family = families ? familyOfCandidate(families, c.id) : null;
+    const history = family
+      ? familyHistorySection(this.ds, family.id, view.electionId, (id) =>
+          this.actions.setElection(id),
+        )
+      : null;
+    if (history) body.append(history);
+    return [
+      this.head(c.label, subtitle, swatch(candidateColor(c), 'diamond'), election !== null),
+      body,
+    ];
   }
 
   private neighborTable(

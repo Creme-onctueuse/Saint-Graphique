@@ -5,6 +5,9 @@
  * puis dans le coin haut droit ; si des repères occupent les deux, elle se réduit à un bouton. Sur
  * téléphone, elle est réduite d'emblée : elle s'ouvre à la demande, par-dessus la carte.
  *
+ * Elle s'efface aussi quand on explore : une sélection, un panneau ouvert, d'autres axes, les anneaux
+ * ou la projection 2027 la réduisent à son bouton, sauf si elle a elle-même mené à cette sélection ou si la personne la rouvre.
+ *
  * Fermée, elle ne revient pas de la session (sessionStorage, hors de l'URL : ce n'est pas un état
  * que l'on partage).
  */
@@ -12,6 +15,7 @@ import './facts.css';
 import type { SaintChart } from '../../chart/chart.ts';
 import { computeFacts, type Fact } from '../../core/facts.ts';
 import type { AppState } from '../../core/state.ts';
+import { PROJECTION_ID } from '../../core/types.ts';
 import type { Dataset } from '../../data/dataset.ts';
 import type { ResolvedView } from '../../view.ts';
 import type { AppActions, Feature } from '../actions.ts';
@@ -28,7 +32,7 @@ type Slot = (typeof SLOTS)[number];
 
 /** Repères et éléments d'interface que la carte ne doit pas recouvrir. */
 const OBSTACLES =
-  '.sg-pcs:not(.sg-dim), .sg-cand:not(.sg-dim), .sg-label:not([opacity="0"]):not(.sg-dim), #sg-panel:not([hidden]), #sg-inspector:not([hidden]), .sg-mapctl, #sg-keybar, .sg-minimap';
+  '.sg-pcs:not(.sg-dim), .sg-cand:not(.sg-dim), .sg-label:not([opacity="0"]):not(.sg-dim), #sg-panel:not([hidden]), #sg-inspector:not([hidden]), #sg-projection:not([hidden]), #sg-rings-key:not([hidden]), #sg-lens-banner:not([hidden]), .sg-mapctl, #sg-keybar, .sg-minimap';
 
 function readDismissed(): boolean {
   try {
@@ -63,6 +67,12 @@ export class FactCard implements Feature {
   private settleTimer: number | undefined;
   private placed = false;
   private hiddenCandidates: readonly string[] = [];
+  /** On explore autre chose : la carte se réduit à son bouton. */
+  private exploring = false;
+  private ringsShown = false;
+  /** Repère mis en avant par « Voir sur la carte » : il ne compte pas comme une exploration. */
+  private shownKey: string | null = null;
+  private lastSelected: string | null = null;
 
   constructor(host: HTMLElement, ds: Dataset, actions: AppActions, chart: SaintChart) {
     this.host = host;
@@ -144,8 +154,24 @@ export class FactCard implements Feature {
     // Pendant le jeu, un constat pourrait donner la réponse.
     this.blocked = state.panel === 'game';
     this.hiddenCandidates = state.hiddenCandidates;
+    this.ringsShown = state.showRings;
+    if (state.selected !== this.lastSelected) {
+      this.lastSelected = state.selected;
+      if (state.selected !== this.shownKey) this.opened = false;
+    }
+    const selectedElsewhere = state.selected !== null && state.selected !== this.shownKey;
+    const wasExploring = this.exploring;
+    this.exploring =
+      view.electionId === PROJECTION_ID ||
+      state.showRings ||
+      state.panel !== null ||
+      (view.crossing?.mode ?? 'map') !== 'map' ||
+      selectedElsewhere;
     if (!this.updatePresence()) return;
-    if (this.placed) {
+    if (this.placed && this.exploring !== wasExploring) {
+      // Se réduire tout de suite : attendre la fin du glissement laisserait la carte sur les repères.
+      this.place();
+    } else if (this.placed) {
       this.schedulePlace();
     } else {
       this.placed = true;
@@ -190,6 +216,7 @@ export class FactCard implements Feature {
     const fact = this.facts[this.index];
     if (!fact) return;
     const { election, selected, compared, box } = fact.target;
+    this.shownKey = selected;
     const keys = [selected, compared].filter((k): k is string => k !== null);
     this.actions.patch(
       {
@@ -250,6 +277,12 @@ export class FactCard implements Feature {
     if (phone) {
       this.setCompact(!this.opened);
       this.setSlot('tl');
+      return;
+    }
+    if (this.exploring && !this.opened) {
+      // Les anneaux ont leur légende dans le coin haut gauche : le bouton passe de l'autre côté.
+      this.setSlot(this.ringsShown ? 'tr' : 'tl');
+      this.setCompact(true);
       return;
     }
     this.setCompact(false);
