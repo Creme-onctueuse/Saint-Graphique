@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "projection.schema.json",
+  "title": "Test sur le passé et projection 2027 d'une méthode",
+  "description": "Produit par scripts/analyze/projection.py. Deux scénarios : « still » (rien ne bouge) et « trend » (la tendance continue). Positions en unités de la carte, scores en points.",
+  "type": "object",
+  "required": ["method", "target", "data_end", "min_history", "backtest", "families", "blocs"],
+  "additionalProperties": false,
+  "properties": {
+    "method": { "type": "string" },
+    "target": {
+      "type": "object",
+      "required": ["label", "date"],
+      "additionalProperties": false,
+      "properties": {
+        "label": { "type": "string" },
+        "date": { "type": "number" }
+      }
+    },
+    "data_end": { "type": "string", "pattern": "^\\d{4}-\\d{2}$" },
+    "min_history": { "type": "integer", "minimum": 1 },
+    "backtest": {
+      "type": "object",
+      "required": ["parties", "blocs", "verdict"],
+      "additionalProperties": false,
+      "properties": {
+        "parties": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/row" } },
+        "blocs": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/row" } },
+        "verdict": {
+          "type": "object",
+          "required": ["trend_worse_position", "trend_worse_score"],
+          "additionalProperties": false,
+          "properties": {
+            "trend_worse_position": { "type": "boolean" },
+            "trend_worse_score": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "families": {
+      "type": "array",
+      "items": {
+        "allOf": [{ "$ref": "#/$defs/projected" }],
+        "required": ["color"],
+        "properties": { "color": { "type": "string" } }
+      }
+    },
+    "blocs": {
+      "type": "array",
+      "items": {
+        "allOf": [{ "$ref": "#/$defs/projected" }],
+        "required": ["tested", "score_range"],
+        "properties": {
+          "tested": {
+            "type": "boolean",
+            "description": "Faux pour l'abstention, projetée mais hors du tableau du test."
+          },
+          "score_range": {
+            "type": "object",
+            "required": ["still", "trend"],
+            "additionalProperties": false,
+            "properties": {
+              "still": { "$ref": "#/$defs/range" },
+              "trend": { "$ref": "#/$defs/range" }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "row": {
+      "type": "object",
+      "required": ["phi", "n", "position_mean", "position_worst", "score_mean", "score_worst"],
+      "additionalProperties": false,
+      "properties": {
+        "phi": { "type": "number", "minimum": 0, "maximum": 1 },
+        "n": { "type": "integer", "minimum": 0 },
+        "position_mean": { "type": "number", "minimum": 0 },
+        "position_worst": { "type": "number", "minimum": 0 },
+        "score_mean": { "type": "number", "minimum": 0 },
+        "score_worst": { "type": "number", "minimum": 0 }
+      }
+    },
+    "errors": {
+      "type": "object",
+      "required": ["n", "position_mean", "position_worst", "score_mean", "score_worst"],
+      "properties": {
+        "n": { "type": "integer", "minimum": 0 },
+        "position_mean": { "type": "number", "minimum": 0 },
+        "position_worst": { "type": "number", "minimum": 0 },
+        "score_mean": { "type": "number", "minimum": 0 },
+        "score_worst": { "type": "number", "minimum": 0 }
+      }
+    },
+    "position": {
+      "type": "object",
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      }
+    },
+    "range": {
+      "type": "array",
+      "items": { "type": "number", "minimum": 0 },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "projected": {
+      "type": "object",
+      "required": ["id", "label", "last_election", "points", "still", "trend", "error"],
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "last_election": { "type": "string" },
+        "points": { "type": "integer", "minimum": 1 },
+        "still": { "$ref": "#/$defs/position" },
+        "trend": { "$ref": "#/$defs/position" },
+        "error": {
+          "type": "object",
+          "required": ["still", "trend"],
+          "additionalProperties": false,
+          "properties": {
+            "still": { "$ref": "#/$defs/errors" },
+            "trend": { "$ref": "#/$defs/errors" }
+          }
+        }
+      }
+    }
+  }
+}

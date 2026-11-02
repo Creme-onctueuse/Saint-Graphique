@@ -187,3 +187,30 @@ Limites des lectures : certaines attributions reposent sur des libellés déplac
 - **Grain.** Une méthode en 30 codes ne peut pas représenter les 41 postes, en particulier les trois tailles d'exploitation agricole et les six catégories de retraités.
 - **Barycentre.** Pour Y, le barycentre linéaire suffit, y compris dans la matrice v11. Pour X, il reproduit le tableau de 2025 mais pas la matrice v11.
 - **Cible.** Le tableau de 2025 à février 2026 reste la seule source détaillée par PCS.
+
+## 7. Frise et projection 2027
+
+**Ce qui bouge.** Toutes les méthodes placent les catégories une seule fois : leurs positions et le barycentre de la population sont identiques aux 7 élections. Seuls les électorats se déplacent, et uniquement parce que leur composition change d'un sondage à l'autre. Sur la méthode `read_positions`, un électorat se déplace d'environ 0,45 unité d'une élection à l'autre (médiane), soit à peu près la taille des ellipses de confiance.
+
+**Familles et blocs.** `config/families.yaml` relie les électorats entre élections. Ce classement est un choix de ce projet : une famille réunit des candidats et des listes qui ne se confondent pas. Les coalitions NUPES et NFP ne sont attribuées à aucun parti : elles laissent un trou dans les trajectoires et comptent dans le bloc de gauche.
+
+**Le vote de chaque groupe.** Les sondages donnent la composition de chaque électorat. Multipliée par le score rapporté aux inscrits, elle donne le vote de chaque groupe, affiché par les anneaux de la frise. Ces tableaux ne détaillent que six groupes : les agriculteurs y sont réunis avec les artisans et commerçants, et les autres inactifs n'y figurent pas.
+
+**Deux scénarios.** Pour la présidentielle de 2027, `scripts/analyze/projection.py` compare « rien ne bouge », le dernier point connu, et « la tendance continue », ce point prolongé par la pente des moindres carrés. Le fichier `data/computed/_projection/<méthode>.json` se régénère après `pipeline.build`.
+
+**Test sur le passé.** Chaque point ayant au moins 3 points antérieurs est prédit depuis ceux-ci, sur `read_positions` :
+
+| Erreur moyenne | Rien ne bouge | Quart de tendance | Demi-tendance | Tendance entière |
+|---|---|---|---|---|
+| Partis, position (17 prédictions) | **0,62** | 0,66 | 0,71 | 0,81 |
+| Partis, score en points | **6,2** | 6,5 | 7,1 | 8,4 (pire erreur : 29,0) |
+| Blocs, position (16 prédictions) | **0,42** | 0,44 | 0,46 | 0,51 |
+| Blocs, score en points | 4,8 | **4,6** | 5,0 | 6,0 |
+
+Lecture :
+
+- **Le mouvement passé ne prédit pas le mouvement suivant.** La tendance entière fait pire que « rien ne bouge » sur les quatre lignes. Le quart de tendance sur le score des blocs reste dans le bruit, sur 16 prédictions.
+- **Les types d'élection pèsent lourd.** Le score d'une famille varie plus d'un type d'élection à l'autre que dans le temps : la France insoumise fait 22 % à la présidentielle de 2022 et 10 % aux européennes de 2024. Le dernier point d'une famille peut donc être une élection d'un autre type que celle que l'on projette.
+- **Ce test ne mesure pas 2027.** Il dit ce que ces deux scénarios ont valu sur 2017 à 2024. Les données s'arrêtent en juillet 2024 : rien de ce qui s'est passé depuis n'y figure.
+
+**Affichage.** La carte montre une position pour chaque parti, sans score ; les scores ne sont donnés qu'en fourchette, pour cinq blocs. Le cercle en pointillés a pour rayon l'erreur moyenne du test de ce parti dans le scénario affiché, sur peu de prédictions : 1 à 4 selon le parti. La fourchette d'un bloc est son score projeté, plus ou moins son erreur moyenne dans le même scénario. L'abstention est projetée sur le même principe, mais hors du tableau, car elle dépend surtout du type d'élection. La page affiche toujours le résultat du test à côté de la projection, qui n'est pas une prévision du résultat.

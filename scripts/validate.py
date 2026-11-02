@@ -52,7 +52,21 @@ def main(argv: list[str] | None = None) -> int:
         ("pcs.schema.json", None, [ROOT / "data" / "pcs.json"]),
         ("positions.schema.json", None, [ROOT / "data" / "positions_chris.json"]),
         ("election.schema.json", None, sorted((ROOT / "data" / "elections").glob("*.json"))),
-        ("computed.schema.json", None, sorted((ROOT / "data" / "computed").glob("*/*.json"))),
+        (
+            "computed.schema.json",
+            None,
+            # Un dossier commençant par « _ » n'est pas une méthode : voir projection.schema.json.
+            sorted(
+                f
+                for f in (ROOT / "data" / "computed").glob("*/*.json")
+                if not f.parent.name.startswith("_")
+            ),
+        ),
+        (
+            "projection.schema.json",
+            None,
+            sorted((ROOT / "data" / "computed" / "_projection").glob("*.json")),
+        ),
     ]
     for schema, ptr, files in targets:
         v = validator(schema, reg, ptr)
