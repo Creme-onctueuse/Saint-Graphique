@@ -27,7 +27,11 @@ Plusieurs **méthodes** coexistent et se choisissent dans l'interface :
 - `ranks` : une reconstruction publiée par un tiers (voir les [crédits](#crédits-et-inspiration)), calculée sur 30 points de données ouvertes. X est le rang du ratio patrimoine / niveau de vie, Y le rang du score de diplômes `5·bac+5 + 3·bac+3 + 2·bac+2 + bac − CAP − 2·brevet − 3·certificat/aucun` ;
 - `continuous` : les mêmes scores en valeurs continues, sans l'effet « escalier » des rangs ;
 - `mca` : une analyse des correspondances multiples, à titre exploratoire ;
+- `espace_social` : l'espace social d'après Bourdieu (*La Distinction*, 1979). En hauteur le volume du capital, en largeur sa structure, du culturel à l'économique, à partir du patrimoine, du niveau de vie et des diplômes. Ce n'est pas une reconstruction du graphique ; les retraités y restent placés selon des diplômes qui reflètent leur génération ;
+- `acm_individus` : une analyse des correspondances multiples sur les individus du recensement 2022 (Le Roux et Rouanet, 2010), avec les PCS en points supplémentaires, à titre exploratoire. Le recensement ne donne ni revenu ni patrimoine : le capital économique n'est approché que par la propriété du logement et le statut d'emploi ;
 - ellipses de confiance par bootstrap sur les marges d'erreur des sondages.
+
+Les deux dernières méthodes ont leurs propres axes et n'atteignent pas le seuil d'écart aux positions lues, qu'elles ne visent pas : voir la [méthodologie](docs/methodologie.md#8-deux-méthodes-tirées-des-sciences-sociales).
 
 ## La carte
 

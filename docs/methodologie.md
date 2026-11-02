@@ -91,7 +91,7 @@ Des commentateurs proposent d'autres lectures, non vérifiées ici. Ventre Press
 
 ## 5. Écarts mesurés
 
-Reproduction : `scripts/analyze/compare.py`, `check_barycenter.py`, `x_variants.py`, `threshold_report.py` et `overlay.py`. Les chiffres dépendent de `data/pcs.json` à la date du calcul.
+Reproduction : `scripts/analyze/compare.py`, `check_barycenter.py`, `x_variants.py`, `threshold_report.py`, `methods_report.py` et `overlay.py`. Les chiffres dépendent de `data/pcs.json` à la date du calcul.
 
 ### Seuil et verdict
 
@@ -103,12 +103,15 @@ Reproduction : `scripts/analyze/compare.py`, `check_barycenter.py`, `x_variants.
 | `ranks` | 0,22 / 1,01 : non atteint | 0,43 / 1,02 : non atteint | 2,53 / 2,39 : non atteint | 3,75 / 4,04 : non atteint |
 | `continuous` | 5,18 / 0,80 : non atteint | 5,26 / 0,92 : non atteint | 7,48 / 2,86 : non atteint | 4,80 / 3,24 : non atteint |
 | `mca` | 3,15 / 1,86 : non atteint | 3,32 / 1,80 : non atteint | 5,49 / 2,61 : non atteint | 5,74 / 10,21 : non atteint |
+| `espace_social` | 1,13 / 0,79 : non atteint | 1,15 / 0,73 : non atteint | 3,40 / 1,65 : non atteint | 5,27 / 2,50 : non atteint |
+| `acm_individus` | 1,81 / 3,23 : non atteint | 1,94 / 3,34 : non atteint | 4,07 / 5,47 : non atteint | 3,52 / 6,21 : non atteint |
 
 Chaque case donne le RMSE en X puis en Y. Lecture :
 
 - **Seuls les candidats mettent `read_positions` à l'épreuve.** Ses catégories coïncident avec les lectures par construction (0,01 et 0,02 sur 32 points) : cet accord ne prouve rien.
 - **Le seuil est atteint contre le tableau de 2025 à février 2026,** la dernière version détaillée par PCS, et par `read_positions` seule.
 - **Il n'est pas atteint contre la matrice v11,** la dernière version montrée, ni par aucune méthode. La v1 réplique donc le tableau, pas la matrice.
+- **`espace_social` et `acm_individus` ne cherchent pas à l'atteindre.** Leurs axes ont un autre sens que ceux de Chris : ces écarts mesurent une distance entre deux lectures, pas une erreur (section 8).
 
 **Calque.** `overlay.py` dessine les postes sur la capture plein écran du 14 février 2026 ([iXImwyHjrwM 10:56](https://youtu.be/iXImwyHjrwM?t=656)). Vérifié à l'œil, 39 cercles sur 41 recouvrent leur disque en position et en taille. Les deux autres sont les catégories déplacées le 28 février 2026, postérieures à cette capture. Ce contrôle confirme la lecture et les poids, sans mesure chiffrée.
 
@@ -214,3 +217,73 @@ Lecture :
 - **Ce test ne mesure pas 2027.** Il dit ce que ces deux scénarios ont valu sur 2017 à 2024. Les données s'arrêtent en juillet 2024 : rien de ce qui s'est passé depuis n'y figure.
 
 **Affichage.** La carte montre une position pour chaque parti, sans score ; les scores ne sont donnés qu'en fourchette, pour cinq blocs. Le cercle en pointillés a pour rayon l'erreur moyenne du test de ce parti dans le scénario affiché, sur peu de prédictions : 1 à 4 selon le parti. La fourchette d'un bloc est son score projeté, plus ou moins son erreur moyenne dans le même scénario. L'abstention est projetée sur le même principe, mais hors du tableau, car elle dépend surtout du type d'élection. La page affiche toujours le résultat du test à côté de la projection, qui n'est pas une prévision du résultat.
+
+## 8. Deux méthodes tirées des sciences sociales
+
+`espace_social` et `acm_individus` ne reconstruisent pas le graphique de Chris. Elles posent une autre question : quelle carte obtient-on en partant d'un cadre publié, et non de ses positions ? Leurs choix, formule, échelle de diplômes, variables et recodages, ont été fixés avant le premier calcul de `threshold_report.py`. Seuls des libellés ont changé ensuite. Reproduction : `scripts/analyze/methods_report.py`.
+
+### `espace_social` : volume et structure du capital
+
+D'après Bourdieu (*La Distinction*, Minuit, 1979). En hauteur le volume du capital, en largeur sa structure, du culturel à gauche à l'économique à droite. Tout vient de `data/pcs.json` :
+
+- capital économique : `E = z(z(ln patrimoine) + z(ln niveau de vie))` ;
+- capital culturel : `C = z(5·bac+5 + 3,5·bac+3/4 + 2·bac+2 + 0·bac − CAP − 3·brevet − 4·certificat ou aucun)`, soit la durée théorique des études en années par rapport au bac. Cette échelle est fixée a priori, ce n'est pas celle de `ranks` ;
+- `z` centre et réduit avec les poids de population, pour que E et C aient la même dispersion ;
+- `x = minmax(z(E − C))` et `y = minmax(z(E + C))` sur [-10 ; +10], comme `continuous`.
+
+**Logarithme.** Le patrimoine médian va de 32 à 1 532 k€ : en euros, les chefs d'entreprise tireraient toute l'échelle à eux seuls. Le logarithme réduit l'asymétrie pondérée, de 2,69 à -0,71 pour le patrimoine et de 1,07 à 0,67 pour le niveau de vie, sans l'annuler.
+
+**Réglage.** Dans le navigateur, les curseurs du panneau Méthode règlent les poids de diplômes, donc le capital culturel. Le capital économique n'a pas de réglage, et l'option de score imposé aux retraités est retirée. La fixture de parité vérifie le portage TypeScript.
+
+**Retraités.** Ils gardent leurs propres valeurs, sans score imposé ni correction, mais n'entrent pas dans la moyenne et l'écart-type de référence, calculés sur les 29 PCS actives. Un point unique qui pèse 33 % de la population fixerait sinon le zéro et la dispersion du capital culturel : le déplacement moyen des PCS actives serait de 1,03 unité, 1,92 au plus.
+
+Le biais reste donc visible sur leur point, et il est fort. Leurs diplômes reflètent leur génération : 34,5 % n'ont qu'un certificat ou aucun diplôme, contre 9,6 % dans les PCS actives, et 5,6 % ont un bac+5, contre 16,8 %. Ils se retrouvent à (+3,18 ; -5,28). Avec les diplômes moyens des PCS actives, ils seraient à (-4,39 ; -1,70). Ce calcul donne un ordre de grandeur, pas une correction : il faudrait pour cela les diplômes à âge égal, par ancienne catégorie. Leur position à droite ne dit donc pas qu'ils détiennent surtout un capital économique, et elle entraîne les électorats âgés.
+
+**Ce que le résultat veut dire.**
+
+- **La carte se lit comme attendu en haut.** Professeurs et professions de l'information et des arts à gauche, chefs d'entreprise et agriculteurs à droite, professions libérales au sommet. Cet ordre vient des données, sans ajustement.
+- **Le volume écrase la structure.** E et C sont corrélés à 0,87 sur les PCS actives : le volume porte 93,5 % de la variance, la structure 6,5 %. La mise à l'échelle donne pourtant la même étendue aux deux axes : la largeur de la carte grossit donc un écart bien plus faible que sa hauteur.
+- **La structure ne vaut pas en bas de la carte.** Employés de commerce et services aux particuliers sont à gauche parce que leur patrimoine est très faible (57 et 63 k€), pas parce que leur capital culturel est élevé.
+- **Une petite PCS fixe la borne gauche.** Le clergé, dont les valeurs sont fragiles (voir `data/SOURCES.md`), est à -10.
+- **Ces mesures sont pauvres.** Pas de capital culturel incorporé, pas de capital social : seulement des titres scolaires et deux médianes.
+
+**Contre les positions lues.** Le seuil n'est atteint nulle part. En Y, l'ordre des catégories est bien retrouvé (Spearman 0,90 sur 24 points), comme celui des candidats de mars 2025 (1,00 sur 7) et de la matrice v11 pour 2022 (0,81 sur 12), ce que `ranks` ne fait pas (0,29, et presque zéro sur la matrice). C'est un résultat, pas une validation : tout indicateur de hiérarchie sociale classe ainsi les catégories, le diplôme entre dans les deux calculs, et les retraités n'y sont pas forcés à -10. En X, l'ordre des catégories n'est pas le même (Spearman 0,42, RMSE 5,27) : la structure du capital n'est pas l'exploitation. Le RMSE de 1,13 sur les candidats ne dit rien de plus : les électorats sont resserrés (écart-type de 0,8 en 2022).
+
+### `acm_individus` : une ACM sur les individus du recensement
+
+Analyse géométrique des données (Le Roux et Rouanet, *Multiple Correspondence Analysis*, SAGE, 2010) : les axes viennent des individus, et les PCS sont projetées ensuite. Le fichier détail du recensement 2022 (17,5 millions de lignes) est lu par morceaux et réduit à un tableau croisé de 116 Ko, sans microdonnées : `data/acm_individus.json`, avec sa source et sa licence.
+
+**Le recensement ne donne ni revenu ni patrimoine.** Le capital économique n'y est approché que par la propriété du logement et le statut d'emploi, le capital culturel que par le diplôme. Le statut d'occupation est celui du ménage : un jeune adulte chez ses parents propriétaires compte comme propriétaire.
+
+**Individus actifs.** Les 30,0 millions de personnes des 29 PCS actives, en emploi ou au chômage, hors scolarisés (`ETUD = 2`), de 15 ans ou plus, pondérées par `IPONDI`.
+
+| Variable active | Colonnes | Modalités |
+|---|---|---|
+| Diplôme | `DIPL` | les 7 catégories du projet : bac+5, bac+3/4, bac+2, bac, CAP, brevet, certificat ou aucun |
+| Logement | `STOCD` | propriétaire (10) ; locataire du privé (21, 23) ; HLM (22) ; autre (30, ZZ) |
+| Emploi | `EMPL`, `TP`, `TACT` | employeur (22) ; indépendant (21, 23) ; CDI ou titulaire à temps complet, à temps partiel (16 selon `TP`) ; durée limitée (11 à 15) ; chômage (`TACT = 12`) |
+
+Trois choix tiennent au codage. `STAT` n'est pas retenu : il est entièrement contenu dans `EMPL`, ce que la lecture vérifie, et le garder compterait deux fois la même information. `TP` est fondu dans l'emploi : il vaut « sans objet » pour tous les chômeurs, et deux variables de même « sans objet » créeraient un axe du seul fait du codage. Enfin, les retraités n'ont aucune condition d'emploi : ce sont des individus supplémentaires. Leur variable manquante compte pour zéro, et leur point ne dépend que de leur diplôme et de leur logement. Leur donner une modalité ferait de l'axe 1 une opposition entre générations : la modalité « retraité » y contribuerait à 25,6 %, « certificat ou aucun » à 23,9 %.
+
+**Calcul.** ACM de `prince` sur les 168 profils de réponses pondérés, comme `mca`. Chaque PCS est le barycentre de ses individus, orienté comme `mca` (chefs d'entreprise à droite, cadres en haut), puis mis à l'échelle sur [-10 ; +10].
+
+| Axe | Valeur propre | Inertie brute | Taux modifié | Contribution du diplôme | du logement | de l'emploi |
+|---|---|---|---|---|---|---|
+| 1 | 0,467 | 10,0 % | 91,4 % | 30,8 % | 37,2 % | 32,0 % |
+| 2 | 0,368 | 7,9 % | 6,1 % | 27,1 % | 43,6 % | 29,3 % |
+| 3 | 0,351 | 7,5 % | 1,6 % | | | |
+
+Le taux brut d'une ACM est toujours faible, et sous-estime l'axe : le taux modifié de Benzécri ne garde que l'écart à la moyenne des axes, ici 1/3. Les deux mesures se complètent.
+
+**Ce que disent les axes, d'après les contributions.**
+
+- **Axe 1 : une échelle de ressources, plus qu'un volume de capital.** À gauche, logement HLM (24,9 % de l'axe), chômage (16,9 %), certificat ou aucun diplôme (14,6 %) et durée limitée (6,1 %). À droite, propriété (10,5 %), bac+5 (7,2 %), emploi stable à temps complet (3,6 %) et employeur (3,2 %). Le côté gauche pèse le plus : cet axe dit d'abord la précarité. Au niveau des PCS actives, il suit les diplômes (corrélation pondérée de 0,89), qui entrent dans le calcul, mais aussi le patrimoine (0,88) et le niveau de vie (0,90), qui n'y entrent pas : c'est ce qui le rapproche du volume, sans l'établir au niveau des individus.
+- **Axe 2 : pas la structure du capital, et une lecture fragile.** En haut, locataires du privé (27,1 %), bac+5 (14,7 %) et durée limitée (12,6 %). En bas, temps partiel stable (14,3 %), propriété (6,7 %), bac+2 (6,4 %) et HLM (6,1 %). Les employeurs sont au centre (-0,11) : capital économique et capital culturel ne s'y opposent pas. Les 15-29 ans sont en haut (+0,28), les 45-59 ans en bas (-0,14) : l'axe mêle âge, logement et stabilité de l'emploi. Sa valeur propre dépasse à peine la moyenne (0,368 contre 0,333) et les axes suivants la talonnent : un autre choix de variables pourrait le changer.
+
+Le nuage est donc presque à une dimension. La méthode reste **exploratoire** : l'axe vertical de la carte n'a pas le statut de l'axe horizontal.
+
+**Limites.** Les retraités sont à (-3,97 ; -8,84) : leur logement et leur diplôme, seuls pris en compte, reflètent leur génération. Le clergé fixe la borne haute de l'axe 2 (logés gratuitement), sur un très petit effectif. Le recensement de 2022 sert pour toutes les élections.
+
+**Contre les positions lues.** Le seuil n'est atteint nulle part. En X, l'ordre des catégories est proche de celui de Chris (Spearman 0,81, RMSE 3,52 sur 24 points) : une échelle de ressources et l'axe de l'exploitation classent les catégories dans un ordre voisin, sans que l'un valide l'autre. En Y, l'écart est grand (RMSE 6,21, Spearman 0,46), et c'est attendu : l'axe 2 ne mesure pas la division du travail.
+
+**Une méthode non mise en œuvre.** Wright (*Classes*, Verso, 1985) définit les classes par l'exploitation et la domination, d'où l'intérêt de sa grille pour ce graphique. Elle demande l'autorité exercée au travail, que le recensement ne renseigne pas : elle n'est donc citée qu'en arrière-plan.
