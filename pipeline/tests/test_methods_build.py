@@ -35,7 +35,7 @@ ALL_METHODS = ("read_positions", "ranks", "continuous", "mca", "espace_social", 
 #: Méthodes dont les axes ont leur propre sens : voir ``methods.<nom>.axes``.
 OWN_AXES = {
     "espace_social": ("Structure du capital", "Volume du capital"),
-    "acm_individus": ("Axe 1 de l'ACM : ressources", "Axe 2 de l'ACM : mobilité ou installation"),
+    "acm_individus": ("Axe 1 : ressources", "Axe 2 : mobilité ou installation"),
 }
 
 

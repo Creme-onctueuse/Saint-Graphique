@@ -195,7 +195,7 @@ class AcmIndividus:
     """ACM sur les individus du recensement, PCS en points supplémentaires."""
 
     name = "acm_individus"
-    label = "ACM sur les individus"
+    label = "ACM individus"
     bootstrap = True
     default_params: Mapping[str, Any] = {
         "orientation": Mca.default_params["orientation"],

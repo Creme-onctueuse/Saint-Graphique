@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { defaultState, type AppState } from './core/state.ts';
 import { asComputedFile, asRawElection, asRawPcs, buildDataset } from './data/dataset.ts';
 import { availableMethods, buildView, defaultElection, effectiveParams } from './view.ts';
-import { defaultParamsFor } from './core/methods.ts';
+import { defaultParamsFor, STUDY_YEARS } from './core/methods.ts';
+import { METHOD_RESERVES } from './core/reserves.ts';
 import { DEFAULT_Y_WEIGHTS } from './core/scores.ts';
+import { POPULATION_ID } from './core/types.ts';
 
 // La fixture fictive a la même forme que la sortie de pipeline/build.py.
 const modules = import.meta.glob<unknown>('./data/sample/**/*.json', {
@@ -302,6 +304,111 @@ describe('réserves de la page', () => {
     expect(mca?.label).toBe('ACM (terciles) (exploratoire)');
     expect(mca?.exploratory).toBe(true);
     expect(ds.methods.find((m) => m.id === 'ranks')?.exploratory).toBe(false);
+  });
+});
+
+describe('méthodes aux axes propres', () => {
+  const axes = {
+    x: { label: 'Structure du capital', low: 'capital culturel', high: 'capital économique' },
+    y: { label: 'Volume du capital', low: 'moins de capital', high: 'plus de capital' },
+  };
+  const dsOwn = buildDataset({
+    ...files,
+    '_config.json': {
+      methods: {
+        methods: {
+          espace_social: { description: 'Volume et structure.', axes, y_weights: STUDY_YEARS },
+          acm_individus: { description: 'ACM.', axes },
+        },
+      },
+    },
+    'acm_individus/population.json': {
+      method: 'acm_individus',
+      election_id: 'population',
+      params: { range: [-10, 10] },
+      axes: { x_label: 'Axe 1', y_label: 'Axe 2', range: [-10, 10] },
+      pcs: [{ code: '10', group: '1', label: 'L', x: 1, y: 2, weight: 100 }],
+      candidates: [],
+      population_barycenter: { x: 1, y: 2 },
+    },
+  });
+  const view = (method: string, patch: Partial<AppState> = {}): ReturnType<typeof buildView> =>
+    buildView(dsOwn, state({ method, election: 'exemple_presidentielle', ...patch }));
+
+  it('affiche ses libellés et ses extrémités, sans diagonale ni noms de régions', () => {
+    const v = view('espace_social');
+    expect(v?.model.xLabel).toBe('Structure du capital');
+    expect(v?.model.yLabel).toBe('Volume du capital');
+    expect(v?.model.axes).toEqual({
+      plain: true,
+      ends: {
+        xLow: 'capital culturel',
+        xHigh: 'capital économique',
+        yLow: 'moins de capital',
+        yHigh: 'plus de capital',
+      },
+    });
+    expect(v?.model.description).toContain('Volume du capital en ordonnée');
+  });
+
+  it('laisse les autres méthodes sur les axes communs', () => {
+    const v = view('ranks');
+    expect(v?.model.xLabel).toBe('Exploitation');
+    expect(v?.model.axes).toBeUndefined();
+    expect(dsOwn.axes.xLabel).toBe('Exploitation');
+  });
+
+  it('se recalcule depuis les données brutes, avec sa propre réserve', () => {
+    const v = view('espace_social');
+    expect(v?.source).toBe('client');
+    expect(v?.canRecompute).toBe(true);
+    expect(v?.defaults.y_weights).toEqual(STUDY_YEARS);
+    expect(v?.reserveSummary).toBe(METHOD_RESERVES['espace_social']?.summary);
+    expect(v?.reserves[0]).toContain('Bourdieu');
+    expect(v?.reserves.join(' ')).not.toContain('Définition de l');
+    expect(v?.model.candidates.length).toBeGreaterThan(0);
+    expect(v?.model.pcs[0]?.status).not.toBeNull();
+  });
+
+  it('ignore un score imposé aux retraités réglé sur une autre méthode', () => {
+    const v = view('espace_social', { retired: -100 });
+    expect(v?.customized).toBe(false);
+    expect(v?.params.retired_y_override).toBeNull();
+  });
+
+  it('se recalcule avec les poids de diplômes de l’utilisateur', () => {
+    const base = view('espace_social');
+    const custom = view('espace_social', { weights: { ...STUDY_YEARS, bac5: 10 } });
+    expect(custom?.customized).toBe(true);
+    expect(custom?.notes.join(' ')).toContain('recalculées');
+    const before = base?.model.pcs.find((p) => p.code === '34');
+    const after = custom?.model.pcs.find((p) => p.code === '34');
+    expect(after?.x).not.toBe(before?.x);
+  });
+
+  it('dit qu’une méthode sans portage ne se recalcule pas, et ne montre pas de statuts', () => {
+    const v = buildView(dsOwn, state({ method: 'acm_individus', election: POPULATION_ID }));
+    expect(v?.canRecompute).toBe(false);
+    expect(v?.recomputeBlock).toMatch(/pas recalculable/);
+    expect(v?.model.pcs[0]?.status).toBeNull();
+    expect(v?.reserveSummary).toBe(METHOD_RESERVES['acm_individus']?.summary);
+    expect(v?.reserves.join(' ')).toContain('ni revenu ni patrimoine');
+    expect(v?.reserves.join(' ')).not.toContain('Réserve sur');
+    expect(v?.model.xLabel).toBe('Structure du capital');
+  });
+
+  it('marque acm_individus exploratoire, pas espace_social', () => {
+    const list = buildDataset({
+      'index.json': {
+        methods: [
+          { id: 'acm_individus', label: 'ACM individus' },
+          { id: 'espace_social', label: 'Espace social' },
+        ],
+      },
+    }).methods;
+    expect(list[0]?.label).toBe('ACM individus (exploratoire)');
+    expect(list[0]?.exploratory).toBe(true);
+    expect(list[1]?.exploratory).toBe(false);
   });
 });
 

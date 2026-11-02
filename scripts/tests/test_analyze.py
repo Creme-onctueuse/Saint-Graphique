@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
-from scripts.analyze import build_positions, overlay, threshold_report
+from scripts.analyze import build_positions, methods_report, overlay, threshold_report
 from scripts.analyze.check_barycenter import (
     collect_group_positions,
     composition_vector,
@@ -616,3 +617,27 @@ def test_overlay_radius_grows_with_the_square_root_of_the_weight() -> None:
     assert overlay.disc_radius(4.0, area_factor=1.0) == 2 * overlay.disc_radius(
         1.0, area_factor=1.0
     )
+
+
+# --- Mesures des méthodes espace_social et acm_individus ---------------------------------------
+
+
+def test_weighted_skewness_by_hand() -> None:
+    # Valeurs symétriques : 0. Puis 0 et 3 de poids 2 et 1 : moyenne 1, variance 2, moment 2.
+    assert methods_report.weighted_skewness(np.array([1.0, 2.0, 3.0]), np.ones(3)) == 0
+    skew = methods_report.weighted_skewness(np.array([0.0, 3.0]), np.array([2.0, 1.0]))
+    assert skew == pytest.approx(2 / 2**1.5)
+
+
+def test_weighted_correlation_by_hand() -> None:
+    a = np.array([1.0, 2.0, 3.0])
+    assert methods_report.weighted_correlation(a, 2 * a + 1, np.ones(3)) == pytest.approx(1)
+    weights = np.array([1.0, 5.0, 1.0])
+    assert methods_report.weighted_correlation(a, -a, weights) == pytest.approx(-1)
+
+
+def test_methods_report_runs_on_the_committed_data(capsys: pytest.CaptureFixture[str]) -> None:
+    assert methods_report.main() == 0
+    out = capsys.readouterr().out
+    assert "espace_social" in out and "acm_individus" in out
+    assert "taux modifiés" in out and "variante écartée" in out

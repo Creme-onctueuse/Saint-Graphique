@@ -27,7 +27,7 @@ DIGITIZED = ROOT / "research" / "digitized"
 COMPUTED = ROOT / "data" / "computed"
 
 THRESHOLD = 0.25
-METHODS = ("read_positions", "ranks", "continuous", "mca")
+METHODS = ("read_positions", "ranks", "continuous", "mca", "espace_social", "acm_individus")
 #: Relevés du tableau, candidats que le contrôle doit retrouver.
 CONTROL = (
     ("powerbi_2025_03_27__2022_presidentielle_t1", "2022_presidentielle_t1"),

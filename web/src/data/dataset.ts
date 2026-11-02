@@ -139,8 +139,8 @@ const METHOD_LABELS: Record<string, string> = {
   ranks: 'Rangs reconstruits',
   continuous: 'Valeurs continues',
   mca: 'ACM (terciles)',
-  espace_social: 'Espace social (Bourdieu)',
-  acm_individus: 'ACM sur les individus',
+  espace_social: 'Espace social',
+  acm_individus: 'ACM individus',
 };
 
 /** Méthodes exploratoires, en plus de celles que index.json marque `exploratory: true`. */

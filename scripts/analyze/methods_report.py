@@ -25,6 +25,7 @@ from pipeline.methods.acm_individus import (  # noqa: E402
     load_aggregate,
     load_table,
     profile_coordinates,
+    run_analysis,
     variables_of,
 )
 from pipeline.methods.espace_social import (  # noqa: E402
@@ -182,6 +183,22 @@ def report_acm() -> None:
               + " ; à l'opposé : " + ", ".join(p.short for p in ordered[-4:]))
     retired = result.pcs[RETIRED_CODE]
     print(f"  retraités : x = {retired.x:+.2f}, y = {retired.y:+.2f}")
+    report_retired_as_active()
+
+
+def report_retired_as_active() -> None:
+    """Variante écartée : les retraités participent au calcul des axes, avec leur modalité."""
+    document = load_aggregate()
+    variables = variables_of(document)
+    variables["emploi"] = [*variables["emploi"], "retraite"]
+    table = load_table(document)
+    table["emploi"] = table["emploi"].fillna("retraite")
+    fit = run_analysis(table, variables)
+    top = fit.modalities["ctr1"].sort_values(ascending=False).head(3)
+    print("  variante écartée, retraités actifs : taux "
+          + ", ".join(f"{v:.1f} %" for v in fit.raw_rates[:2]) + " ; modifiés "
+          + ", ".join(f"{v:.1f} %" for v in fit.modified_rates[:2]) + " ; axe 1 : "
+          + ", ".join(f"{name} {value:.1f} %" for name, value in top.items()))
 
 
 def main() -> int:

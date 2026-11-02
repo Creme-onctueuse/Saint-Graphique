@@ -98,7 +98,7 @@ class EspaceSocial:
     """Volume et structure du capital, sur [-10, 10]."""
 
     name = "espace_social"
-    label = "Espace social (Bourdieu)"
+    label = "Espace social"
     bootstrap = True
     default_params: Mapping[str, Any] = {
         "y_weights": STUDY_YEARS,

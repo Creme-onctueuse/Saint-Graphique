@@ -223,7 +223,7 @@ registerClientMethod({
 
 registerClientMethod({
   id: 'espace_social',
-  label: 'Espace social (Bourdieu)',
+  label: 'Espace social',
   ranked: false,
   placeAxis: (items, range) => continuousCoords(items, range),
   scores: (items, params) => espaceSocialScores(items, params.y_weights),
