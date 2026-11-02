@@ -597,6 +597,7 @@ def analyse_video(
     threshold: float,
     max_dist: int,
     near_miss: list[np.ndarray] | None = None,
+    min_panel: float = 0.0,
 ) -> tuple[list[Kept], list[list[float]]]:
     """Échantillonne, note et dédoublonne les frames d'un fichier vidéo.
 
@@ -611,7 +612,7 @@ def analyse_video(
         for t, frame in iter_frames(path, start, end, step, width, height):
             feats = chart_features(frame)
             scores.append([round(t, 1), feats.score])
-            if feats.score < threshold:
+            if feats.score < threshold or feats.panel_frac < min_panel:
                 if near_miss is not None and feats.score >= threshold - 0.3:
                     near = region_phash(frame, (0, 0, width, height))
                     if nearest_duplicate(near, near_hashes, 10) is None:
@@ -644,6 +645,7 @@ def process_video(
     full_scan: bool = False,
     force: bool = False,
     review_dir: str | None = None,
+    min_panel: float = 0.0,
 ) -> dict[str, Any] | None:
     """Traite une vidéo core : téléchargement, échantillonnage, captures, manifeste.
 
@@ -669,7 +671,9 @@ def process_video(
             len(plan),
         )
         near_miss: list[np.ndarray] | None = [] if review_dir else None
-        kept, scores = analyse_video(path, plan, width, height, threshold, max_dist, near_miss)
+        kept, scores = analyse_video(
+            path, plan, width, height, threshold, max_dist, near_miss, min_panel
+        )
     # Le dossier temporaire (et la vidéo) est supprimé à la sortie du bloc.
     if review_dir:
         write_sheet(Path(review_dir) / f"{vid}_near.png", near_miss or [])
@@ -701,6 +705,7 @@ def process_video(
                 "chart_bbox": [x, y, w, h],
                 "n_circles": k.features.n_circles,
                 "n_discs": k.features.n_discs,
+                "panel_frac": k.features.panel_frac,
                 "theme": "dark" if k.features.dark else "light",
                 "axes": k.features.axes,
             }
@@ -714,6 +719,7 @@ def process_video(
         "processed_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "params": {
             "threshold": threshold,
+            "min_panel": min_panel,
             "phash_max_dist": max_dist,
             "segment_step": segment_step,
             "full_step": full_step,
@@ -794,6 +800,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=f"chart_score minimal ({DEFAULT_THRESHOLD})",
     )
     ap.add_argument(
+        "--min-panel",
+        type=float,
+        default=0.0,
+        help="part minimale de l'image occupée par le panneau du graphique (0 : pas de filtre ; "
+        "0,2 écarte l'essentiel des webcams et des tweets)",
+    )
+    ap.add_argument(
         "--phash-dist",
         type=int,
         default=PHASH_MAX_DIST,
@@ -829,7 +842,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     setup_logging(args.verbose)
     videos = select_videos(load_index(), args.relevance, args.ids, args.limit)
-    if "mention" in args.relevance:  # une vidéo « mention » sans segment n'est pas balayée
+    # Sans --full-scan, une vidéo « mention » sans segment n'est pas balayée.
+    if "mention" in args.relevance and not args.full_scan:
         videos = [v for v in videos if v["relevance"] == "core" or v.get("chart_segments")]
     todo = [v for v in videos if args.force or not (CAPTURE_STATE_DIR / f"{v['id']}.json").exists()]
     log.info("captures : %d vidéos retenues, %d à traiter", len(videos), len(todo))
@@ -844,6 +858,7 @@ def main(argv: list[str] | None = None) -> int:
         full_scan=args.full_scan,
         force=args.force,
         review_dir=args.review_dir,
+        min_panel=args.min_panel,
     )
     log.info("captures : %d vidéo(s) traitée(s)", n_ok)
     return 0
