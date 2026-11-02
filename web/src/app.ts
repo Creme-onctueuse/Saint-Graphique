@@ -19,6 +19,8 @@ import { Filters } from './ui/filters.ts';
 import { mountIcons } from './ui/icons.ts';
 import { Legend } from './ui/legend.ts';
 import { MethodPanel } from './ui/methodPanel.ts';
+import { FactCard } from './ui/shell/factCard.ts';
+import { Game } from './ui/shell/game.ts';
 import { Keybar } from './ui/shell/keybar.ts';
 import { Shell } from './ui/shell/shell.ts';
 import { Timeline } from './ui/shell/timeline.ts';
@@ -179,7 +181,9 @@ export function startApp(): void {
       },
       actions,
     ),
+    new Game(byId('sg-game-panel'), ds, actions, chart),
     new Shell(actions, (insets) => chart.setInsets(insets)),
+    new FactCard(byId('sg-fact'), ds, actions, chart),
   ];
 
   function render(animation: Animation): void {

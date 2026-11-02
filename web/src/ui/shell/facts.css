@@ -1,0 +1,337 @@
+/* Carte « Le saviez-vous ? » et mini-jeu. Aucune couleur en dur : tout passe par les tokens. */
+
+.sg-fact {
+  position: fixed;
+  top: calc(var(--sg-inset-top, 70px) + 38px);
+  z-index: 8;
+  width: 300px;
+  max-height: calc(100vh - var(--sg-inset-top, 70px) - var(--sg-inset-bottom, 80px) - 60px);
+  overflow-y: auto;
+  transition:
+    left 170ms ease,
+    right 170ms ease;
+}
+
+.sg-fact--tl {
+  left: calc(var(--sg-inset-left, 84px) + 46px);
+}
+
+.sg-fact--tr {
+  right: calc(var(--sg-inset-right, 8px) + 12px);
+}
+
+.sg-fact--compact {
+  width: auto;
+  overflow: visible;
+  border-radius: 999px;
+}
+
+.sg-fact__card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px 10px;
+}
+
+.sg-fact__head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sg-fact__icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  color: var(--sg-logo-halo);
+}
+
+.sg-fact__title {
+  flex: 1;
+  font-size: 0.86rem;
+  font-weight: 650;
+}
+
+.sg-fact__close {
+  width: 26px;
+  height: 26px;
+  padding: 4px;
+}
+
+.sg-fact__text {
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+
+.sg-fact__caveat {
+  color: var(--sg-text-muted);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+.sg-fact__scope {
+  color: var(--sg-text-muted);
+  font-size: 0.72rem;
+}
+
+.sg-fact__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.sg-fact__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+}
+
+.sg-fact__btn .sg-icon__svg {
+  width: 14px;
+  height: 14px;
+}
+
+.sg-fact__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 3px 12px 3px 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--sg-text);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.sg-fact__pill:hover {
+  background: var(--sg-hover);
+}
+
+.sg-fact__pill .sg-icon__svg {
+  width: 18px;
+  height: 18px;
+  color: var(--sg-logo-halo);
+}
+
+/* Téléphone : un bouton sous la barre du haut, puis une carte sur toute la largeur */
+.sg-fact--phone {
+  left: 30px;
+  top: calc(var(--sg-inset-top, 96px) + 40px);
+  right: auto;
+  width: auto;
+  max-width: calc(100vw - 12px);
+  max-height: 46vh;
+}
+
+.sg-fact--phone:not(.sg-fact--compact) {
+  left: 6px;
+  right: 6px;
+  z-index: 9;
+}
+
+/* Jeu : tout ce qui donnerait la réponse est coupé pendant une manche */
+.sg-game-round .sg-tooltip {
+  display: none !important;
+}
+
+.sg-game-round .sg-pcs {
+  opacity: 0.35;
+}
+
+/* Le cercle de la population ne doit pas se confondre avec celui qui désigne l'électorat. */
+.sg-game-round .sg-bary {
+  opacity: 0.2;
+}
+
+.sg-game-marker {
+  fill: none;
+  stroke: var(--sg-accent);
+  stroke-width: 3;
+  pointer-events: none;
+  animation: sg-game-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes sg-game-pulse {
+  50% {
+    stroke-opacity: 0.35;
+  }
+}
+
+.sg-game__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sg-game__bar {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr) 36px;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.sg-game__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sg-game__track {
+  position: relative;
+  display: block;
+  height: 10px;
+  border-radius: 3px;
+  background: var(--sg-hover);
+}
+
+.sg-game__fill {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--sg-bar);
+}
+
+.sg-game__tick {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--sg-text);
+}
+
+.sg-game__value {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.sg-game__legend {
+  color: var(--sg-text-muted);
+  font-size: 0.74rem;
+}
+
+.sg-game__options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sg-game__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 38px;
+  padding: 6px 10px;
+  border: 1px solid var(--sg-border);
+  border-radius: var(--sg-radius);
+  background: var(--sg-surface);
+  color: var(--sg-text);
+  font: inherit;
+  font-size: 0.86rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sg-game__option:hover:not(:disabled) {
+  background: var(--sg-surface-2);
+}
+
+.sg-game__option:disabled {
+  cursor: default;
+}
+
+.sg-game__option--right {
+  border-color: var(--sg-accent);
+  border-width: 2px;
+  font-weight: 650;
+}
+
+.sg-game__option--wrong {
+  border-color: var(--sg-warning-border);
+  border-style: dashed;
+}
+
+.sg-game__mark {
+  flex: none;
+  color: var(--sg-text-muted);
+  font-size: 0.74rem;
+  font-weight: 400;
+}
+
+.sg-game__feedback {
+  min-height: 1.4em;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.sg-game__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sg-game__score {
+  color: var(--sg-text-muted);
+  font-size: 0.82rem;
+}
+
+.sg-game__next {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sg-game__next .sg-icon__svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Téléphone : deux colonnes de barres, pour garder les trois noms en vue */
+@media (max-width: 719px) {
+  .sg-game__bars {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+  }
+
+  .sg-game__bar {
+    grid-template-columns: 62px minmax(0, 1fr) 28px;
+    gap: 4px;
+    font-size: 0.7rem;
+  }
+
+  .sg-game__legend {
+    font-size: 0.68rem;
+  }
+
+  .sg-game__options {
+    gap: 4px;
+  }
+
+  .sg-game__option {
+    min-height: 32px;
+    padding: 3px 10px;
+    font-size: 0.82rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sg-game-marker {
+    animation: none;
+  }
+}
