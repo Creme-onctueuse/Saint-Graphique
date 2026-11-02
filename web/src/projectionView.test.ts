@@ -70,6 +70,15 @@ describe('jeu de données', () => {
   });
 });
 
+describe('données fictives', () => {
+  it('n’ont pas de familles, même si la configuration en donne', () => {
+    const families = { families: {}, blocs: {} };
+    const sample = buildDataset({ ...files, '_config.json': { families } });
+    expect(sample.isSample).toBe(true);
+    expect(sample.families).toBeNull();
+  });
+});
+
 describe('étape de la projection', () => {
   it('n’existe que s’il y a une projection', () => {
     expect(resolveElection(ds, state({ election: PROJECTION_ID }))).toBe(PROJECTION_ID);
@@ -106,7 +115,10 @@ describe('étape de la projection', () => {
     const reference = buildView(ds, state({ method: 'ranks' }));
     expect(view?.model.pcs).toHaveLength(reference?.model.pcs.length ?? -1);
     expect(view?.reserves[0]).toMatch(/^Projection 2027/);
-    expect(view?.reserves.length).toBe((reference?.reserves.length ?? 0) + 1);
+    expect(view?.reserves.length).toBe((reference?.reserves.length ?? 0) + 3);
+    expect(view?.reserves[1]).toContain('0,81 contre 0,62');
+    expect(view?.reserves[2]).toContain('« Rien ne bouge »');
+    expect(view?.reserves[2]).toContain('Cercle en pointillés');
     expect(view?.reserveSummary).toContain('ne prévoit pas le résultat');
   });
 

@@ -34,7 +34,14 @@ import {
   type Tie,
 } from './core/reserves.ts';
 import { formatNumber } from './core/format.ts';
-import { scenarioError, scenarioPoint, type ProjectionFile } from './core/projection.ts';
+import {
+  PROJECTION_MARKS,
+  SCENARIO_LABELS,
+  scenarioError,
+  scenarioPoint,
+  verdictSentence,
+  type ProjectionFile,
+} from './core/projection.ts';
 import { computeScores, sameWeights } from './core/scores.ts';
 import type { AppState, Scenario } from './core/state.ts';
 import {
@@ -451,7 +458,15 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
     hasEllipses: candidates.some((c) => c.ellipse !== null),
     rawElection,
     notes,
-    reserves: projection ? [PROJECTION_RESERVE, ...reserves] : reserves,
+    // Une image circule sans la page : elle doit dire son scénario et le résultat du test.
+    reserves: projection
+      ? [
+          PROJECTION_RESERVE,
+          verdictSentence(projection),
+          `Scénario affiché : « ${SCENARIO_LABELS[state.scenario]} ». ${PROJECTION_MARKS}`,
+          ...reserves,
+        ]
+      : reserves,
     reserveSummary: projection
       ? PROJECTION_RESERVE_SUMMARY
       : isRead

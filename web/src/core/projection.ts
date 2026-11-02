@@ -155,6 +155,17 @@ export function formatDataEnd(value: string): string {
   return name && year ? `${name} ${year}` : value;
 }
 
+/** Noms des deux scénarios, partout où ils sont affichés. */
+export const SCENARIO_LABELS: Readonly<Record<Scenario, string>> = {
+  still: 'Rien ne bouge',
+  trend: 'La tendance continue',
+};
+
+/** Ce que disent la flèche et le cercle sur la carte. */
+export const PROJECTION_MARKS =
+  'Flèche : de « rien ne bouge » à « la tendance continue ». Cercle en pointillés : erreur moyenne ' +
+  'de ce parti sur le passé, sur 1 à 4 prédictions.';
+
 export interface VerdictText {
   headline: string;
   /** Ce que comparent les deux lignes suivantes. */
@@ -204,4 +215,10 @@ export function verdictText(file: ProjectionFile): VerdictText {
     score: compared(file, 'score_mean', 1),
     dataEnd: `Données arrêtées en ${formatDataEnd(file.data_end)}.`,
   };
+}
+
+/** Le résultat du test en une ligne, pour le détail des réserves et les exports. */
+export function verdictSentence(file: ProjectionFile): string {
+  const t = verdictText(file);
+  return `${t.headline}. ${t.comparison} position ${t.position} ; score ${t.score}. ${t.dataEnd}`;
 }

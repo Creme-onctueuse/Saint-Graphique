@@ -3,7 +3,12 @@
  * visible à cette étape, et les fourchettes de score des blocs. Tous les chiffres viennent du fichier.
  */
 import { formatNumber } from '../../core/format.ts';
-import { verdictText, type ProjectedBloc } from '../../core/projection.ts';
+import {
+  PROJECTION_MARKS,
+  SCENARIO_LABELS,
+  verdictText,
+  type ProjectedBloc,
+} from '../../core/projection.ts';
 import type { AppState, Scenario } from '../../core/state.ts';
 import type { ResolvedView } from '../../view.ts';
 import type { AppActions, Feature } from '../actions.ts';
@@ -12,10 +17,7 @@ import { el } from '../dom.ts';
 /** Largeur où le détail s'ouvre de lui-même. */
 const DETAIL_OPEN_WIDTH = 720;
 
-const SCENARIOS: { id: Scenario; label: string }[] = [
-  { id: 'still', label: 'Rien ne bouge' },
-  { id: 'trend', label: 'La tendance continue' },
-];
+const SCENARIOS: readonly Scenario[] = ['still', 'trend'];
 
 function blocToken(id: string): string {
   return `var(--sg-bloc-${id.replace('_', '-')})`;
@@ -55,16 +57,21 @@ export class ProjectionCard implements Feature {
       'fieldset',
       { class: 'sg-scenario', attrs: { id: 'sg-scenario' } },
       el('legend', { class: 'sg-sr-only', text: 'Scénario de la projection' }),
-      ...SCENARIOS.map((s) => {
+      ...SCENARIOS.map((id) => {
         const input = el('input', {
           class: 'sg-sr-only',
-          attrs: { type: 'radio', name: 'sg-scenario', value: s.id },
+          attrs: { type: 'radio', name: 'sg-scenario', value: id },
         });
         input.addEventListener('change', () => {
-          if (input.checked) actions.patch({ scenario: s.id }, 'normal');
+          if (input.checked) actions.patch({ scenario: id }, 'normal');
         });
         this.inputs.push(input);
-        return el('label', { class: 'sg-scenario__choice' }, input, el('span', { text: s.label }));
+        return el(
+          'label',
+          { class: 'sg-scenario__choice' },
+          input,
+          el('span', { text: SCENARIO_LABELS[id] }),
+        );
       }),
     );
     const details = el(
@@ -109,6 +116,7 @@ export class ProjectionCard implements Feature {
         ),
         this.dataEnd,
       ),
+      el('p', { class: 'sg-note sg-projection-card__marks', text: PROJECTION_MARKS }),
       details,
     );
     this.root.hidden = true;

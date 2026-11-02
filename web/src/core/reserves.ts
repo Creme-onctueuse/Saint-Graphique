@@ -100,8 +100,7 @@ export const READ_POSITIONS_RESERVE_SUMMARY =
 export const PROJECTION_RESERVE =
   'Projection 2027 : cette carte prolonge les électorats de 2017 à 2024 selon deux scénarios. Elle ne ' +
   'prévoit pas le résultat. Les données s’arrêtent en juillet 2024. Les familles suivent un ' +
-  'classement propre à ce projet, et les candidats de 2027 n’y figurent pas. Testée sur le passé, ' +
-  'la tendance prédit moins bien que « rien ne bouge » : voir la carte de la projection.';
+  'classement propre à ce projet, et les candidats de 2027 n’y figurent pas.';
 export const PROJECTION_RESERVE_SUMMARY =
   'Projection 2027 : prolonge 2017-2024, ne prévoit pas le résultat, données arrêtées en juillet 2024';
 

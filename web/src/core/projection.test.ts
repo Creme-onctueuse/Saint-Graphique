@@ -5,6 +5,7 @@ import {
   formatDataEnd,
   scenarioError,
   scenarioPoint,
+  verdictSentence,
   verdictText,
   type ProjectionFile,
 } from './projection.ts';
@@ -125,6 +126,16 @@ describe('verdictText', () => {
       },
     });
     expect(mixed.headline).toContain('place moins bien');
+  });
+});
+
+describe('verdictSentence', () => {
+  it('tient le résultat du test en une ligne, chiffres compris', () => {
+    const sentence = verdictSentence(file);
+    expect(sentence).toContain('prédit moins bien');
+    expect(sentence).toContain('position 0,81 contre 0,62 (partis)');
+    expect(sentence).toContain('score 8,4 contre 6,2 (partis)');
+    expect(sentence).toContain('juillet 2024');
   });
 });
 

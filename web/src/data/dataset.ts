@@ -729,7 +729,11 @@ export function buildDataset(files: Readonly<Record<string, unknown>>): Dataset 
     computed,
     rawPcs,
     rawElections,
-    families: asFamilyConfig(config['families']),
+    // Les familles nomment de vrais candidats : elles ne s'appliquent pas aux données fictives.
+    families:
+      index['sample'] === true || index['is_sample'] === true
+        ? null
+        : asFamilyConfig(config['families']),
     projections,
     sources,
     warnings,
