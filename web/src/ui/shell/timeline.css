@@ -1,7 +1,7 @@
 /* Frise, trajectoires, anneaux et projection 2027. Aucune couleur en dur : voir tokens.css. */
 
 /* La frise ne doit pas bouger quand le nom de l'élection change de longueur. */
-@media (min-width: 1041px) {
+@media (min-width: 1241px) {
   .sg-brand {
     width: 356px;
   }
@@ -151,7 +151,6 @@
 .sg-projection-card {
   position: fixed;
   top: calc(var(--sg-inset-top, 70px) + 6px);
-  left: calc(var(--sg-inset-left, 84px) + 46px);
   z-index: 8;
   display: flex;
   flex-direction: column;
@@ -162,7 +161,9 @@
   transition: left 170ms ease;
 }
 
+/* La légende flotte sur le coin vide de la carte, à droite de l'axe. */
 .sg-rings-key {
+  left: calc(var(--sg-inset-left, 84px) + 46px);
   width: 240px;
   font-size: 0.78rem;
 }
@@ -229,8 +230,9 @@
   pointer-events: none;
 }
 
-/* Carte de la projection */
+/* Carte de la projection : la carte du Saint-Graphique glisse à côté d'elle. */
 .sg-projection-card {
+  left: calc(var(--sg-chrome-left, 76px) + 6px);
   width: 340px;
 }
 
@@ -359,17 +361,49 @@
   text-align: right;
 }
 
-/* Fenêtres moyennes */
-@media (max-width: 1040px) {
-  .sg-tl-controls {
-    margin-right: -30px;
+/* Sur une fenêtre de portable, le filtre reste dans le panneau Électorats : la frise garde la place. */
+@media (max-width: 1500px) {
+  .sg-tl-controls .sg-tl-select {
+    display: none;
+  }
+}
+
+/* Fenêtres moyennes : la frise passe sur sa propre ligne, plus tôt que le reste de l'en-tête. */
+@media (max-width: 1240px) {
+  .sg-top {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .sg-timeline {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding: 0 22px;
+  }
+
+  .sg-rail,
+  .sg-panel,
+  .sg-inspector {
+    top: 126px;
   }
 }
 
 /* Téléphone : la lecture seule reste dans la barre, le reste est dans le panneau Électorats. */
 @media (max-width: 719px) {
   .sg-tl-controls {
-    margin-right: -26px;
+    margin-right: 0;
+  }
+
+  .sg-rail {
+    top: auto;
+  }
+
+  .sg-panel,
+  .sg-inspector {
+    top: auto;
+  }
+
+  .sg-timeline {
+    padding: 0 28px 0 2px;
   }
 
   .sg-tl-controls .sg-tl-select,
@@ -387,7 +421,7 @@
     top: auto;
     left: 4px;
     right: 4px;
-    bottom: calc(var(--sg-inset-bottom, 96px) + 2px);
+    bottom: 94px;
     width: auto;
     max-height: 42vh;
     gap: 6px;

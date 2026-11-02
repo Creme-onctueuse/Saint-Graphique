@@ -82,7 +82,8 @@ export class ProjectionCard implements Feature {
       'aside',
       {
         class: 'sg-projection-card sg-float',
-        attrs: { id: 'sg-projection', 'aria-label': 'Projection 2027' },
+        // La carte réserve sa place : elle ne doit cacher aucun électorat.
+        attrs: { id: 'sg-projection', 'aria-label': 'Projection 2027', 'data-sg-reserve': '' },
       },
       el('h2', { class: 'sg-projection-card__title', text: 'Projection 2027' }),
       el('p', {
