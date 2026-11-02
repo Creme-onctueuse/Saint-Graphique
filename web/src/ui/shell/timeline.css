@@ -3,7 +3,7 @@
 /* La frise ne doit pas bouger quand le nom de l'élection change de longueur. */
 @media (min-width: 1041px) {
   .sg-brand {
-    width: 322px;
+    width: 356px;
   }
 
   .sg-subtitle {
@@ -82,11 +82,25 @@
 
 .sg-trail--strong {
   stroke-width: 2.5;
-  stroke-opacity: 0.95;
+  stroke-opacity: 1;
+}
+
+.sg-trails--focused .sg-trail:not(.sg-trail--strong) {
+  stroke-opacity: 0.12;
+}
+
+.sg-trail-casing {
+  fill: none;
+  stroke: var(--sg-cand-ring);
+  stroke-width: 4.5;
+  stroke-opacity: 0.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
 }
 
 .sg-trail-dot {
-  stroke: var(--sg-ring);
+  stroke: var(--sg-cand-ring);
   stroke-width: 2;
   pointer-events: none;
 }

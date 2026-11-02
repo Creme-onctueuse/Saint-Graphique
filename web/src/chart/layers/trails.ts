@@ -44,6 +44,10 @@ export class TrailsLayer implements Feature {
   private readonly chart: SaintChart;
   private readonly ds: Dataset;
   private readonly layer: Selection<SVGGElement, unknown, null, undefined>;
+  // Trois niveaux, pour que le tracé d'une trajectoire ne passe jamais sur le nom d'une étape.
+  private readonly lines: Selection<SVGGElement, unknown, null, undefined>;
+  private readonly dots: Selection<SVGGElement, unknown, null, undefined>;
+  private readonly tags: Selection<SVGGElement, unknown, null, undefined>;
   private trails: Trail[] = [];
   private strong = new Set<string>();
 
@@ -51,6 +55,9 @@ export class TrailsLayer implements Feature {
     this.chart = chart;
     this.ds = ds;
     this.layer = select(chart.layerUnder).append('g').attr('class', 'sg-trails');
+    this.lines = this.layer.append('g');
+    this.dots = this.layer.append('g');
+    this.tags = this.layer.append('g');
     chart.onRender(() => this.render());
   }
 
@@ -120,7 +127,20 @@ export class TrailsLayer implements Feature {
           points,
         })),
     );
-    this.layer
+    const line = (d: SegmentDatum): string =>
+      `M${d.points.map((p) => `${x(p.x)},${y(p.y)}`).join('L')}`;
+    this.layer.classed('sg-trails--focused', this.strong.size > 0);
+    // Un liseré clair sous la trajectoire choisie : certaines couleurs de partis sont très sombres.
+    this.lines
+      .selectAll<SVGPathElement, SegmentDatum>('path.sg-trail-casing')
+      .data(
+        segments.filter((d) => d.strong),
+        (d) => d.key,
+      )
+      .join('path')
+      .attr('class', 'sg-trail-casing')
+      .attr('d', line);
+    this.lines
       .selectAll<SVGPathElement, SegmentDatum>('path.sg-trail')
       .data(segments, (d) => d.key)
       .join('path')
@@ -128,8 +148,8 @@ export class TrailsLayer implements Feature {
       .attr('data-family', (d) => d.family)
       .classed('sg-trail--strong', (d) => d.strong)
       .style('stroke', (d) => d.color)
-      .attr('d', (d) => `M${d.points.map((p) => `${x(p.x)},${y(p.y)}`).join('L')}`);
-    this.layer.selectAll<SVGPathElement, SegmentDatum>('path.sg-trail--strong').raise();
+      .attr('d', line);
+    this.lines.selectAll<SVGPathElement, SegmentDatum>('path.sg-trail--strong').raise();
 
     const dots: DotDatum[] = this.trails
       .filter((t) => this.strong.has(t.family))
@@ -141,7 +161,7 @@ export class TrailsLayer implements Feature {
           tag: this.tagOf(p.election),
         })),
       );
-    this.layer
+    this.dots
       .selectAll<SVGCircleElement, DotDatum>('circle.sg-trail-dot')
       .data(dots, (d) => d.key)
       .join('circle')
@@ -150,7 +170,7 @@ export class TrailsLayer implements Feature {
       .attr('cx', (d) => x(d.x))
       .attr('cy', (d) => y(d.y))
       .style('fill', (d) => d.color);
-    this.layer
+    this.tags
       .selectAll<SVGTextElement, DotDatum>('text.sg-trail-tag')
       .data(dots, (d) => d.key)
       .join('text')
