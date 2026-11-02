@@ -151,6 +151,14 @@ export class Shell implements Feature {
       if (panelRect) left = panelRect.right;
       if (inspectorRect) right = width - inspectorRect.left;
     }
+    // Bord du cadre fixe, pour une carte placée à côté de lui ; elle peut ensuite réserver sa place.
+    document.documentElement.style.setProperty('--sg-chrome-left', `${Math.round(left)}px`);
+    const reserved = document.querySelector<HTMLElement>('[data-sg-reserve]:not([hidden])');
+    if (reserved) {
+      const rect = reserved.getBoundingClientRect();
+      if (phone) bottom = Math.max(bottom, height - rect.top);
+      else left = Math.max(left, rect.right);
+    }
     const insets: Insets = {
       top: Math.round(topRect.bottom + INSET_GAP),
       right: Math.round(right + INSET_GAP),

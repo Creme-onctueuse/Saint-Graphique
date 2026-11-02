@@ -24,6 +24,7 @@ import {
   type RawPcsItem,
   type SourceRef,
 } from '../core/types.ts';
+import { asProjectionFile, type ProjectionFile } from '../core/projection.ts';
 
 export interface MethodInfo {
   id: string;
@@ -109,6 +110,8 @@ export interface Dataset {
   rawElections: Map<string, RawElection>;
   /** Null si config/families.yaml manque (données d'exemple). */
   families: FamilyConfig | null;
+  /** Projection 2027, par méthode (_projection/<méthode>.json). Vide si absente. */
+  projections: Map<string, ProjectionFile>;
   sources: SourceRef[];
   warnings: string[];
 }
@@ -502,6 +505,15 @@ export function buildDataset(files: Readonly<Record<string, unknown>>): Dataset 
   }
   const firstFile = computed.values().next().value;
 
+  // Projection 2027 : hors du motif ci-dessus, car un dossier « _ » n'est pas une méthode.
+  const projections = new Map<string, ProjectionFile>();
+  for (const [path, value] of Object.entries(files)) {
+    if (!/^_projection\/[^/]+\.json$/.test(path)) continue;
+    const file = asProjectionFile(value);
+    if (file) projections.set(file.method, file);
+    else warnings.push(`Fichier ignoré (non conforme à projection.schema.json) : ${path}`);
+  }
+
   // Données brutes
   const rawBlock = rec(index['raw'] ?? index['inputs']);
   let rawPcs = asRawPcs(resolveRef(rawBlock['pcs'] ?? index['pcs_data'], files));
@@ -717,7 +729,12 @@ export function buildDataset(files: Readonly<Record<string, unknown>>): Dataset 
     computed,
     rawPcs,
     rawElections,
-    families: asFamilyConfig(config['families']),
+    // Les familles nomment de vrais candidats : elles ne s'appliquent pas aux données fictives.
+    families:
+      index['sample'] === true || index['is_sample'] === true
+        ? null
+        : asFamilyConfig(config['families']),
+    projections,
     sources,
     warnings,
   };

@@ -23,6 +23,8 @@ import {
   countStatuses,
   findTies,
   parseStatus,
+  PROJECTION_RESERVE,
+  PROJECTION_RESERVE_SUMMARY,
   READ_POSITIONS_METHOD,
   COMPUTED_RESERVE_SUMMARY,
   READ_POSITIONS_RESERVE,
@@ -31,10 +33,20 @@ import {
   xAxisReserve,
   type Tie,
 } from './core/reserves.ts';
+import { formatNumber } from './core/format.ts';
+import {
+  PROJECTION_MARKS,
+  SCENARIO_LABELS,
+  scenarioError,
+  scenarioPoint,
+  verdictSentence,
+  type ProjectionFile,
+} from './core/projection.ts';
 import { computeScores, sameWeights } from './core/scores.ts';
-import type { AppState } from './core/state.ts';
+import type { AppState, Scenario } from './core/state.ts';
 import {
   POPULATION_ID,
+  PROJECTION_ID,
   type ComputedFile,
   type Point,
   type RawCandidate,
@@ -69,6 +81,8 @@ export interface ResolvedView {
   reserves: string[];
   /** Réserve résumée en une ligne, visible en permanence. */
   reserveSummary: string;
+  /** Projection 2027 de la méthode, à cette étape de la frise seulement. */
+  projection: ProjectionFile | null;
   /** Sources lues dans les données brutes : sondage de l'élection, données sur les PCS. */
   sources: { poll: SourceRef[]; pcs: SourceRef[]; positions: SourceRef[] };
 }
@@ -104,6 +118,7 @@ export function resolveMethod(ds: Dataset, state: AppState): MethodInfo | null {
 export function resolveElection(ds: Dataset, state: AppState): string {
   const id = state.election;
   if (id === POPULATION_ID) return id;
+  if (id === PROJECTION_ID && ds.projections.size > 0) return id;
   if (id && ds.elections.some((e) => e.id === id)) return id;
   return defaultElection(ds);
 }
@@ -266,12 +281,44 @@ function candidateFromRaw(
   };
 }
 
+/** Une famille sur la carte de 2027 : une position, pas de score. */
+function projectedCandidates(file: ProjectionFile, scenario: Scenario): ChartCandidate[] {
+  return file.families.map((f) => {
+    const point = scenarioPoint(f, scenario);
+    const error = scenarioError(f, scenario);
+    return {
+      id: f.id,
+      label: f.label,
+      color: f.color,
+      x: point.x,
+      y: point.y,
+      share: null,
+      isAbstention: false,
+      ellipse: null,
+      composition: null,
+      notes: [
+        'Position projetée, sans score.',
+        `Erreur moyenne de ce parti sur le passé : ${formatNumber(error.position_mean)} ` +
+          `(${error.n} prédiction${error.n > 1 ? 's' : ''}).`,
+      ],
+    };
+  });
+}
+
+/** Sources des sondages de toutes les élections, pour la projection qui les réunit. */
+function allPollSources(ds: Dataset): SourceRef[] {
+  const out = new Map<string, SourceRef>();
+  for (const e of ds.rawElections.values()) for (const s of e.sources) out.set(s.id, s);
+  return [...out.values()];
+}
+
 /** Construit la vue affichée ; null si aucune donnée n'est utilisable. */
 export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
   const method = resolveMethod(ds, state);
   if (!method) return null;
   const electionId = resolveElection(ds, state);
   const isPopulation = electionId === POPULATION_ID;
+  const projection = electionId === PROJECTION_ID ? (ds.projections.get(method.id) ?? null) : null;
   const notes: string[] = [];
 
   const exact = ds.computed.get(computedKey(method.id, electionId)) ?? null;
@@ -281,7 +328,10 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
   const rawElection = isPopulation ? null : (ds.rawElections.get(electionId) ?? null);
 
   let recomputeBlock: string | null = null;
-  if (!isClientComputable(method.id, defaults)) {
+  if (electionId === PROJECTION_ID) {
+    recomputeBlock =
+      'La projection reprend les poids d’origine : les curseurs sont sans effet ici.';
+  } else if (!isClientComputable(method.id, defaults)) {
     recomputeBlock = 'Cette méthode n’est pas recalculable dans le navigateur.';
   } else if (!ds.rawPcs) {
     recomputeBlock =
@@ -301,9 +351,12 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
   }
   if (customized && !canRecompute && recomputeBlock) notes.push(recomputeBlock);
 
-  const electionLabel = isPopulation
-    ? ds.populationLabel
-    : (ds.elections.find((e) => e.id === electionId)?.label ?? electionId);
+  const electionLabel =
+    electionId === PROJECTION_ID
+      ? 'Projection 2027'
+      : isPopulation
+        ? ds.populationLabel
+        : (ds.elections.find((e) => e.id === electionId)?.label ?? electionId);
 
   // Réserves : statuts comptés dans les données brutes, ex æquo calculés depuis les scores.
   const rawItems = new Map((ds.rawPcs?.items ?? []).map((it) => [it.code, it]));
@@ -367,6 +420,8 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
         ellipse: c.ellipse ?? null,
         composition: compositionOf(ds, rawElection, c.id),
       }));
+    } else if (projection) {
+      candidates = projectedCandidates(projection, state.scenario);
     } else if (!isPopulation) {
       notes.push('Cette méthode ne couvre pas cette élection : seules les PCS sont affichées.');
     }
@@ -403,10 +458,23 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
     hasEllipses: candidates.some((c) => c.ellipse !== null),
     rawElection,
     notes,
-    reserves,
-    reserveSummary: isRead ? READ_POSITIONS_RESERVE_SUMMARY : COMPUTED_RESERVE_SUMMARY,
+    // Une image circule sans la page : elle doit dire son scénario et le résultat du test.
+    reserves: projection
+      ? [
+          PROJECTION_RESERVE,
+          verdictSentence(projection),
+          `Scénario affiché : « ${SCENARIO_LABELS[state.scenario]} ». ${PROJECTION_MARKS}`,
+          ...reserves,
+        ]
+      : reserves,
+    reserveSummary: projection
+      ? PROJECTION_RESERVE_SUMMARY
+      : isRead
+        ? READ_POSITIONS_RESERVE_SUMMARY
+        : COMPUTED_RESERVE_SUMMARY,
+    projection,
     sources: {
-      poll: rawElection?.sources ?? [],
+      poll: projection ? allPollSources(ds) : (rawElection?.sources ?? []),
       pcs: ds.rawPcs?.sources ?? [],
       positions: fallbackFile?.sources ?? [],
     },

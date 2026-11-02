@@ -39,6 +39,7 @@ export function candTip(
       [m?.yLabel ?? 'y', formatNumber(d.y)],
     ],
   };
+  if (d.notes) content.notes = d.notes;
   if (d.ellipse && showEllipses) content.subtitle = 'Ellipse : intervalle de confiance à 95 %';
   if (d.composition && d.composition.length > 0) {
     content.barsTitle = 'Composition de l’électorat';

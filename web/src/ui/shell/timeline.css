@@ -1,0 +1,435 @@
+/* Frise, trajectoires, anneaux et projection 2027. Aucune couleur en dur : voir tokens.css. */
+
+/* La frise ne doit pas bouger quand le nom de l'élection change de longueur. */
+@media (min-width: 1241px) {
+  .sg-brand {
+    width: 356px;
+  }
+
+  .sg-subtitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Commandes de la frise */
+.sg-tl-controls {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: -32px;
+}
+
+.sg-tl-select {
+  max-width: 112px;
+  min-height: 28px;
+  padding: 0 2px;
+  border: 1px solid var(--sg-border);
+  border-radius: var(--sg-radius);
+  background: var(--sg-surface);
+  color: var(--sg-text);
+  font: inherit;
+  font-size: 0.74rem;
+}
+
+.sg-iconbtn:disabled {
+  color: var(--sg-text-muted);
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.sg-year {
+  z-index: 1;
+}
+
+/* L'avenir de la frise : la ligne devient pointillée après le dernier scrutin. */
+.sg-timeline__track--future::before {
+  right: calc(100% - var(--sg-future-start, 100%));
+}
+
+.sg-timeline__track--future::after {
+  content: '';
+  position: absolute;
+  top: 13px;
+  left: var(--sg-future-start, 100%);
+  right: 0;
+  border-top: 2px dashed var(--sg-border-strong);
+}
+
+.sg-stop--projection .sg-stop__dot {
+  border-style: dashed;
+  font-size: 0.82rem;
+}
+
+.sg-stop--off {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.sg-stop--off:hover .sg-stop__dot {
+  transform: none;
+}
+
+/* Trajectoires */
+.sg-trail {
+  fill: none;
+  stroke-width: 1.25;
+  stroke-opacity: var(--sg-trail-opacity);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.sg-trail--strong {
+  stroke-width: 2.5;
+  stroke-opacity: 1;
+}
+
+.sg-trails--focused .sg-trail:not(.sg-trail--strong) {
+  stroke-opacity: 0.12;
+}
+
+.sg-trail-casing {
+  fill: none;
+  stroke: var(--sg-cand-ring);
+  stroke-width: 4.5;
+  stroke-opacity: 0.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.sg-trail-dot {
+  stroke: var(--sg-cand-ring);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.sg-trail-tag {
+  fill: var(--sg-label);
+  font-size: 10.5px;
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--sg-label-halo);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+/* Anneaux de vote */
+.sg-ring__part {
+  stroke: var(--sg-ring);
+  stroke-width: 1.5;
+  cursor: help;
+}
+
+.sg-ring__name {
+  fill: var(--sg-label);
+  font-size: 11px;
+  font-weight: 650;
+  paint-order: stroke;
+  stroke: var(--sg-label-halo);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.sg-rings-on .sg-pcs {
+  fill-opacity: 0.28;
+}
+
+.sg-rings-on .sg-territory {
+  opacity: 0.35;
+}
+
+.sg-rings-on .sg-label:not(.sg-label--cand),
+.sg-rings-on .sg-leader[data-key^='p:'] {
+  opacity: 0;
+}
+
+.sg-rings-key,
+.sg-projection-card {
+  position: fixed;
+  top: calc(var(--sg-inset-top, 70px) + 6px);
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: calc(100vh - var(--sg-inset-top, 70px) - var(--sg-inset-bottom, 80px) - 20px);
+  overflow-y: auto;
+  padding: 10px 12px;
+  transition: left 170ms ease;
+}
+
+/* La légende flotte sur le coin vide de la carte, à droite de l'axe. */
+.sg-rings-key {
+  left: calc(var(--sg-inset-left, 84px) + 46px);
+  width: 240px;
+  font-size: 0.78rem;
+}
+
+.sg-rings-key__title {
+  font-weight: 650;
+}
+
+.sg-rings-key__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sg-rings-key__list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sg-rings-key details[open] {
+  width: max-content;
+  max-width: 62vw;
+}
+
+.sg-rings-key summary,
+.sg-projection-card summary {
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Projection 2027 sur la carte */
+.sg-projection-error {
+  fill: currentColor;
+  fill-opacity: 0.08;
+  stroke: currentColor;
+  stroke-width: 1.25;
+  stroke-opacity: 0.8;
+  stroke-dasharray: 4 4;
+  pointer-events: none;
+}
+
+.sg-projection-arrow {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-opacity: 0.9;
+  pointer-events: none;
+}
+
+.sg-projection-head {
+  fill: currentColor;
+  stroke: none;
+  pointer-events: none;
+}
+
+.sg-projection-ghost {
+  fill: var(--sg-plot-bg);
+  stroke: currentColor;
+  stroke-width: 1.5;
+  pointer-events: none;
+}
+
+/* Carte de la projection : la carte du Saint-Graphique glisse à côté d'elle. */
+.sg-projection-card {
+  left: calc(var(--sg-chrome-left, 76px) + 6px);
+  width: 340px;
+}
+
+.sg-projection-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.sg-projection-card__verdict {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--sg-warning-border);
+  border-radius: 4px;
+  background: var(--sg-warning-bg);
+  color: var(--sg-warning-text);
+}
+
+.sg-projection-card__verdict .sg-note {
+  color: inherit;
+  font-size: 0.76rem;
+}
+
+.sg-verdict-numbers {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1px 8px;
+  margin: 0;
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.sg-verdict-numbers dt {
+  font-weight: 650;
+}
+
+.sg-verdict-numbers dd {
+  margin: 0;
+}
+
+.sg-projection-card__headline {
+  font-size: 0.84rem;
+  font-weight: 650;
+}
+
+.sg-projection-card__details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.82rem;
+}
+
+.sg-scenario {
+  display: flex;
+  margin: 0;
+  padding: 2px;
+  border: 1px solid var(--sg-border);
+  border-radius: var(--sg-radius);
+}
+
+.sg-scenario__choice {
+  position: relative;
+  flex: 1;
+  cursor: pointer;
+}
+
+.sg-scenario__choice span {
+  display: block;
+  padding: 5px 6px;
+  border-radius: 6px;
+  color: var(--sg-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.sg-scenario__choice:hover span {
+  background: var(--sg-hover);
+}
+
+.sg-scenario__choice input:checked + span {
+  background: var(--sg-accent);
+  color: var(--sg-accent-text);
+}
+
+.sg-scenario__choice input:focus-visible + span {
+  outline: 3px solid var(--sg-focus);
+  outline-offset: 1px;
+}
+
+.sg-ranges {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 6px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sg-range {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr) 64px;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.76rem;
+}
+
+.sg-range__track {
+  position: relative;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--sg-surface-2);
+}
+
+.sg-range__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 2px;
+}
+
+.sg-range__value {
+  color: var(--sg-text-muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* Sur une fenêtre de portable, le filtre reste dans le panneau Électorats : la frise garde la place. */
+@media (max-width: 1500px) {
+  .sg-tl-controls .sg-tl-select {
+    display: none;
+  }
+}
+
+/* Fenêtres moyennes : la frise passe sur sa propre ligne, plus tôt que le reste de l'en-tête. */
+@media (max-width: 1240px) {
+  .sg-top {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .sg-timeline {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    padding: 0 22px;
+  }
+
+  .sg-rail,
+  .sg-panel,
+  .sg-inspector {
+    top: 126px;
+  }
+}
+
+/* Téléphone : la lecture seule reste dans la barre, le reste est dans le panneau Électorats. */
+@media (max-width: 719px) {
+  .sg-tl-controls {
+    margin-right: 0;
+  }
+
+  .sg-rail {
+    top: auto;
+  }
+
+  .sg-panel,
+  .sg-inspector {
+    top: auto;
+  }
+
+  .sg-timeline {
+    padding: 0 28px 0 2px;
+  }
+
+  .sg-tl-controls .sg-tl-select,
+  .sg-tl-controls #sg-toggle-trails,
+  .sg-tl-controls #sg-toggle-rings {
+    display: none;
+  }
+
+  .sg-timeline__none {
+    display: none;
+  }
+
+  .sg-projection-card,
+  .sg-rings-key {
+    top: auto;
+    left: 4px;
+    right: 4px;
+    bottom: 94px;
+    width: auto;
+    max-height: 42vh;
+    gap: 6px;
+    padding: 8px 10px;
+  }
+
+  .sg-projection-card__intro,
+  .sg-rings-key > .sg-note {
+    display: none;
+  }
+}

@@ -194,8 +194,14 @@ export function buildExportSvg(source: SVGSVGElement, meta: ExportMeta): Exporte
   }
   y += 10;
 
-  // Graphique
-  const group = svgEl('g', { transform: `translate(0,${y})` });
+  // Carte : un SVG imbriqué la découpe, sinon un zoom ferait déborder ses repères sur la légende.
+  const group = svgEl('svg', {
+    x: 0,
+    y,
+    width,
+    height: chartHeight,
+    viewBox: `0 0 ${width} ${chartHeight}`,
+  });
   while (clone.firstChild) group.append(clone.firstChild);
   parts.push(group);
   y += chartHeight + 6;

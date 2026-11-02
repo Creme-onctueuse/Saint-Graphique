@@ -96,6 +96,14 @@ export const COMPUTED_RESERVE_SUMMARY =
 export const READ_POSITIONS_RESERVE_SUMMARY =
   'Positions lues sur les vidéos de Chris, formule non publiée, 2 à 3 unités de la matrice v11';
 
+/** Projection 2027 : ce que la carte montre à cette étape, et ce qu'elle ne montre pas. */
+export const PROJECTION_RESERVE =
+  'Projection 2027 : cette carte prolonge les électorats de 2017 à 2024 selon deux scénarios. Elle ne ' +
+  'prévoit pas le résultat. Les données s’arrêtent en juillet 2024. Les familles suivent un ' +
+  'classement propre à ce projet, et les candidats de 2027 n’y figurent pas.';
+export const PROJECTION_RESERVE_SUMMARY =
+  'Projection 2027 : prolonge 2017-2024, ne prévoit pas le résultat, données arrêtées en juillet 2024';
+
 /** Méthode dont les PCS sont lues sur le graphique de Chris au lieu d'être calculées. */
 export const READ_POSITIONS_METHOD = 'read_positions';
 

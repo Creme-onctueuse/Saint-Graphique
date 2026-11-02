@@ -142,3 +142,6 @@ export interface ComputedFile {
 
 /** Identifiant réservé aux fichiers sans électorat (population seule). */
 export const POPULATION_ID = 'population';
+
+/** Identifiant réservé à la projection 2027 : une étape de la frise, pas une élection. */
+export const PROJECTION_ID = 'projection_2027';
