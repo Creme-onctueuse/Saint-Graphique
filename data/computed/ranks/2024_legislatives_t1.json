@@ -1,5 +1,5 @@
 {
-  "method": "ranks_jnthnbs",
+  "method": "ranks",
   "params": {
     "x_score": "patrimoine_over_niveau_vie",
     "y_weights": {
@@ -21,8 +21,8 @@
       10
     ]
   },
-  "election_id": "2024_europeennes",
-  "election_label": "Européennes 2024",
+  "election_id": "2024_legislatives_t1",
+  "election_label": "Législatives 2024 (1er tour)",
   "axes": {
     "x_label": "Exploitation",
     "y_label": "Domination",
@@ -363,157 +363,143 @@
   ],
   "candidates": [
     {
-      "id": "lfi",
-      "label": "La France insoumise (M. Aubry)",
+      "id": "extreme-gauche",
+      "label": "Extrême gauche",
+      "color": "#7b1113",
+      "x": 0.699636,
+      "y": -1.683017,
+      "is_abstention": false,
+      "national_share_pct": 1.1,
+      "ellipse": {
+        "rx": 0.604942,
+        "ry": 0.286953,
+        "angle_deg": 67.430623
+      }
+    },
+    {
+      "id": "nfp",
+      "label": "Nouveau Front populaire et divers NFP",
       "color": "#e5383b",
-      "x": -1.108494,
-      "y": -1.835832,
+      "x": -0.315411,
+      "y": -2.119857,
       "is_abstention": false,
-      "national_share_pct": 9.9,
+      "national_share_pct": 28.1,
       "ellipse": {
-        "rx": 0.512586,
-        "ry": 0.274623,
-        "angle_deg": 64.913311
+        "rx": 0.511824,
+        "ry": 0.279271,
+        "angle_deg": 73.110435
       }
     },
     {
-      "id": "pcf",
-      "label": "Parti communiste-MRC (L. Deffontaines)",
-      "color": "#c8102e",
-      "x": 0.443842,
-      "y": -3.97023,
+      "id": "divers-gauche",
+      "label": "Divers gauche",
+      "color": "#ef9a9a",
+      "x": 1.381214,
+      "y": -5.101915,
       "is_abstention": false,
-      "national_share_pct": 2.4,
+      "national_share_pct": 1.6,
       "ellipse": {
-        "rx": 0.513871,
-        "ry": 0.233559,
-        "angle_deg": 79.106609
+        "rx": 0.510232,
+        "ry": 0.253332,
+        "angle_deg": 73.66326
       }
     },
     {
-      "id": "ps-pp",
-      "label": "Parti socialiste-Place publique (R. Glucksmann)",
-      "color": "#f06292",
-      "x": 0.357728,
-      "y": -3.229459,
-      "is_abstention": false,
-      "national_share_pct": 13.8,
-      "ellipse": {
-        "rx": 0.573823,
-        "ry": 0.229824,
-        "angle_deg": 80.755241
-      }
-    },
-    {
-      "id": "ecologistes",
-      "label": "Les Écologistes (M. Toussaint)",
-      "color": "#2e9e4f",
-      "x": 0.387616,
-      "y": -0.732312,
-      "is_abstention": false,
-      "national_share_pct": 5.5,
-      "ellipse": {
-        "rx": 0.510517,
-        "ry": 0.287614,
-        "angle_deg": 69.90488
-      }
-    },
-    {
-      "id": "renaissance",
-      "label": "Renaissance-Modem-Horizons-UDI (V. Hayer)",
+      "id": "ensemble",
+      "label": "Majorité présidentielle et divers majorité",
       "color": "#f9a825",
-      "x": 0.75974,
-      "y": -4.317499,
+      "x": 0.737084,
+      "y": -4.23268,
       "is_abstention": false,
-      "national_share_pct": 14.6,
+      "national_share_pct": 21.3,
       "ellipse": {
-        "rx": 0.514695,
-        "ry": 0.217261,
-        "angle_deg": 80.523691
+        "rx": 0.507792,
+        "ry": 0.251686,
+        "angle_deg": 79.181729
       }
     },
     {
-      "id": "lr",
-      "label": "Les Républicains (F.-X. Bellamy)",
+      "id": "divers-centre",
+      "label": "Divers centre",
+      "color": "#ffcc80",
+      "x": -0.25851,
+      "y": -3.600783,
+      "is_abstention": false,
+      "national_share_pct": 1.2,
+      "ellipse": {
+        "rx": 0.525352,
+        "ry": 0.237468,
+        "angle_deg": 79.875044
+      }
+    },
+    {
+      "id": "lr-dvd",
+      "label": "Les Républicains ou divers droite",
       "color": "#1565c0",
-      "x": 0.813042,
-      "y": -3.190926,
+      "x": 0.077918,
+      "y": -3.784914,
       "is_abstention": false,
-      "national_share_pct": 7.2,
+      "national_share_pct": 10.2,
       "ellipse": {
-        "rx": 0.542599,
-        "ry": 0.267537,
-        "angle_deg": 79.940342
-      }
-    },
-    {
-      "id": "reconquete",
-      "label": "Reconquête (M. Maréchal)",
-      "color": "#3e2723",
-      "x": 0.450715,
-      "y": -3.889911,
-      "is_abstention": false,
-      "national_share_pct": 5.5,
-      "ellipse": {
-        "rx": 0.524851,
-        "ry": 0.275267,
-        "angle_deg": 76.775816
+        "rx": 0.486607,
+        "ry": 0.2895,
+        "angle_deg": 74.58456
       }
     },
     {
       "id": "rn",
-      "label": "Rassemblement national (J. Bardella)",
+      "label": "Investi ou soutenu par le Rassemblement national",
       "color": "#0d1b4c",
-      "x": -1.203302,
-      "y": -4.143436,
+      "x": -1.052842,
+      "y": -3.777318,
       "is_abstention": false,
-      "national_share_pct": 31.4,
+      "national_share_pct": 33.2,
       "ellipse": {
-        "rx": 0.44784,
-        "ry": 0.286877,
-        "angle_deg": 72.529962
+        "rx": 0.469291,
+        "ry": 0.294462,
+        "angle_deg": 69.392078
       }
     },
     {
-      "id": "animaliste",
-      "label": "Parti animaliste (H. Thouy)",
-      "color": "#7cb342",
-      "x": -0.909684,
-      "y": -2.410455,
+      "id": "reconquete",
+      "label": "Reconquête",
+      "color": "#3e2723",
+      "x": 1.479446,
+      "y": -1.760412,
       "is_abstention": false,
-      "national_share_pct": 2.0,
+      "national_share_pct": 0.7,
       "ellipse": {
-        "rx": 0.502647,
-        "ry": 0.248724,
-        "angle_deg": 79.115954
+        "rx": 0.535303,
+        "ry": 0.237076,
+        "angle_deg": 81.172585
       }
     },
     {
-      "id": "autres-listes",
-      "label": "Autres listes",
+      "id": "divers",
+      "label": "Divers",
       "color": "#8e8e8e",
-      "x": -0.982574,
-      "y": -2.523741,
+      "x": -0.368185,
+      "y": -3.694662,
       "is_abstention": false,
-      "national_share_pct": 7.7,
+      "national_share_pct": 2.6,
       "ellipse": {
-        "rx": 0.501607,
-        "ry": 0.278276,
-        "angle_deg": 64.209276
+        "rx": 0.462292,
+        "ry": 0.293457,
+        "angle_deg": 76.158636
       }
     },
     {
       "id": "abstention",
       "label": "Abstention",
       "color": "#000000",
-      "x": -0.742144,
-      "y": -2.951652,
+      "x": -1.009757,
+      "y": -3.239969,
       "is_abstention": true,
-      "national_share_pct": 48.5,
+      "national_share_pct": 33.3,
       "ellipse": {
-        "rx": 0.492047,
-        "ry": 0.296111,
-        "angle_deg": 68.036234
+        "rx": 0.452033,
+        "ry": 0.301969,
+        "angle_deg": 70.828518
       }
     }
   ],

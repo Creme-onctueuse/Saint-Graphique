@@ -30,9 +30,9 @@
       ]
     },
     {
-      "id": "ranks_jnthnbs",
-      "label": "Rangs (reconstruction JnthnBS)",
-      "description": "Calculée sur données ouvertes : rangs 1..N normalisés sur [-10,10] (reconstruction de JnthnBS, https://github.com/JnthnBS/saint-graphique). Elle s'écarte du graphique de Chris, notamment pour les retraités.",
+      "id": "ranks",
+      "label": "Rangs reconstruits",
+      "description": "Calculée sur données ouvertes : rangs 1..N normalisés sur [-10,10]. Elle s'écarte du graphique de Chris, notamment pour les retraités.",
       "ellipses": true,
       "elections": [
         "population",
