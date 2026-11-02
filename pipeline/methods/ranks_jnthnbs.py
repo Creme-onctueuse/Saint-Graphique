@@ -1,4 +1,4 @@
-"""Méthode « ranks_chris_v1 » : rangs normalisés (méthode de Chris reconstruite par JnthnBS).
+"""Méthode « ranks_jnthnbs » : rangs normalisés (méthode de Chris reconstruite par JnthnBS).
 
 Algorithme reconstruit par JnthnBS (https://github.com/JnthnBS/saint-graphique), réimplémenté
 sans copie de code, d'après sa description et la lecture de son implémentation.
@@ -27,11 +27,11 @@ from pipeline.model import Election, Pcs, Result
 
 
 @register
-class RanksChrisV1:
+class RanksJnthnbs:
     """Rangs 1..N normalisés sur [-10, 10]."""
 
-    name = "ranks_chris_v1"
-    label = "Rangs (réplique Chris v1)"
+    name = "ranks_jnthnbs"
+    label = "Rangs (reconstruction JnthnBS)"
     bootstrap = True
     default_params: Mapping[str, Any] = {
         "x_score": "patrimoine_over_niveau_vie",

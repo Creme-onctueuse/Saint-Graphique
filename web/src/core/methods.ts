@@ -66,7 +66,7 @@ const BASE_PARAMS: MethodParams = {
 
 /** Paramètres par défaut si les données n'en fournissent pas (miroir de config/methods.yaml). */
 const DEFAULT_PARAMS: Record<string, MethodParams> = {
-  ranks_chris_v1: { ...BASE_PARAMS, retired_y_override: { code: RETIRED_CODE, score: -180 } },
+  ranks_jnthnbs: { ...BASE_PARAMS, retired_y_override: { code: RETIRED_CODE, score: -180 } },
   continuous: { ...BASE_PARAMS },
 };
 
@@ -128,8 +128,8 @@ export function getClientMethod(id: string): ClientMethod | undefined {
 }
 
 registerClientMethod({
-  id: 'ranks_chris_v1',
-  label: 'Rangs (réplique Chris v1)',
+  id: 'ranks_jnthnbs',
+  label: 'Rangs (reconstruction JnthnBS)',
   ranked: true,
   placeAxis: (items, range) => rankCoords(items, range),
 });

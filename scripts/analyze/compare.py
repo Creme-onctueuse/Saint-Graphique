@@ -6,7 +6,7 @@ et liste les plus grands écarts. Mêmes mesures pour les candidats si possible.
 (ratio patrimoine / niveau de vie, etc.), sans rien modifier aux méthodes.
 
 Usage :
-    uv run python scripts/analyze/compare.py research/digitized/v.json --method ranks_chris_v1 \
+    uv run python scripts/analyze/compare.py research/digitized/v.json --method ranks_jnthnbs \
         --election 2022_presidentielle_t1 --hypotheses
     uv run python scripts/analyze/compare.py research/digitized/v.json --computed fichier.json
 """
@@ -360,7 +360,7 @@ def print_metrics(title: str, block: Mapping[str, Any]) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("digitized", type=Path)
-    parser.add_argument("--method", default="ranks_chris_v1")
+    parser.add_argument("--method", default="ranks_jnthnbs")
     parser.add_argument("--election", default="population")
     parser.add_argument("--computed", type=Path, help="fichier calculé à la place de la méthode")
     parser.add_argument("--min-confidence", type=float, default=0.0)

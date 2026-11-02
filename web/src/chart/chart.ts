@@ -39,8 +39,8 @@ export interface ChartPcs {
   y: number;
   /** Part de la population (%). */
   weight: number;
-  /** Statut des valeurs qui fondent l'axe X. */
-  status: { patrimoine: ValueStatus; niveauVie: ValueStatus };
+  /** Statut des valeurs qui fondent l'axe X ; null si la position n'en dépend pas (position lue). */
+  status: { patrimoine: ValueStatus; niveauVie: ValueStatus } | null;
   /** Réserves propres à cette PCS (ex æquo), affichées dans l'infobulle. */
   notes: string[];
 }
@@ -702,8 +702,10 @@ export class SaintChart {
         (d) =>
           `${d.label} (${d.groupLabel}) : ${formatPct(d.weight)} de la population, ` +
           `${model?.xLabel ?? 'x'} ${formatNumber(d.x)}, ${model?.yLabel ?? 'y'} ${formatNumber(d.y)}` +
-          `, patrimoine : ${formatStatus(d.status.patrimoine)}` +
-          `, niveau de vie : ${formatStatus(d.status.niveauVie)}`,
+          (d.status
+            ? `, patrimoine : ${formatStatus(d.status.patrimoine)}` +
+              `, niveau de vie : ${formatStatus(d.status.niveauVie)}`
+            : ''),
       )
       .style('fill', (d) => `var(--sg-group-${d.group}, ${d.color})`);
     setAttrs(all, duration, {
@@ -1104,8 +1106,12 @@ export class SaintChart {
         ['Part de la population', formatPct(d.weight)],
         [m?.xLabel ?? 'x', formatNumber(d.x)],
         [m?.yLabel ?? 'y', formatNumber(d.y)],
-        ['Patrimoine', formatStatus(d.status.patrimoine)],
-        ['Niveau de vie', formatStatus(d.status.niveauVie)],
+        ...(d.status
+          ? ([
+              ['Patrimoine', formatStatus(d.status.patrimoine)],
+              ['Niveau de vie', formatStatus(d.status.niveauVie)],
+            ] as [string, string][])
+          : []),
       ],
       notes: d.notes,
     };

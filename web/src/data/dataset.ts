@@ -96,7 +96,8 @@ const rec = (v: unknown): Rec => (isRec(v) ? v : {});
 
 /** Libellés de repli des méthodes connues. */
 const METHOD_LABELS: Record<string, string> = {
-  ranks_chris_v1: 'Rangs (réplique Chris v1)',
+  read_positions: 'Positions lues (Chris)',
+  ranks_jnthnbs: 'Rangs (reconstruction JnthnBS)',
   continuous: 'Valeurs continues',
   mca: 'ACM (terciles)',
 };
@@ -171,6 +172,8 @@ function asComputedPcs(v: unknown): ComputedPcs | null {
   };
   const short = str(v['short']);
   if (short) pcs.short = short;
+  const note = str(v['note']);
+  if (note) pcs.note = note;
   return pcs;
 }
 
@@ -245,6 +248,8 @@ export function asComputedFile(v: unknown, warnings: string[] = []): ComputedFil
   };
   const generated = str(v['generated_at']);
   if (generated) file.generated_at = generated;
+  const sources = asSources(v['sources']);
+  if (sources.length > 0) file.sources = sources;
   return file;
 }
 

@@ -105,6 +105,8 @@ export interface ComputedPcs {
   y: number;
   /** Part de la population (%). */
   weight: number;
+  /** Provenance propre à ce point (positions lues). */
+  note?: string;
 }
 
 export interface ComputedCandidate {
@@ -134,6 +136,8 @@ export interface ComputedFile {
   pcs: ComputedPcs[];
   candidates: ComputedCandidate[];
   population_barycenter: Point;
+  /** Sources propres à la méthode (positions lues). */
+  sources?: SourceRef[];
 }
 
 /** Identifiant réservé aux fichiers sans électorat (population seule). */

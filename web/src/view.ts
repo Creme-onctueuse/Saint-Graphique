@@ -23,6 +23,8 @@ import {
   countStatuses,
   findTies,
   parseStatus,
+  READ_POSITIONS_METHOD,
+  READ_POSITIONS_RESERVE,
   X_DEFINITION_RESERVE,
   xAxisReserve,
   type Tie,
@@ -64,7 +66,7 @@ export interface ResolvedView {
   /** Réserves visibles en permanence à côté du graphique. */
   reserves: string[];
   /** Sources lues dans les données brutes : sondage de l'élection, données sur les PCS. */
-  sources: { poll: SourceRef[]; pcs: SourceRef[] };
+  sources: { poll: SourceRef[]; pcs: SourceRef[]; positions: SourceRef[] };
 }
 
 /** Méthodes utilisables : avec fichiers précalculés, ou recalculables depuis les données brutes. */
@@ -185,6 +187,7 @@ function tieNote(ds: Dataset, tie: Tie, code: string, ranked: boolean): string {
 function pcsFromFile(ds: Dataset, file: ComputedFile, extras: PcsExtras): ChartPcs[] {
   return file.pcs.map((p) => {
     const meta = ds.pcsMeta.get(p.code);
+    const extra = extras(p.code);
     return {
       code: p.code,
       group: p.group,
@@ -195,7 +198,8 @@ function pcsFromFile(ds: Dataset, file: ComputedFile, extras: PcsExtras): ChartP
       x: p.x,
       y: p.y,
       weight: p.weight,
-      ...extras(p.code),
+      ...extra,
+      notes: p.note ? [...extra.notes, p.note] : extra.notes,
     };
   });
 }
@@ -301,7 +305,9 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
   const rawItems = new Map((ds.rawPcs?.items ?? []).map((it) => [it.code, it]));
   const ties = tiesOf(ds, method, params);
   const ranked = getClientMethod(method.id)?.ranked ?? false;
+  const isRead = method.id === READ_POSITIONS_METHOD;
   const extras: PcsExtras = (code) => {
+    if (isRead) return { status: null, notes: [] };
     const raw = rawItems.get(code);
     return {
       status: {
@@ -315,11 +321,13 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
     ds.rawPcs ? countStatuses(ds.rawPcs.items) : null,
     ds.axes.xLabel,
   );
-  const reserves = [
-    X_DEFINITION_RESERVE,
-    ...(axisReserve ? [axisReserve] : []),
-    ...ties.map((t) => tieReserve(ds, t, ranked)),
-  ];
+  const reserves = isRead
+    ? [READ_POSITIONS_RESERVE]
+    : [
+        X_DEFINITION_RESERVE,
+        ...(axisReserve ? [axisReserve] : []),
+        ...ties.map((t) => tieReserve(ds, t, ranked)),
+      ];
 
   let pcs: ChartPcs[];
   let candidates: ChartCandidate[] = [];
@@ -392,6 +400,10 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
     rawElection,
     notes,
     reserves,
-    sources: { poll: rawElection?.sources ?? [], pcs: ds.rawPcs?.sources ?? [] },
+    sources: {
+      poll: rawElection?.sources ?? [],
+      pcs: ds.rawPcs?.sources ?? [],
+      positions: fallbackFile?.sources ?? [],
+    },
   };
 }

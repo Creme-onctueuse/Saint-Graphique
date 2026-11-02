@@ -90,6 +90,17 @@ export const X_DEFINITION_RESERVE =
   'PCS, une donnée introuvable à ce niveau dans les sources consultées : les positions peuvent ' +
   'différer de son graphique.';
 
+/** Méthode dont les PCS sont lues sur le graphique de Chris au lieu d'être calculées. */
+export const READ_POSITIONS_METHOD = 'read_positions';
+
+/** Chiffres mesurés et sources détaillées : voir docs/methodologie.md. */
+export const READ_POSITIONS_RESERVE =
+  'Positions lues : les catégories sont placées là où le tableau de Chris les affiche (février 2026), ' +
+  "sur sa grille de 0,5. La formule de ses axes n'est pas publiée : cette page ne la recalcule pas. " +
+  'Les électorats sont des barycentres calculés ici à partir de sondages : ils retrouvent les ' +
+  'candidats lus dans son tableau de 2025 à environ 0,2 unité près, hors la lecture de janvier 2025 ' +
+  "pour 2022. Ils s'écartent de 2 à 3 unités de la matrice v11, un autre modèle montré en septembre 2026.";
+
 /**
  * Réserve sur l'axe X, ou null s'il n'y a rien à signaler : toutes les valeurs publiées et tous les
  * statuts connus. Sans statuts dans les données (`counts` null ou champs absents), elle le dit sans

@@ -11,6 +11,7 @@ groups:
   "5": { label: Employés, color: "#d62728" }
   "6": { label: Ouvriers, color: "#8c2d04" }
   "7": { label: Retraités, color: "#7f7f7f" }
+  "8": { label: Autres personnes sans activité professionnelle, color: "#8e82b8" }
 items:
   - { code: "10", group: "1", label: "Exploitants de l'agriculture, sylviculture, pêche et aquaculture", short: Agriculteurs }
   - { code: "21", group: "2", label: Artisans, short: Artisans }

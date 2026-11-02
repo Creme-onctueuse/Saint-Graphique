@@ -50,6 +50,7 @@ def main(argv: list[str] | None = None) -> int:
 
     targets: list[tuple[str, str | None, list[Path]]] = [
         ("pcs.schema.json", None, [ROOT / "data" / "pcs.json"]),
+        ("positions.schema.json", None, [ROOT / "data" / "positions_chris.json"]),
         ("election.schema.json", None, sorted((ROOT / "data" / "elections").glob("*.json"))),
         ("computed.schema.json", None, sorted((ROOT / "data" / "computed").glob("*/*.json"))),
     ]

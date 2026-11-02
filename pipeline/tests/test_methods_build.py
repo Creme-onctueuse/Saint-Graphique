@@ -29,8 +29,9 @@ FAKE = ROOT / "pipeline" / "tests" / "fixtures" / "fake"
 PRES = "2099_presidentielle_t1"
 EURO = "2099_europeennes"
 TARGETS = ("population", EURO, PRES)
-BOOTSTRAPPED = ("ranks_chris_v1", "continuous")
-ALL_METHODS = ("ranks_chris_v1", "continuous", "mca")
+BOOTSTRAPPED = ("read_positions", "ranks_jnthnbs", "continuous")
+PARITY = ("ranks_jnthnbs", "continuous")
+ALL_METHODS = ("read_positions", "ranks_jnthnbs", "continuous", "mca")
 
 
 def _load_fake_data_module() -> ModuleType:
@@ -89,13 +90,20 @@ def test_methods_build_documents_follow_the_schema(built: Path, method: str, tar
     assert document["axes"] == {"x_label": "Exploitation", "y_label": "Domination",
                                 "range": [-10, 10]}
     assert "description" not in document["params"]
-    assert len(document["pcs"]) == 30
-    # Somme des poids : 100 % à l'arrondi de publication près (1e-6 par PCS).
-    assert sum(p["weight"] for p in document["pcs"]) == pytest.approx(100, abs=1e-4)
-    assert sum(g["weight"] for g in document["groups"]) == pytest.approx(100, abs=1e-4)
-    # Les libellés viennent de config/pcs.yaml, pas des fichiers de données.
-    labels = {p["code"]: p["label"] for p in document["pcs"]}
-    assert labels == {str(i["code"]): i["label"] for i in load_pcs_config()["items"]}
+    if method == "read_positions":
+        # Postes lus : 41 points, poids lus ou estimés, donc une somme proche de 100 seulement.
+        assert len(document["pcs"]) == 41
+        assert sum(p["weight"] for p in document["pcs"]) == pytest.approx(100, abs=3)
+        assert all(p["note"] for p in document["pcs"])
+        assert document["sources"]
+    else:
+        assert len(document["pcs"]) == 30
+        # Somme des poids : 100 % à l'arrondi de publication près (1e-6 par PCS).
+        assert sum(p["weight"] for p in document["pcs"]) == pytest.approx(100, abs=1e-4)
+        assert sum(g["weight"] for g in document["groups"]) == pytest.approx(100, abs=1e-4)
+        # Les libellés viennent de config/pcs.yaml, pas des fichiers de données.
+        labels = {p["code"]: p["label"] for p in document["pcs"]}
+        assert labels == {str(i["code"]): i["label"] for i in load_pcs_config()["items"]}
     if target == "population":
         assert document["candidates"] == []
     else:
@@ -115,7 +123,7 @@ def test_methods_build_ellipses_only_where_requested(built: Path, target: str) -
 
 
 def test_methods_build_candidate_fields_come_from_the_election(built: Path) -> None:
-    document = read_json(built / "ranks_chris_v1" / f"{PRES}.json")
+    document = read_json(built / "ranks_jnthnbs" / f"{PRES}.json")
     election = load_election(FAKE / "elections" / f"{PRES}.json")
     assert [c["id"] for c in document["candidates"]] == [c.id for c in election.candidates]
     by_id = {c["id"]: c for c in document["candidates"]}
@@ -148,7 +156,7 @@ def test_methods_build_index(built: Path) -> None:
     assert index["axes"]["x_hint"] and index["axes"]["y_hint"]
     assert index["axes"]["range"] == [-10, 10]
     assert [m["id"] for m in index["methods"]] == list(ALL_METHODS)  # ordre de methods.yaml
-    assert index["default_method"] == "ranks_chris_v1"
+    assert index["default_method"] == "read_positions"
     for method in index["methods"]:
         assert method["label"] and method["description"]
         assert method["elections"][0] == "population"
@@ -159,7 +167,7 @@ def test_methods_build_index(built: Path) -> None:
     assert set(elections) == set(TARGETS)
     assert elections[PRES] == {"id": PRES, "label": "Présidentielle fictive 2099 (1er tour)",
                                "type": "presidentielle", "year": 2099, "round": 1}
-    assert [g["code"] for g in index["groups"]] == list("1234567")
+    assert [g["code"] for g in index["groups"]] == list("12345678")
     assert all(g["label"] and g["color"].startswith("#") for g in index["groups"])
 
 
@@ -180,8 +188,8 @@ def test_methods_build_filters(tmp_path: Path) -> None:
 
 
 def test_methods_build_no_bootstrap(tmp_path: Path) -> None:
-    assert _build(tmp_path, "--method", "ranks_chris_v1", "--no-bootstrap") == 0
-    document = read_json(tmp_path / "ranks_chris_v1" / f"{PRES}.json")
+    assert _build(tmp_path, "--method", "ranks_jnthnbs", "--no-bootstrap") == 0
+    document = read_json(tmp_path / "ranks_jnthnbs" / f"{PRES}.json")
     assert "bootstrap" not in document
     assert all("ellipse" not in c for c in document["candidates"])
 
@@ -250,7 +258,7 @@ def test_methods_parity_fixture_only_contains_fictitious_data() -> None:
     fake_population = {p.code: p.population for p in load_pcs(FAKE / "pcs.json").items}
     assert {p["code"]: p["population"] for p in parity["input"]["pcs"]} == fake_population
     cases = {(c["method"], c["election_id"]) for c in parity["cases"]}
-    assert cases == {(m, e) for m in BOOTSTRAPPED for e in (EURO, PRES)}
+    assert cases == {(m, e) for m in PARITY for e in (EURO, PRES)}
     # Mêmes ex æquo que le jeu fictif : le portage doit appliquer le même départage.
     by_code = {p["code"]: p for p in parity["input"]["pcs"]}
     assert by_code["62"]["patrimoine_keur"] == by_code["63"]["patrimoine_keur"]
@@ -313,7 +321,9 @@ def test_methods_model_adds_labels_from_config() -> None:
 def test_methods_model_falls_back_for_codes_absent_from_config(tmp_path: Path) -> None:
     document = read_json(FAKE / "pcs.json")
     document["items"][0].update(code="99", group="8")
-    pcs = load_pcs(_write(tmp_path / "pcs.json", document))
+    config = load_pcs_config()
+    del config["groups"]["8"]
+    pcs = load_pcs(_write(tmp_path / "pcs.json", document), pcs_config=config)
     assert (pcs.items[0].label, pcs.items[0].short) == ("99", "99")
     assert pcs.groups["8"].label == "Groupe 8"
 

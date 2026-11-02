@@ -343,10 +343,10 @@ const elections: RawElection[] = [
 // --- Méthodes et calcul -----------------------------------------------------------------------
 const METHODS: { id: string; label: string; description: string; params: MethodParams }[] = [
   {
-    id: 'ranks_chris_v1',
-    label: 'Rangs (réplique Chris v1)',
+    id: 'ranks_jnthnbs',
+    label: 'Rangs (reconstruction JnthnBS)',
     description:
-      'Réplique : rangs 1..N normalisés sur [-10, 10] (algorithme reconstruit par JnthnBS ; graphique original de Chris et de la PaduTeam)',
+      'Rangs 1..N normalisés sur [-10, 10] (algorithme reconstruit par JnthnBS ; graphique original de Chris et de la PaduTeam)',
     params: {
       x_score: 'patrimoine_over_niveau_vie',
       y_weights: { ...DEFAULT_Y_WEIGHTS },
@@ -487,7 +487,7 @@ files['index.json'] = {
     range: RANGE,
   },
   path_template: '{method}/{election}.json',
-  default_method: 'ranks_chris_v1',
+  default_method: 'ranks_jnthnbs',
   methods: METHODS.map((m) => ({
     id: m.id,
     label: m.label,

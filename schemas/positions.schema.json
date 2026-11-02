@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "positions.schema.json",
+  "title": "Positions de PCS lues sur le graphique de Chris (data/positions_chris.json)",
+  "type": "object",
+  "required": ["version_id", "date", "nomenclature", "grid", "sources", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "version_id": { "type": "string" },
+    "date": { "type": "string", "format": "date" },
+    "nomenclature": { "type": "string" },
+    "grid": { "type": "number", "exclusiveMinimum": 0 },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "url"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "url": { "type": "string" },
+          "publisher": { "type": "string" },
+          "accessed": { "type": "string" },
+          "license": { "type": "string" },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["code", "group", "label", "short", "x", "y", "weight_pct", "weight_status", "readings", "video_id", "timestamp_s"],
+        "additionalProperties": false,
+        "properties": {
+          "code": { "type": "string", "pattern": "^[1-8][0-9]$" },
+          "group": { "type": "string", "pattern": "^[1-8]$" },
+          "label": { "type": "string" },
+          "short": { "type": "string" },
+          "x": { "type": "number" },
+          "y": { "type": "number" },
+          "weight_pct": { "type": "number", "exclusiveMinimum": 0 },
+          "weight_status": {
+            "enum": ["read", "census", "disc"],
+            "description": "read : infobulle ; census : recensement remis à l'échelle ; disc : aire du disque"
+          },
+          "readings": { "type": "integer", "minimum": 1, "description": "Lectures concordantes qui soutiennent la position" },
+          "video_id": { "type": "string" },
+          "timestamp_s": { "type": "number", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

@@ -13,10 +13,10 @@
     ]
   },
   "path_template": "{method}/{election}.json",
-  "default_method": "ranks_chris_v1",
+  "default_method": "ranks_jnthnbs",
   "methods": [
     {
-      "id": "ranks_chris_v1",
+      "id": "ranks_jnthnbs",
       "label": "Rangs (réplique Chris v1)",
       "description": "Réplique : rangs 1..N normalisés sur [-10, 10] (algorithme reconstruit par JnthnBS ; graphique original de Chris et de la PaduTeam)",
       "ellipses": true,

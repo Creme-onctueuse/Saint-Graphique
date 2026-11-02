@@ -1,4 +1,4 @@
-"""Exactitude de ``ranks_chris_v1`` par rapport à la reproduction JnthnBS : test LOCAL.
+"""Exactitude de ``ranks_jnthnbs`` par rapport à la reproduction JnthnBS : test LOCAL.
 
 JnthnBS/saint-graphique (https://github.com/JnthnBS/saint-graphique) n'a pas de licence : son code
 et ses données ne sont pas dans ce dépôt, seulement dans ``research/`` (gitignoré). Ce module est
@@ -148,10 +148,10 @@ def dataset(converted: Path) -> tuple[PcsData, Election]:
 
 @pytest.fixture(scope="module")
 def ranks(dataset: tuple[PcsData, Election]) -> Result:
-    """``ranks_chris_v1`` avec les paramètres réels de ``config/methods.yaml``."""
+    """``ranks_jnthnbs`` avec les paramètres réels de ``config/methods.yaml``."""
     pcs_data, election = dataset
-    params = build.method_params("ranks_chris_v1", load_methods_config())
-    return METHODS["ranks_chris_v1"].compute(pcs_data.items, election, params)
+    params = build.method_params("ranks_jnthnbs", load_methods_config())
+    return METHODS["ranks_jnthnbs"].compute(pcs_data.items, election, params)
 
 
 # --- Exactitude ------------------------------------------------------------------------------
@@ -232,11 +232,11 @@ def test_methods_reference_build_end_to_end(
     """La CLI publie les mêmes coordonnées, arrondies, avec des ellipses plausibles."""
     argv = ["--data-dir", str(converted), "--out-dir", str(tmp_path), "--n-boot", "200"]
     assert build.main(argv) == 0
-    for method in ("ranks_chris_v1", "continuous", "mca"):
+    for method in ("ranks_jnthnbs", "continuous", "mca"):
         for election_id in ("population", ELECTION_ID):
             validate_instance(read_json(tmp_path / method / f"{election_id}.json"),
                               "computed.schema.json", f"{method}/{election_id}")
-    document = read_json(tmp_path / "ranks_chris_v1" / f"{ELECTION_ID}.json")
+    document = read_json(tmp_path / "ranks_jnthnbs" / f"{ELECTION_ID}.json")
     for item in document["pcs"]:
         assert (item["x"], item["y"]) == pytest.approx(reference.pcs[item["code"]], abs=1e-6)
     for candidate in document["candidates"]:

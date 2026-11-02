@@ -1,6 +1,6 @@
 """Méthode « mca » : analyse des correspondances multiples (ACM) avec prince.
 
-Utilise le score diplôme de ``ranks_chris_v1``. Algorithme reconstruit par JnthnBS
+Utilise le score diplôme de ``ranks_jnthnbs``. Algorithme reconstruit par JnthnBS
 (https://github.com/JnthnBS/saint-graphique), réimplémenté
 sans copie de code, d'après sa description et la lecture de son implémentation.
 Saint-Graphique original : Chris et la PaduTeam.

@@ -33,6 +33,8 @@ function row(label: string, sources: readonly SourceRef[]): HTMLParagraphElement
 export function renderSources(host: HTMLElement, view: ResolvedView): void {
   host.replaceChildren(
     ...(view.isPopulation ? [] : [row('Sondage', view.sources.poll)]),
-    row('Population, diplômes, revenus et patrimoine', view.sources.pcs),
+    view.sources.positions.length > 0
+      ? row('Positions et poids des catégories', view.sources.positions)
+      : row('Population, diplômes, revenus et patrimoine', view.sources.pcs),
   );
 }

@@ -98,7 +98,7 @@ def build_pcs(
         )
         if code == RETIRED_CODE:
             notes += (
-                " Diplômes réels des retraités ; la méthode ranks_chris_v1 les remplace par un "
+                " Diplômes réels des retraités ; la méthode ranks_jnthnbs les remplace par un "
                 "score fixe."
             )
         items.append(

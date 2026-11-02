@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from scripts.analyze import build_positions
 from scripts.analyze.check_barycenter import (
     collect_group_positions,
     composition_vector,
@@ -324,13 +325,13 @@ def test_linear_barycenter_check() -> None:
 def test_summary_rows_skip_empty_blocks() -> None:
     report = {
         "version_id": "v",
-        "computed": "data/computed/ranks_chris_v1/population.json",
+        "computed": "data/computed/ranks_jnthnbs/population.json",
         "pcs": {"n": 2, "rmse_x": 1, "rmse_y": 2, "spearman_x": 0.5, "spearman_y": 0.6},
         "candidates": {"n": 0},
     }
     rows = summary_rows([report])
     assert len(rows) == 1
-    assert rows[0]["method"] == "ranks_chris_v1"
+    assert rows[0]["method"] == "ranks_jnthnbs"
     assert rows[0]["election"] == "population"
 
 
@@ -523,3 +524,61 @@ def test_detect_discs_on_synthetic_image(tmp_path: Path) -> None:
     discs = detect_discs(path, (0, 0, 300, 200))
     assert any(abs(d["px"] - 60) < 2 and abs(d["py"] - 50) < 2 for d in discs)
     assert any(abs(d["px"] - 220) < 2 and abs(d["py"] - 140) < 2 for d in discs)
+
+
+# --- build_positions -------------------------------------------------------------------
+
+
+def test_snap_goes_to_the_half_unit_grid() -> None:
+    assert build_positions.snap(-2.97) == -3.0
+    assert build_positions.snap(5.49) == 5.5
+
+
+def test_retained_position_uses_the_median_of_agreeing_readings() -> None:
+    position = build_positions.retained_position([(1.02, -3.01), (0.98, -2.99), (1.0, -3.0)])
+    assert position == (1.0, -3.0, 3)
+
+
+def test_retained_position_keeps_only_the_last_revision() -> None:
+    readings = [(-8.01, -9.0), (-7.99, -8.98), (-7.52, -7.0)]
+    assert build_positions.retained_position(readings) == (-7.5, -7.0, 1)
+
+
+def test_retained_position_needs_a_reading() -> None:
+    with pytest.raises(ValueError, match="aucune lecture"):
+        build_positions.retained_position([])
+
+
+def test_linear_scale_reads_an_axis() -> None:
+    slope, intercept = build_positions.linear_scale(
+        [{"pixel": 100, "value": -10}, {"pixel": 200, "value": 0}, {"pixel": 300, "value": 10}]
+    )
+    assert slope * 250 + intercept == pytest.approx(5)
+
+
+def test_match_radii_ignores_distant_discs() -> None:
+    calibration = {
+        "x_marks": [{"pixel": 0, "value": 0}, {"pixel": 100, "value": 10}],
+        "y_marks": [{"pixel": 0, "value": 0}, {"pixel": 100, "value": 10}],
+    }
+    radii = build_positions.match_radii(
+        {"a": (5.0, 5.0), "b": (1.0, 1.0)}, [{"px": 50.5, "py": 50, "r": 7}], calibration
+    )
+    assert radii == {"a": 7.0}
+
+
+def test_choose_weights_prefers_tooltips_then_census_then_discs() -> None:
+    weights = build_positions.choose_weights(
+        ["a", "b", "c"],
+        tooltips={"a": 2.0},
+        census_shares={"a": 4.0, "b": 10.0},
+        radii={"a": 10.0, "c": 20.0},
+    )
+    assert weights == {"a": (2.0, "read"), "b": (5.0, "census"), "c": (8.0, "disc")}
+
+
+def test_choose_weights_refuses_an_unknown_weight() -> None:
+    with pytest.raises(ValueError, match="aucun poids"):
+        build_positions.choose_weights(
+            ["z"], tooltips={"a": 1.0}, census_shares={"a": 1.0}, radii={"a": 1.0}
+        )

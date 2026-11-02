@@ -80,7 +80,7 @@
   --sg-group-5: #0072b2; /* Employés */
   --sg-group-6: #d55e00; /* Ouvriers */
   --sg-group-7: #c9c9c2; /* Retraités */
-  --sg-group-8: #8a8a84; /* Autres inactifs */
+  --sg-group-8: #8e82b8; /* Autres inactifs */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -124,7 +124,7 @@
     --sg-tooltip-bar: #8cb8e3;
     --sg-tooltip-track: #4a4a46;
     --sg-group-7: #5c5c56;
-    --sg-group-8: #5f5f5a;
+    --sg-group-8: #8e82b8;
   }
 }
 
@@ -168,5 +168,5 @@
   --sg-tooltip-bar: #8cb8e3;
   --sg-tooltip-track: #4a4a46;
   --sg-group-7: #5c5c56;
-  --sg-group-8: #5f5f5a;
+  --sg-group-8: #8e82b8;
 }

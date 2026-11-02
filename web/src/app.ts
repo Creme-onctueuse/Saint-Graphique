@@ -187,9 +187,12 @@ export function startApp(): void {
       credit: CREDIT,
       notes: [
         ...current.reserves,
-        ...[...current.sources.poll, ...current.sources.pcs].map(
-          (s) => `Source : ${sourceText(s)}`,
-        ),
+        ...[
+          ...current.sources.poll,
+          ...(current.sources.positions.length > 0
+            ? current.sources.positions
+            : current.sources.pcs),
+        ].map((s) => `Source : ${sourceText(s)}`),
       ],
       legend: [
         ...[...groups.values()]

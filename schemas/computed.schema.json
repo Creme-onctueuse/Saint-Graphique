@@ -9,6 +9,11 @@
     "params": { "type": "object" },
     "election_id": { "type": "string" },
     "generated_at": { "type": "string" },
+    "sources": {
+      "type": "array",
+      "description": "Sources propres à la méthode (positions lues)",
+      "items": { "type": "object", "required": ["id", "title", "url"] }
+    },
     "axes": {
       "type": "object",
       "required": ["x_label", "y_label", "range"],
@@ -25,7 +30,8 @@
         "properties": {
           "code": { "type": "string" }, "group": { "type": "string" }, "label": { "type": "string" },
           "x": { "type": "number" }, "y": { "type": "number" },
-          "weight": { "type": "number", "description": "Part de la population (%)" }
+          "weight": { "type": "number", "description": "Part de la population (%)" },
+          "note": { "type": "string", "description": "Provenance propre à ce point" }
         }
       }
     },

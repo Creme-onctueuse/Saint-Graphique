@@ -5,7 +5,7 @@
   "tolerance": 1e-09,
   "notes": [
     "x = patrimoine_keur / niveau_vie_mensuel_eur * 100 ; y = somme de gauche à droite, dans l'ordre bac5..certif_aucun, des y_weights * diplomes, sauf retired_y_override (score forcé pour un code).",
-    "ranks_chris_v1 : rang décroissant 1..N, coordonnée = lo + (hi - lo) / (N - 1) * (N - rang). Ex æquo : le plus petit code PCS (ordre lexicographique) reçoit le meilleur rang. Le jeu contient des ex æquo volontaires (x : 62/63, y : 67/68).",
+    "ranks_jnthnbs : rang décroissant 1..N, coordonnée = lo + (hi - lo) / (N - 1) * (N - rang). Ex æquo : le plus petit code PCS (ordre lexicographique) reçoit le meilleur rang. Le jeu contient des ex æquo volontaires (x : 62/63, y : 67/68).",
     "continuous : z-score non pondéré (écart-type ddof 0) puis min/max : lo + (hi - lo) * ((z - zmin) / (zmax - zmin)).",
     "Groupes : barycentre des PCS du groupe pondéré par la population. Population : barycentre de toutes les PCS pondéré par la population.",
     "Candidats : barycentre des groupes pondéré par composition[candidat][groupe]. Une composition de niveau 2 (pcs_level 2) est d'abord sommée par groupe. Les clés sans PCS ni groupe connu (ex. '81') sont ignorées et un candidat de poids nul est omis."
@@ -736,7 +736,7 @@
   },
   "cases": [
     {
-      "method": "ranks_chris_v1",
+      "method": "ranks_jnthnbs",
       "election_id": "2099_europeennes",
       "params": {
         "x_score": "patrimoine_over_niveau_vie",
@@ -1217,7 +1217,7 @@
       }
     },
     {
-      "method": "ranks_chris_v1",
+      "method": "ranks_jnthnbs",
       "election_id": "2099_presidentielle_t1",
       "params": {
         "x_score": "patrimoine_over_niveau_vie",

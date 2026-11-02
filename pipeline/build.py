@@ -14,7 +14,7 @@ bootstrap des compositions (voir ``pipeline.methods.bootstrap``). Sans ``--elect
 fichiers d'élections disparues sont supprimés. ``index.json`` décrit ensuite, pour le front, les
 méthodes, élections, axes, groupes et fichiers disponibles.
 
-``--parity`` écrit les entrées et sorties attendues de ``ranks_chris_v1`` et ``continuous``,
+``--parity`` écrit les entrées et sorties attendues de ``ranks_jnthnbs`` et ``continuous``,
 calculées sur le jeu FICTIF (``pipeline/tests/fixtures/fake/``, voir ``scripts/fake_data.py``),
 dans ``web/src/core/__fixtures__/parity.json``. Cette fixture sert aux tests vitest du portage
 TypeScript.
@@ -60,7 +60,8 @@ from pipeline.model import (
 
 FAKE_DIR = ROOT / "pipeline" / "tests" / "fixtures" / "fake"
 PARITY_PATH = ROOT / "web" / "src" / "core" / "__fixtures__" / "parity.json"
-PARITY_METHODS = ("ranks_chris_v1", "continuous")
+DEFAULT_METHOD = "read_positions"
+PARITY_METHODS = ("ranks_jnthnbs", "continuous")
 POPULATION_LABEL = "Population (sans élection)"
 DECIMALS = 6
 
@@ -104,9 +105,17 @@ def computed_document(
     axes: Mapping[str, Any],
     ellipses: Mapping[str, Ellipse] | None = None,
     bootstrap: Mapping[str, Any] | None = None,
+    weight_total: float | None = None,
+    sources: Sequence[Mapping[str, Any]] = (),
+    pcs_notes: Mapping[str, str] | None = None,
 ) -> dict[str, Any]:
-    """Document ``computed.schema.json`` pour un résultat."""
-    total = sum(p.population for p in pcs_data.items)
+    """Document ``computed.schema.json`` pour un résultat.
+
+    ``weight_total`` fixe le dénominateur des poids (somme des populations par défaut).
+    ``sources`` cite les sources propres à la méthode, ``pcs_notes`` commente certaines PCS.
+    """
+    pcs_notes = pcs_notes or {}
+    total = weight_total or sum(p.population for p in pcs_data.items)
     group_population: dict[str, float] = {}
     for p in pcs_data.items:
         group_population[p.group] = group_population.get(p.group, 0.0) + p.population
@@ -142,6 +151,7 @@ def computed_document(
                 "code": p.code, "group": p.group, "label": p.label, "short": p.short,
                 "x": _round(result.pcs[p.code].x), "y": _round(result.pcs[p.code].y),
                 "weight": _round(100 * p.population / total),
+                **({"note": pcs_notes[p.code]} if p.code in pcs_notes else {}),
             }
             for p in pcs_data.items
         ],
@@ -161,6 +171,8 @@ def computed_document(
     }
     if bootstrap:
         doc["bootstrap"] = dict(bootstrap)
+    if sources:
+        doc["sources"] = [dict(s) for s in sources]
     return doc
 
 
@@ -211,7 +223,7 @@ def build_index(
             "y_label": axes["y"]["label"], "y_hint": axes["y"].get("hint", ""),
             "range": list(axes["range"]),
         },
-        "default_method": "ranks_chris_v1" if "ranks_chris_v1" in ids else (ids or [None])[0],
+        "default_method": DEFAULT_METHOD if DEFAULT_METHOD in ids else (ids or [None])[0],
         "methods": methods,
         "elections": [meta.get(i, {"id": i, "label": i}) for i in sorted(available, key=sort_key)],
         "groups": [{"code": g.code, "label": g.label, "color": g.color}
@@ -253,7 +265,7 @@ def parity_document(
             "x = patrimoine_keur / niveau_vie_mensuel_eur * 100 ; y = somme de gauche à droite, "
             "dans l'ordre bac5..certif_aucun, des y_weights * diplomes, sauf retired_y_override "
             "(score forcé pour un code).",
-            "ranks_chris_v1 : rang décroissant 1..N, coordonnée = lo + (hi - lo) / (N - 1) * "
+            "ranks_jnthnbs : rang décroissant 1..N, coordonnée = lo + (hi - lo) / (N - 1) * "
             "(N - rang). Ex æquo : le plus petit code PCS (ordre lexicographique) reçoit le "
             "meilleur rang. Le jeu contient des ex æquo volontaires (x : 62/63, y : 67/68).",
             "continuous : z-score non pondéré (écart-type ddof 0) puis min/max : lo + (hi - lo) * "
@@ -369,8 +381,18 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
                 info = {"n_boot": args.n_boot, "margin_pts": margin,
                         "kind": args.bootstrap_kind, "seed": args.seed, "level": DEFAULT_LEVEL}
-            doc = computed_document(result, pcs_data, election, methods_cfg["axes"],
-                                    ellipses, info)
+            display_data = getattr(method, "display_data", None)
+            doc = computed_document(
+                result,
+                display_data(pcs_data) if display_data else pcs_data,
+                election,
+                methods_cfg["axes"],
+                ellipses,
+                info,
+                weight_total=getattr(method, "weight_total", None),
+                sources=getattr(method, "sources", ()),
+                pcs_notes=getattr(method, "pcs_notes", None),
+            )
             path = out_dir / name / f"{result.election_id}.json"
             validate_instance(doc, "computed.schema.json", _display(path))
             write_json(path, doc)

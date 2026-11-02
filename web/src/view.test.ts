@@ -24,8 +24,8 @@ describe('jeu de données d’exemple', () => {
   it('est signalé comme fictif et complet', () => {
     expect(ds.isSample).toBe(true);
     expect(ds.warnings).toEqual([]);
-    expect(ds.defaultMethod).toBe('ranks_chris_v1');
-    expect(ds.methods.map((m) => m.id)).toEqual(['ranks_chris_v1', 'continuous']);
+    expect(ds.defaultMethod).toBe('ranks_jnthnbs');
+    expect(ds.methods.map((m) => m.id)).toEqual(['ranks_jnthnbs', 'continuous']);
     expect(ds.elections.map((e) => e.id)).toEqual([
       'exemple_presidentielle',
       'exemple_europeennes',
@@ -43,7 +43,7 @@ describe('jeu de données d’exemple', () => {
   });
 
   it('a ses coordonnées précalculées cohérentes avec le calcul dans le navigateur', () => {
-    for (const method of ['ranks_chris_v1', 'continuous']) {
+    for (const method of ['ranks_jnthnbs', 'continuous']) {
       for (const election of ['exemple_presidentielle', 'exemple_europeennes']) {
         const precomputed = buildView(ds, state({ method, election }));
         expect(precomputed?.source).toBe('precomputed');
@@ -68,7 +68,7 @@ describe('jeu de données d’exemple', () => {
 describe('buildView', () => {
   it('choisit la méthode et l’élection par défaut', () => {
     const view = buildView(ds, state());
-    expect(view?.method.id).toBe('ranks_chris_v1');
+    expect(view?.method.id).toBe('ranks_jnthnbs');
     expect(view?.electionId).toBe('exemple_presidentielle');
     expect(defaultElection(ds)).toBe('exemple_presidentielle');
     expect(view?.source).toBe('precomputed');
@@ -81,7 +81,7 @@ describe('buildView', () => {
   it('remplace une élection ou une méthode inconnue (URL périmée) par le défaut', () => {
     const view = buildView(ds, state({ election: 'inconnue', method: 'inconnue' }));
     expect(view?.electionId).toBe('exemple_presidentielle');
-    expect(view?.method.id).toBe('ranks_chris_v1');
+    expect(view?.method.id).toBe('ranks_jnthnbs');
   });
 
   it('affiche la population sans électorat', () => {
@@ -147,7 +147,7 @@ describe('sans données brutes (index.json de WP3 seul)', () => {
     expect(view?.canRecompute).toBe(false);
     expect(view?.recomputeBlock).toMatch(/brutes/);
     expect(view?.reserves[1]).toContain('statut inconnu');
-    expect(view?.sources).toEqual({ poll: [], pcs: [] });
+    expect(view?.sources).toEqual({ poll: [], pcs: [], positions: [] });
     expect(view?.hasEllipses).toBe(true);
     expect(view?.model.candidates[0]?.composition).toBeNull();
   });
@@ -174,12 +174,57 @@ describe('recalcul quand le fichier précalculé manque', () => {
   });
 });
 
+describe('positions lues', () => {
+  const source = { id: 'video', title: 'Vidéo', url: 'https://youtu.be/x' };
+  const reading = {
+    method: 'read_positions',
+    params: {},
+    election_id: 'population',
+    axes: { x_label: 'Exploitation', y_label: 'Domination', range: [-10, 10] },
+    pcs: [
+      {
+        code: '75',
+        group: '7',
+        label: 'Anciennes professions intermédiaires',
+        x: 5,
+        y: -5,
+        weight: 6.6,
+        note: 'Position et poids lus sur le graphique de Chris.',
+      },
+    ],
+    candidates: [],
+    population_barycenter: { x: 5, y: -5 },
+    sources: [source],
+  };
+  const withReading = buildDataset({ ...files, 'read_positions/population.json': reading });
+  const view = buildView(withReading, state({ method: 'read_positions', election: 'population' }));
+
+  it('remplace les réserves sur le patrimoine par celle des positions lues', () => {
+    expect(view?.reserves).toHaveLength(1);
+    expect(view?.reserves[0]).toMatch(/^Positions lues/);
+    expect(view?.reserves[0]).not.toContain('composition du patrimoine');
+  });
+
+  it('ne prête aucun statut de patrimoine à une position lue', () => {
+    expect(view?.model.pcs[0]?.status).toBeNull();
+  });
+
+  it('donne la provenance dans l’infobulle et cite les vidéos', () => {
+    expect(view?.model.pcs[0]?.notes).toEqual(['Position et poids lus sur le graphique de Chris.']);
+    expect(view?.sources.positions.map((s) => s.url)).toEqual(['https://youtu.be/x']);
+  });
+
+  it('ne se recalcule pas dans le navigateur', () => {
+    expect(view?.canRecompute).toBe(false);
+  });
+});
+
 describe('réserves de la page', () => {
   it('compte les statuts de la fixture et signale les valeurs imputées', () => {
     const view = buildView(ds, state());
     expect(view?.reserves[1]).toMatch(/axe Exploitation : \d+ valeurs? imputées?/);
     const p = view?.model.pcs[0];
-    expect(['published', 'imputed']).toContain(p?.status.patrimoine);
+    expect(['published', 'imputed']).toContain(p?.status?.patrimoine);
   });
 
   it('calcule les ex æquo depuis les scores, avec un ordre arbitraire pour les rangs', () => {
@@ -237,7 +282,7 @@ describe('réserves de la page', () => {
     expect(published?.reserves.some((r) => r.startsWith('Réserve'))).toBe(false);
     const calculated = withStatus('calculated');
     expect(calculated?.reserves.some((r) => r.startsWith('Réserve'))).toBe(true);
-    expect(calculated?.model.pcs[0]?.status.niveauVie).toBe('calculated');
+    expect(calculated?.model.pcs[0]?.status?.niveauVie).toBe('calculated');
   });
 
   it('signale « statut inconnu » tant que les champs manquent, sans rien inventer', () => {
@@ -256,12 +301,12 @@ describe('réserves de la page', () => {
     const mca = d.methods.find((m) => m.id === 'mca');
     expect(mca?.label).toBe('ACM (terciles) (exploratoire)');
     expect(mca?.exploratory).toBe(true);
-    expect(ds.methods.find((m) => m.id === 'ranks_chris_v1')?.exploratory).toBe(false);
+    expect(ds.methods.find((m) => m.id === 'ranks_jnthnbs')?.exploratory).toBe(false);
   });
 });
 
 describe('effectiveParams', () => {
-  const defaults = defaultParamsFor('ranks_chris_v1');
+  const defaults = defaultParamsFor('ranks_jnthnbs');
 
   it('laisse les paramètres intacts par défaut', () => {
     const { params, customized } = effectiveParams(defaults, { weights: null, retired: 'default' });
