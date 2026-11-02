@@ -18,6 +18,8 @@ export interface ChartPcs {
   status: { patrimoine: ValueStatus; niveauVie: ValueStatus } | null;
   /** Réserves propres à cette PCS (ex æquo), affichées dans l'infobulle. */
   notes: string[];
+  /** Couleur imposée (variable de couleur) ; sinon, celle du groupe. */
+  fill?: string;
 }
 
 export interface ChartCandidate {
@@ -38,6 +40,20 @@ export interface ChartCandidate {
   notes?: string[];
 }
 
+/** Quand les axes ne sont pas ceux du Saint-Graphique. */
+export interface ChartAxes {
+  /** Ni diagonale ni noms de régions. */
+  plain?: boolean;
+  /** Aucun axe : ni graduation, ni titre, ni grille, ni quadrants. */
+  none?: boolean;
+  /** Vrai par défaut : halos des territoires. */
+  halos?: boolean;
+  /** Textes des extrémités des axes. */
+  ends?: { xLow: string; xHigh: string; yLow: string; yHigh: string };
+  /** Position sur la carte → valeur réelle à afficher. */
+  text?: { x: (position: number) => string; y: (position: number) => string };
+}
+
 export interface ChartModel {
   /** Titre accessible du graphique. */
   title: string;
@@ -48,6 +64,7 @@ export interface ChartModel {
   pcs: ChartPcs[];
   candidates: ChartCandidate[];
   barycenter: Point | null;
+  axes?: ChartAxes;
 }
 
 export interface ChartView {

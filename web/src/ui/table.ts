@@ -26,6 +26,9 @@ export function renderTables(host: HTMLElement, view: ResolvedView): void {
   const { model } = view;
   const x = model.xLabel;
   const y = model.yLabel;
+  const withAxes = model.axes?.none !== true;
+  const xValue = (v: number): string => model.axes?.text?.x(v) ?? formatNumber(v);
+  const yValue = (v: number): string => model.axes?.text?.y(v) ?? formatNumber(v);
 
   const pcsTable = el(
     'table',
@@ -54,8 +57,8 @@ export function renderTables(host: HTMLElement, view: ResolvedView): void {
             cell(p.label),
             cell(p.groupLabel),
             cell(formatPct(p.weight), true),
-            cell(formatNumber(p.x), true),
-            cell(formatNumber(p.y), true),
+            cell(xValue(p.x), true),
+            cell(yValue(p.y), true),
             cell(p.status ? formatStatus(p.status.patrimoine) : 'sans objet'),
             cell(p.status ? formatStatus(p.status.niveauVie) : 'sans objet'),
           ),
@@ -63,7 +66,8 @@ export function renderTables(host: HTMLElement, view: ResolvedView): void {
     ),
   );
 
-  const sections: Node[] = [el('div', { class: 'sg-table-wrap' }, pcsTable)];
+  const sections: Node[] =
+    model.pcs.length > 0 ? [el('div', { class: 'sg-table-wrap' }, pcsTable)] : [];
 
   if (model.candidates.length > 0) {
     const candTable = el(
@@ -73,8 +77,12 @@ export function renderTables(host: HTMLElement, view: ResolvedView): void {
       headerRow([
         ['Électorat', false],
         ['Score', true],
-        [x, true],
-        [y, true],
+        ...(withAxes
+          ? ([
+              [x, true],
+              [y, true],
+            ] as [string, boolean][])
+          : []),
       ]),
       el(
         'tbody',
@@ -87,8 +95,8 @@ export function renderTables(host: HTMLElement, view: ResolvedView): void {
               {},
               cell(c.label),
               cell(c.share !== null ? formatPct(c.share) : '–', true),
-              cell(formatNumber(c.x), true),
-              cell(formatNumber(c.y), true),
+              withAxes ? cell(xValue(c.x), true) : null,
+              withAxes ? cell(yValue(c.y), true) : null,
             ),
           ),
       ),
@@ -101,8 +109,8 @@ export function renderTables(host: HTMLElement, view: ResolvedView): void {
       el('p', {
         class: 'sg-note',
         text:
-          `Barycentre de la population : ${x} ${formatNumber(model.barycenter.x)}, ` +
-          `${y} ${formatNumber(model.barycenter.y)}.`,
+          `Barycentre de la population : ${x} ${xValue(model.barycenter.x)}, ` +
+          `${y} ${yValue(model.barycenter.y)}.`,
       }),
     );
   }

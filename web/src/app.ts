@@ -10,7 +10,9 @@ import { Minimap } from './chart/layers/minimap.ts';
 import { ProjectionLayer } from './chart/layers/projection.ts';
 import { RingsLayer } from './chart/layers/rings.ts';
 import { TrailsLayer } from './chart/layers/trails.ts';
+import { Spokes } from './chart/layers/spokes.ts';
 import { sameWeights } from './core/scores.ts';
+import { selectionPatch } from './core/selection.ts';
 import { parseState, serializeState, type AppState } from './core/state.ts';
 import { loadDataset } from './data/load.ts';
 import { initAbout } from './ui/about.ts';
@@ -22,6 +24,8 @@ import { Filters } from './ui/filters.ts';
 import { mountIcons } from './ui/icons.ts';
 import { Legend } from './ui/legend.ts';
 import { MethodPanel } from './ui/methodPanel.ts';
+import { CrossPanel } from './ui/shell/crossPanel.ts';
+import { Inspector } from './ui/shell/inspector.ts';
 import { Keybar } from './ui/shell/keybar.ts';
 import { ProjectionCard } from './ui/shell/projectionCard.ts';
 import { RingsKey } from './ui/shell/ringsKey.ts';
@@ -31,6 +35,7 @@ import { sourceText } from './ui/sources.ts';
 import { renderTables } from './ui/table.ts';
 import { applyTheme, storedTheme, ThemeSwitch } from './ui/theme.ts';
 import { buildView, type ResolvedView } from './view.ts';
+import { effectiveSelection } from './viewCrossing.ts';
 
 const SAMPLE_WARNING =
   'Données d’exemple entièrement fictives : ces positions ne représentent aucune réalité. Ne pas citer.';
@@ -112,9 +117,9 @@ export function startApp(): void {
     showLabels: state.showLabels,
     showEllipses: state.showEllipses,
     showTerritories: state.showTerritories,
-    focus: null,
-    selected: new Set([state.selected, state.compared].filter((k): k is string => k !== null)),
-    square: state.square,
+    focus: view?.crossing?.focus ?? null,
+    selected: new Set(view?.crossing?.keys ?? []),
+    square: state.square || view?.crossing?.mode === 'proximity',
   });
 
   const actions: AppActions = {
@@ -189,6 +194,9 @@ export function startApp(): void {
       },
       actions,
     ),
+    new CrossPanel(byId('sg-cross-panel'), ds, actions, () => chart.resetZoom()),
+    new Inspector(byId('sg-inspector'), actions),
+    new Spokes(chart),
     new Shell(actions, (insets) => chart.setInsets(insets)),
   ];
 
@@ -223,13 +231,8 @@ export function startApp(): void {
   }
 
   chart.onSelect((key, additive) => {
-    if (key === null) {
-      if (state.selected) update({ selected: null, compared: null }, 'fast');
-    } else if (additive && state.selected && state.selected !== key) {
-      update({ compared: key }, 'fast');
-    } else {
-      update({ selected: state.selected === key ? null : key, compared: null }, 'fast');
-    }
+    if (key === null && !state.selected) return;
+    update(selectionPatch(effectiveSelection(view, state), key, additive), 'fast');
   });
 
   window.addEventListener('hashchange', () => {
