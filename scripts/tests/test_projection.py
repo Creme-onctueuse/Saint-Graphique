@@ -1,7 +1,7 @@
 """Tests du test sur le passé et de la projection 2027.
 
 Les calculs sont vérifiés sur des trajectoires inventées. Les chiffres réels ne sont contrôlés que
-si les données issues de sondages sont présentes : elles ne sont pas publiées.
+si les données issues de sondages sont présentes.
 """
 
 from __future__ import annotations

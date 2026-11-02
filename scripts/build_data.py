@@ -202,16 +202,16 @@ def render_sources(
         "Aucune donnée de la reproduction citée dans les crédits n'y figure : son dépôt, sans "
         "licence, n'a servi que de contrôle local.",
         "",
-        "## Données Ifop : usage personnel et non commercial",
+        "## Données Ifop : projet libre et non commercial",
         "",
         "Les 7 fichiers d'élections reposent sur des rapports Ifop, et chacun indique : « Aucune "
         "publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » "
         "Aucun accord n'a été demandé ni obtenu.",
         "",
-        "Ce projet est à usage personnel et non commercial, et les données tirées de ces rapports "
-        "ne sont pas publiées : `data/elections/`, `pipeline/sources/manual/` et les coordonnées "
-        "d'électorats de `data/computed/`. Ces lignes décrivent un usage, ce n'est pas un avis "
-        "juridique.",
+        "Ce projet est libre et non commercial. Il publie les chiffres tirés de ces rapports en "
+        "citant chacun d'eux : `data/elections/`, `pipeline/sources/manual/` et les coordonnées "
+        "d'électorats de `data/computed/`. Si l'Ifop demande leur retrait, ils seront retirés. "
+        "Ces lignes décrivent un usage, ce n'est pas un avis juridique.",
         "",
         "## Jeux de données",
         "",

@@ -70,7 +70,8 @@ REUSE_NOTICE: dict[str, str] = {
     "Ifop": (
         "Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être "
         "faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu : "
-        "usage personnel et non commercial, données non publiées, voir data/SOURCES.md."
+        "projet libre et non commercial, chiffres cités et retirés sur demande, voir "
+        "data/SOURCES.md."
     ),
     "Ipsos": "Rapport © Ipsos, aucune licence de réutilisation indiquée.",
 }

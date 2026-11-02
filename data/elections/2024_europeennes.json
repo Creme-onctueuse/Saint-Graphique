@@ -12,7 +12,7 @@
       "url": "https://www.ifop.com/wp-content/uploads/2024/06/DET-120537-Rapport-JDV-EUR24-10.06.2024.pdf",
       "accessed": "2026-10-31",
       "publisher": "Ifop-Fiducial",
-      "license": "Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu : usage personnel et non commercial, données non publiées, voir data/SOURCES.md.",
+      "license": "Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu : projet libre et non commercial, chiffres cités et retirés sur demande, voir data/SOURCES.md.",
       "notes": "Échantillon : 2 871 inscrits, extraits d'un échantillon de 3 065 personnes. Terrain : en ligne, le 9 juin 2024, de 11 h à 18 h. Tableaux : colonnes de groupes, vote en composition p. 37 (PDF 38) et abstention en composition p. 16 (PDF 17) ; national_share_pct, ligne ENSEMBLE du vote p. 34 (PDF 35) et de la participation p. 14 (PDF 15). Groupes : 2=Artisans ou commerçants; 3=Cadres et prof. int. sup.; 4=Professions intermédiaires; 5=Employés; 6=Ouvriers; 7=Retraités; 8=Autres inactifs. Le rapport n'isole pas les agriculteurs : la clé « 1 » est absente, et on ignore s'ils sont comptés dans le groupe 2. « Autre inactif » (groupe 8) est retiré et les parts ramenées à 100 sur les groupes restants ; les parts publiées sont dans pipeline/sources/manual. national_share_pct : ligne ensemble du sondage (abstention en % des inscrits), pas le résultat officiel. Transcription manuelle ; « - » reproduit le tiret du rapport. Parts publiées en nombres entiers."
     }
   ],

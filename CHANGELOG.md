@@ -15,6 +15,7 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnage [
 
 ### Modifié
 
+- Le dépôt devient public : les chiffres de l'Ifop et les positions lues sur les vidéos de Chris sont publiés avec leurs sources, et retirés sur demande. Le déploiement sur GitHub Pages suit chaque poussée dès que la variable `PAGES_ENABLED` est définie.
 - La réserve se résume en une ligne toujours visible et les sources tiennent sur une ligne en fin de page ; chacune s'ouvre sur son détail. Les catégories ne sont nommées que si elles sont grandes ou ont de la place, et le zoom fait apparaître les autres.
 
 - La méthode des rangs s'appelle désormais `ranks` et s'affiche sous le libellé « Rangs reconstruits » : l'auteur de la reconstruction n'est plus cité que dans les crédits.

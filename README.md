@@ -1,12 +1,14 @@
 # Saint-Graphique : reconstruction ouverte
 
+*Le Saint-Graphique, vibe coder au chômage.*
+
 Reconstruction **open source, sourcée et vérifiable** du « Saint-Graphique », le graphique de sociologie électorale présenté par Chris (revue *Positions*) dans les vidéos de la PaduTeam.
 
 Le Saint-Graphique a été créé par **Chris et la PaduTeam**. Voir [Crédits et inspiration](#crédits-et-inspiration).
 
 > **Projet non officiel.** Il n'a aucun lien avec Positions Revue ni avec la PaduTeam. L'algorithme original n'a pas été publié : ce dépôt reprend les **positions lues** sur les vidéos publiques et propose des méthodes de calcul ouvertes, sans prétendre à l'identité exacte.
 
-**Statut :** v1.1 en cours, une carte interactive construite sur la réplique du tableau de Chris de février 2026 ([fidélité mesurée](#fidélité-de-la-réplique), [feuille de route](#feuille-de-route)). **Usage personnel et non commercial :** les données tirées des rapports Ifop ne sont pas publiées ([détails](#données-ifop--usage-personnel-et-non-commercial)).
+**Statut :** v1.1 en cours, une carte interactive construite sur la réplique du tableau de Chris de février 2026 ([fidélité mesurée](#fidélité-de-la-réplique), [feuille de route](#feuille-de-route)). **Projet libre et non commercial :** les chiffres tirés des rapports Ifop sont cités et retirés sur demande ([détails](#données-ifop--projet-libre-et-non-commercial)).
 
 ## Le principe
 
@@ -81,13 +83,13 @@ Toutes les données proviennent de **sources citées**, recensées dans [`data/S
 
 Les vidéos, transcriptions et captures servent uniquement à l'analyse locale. Elles ne sont **pas redistribuées**. Seuls des chiffres dérivés figurent dans la documentation, chacun cité avec l'identifiant de la vidéo et l'horodatage.
 
-### Données Ifop : usage personnel et non commercial
+### Données Ifop : projet libre et non commercial
 
 Les rapports Ifop dont sont tirées les 7 élections indiquent : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu.
 
-Ce projet a donc un usage **personnel et non commercial**, et les données tirées de ces rapports **ne sont pas publiées**. Sont concernés `data/elections/`, `pipeline/sources/manual/`, les coordonnées d'électorats de `data/computed/`, la projection de `data/computed/_projection/`, les chiffres vérifiés par `web/src/core/facts.test.ts` et cités dans `web/src/core/facts.ts` et `docs/methodologie.md`, et donc la page construite à partir d'elles. La source Ifop reste citée sur la page et dans `data/SOURCES.md`.
+Ce projet est **libre et non commercial**. Il publie les chiffres tirés de ces rapports en citant chacun d'eux, et les retire si l'Ifop le demande. Sont concernés `data/elections/`, `pipeline/sources/manual/`, les coordonnées d'électorats de `data/computed/`, la projection de `data/computed/_projection/` et les constats de la page. La source Ifop reste citée sur la page et dans `data/SOURCES.md`.
 
-Le code reste sous licence MIT, mais ces données n'y sont pas soumises. Le dépôt n'a pas de dépôt distant public, et le workflow GitHub Pages n'est pas lancé.
+Le code reste sous licence MIT, mais ces données n'y sont pas soumises.
 
 ## Fidélité de la réplique
 
@@ -128,11 +130,11 @@ Ce que ces chiffres disent, et ne disent pas :
 
 ## Publication
 
-**En l'état, ce dépôt et sa page ne doivent pas être publiés**, car ils contiennent des données tirées des rapports Ifop. Publier plus tard supposerait d'abord de retirer ces fichiers de tout l'historique git, pas seulement du dernier commit, ou d'obtenir l'accord de l'Ifop.
+Le dépôt est public : [Creme-onctueuse/Saint-Graphique](https://github.com/Creme-onctueuse/Saint-Graphique). La page est un fichier unique, sans serveur ni requête externe, déployé sur GitHub Pages à l'adresse prévue <https://creme-onctueuse.github.io/Saint-Graphique/>.
 
-Les positions lues suivent la même règle : `data/positions_chris.json` et `data/computed/read_positions/` ne sont pas publiés non plus, sauf décision contraire. Ces chiffres sont cités, mais relevés sur le travail de Chris. Publier plus tard supposerait de les retirer aussi de l'historique, ou d'obtenir l'accord de Chris.
+Pour mettre le site en ligne, une fois : *Settings → Pages → Source* = **GitHub Actions**, puis la variable de dépôt `PAGES_ENABLED` = `true`. Ensuite, chaque poussée sur `main` le met à jour.
 
-Le workflow `.github/workflows/pages.yml` ne se lance que manuellement. S'il est lancé un jour, il faut choisir *Settings → Pages → Source* = **GitHub Actions**.
+**Retrait sur demande.** Les chiffres de l'Ifop et les positions lues sur les vidéos de Chris restent l'œuvre de leurs auteurs. Ils sont cités, et ne sont pas placés sous la licence du code. Si l'un d'eux souhaite une correction ou un retrait, une issue suffit.
 
 ## Contribuer
 

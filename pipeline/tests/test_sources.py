@@ -721,7 +721,7 @@ def test_ifop_licence_field_describes_the_use(election_id: str) -> None:
     licence = _elections()[election_id]["sources"][0]["license"]
     assert "Aucune publication totale ou partielle ne peut être faite" in licence
     assert "Aucun accord n'a été demandé ni obtenu" in licence
-    assert "usage personnel et non commercial" in licence
+    assert "projet libre et non commercial" in licence
     assert "à trancher" not in licence
 
 
@@ -736,7 +736,7 @@ def test_sources_document_is_complete() -> None:
     text = (DATA / "SOURCES.md").read_text(encoding="utf-8")
     assert "## Données manquantes / TODO" in text
     assert "Aucune publication totale ou partielle ne peut être faite sans l'accord exprès" in text
-    assert "## Données Ifop : usage personnel et non commercial" in text
+    assert "## Données Ifop : projet libre et non commercial" in text
     assert "Aucun accord n'a été demandé ni obtenu" in text
     assert "n'est pas un avis juridique" in text.replace("\n", " ")
     assert "à trancher" not in text
