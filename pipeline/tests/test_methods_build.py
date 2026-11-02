@@ -29,9 +29,9 @@ FAKE = ROOT / "pipeline" / "tests" / "fixtures" / "fake"
 PRES = "2099_presidentielle_t1"
 EURO = "2099_europeennes"
 TARGETS = ("population", EURO, PRES)
-BOOTSTRAPPED = ("read_positions", "ranks_jnthnbs", "continuous")
-PARITY = ("ranks_jnthnbs", "continuous")
-ALL_METHODS = ("read_positions", "ranks_jnthnbs", "continuous", "mca")
+BOOTSTRAPPED = ("read_positions", "ranks", "continuous")
+PARITY = ("ranks", "continuous")
+ALL_METHODS = ("read_positions", "ranks", "continuous", "mca")
 
 
 def _load_fake_data_module() -> ModuleType:
@@ -123,7 +123,7 @@ def test_methods_build_ellipses_only_where_requested(built: Path, target: str) -
 
 
 def test_methods_build_candidate_fields_come_from_the_election(built: Path) -> None:
-    document = read_json(built / "ranks_jnthnbs" / f"{PRES}.json")
+    document = read_json(built / "ranks" / f"{PRES}.json")
     election = load_election(FAKE / "elections" / f"{PRES}.json")
     assert [c["id"] for c in document["candidates"]] == [c.id for c in election.candidates]
     by_id = {c["id"]: c for c in document["candidates"]}
@@ -188,8 +188,8 @@ def test_methods_build_filters(tmp_path: Path) -> None:
 
 
 def test_methods_build_no_bootstrap(tmp_path: Path) -> None:
-    assert _build(tmp_path, "--method", "ranks_jnthnbs", "--no-bootstrap") == 0
-    document = read_json(tmp_path / "ranks_jnthnbs" / f"{PRES}.json")
+    assert _build(tmp_path, "--method", "ranks", "--no-bootstrap") == 0
+    document = read_json(tmp_path / "ranks" / f"{PRES}.json")
     assert "bootstrap" not in document
     assert all("ellipse" not in c for c in document["candidates"])
 

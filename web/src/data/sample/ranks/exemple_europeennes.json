@@ -1,5 +1,5 @@
 {
-  "method": "ranks_jnthnbs",
+  "method": "ranks",
   "params": {
     "x_score": "patrimoine_over_niveau_vie",
     "y_weights": {

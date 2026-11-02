@@ -2,7 +2,7 @@
 
 Reconstruction **open source, sourcée et vérifiable** du « Saint-Graphique », le graphique de sociologie électorale présenté par Chris (revue *Positions*) dans les vidéos de la PaduTeam.
 
-Le Saint-Graphique a été créé par **Chris et la PaduTeam**. Ce projet est directement **inspiré de [JnthnBS/saint-graphique](https://github.com/JnthnBS/saint-graphique)**, dont il réimplémente l'algorithme reconstruit comme méthode de calcul. Voir [Crédits et inspiration](#crédits-et-inspiration).
+Le Saint-Graphique a été créé par **Chris et la PaduTeam**. Voir [Crédits et inspiration](#crédits-et-inspiration).
 
 > **Projet non officiel.** Il n'a aucun lien avec Positions Revue ni avec la PaduTeam. L'algorithme original n'a pas été publié : ce dépôt reprend les **positions lues** sur les vidéos publiques et propose des méthodes de calcul ouvertes, sans prétendre à l'identité exacte.
 
@@ -22,7 +22,7 @@ Chaque **électorat** (candidat, liste, abstention) est ensuite placé au **bary
 Plusieurs **méthodes** coexistent et se choisissent dans l'interface :
 
 - `read_positions` (par défaut) : la réplique. Les 41 catégories sont placées là où le tableau de Chris les affiche, sur sa grille de 0,5. Sa formule n'étant pas publiée, ces positions sont lues et non recalculées ;
-- `ranks_jnthnbs` : la reconstruction de JnthnBS, calculée sur 30 points de données ouvertes. X est le rang du ratio patrimoine / niveau de vie, Y le rang du score de diplômes `5·bac+5 + 3·bac+3 + 2·bac+2 + bac − CAP − 2·brevet − 3·certificat/aucun` ;
+- `ranks` : une reconstruction publiée par un tiers (voir les [crédits](#crédits-et-inspiration)), calculée sur 30 points de données ouvertes. X est le rang du ratio patrimoine / niveau de vie, Y le rang du score de diplômes `5·bac+5 + 3·bac+3 + 2·bac+2 + bac − CAP − 2·brevet − 3·certificat/aucun` ;
 - `continuous` : les mêmes scores en valeurs continues, sans l'effet « escalier » des rangs ;
 - `mca` : une analyse des correspondances multiples, à titre exploratoire ;
 - ellipses de confiance par bootstrap sur les marges d'erreur des sondages.
@@ -79,7 +79,7 @@ Le code reste sous licence MIT, mais ces données n'y sont pas soumises. Le dép
 
 Écarts quadratiques moyens entre les positions lues sur les vidéos et celles de cette page, en unités d'axe. Détail et reproduction : [`docs/methodologie.md`](docs/methodologie.md).
 
-| Comparaison | Points | `read_positions` X / Y | `ranks_jnthnbs` X / Y |
+| Comparaison | Points | `read_positions` X / Y | `ranks` X / Y |
 |---|---|---|---|
 | Candidats 2022, tableau de mars 2025 | 7 | 0,16 / 0,20 | 0,16 / 0,91 |
 | Candidats législatives 2024, tableau de mars 2025 | 3 | 0,22 / 0,18 | 0,06 / 0,53 |
@@ -97,12 +97,12 @@ Le code reste sous licence MIT, mais ces données n'y sont pas soumises. Le dép
 
 Ce que ces chiffres disent, et ne disent pas :
 
-- **Les catégories coïncident par construction**, puisqu'elles sont lues : ce n'est pas une preuve. `ranks_jnthnbs` s'en écarte de 3,75 en X et 4,04 en Y sur 24 PCS.
+- **Les catégories coïncident par construction**, puisqu'elles sont lues : ce n'est pas une preuve. `ranks` s'en écarte de 3,75 en X et 4,04 en Y sur 24 PCS.
 - **Les candidats sont un vrai contrôle** : ces relevés n'entrent pas dans le calcul. Ils dépendent en revanche de nos compositions Ifop.
 - **Janvier 2025, candidats 2022 :** Chris les a ensuite déplacés, alors que ses catégories n'ont pas bougé. Nous retrouvons sa version de mars.
 - **La matrice v11 n'est pas répliquée.** C'est un autre modèle, à 7 lignes agrégées, dont le calcul de X n'est pas linéaire.
 - **Une partie des poids est estimée :** sur 41, 18 sont lus, 16 tirés du recensement et 7 de la taille des disques.
-- **L'axe X reste non élucidé.** Chris parle de niveau de capital, de composition du patrimoine et de taux de propriété, sans publier de formule. Les données testées ne tranchent pas, et la composition du patrimoine n'est publiée que pour 11 ou 12 catégories de ménages. `read_positions` n'a pas besoin de ce choix ; `ranks_jnthnbs` garde le ratio de JnthnBS, qui ne figure dans aucun énoncé relevé de Chris.
+- **L'axe X reste non élucidé.** Chris parle de niveau de capital, de composition du patrimoine et de taux de propriété, sans publier de formule. Les données testées ne tranchent pas, et la composition du patrimoine n'est publiée que pour 11 ou 12 catégories de ménages. `read_positions` n'a pas besoin de ce choix ; `ranks` garde le ratio de cette reconstruction, qui ne figure dans aucun énoncé relevé de Chris.
 - **La réplique porte sur les positions et les calculs,** pas sur l'habillage du logiciel de Chris.
 
 ## Feuille de route
@@ -132,7 +132,7 @@ Voir [CONTRIBUTING.md](CONTRIBUTING.md) : comment ajouter une élection, une mé
   - normalisation sur [−10, 10] ;
   - barycentres des électorats.
 
-  C'est cette méthode que réimplémente `ranks_jnthnbs`. Ce dépôt étant publié sans licence, son code, ses données et ses éléments graphiques **ne sont pas copiés** : la méthode est réécrite d'après sa description et la lecture de son code, sans en reprendre une ligne. L'exactitude est vérifiée par un test local, non publié, qui s'exécute contre sa version. Toutes les données sont reprises aux sources primaires.
+  C'est cette méthode que réimplémente `ranks`. Ce dépôt étant publié sans licence, son code, ses données et ses éléments graphiques **ne sont pas copiés** : la méthode est réécrite d'après sa description et la lecture de son code, sans en reprendre une ligne. L'exactitude est vérifiée par un test local, non publié, qui s'exécute contre sa version. Toutes les données sont reprises aux sources primaires.
 - **INSEE** et **instituts de sondage** : données citées dans [`data/SOURCES.md`](data/SOURCES.md).
 
 Ce projet n'est pas affilié à ces auteurs. S'ils souhaitent une modification de ces mentions, une issue suffit.

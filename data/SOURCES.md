@@ -2,7 +2,7 @@
 
 Fichier généré par `scripts/build_data.py`, à ne pas modifier à la main.
 
-`data/` contient des chiffres issus de publications primaires (Insee, nomenclature-pcs.fr, Ifop) ou calculés à partir d'elles par une méthode décrite ici, et les positions lues sur les vidéos de la PaduTeam (`data/positions_chris.json`). Aucune donnée de la reproduction JnthnBS n'y figure : son dépôt, sans licence, n'a servi que de contrôle local.
+`data/` contient des chiffres issus de publications primaires (Insee, nomenclature-pcs.fr, Ifop) ou calculés à partir d'elles par une méthode décrite ici, et les positions lues sur les vidéos de la PaduTeam (`data/positions_chris.json`). Aucune donnée de la reproduction citée dans les crédits n'y figure : son dépôt, sans licence, n'a servi que de contrôle local.
 
 ## Données Ifop : usage personnel et non commercial
 
@@ -37,7 +37,7 @@ Ce projet est à usage personnel et non commercial, et les données tirées de c
 - **Millésimes.** Les effectifs et les diplômes datent de 2022, le niveau de vie et le patrimoine de 2020-2021.
 - **Niveau de vie des retraités.** Publié par l'Insee (ERFS 2021, ligne Retraités).
 - **Patrimoine des retraités : calculé, non publié.** L'Insee publie plusieurs catégories de retraités, sans ensemble, et n'en donne la répartition dans les déciles de patrimoine que pour 2023-2024. Leur médiane commune y est estimée à 263,5 k€ par interpolation linéaire, entre les seuils publiés 205,1 et 283,2 k€. Elle est ramenée à début 2021 par le rapport des médianes de l'ensemble des ménages (177,2 / 205,1), soit **227,7 k€**, entre 177,2 et 244,7 k€ si ce rapport s'applique aux retraités. Repères publiés en 2020-2021 : 232,8 k€ pour les ménages de 60 à 69 ans, 211,5 k€ pour ceux de 70 ans ou plus.
-- **Comparaison avec la reproduction JnthnBS.** Pour les 29 PCS actives, les valeurs coïncident avec les siennes parce que c'est la même table. Cet accord n'est donc pas une validation indépendante.
+- **Comparaison avec la reproduction de référence.** Pour les 29 PCS actives, les valeurs coïncident avec les siennes parce que c'est la même table. Cet accord n'est donc pas une validation indépendante.
 
 | PCS | Libellé | Niveau de vie (€/mois) | Statut | Patrimoine (k€) | Statut | Patrimoine professionnel (%) | Statut de la composition |
 | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -74,7 +74,7 @@ Ce projet est à usage personnel et non commercial, et les données tirées de c
 
 ## Composition du patrimoine : ce qui existe, et à quel niveau
 
-Chris définit l'axe Exploitation par la composition du patrimoine des PCS : de l'absence de patrimoine jusqu'au capital d'entreprise. Le ratio patrimoine / niveau de vie vient de la reconstruction JnthnBS. Cette composition n'est pas publiée au niveau 2 des PCS dans les sources consultées :
+Chris définit l'axe Exploitation par la composition du patrimoine des PCS : de l'absence de patrimoine jusqu'au capital d'entreprise. Le ratio patrimoine / niveau de vie vient de la méthode des rangs reconstruite. Cette composition n'est pas publiée au niveau 2 des PCS dans les sources consultées :
 
 - **Insee, HVP 2020-2021 et 2023-2024.** Parts de la masse du patrimoine (immobilier, financier, professionnel, résiduel, et leur détail) et taux de détention : 11 catégories de ménages en 2020-2021, 12 en 2023-2024, selon la personne de référence. C'est le niveau le plus fin trouvé.
 - **nomenclature-pcs.fr, portraits de groupes.** Aucune composition du patrimoine. Les fichiers DEC_POR_1 à 10 portent sur l'âge, la famille, la santé, la migration et le logement, l'origine sociale, le diplôme, l'emploi, la situation financière, le mode de vie et la participation sociale. Seule la part de propriétaires concerne la détention, en 29 postes. Les tableaux par thème (DEC_THEM_8) donnent des patrimoines immobilier et financier médians, mais par groupe de niveau 1 et sans patrimoine professionnel.

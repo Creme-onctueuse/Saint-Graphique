@@ -3,9 +3,7 @@
 - score x (« exploitation ») : patrimoine / niveau de vie × 100 (``patrimoine_over_niveau_vie``) ;
 - score y (« domination ») : somme pondérée de la répartition des diplômes (``y_weights``).
 
-Algorithme reconstruit par JnthnBS (https://github.com/JnthnBS/saint-graphique), réimplémenté
-sans copie de code, d'après sa description et la lecture de son implémentation.
-Saint-Graphique original : Chris et la PaduTeam.
+Origine de l'algorithme : voir ``ranks``.
 """
 
 from __future__ import annotations

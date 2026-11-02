@@ -14,7 +14,7 @@ bootstrap des compositions (voir ``pipeline.methods.bootstrap``). Sans ``--elect
 fichiers d'élections disparues sont supprimés. ``index.json`` décrit ensuite, pour le front, les
 méthodes, élections, axes, groupes et fichiers disponibles.
 
-``--parity`` écrit les entrées et sorties attendues de ``ranks_jnthnbs`` et ``continuous``,
+``--parity`` écrit les entrées et sorties attendues de ``ranks`` et ``continuous``,
 calculées sur le jeu FICTIF (``pipeline/tests/fixtures/fake/``, voir ``scripts/fake_data.py``),
 dans ``web/src/core/__fixtures__/parity.json``. Cette fixture sert aux tests vitest du portage
 TypeScript.
@@ -61,7 +61,7 @@ from pipeline.model import (
 FAKE_DIR = ROOT / "pipeline" / "tests" / "fixtures" / "fake"
 PARITY_PATH = ROOT / "web" / "src" / "core" / "__fixtures__" / "parity.json"
 DEFAULT_METHOD = "read_positions"
-PARITY_METHODS = ("ranks_jnthnbs", "continuous")
+PARITY_METHODS = ("ranks", "continuous")
 POPULATION_LABEL = "Population (sans élection)"
 DECIMALS = 6
 
@@ -265,7 +265,7 @@ def parity_document(
             "x = patrimoine_keur / niveau_vie_mensuel_eur * 100 ; y = somme de gauche à droite, "
             "dans l'ordre bac5..certif_aucun, des y_weights * diplomes, sauf retired_y_override "
             "(score forcé pour un code).",
-            "ranks_jnthnbs : rang décroissant 1..N, coordonnée = lo + (hi - lo) / (N - 1) * "
+            "ranks : rang décroissant 1..N, coordonnée = lo + (hi - lo) / (N - 1) * "
             "(N - rang). Ex æquo : le plus petit code PCS (ordre lexicographique) reçoit le "
             "meilleur rang. Le jeu contient des ex æquo volontaires (x : 62/63, y : 67/68).",
             "continuous : z-score non pondéré (écart-type ddof 0) puis min/max : lo + (hi - lo) * "

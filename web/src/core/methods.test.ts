@@ -82,7 +82,7 @@ describe('normalizeParams', () => {
   });
 
   it('distingue un score imposé absent (repli) d’un score explicitement nul', () => {
-    const fallback = defaultParamsFor('ranks_jnthnbs');
+    const fallback = defaultParamsFor('ranks');
     expect(normalizeParams({}, fallback).retired_y_override).toEqual({ code: '7', score: -180 });
     expect(normalizeParams({ retired_y_override: null }, fallback).retired_y_override).toBeNull();
   });
@@ -95,7 +95,7 @@ describe('normalizeParams', () => {
 
 describe('registre des méthodes', () => {
   it('connaît les méthodes portées et pas les autres', () => {
-    expect(isClientComputable('ranks_jnthnbs', defaultParamsFor('ranks_jnthnbs'))).toBe(true);
+    expect(isClientComputable('ranks', defaultParamsFor('ranks'))).toBe(true);
     expect(isClientComputable('continuous', defaultParamsFor('continuous'))).toBe(true);
     expect(isClientComputable('mca', defaultParamsFor('mca'))).toBe(false);
     expect(
@@ -118,10 +118,10 @@ describe('registre des méthodes', () => {
 });
 
 describe('computeLayout', () => {
-  const params = defaultParamsFor('ranks_jnthnbs');
+  const params = defaultParamsFor('ranks');
 
   it('calcule rangs, parts de population et barycentre', () => {
-    const layout = computeLayout('ranks_jnthnbs', params, { pcs });
+    const layout = computeLayout('ranks', params, { pcs });
     const byCode = new Map(layout.pcs.map((p) => [p.code, p]));
     expect(byCode.get('7')?.x).toBe(10);
     expect(byCode.get('21')?.x).toBe(-10);
@@ -138,7 +138,7 @@ describe('computeLayout', () => {
   });
 
   it('place les électorats de niveau 1 sur les barycentres de groupes', () => {
-    const layout = computeLayout('ranks_jnthnbs', params, {
+    const layout = computeLayout('ranks', params, {
       pcs,
       election: {
         pcs_level: 1,
@@ -161,7 +161,7 @@ describe('computeLayout', () => {
       candidates: [{ id: 'a' }],
       composition: { a: { '21': 10, '22': 30, '7': 40, '81': 20 } },
     };
-    const layout = computeLayout('ranks_jnthnbs', params, { pcs, election });
+    const layout = computeLayout('ranks', params, { pcs, election });
     const g2 = layout.groups.get('2');
     const g7 = layout.groups.get('7');
     expect(layout.candidates[0]?.x).toBeCloseTo(((g2?.x ?? 0) * 40 + (g7?.x ?? 0) * 40) / 80, 12);
@@ -169,7 +169,7 @@ describe('computeLayout', () => {
 
   it('utilise les PCS détaillées si la méthode ET la composition sont de niveau 2', () => {
     const layout = computeLayout(
-      'ranks_jnthnbs',
+      'ranks',
       { ...params, candidate_pcs_level: 2 },
       {
         pcs,

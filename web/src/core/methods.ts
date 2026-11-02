@@ -8,9 +8,7 @@
  * Ajouter une méthode : appeler registerClientMethod({ id, label, ranked, placeAxis }) avec le même `id`
  * que dans config/methods.yaml, puis ajouter un cas de parité (pipeline/build.py, PARITY_METHODS).
  *
- * Algorithme reconstruit par JnthnBS (https://github.com/JnthnBS/saint-graphique), réimplémenté
- * sans copie de code, d'après sa description et la lecture de son implémentation.
- * Saint-Graphique original : Chris et la PaduTeam.
+ * Origine de l'algorithme des rangs : voir les crédits du README.
  */
 import {
   aggregateShares,
@@ -66,7 +64,7 @@ const BASE_PARAMS: MethodParams = {
 
 /** Paramètres par défaut si les données n'en fournissent pas (miroir de config/methods.yaml). */
 const DEFAULT_PARAMS: Record<string, MethodParams> = {
-  ranks_jnthnbs: { ...BASE_PARAMS, retired_y_override: { code: RETIRED_CODE, score: -180 } },
+  ranks: { ...BASE_PARAMS, retired_y_override: { code: RETIRED_CODE, score: -180 } },
   continuous: { ...BASE_PARAMS },
 };
 
@@ -128,8 +126,8 @@ export function getClientMethod(id: string): ClientMethod | undefined {
 }
 
 registerClientMethod({
-  id: 'ranks_jnthnbs',
-  label: 'Rangs (reconstruction JnthnBS)',
+  id: 'ranks',
+  label: 'Rangs reconstruits',
   ranked: true,
   placeAxis: (items, range) => rankCoords(items, range),
 });

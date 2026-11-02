@@ -361,7 +361,7 @@ async function main() {
 
   // --- Curseurs : recalcul dans le navigateur ------------------------------------------------------
   // Les curseurs et les statuts de patrimoine n'existent que pour les méthodes calculées.
-  await chooseMethod('ranks_jnthnbs');
+  await chooseMethod('ranks');
   const before = await evaluate(
     `document.querySelector('.sg-pcs[data-key="p:31"]')?.getAttribute('cy')`,
   );

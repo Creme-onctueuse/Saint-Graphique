@@ -97,7 +97,7 @@ const rec = (v: unknown): Rec => (isRec(v) ? v : {});
 /** Libellés de repli des méthodes connues. */
 const METHOD_LABELS: Record<string, string> = {
   read_positions: 'Positions lues (Chris)',
-  ranks_jnthnbs: 'Rangs (reconstruction JnthnBS)',
+  ranks: 'Rangs reconstruits',
   continuous: 'Valeurs continues',
   mca: 'ACM (terciles)',
 };

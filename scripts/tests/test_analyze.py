@@ -325,13 +325,13 @@ def test_linear_barycenter_check() -> None:
 def test_summary_rows_skip_empty_blocks() -> None:
     report = {
         "version_id": "v",
-        "computed": "data/computed/ranks_jnthnbs/population.json",
+        "computed": "data/computed/ranks/population.json",
         "pcs": {"n": 2, "rmse_x": 1, "rmse_y": 2, "spearman_x": 0.5, "spearman_y": 0.6},
         "candidates": {"n": 0},
     }
     rows = summary_rows([report])
     assert len(rows) == 1
-    assert rows[0]["method"] == "ranks_jnthnbs"
+    assert rows[0]["method"] == "ranks"
     assert rows[0]["election"] == "population"
 
 

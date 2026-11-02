@@ -74,7 +74,7 @@ ELECTION_DOC = {
     },
 }
 COMPUTED_DOC = {
-    "method": "ranks_jnthnbs",
+    "method": "ranks",
     "params": {},
     "election_id": "2022_presidentielle_t1",
     "axes": {"x_label": "Exploitation", "y_label": "Domination", "range": [-10, 10]},

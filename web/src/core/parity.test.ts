@@ -72,7 +72,7 @@ describe('lecture de la fixture', () => {
       },
       cases: [
         {
-          method: 'ranks_jnthnbs',
+          method: 'ranks',
           election_id: 'e',
           params,
           expected: { ...expected, population_barycenter: { x: 0, y: 0 } },
@@ -109,7 +109,7 @@ describe('lecture de la fixture', () => {
     const [c] = parityCases({
       cases: [
         {
-          method: 'ranks_jnthnbs',
+          method: 'ranks',
           params,
           input: { pcs, composition: { a: { '2': 1 } }, candidates: [{ id: 'a' }] },
           expected: {

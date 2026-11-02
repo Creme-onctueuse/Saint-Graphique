@@ -1,6 +1,6 @@
 """Bootstrap des compositions et ellipses de confiance (jeu FICTIF).
 
-Référence théorique : pour ``ranks_jnthnbs`` et ``continuous``, les PCS ne dépendent pas de
+Référence théorique : pour ``ranks`` et ``continuous``, les PCS ne dépendent pas de
 l'élection. Le barycentre d'un candidat, B = Σ p_g·G_g, est donc linéaire dans sa composition
 normalisée p, d'où Cov(B) = Gᵀ·(diag(p) - p·pᵀ)/n·G, avec n = (1,96 × 50 / margin_pts)². Les
 ellipses simulées (graine fixée) doivent retrouver ces demi-axes à l'erreur Monte-Carlo près :
@@ -26,7 +26,7 @@ from pipeline.methods.bootstrap import (
 from pipeline.model import ROOT, Election, PcsData, Result, load_elections, load_pcs
 
 FAKE = ROOT / "pipeline" / "tests" / "fixtures" / "fake"
-BOOTSTRAPPED = ("ranks_jnthnbs", "continuous")
+BOOTSTRAPPED = ("ranks", "continuous")
 CHI2_95 = -2 * math.log(0.05)
 
 
@@ -95,7 +95,7 @@ def test_methods_bootstrap_matches_theory(
 
 
 def test_methods_bootstrap_margin(pcs_data: PcsData, elections: dict[str, Election]) -> None:
-    method = METHODS["ranks_jnthnbs"]
+    method = METHODS["ranks"]
     pres, euro = elections["2099_presidentielle_t1"], elections["2099_europeennes"]
     assert pres.margin_pts == 3.0 and euro.margin_pts is None
     # Sans marge dans l'élection : 3 points par défaut.

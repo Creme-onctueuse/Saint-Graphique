@@ -3,7 +3,7 @@
 Pour chaque variable de ``data/pcs.json`` : rangs des PCS ramenés sur [-10, 10], moyenne des
 groupes par population, puis barycentre linéaire des électorats avec nos compositions. Mesure
 l'accord avec les PCS et les candidats numérisés. La variante « ratio » reproduit le X de
-``ranks_jnthnbs`` et sert de contrôle.
+``ranks`` et sert de contrôle.
 
 Usage :
     uv run python scripts/analyze/x_variants.py --json research/digitized/compare/_x_variants.json

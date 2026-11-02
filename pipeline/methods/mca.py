@@ -1,9 +1,6 @@
 """Méthode « mca » : analyse des correspondances multiples (ACM) avec prince.
 
-Utilise le score diplôme de ``ranks_jnthnbs``. Algorithme reconstruit par JnthnBS
-(https://github.com/JnthnBS/saint-graphique), réimplémenté
-sans copie de code, d'après sa description et la lecture de son implémentation.
-Saint-Graphique original : Chris et la PaduTeam.
+Utilise le score diplôme de ``ranks`` : voir ce module pour l'origine de l'algorithme.
 
 Construction (choix documentés) :
 
@@ -27,8 +24,8 @@ Construction (choix documentés) :
    diplôme pour y).
 5. Échelle : min/max vers [-10, 10] sur chaque axe, comme ``continuous``.
 
-Limites, constatées en terciles sur les données 2022 de la reproduction JnthnBS et vérifiées par
-le test local ``test_methods_reference.py`` (à revérifier sur les données définitives, ce jeu
+Limites, constatées en terciles sur les données 2022 de la reproduction de référence et vérifiées
+par le test local ``test_methods_reference.py`` (à revérifier sur les données définitives, ce jeu
 encodant les retraités par 180 % de CAP) :
 
 - les trois variables sont fortement liées (Spearman de 0,72 à 0,80 sur les 30 PCS) : la

@@ -98,7 +98,7 @@ def build_pcs(
         )
         if code == RETIRED_CODE:
             notes += (
-                " Diplômes réels des retraités ; la méthode ranks_jnthnbs les remplace par un "
+                " Diplômes réels des retraités ; la méthode ranks les remplace par un "
                 "score fixe."
             )
         items.append(
@@ -199,8 +199,8 @@ def render_sources(
         "`data/` contient des chiffres issus de publications primaires (Insee, "
         "nomenclature-pcs.fr, Ifop) ou calculés à partir d'elles par une méthode décrite ici, et "
         "les positions lues sur les vidéos de la PaduTeam (`data/positions_chris.json`). "
-        "Aucune donnée de la reproduction JnthnBS n'y figure : son dépôt, sans licence, n'a servi "
-        "que de contrôle local.",
+        "Aucune donnée de la reproduction citée dans les crédits n'y figure : son dépôt, sans "
+        "licence, n'a servi que de contrôle local.",
         "",
         "## Données Ifop : usage personnel et non commercial",
         "",
@@ -330,7 +330,7 @@ def render_sources(
         f"{french(retired.high_keur)} k€ si ce rapport s'applique aux retraités. Repères publiés "
         f"en 2020-2021 : {french(retired.age_60_69_2021_keur)} k€ pour les ménages de 60 à 69 ans, "
         f"{french(retired.age_70_plus_2021_keur)} k€ pour ceux de 70 ans ou plus.",
-        "- **Comparaison avec la reproduction JnthnBS.** Pour les 29 PCS actives, les valeurs "
+        "- **Comparaison avec la reproduction de référence.** Pour les 29 PCS actives, les valeurs "
         "coïncident avec les siennes parce que c'est la même table. Cet accord n'est donc pas une "
         "validation indépendante.",
         "",
@@ -359,8 +359,8 @@ def render_sources(
         "",
         "Chris définit l'axe Exploitation par la composition du patrimoine des PCS : de l'absence "
         "de patrimoine jusqu'au capital d'entreprise. Le ratio patrimoine / niveau de vie vient de "
-        "la reconstruction JnthnBS. Cette composition n'est pas publiée au niveau 2 des PCS dans "
-        "les sources consultées :",
+        "la méthode des rangs reconstruite. Cette composition n'est pas publiée au niveau 2 des "
+        "PCS dans les sources consultées :",
         "",
         "- **Insee, HVP 2020-2021 et 2023-2024.** Parts de la masse du patrimoine (immobilier, "
         "financier, professionnel, résiduel, et leur détail) et taux de détention : 11 catégories "

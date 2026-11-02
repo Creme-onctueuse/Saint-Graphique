@@ -85,8 +85,8 @@ function tallyDetail(t: StatusTally): string {
  * Il dépend du choix de méthode, pas des données : il reste affiché quelles que soient les valeurs.
  */
 export const X_DEFINITION_RESERVE =
-  "Définition de l'axe X : cette page classe les PCS d'après leur patrimoine et leur niveau de vie " +
-  '(reconstruction de JnthnBS). Chris définit cet axe par la composition du patrimoine de chaque ' +
+  "Définition de l'axe X : cette page classe les PCS d'après leur patrimoine et leur niveau de vie. " +
+  'Chris définit cet axe par la composition du patrimoine de chaque ' +
   'PCS, une donnée introuvable à ce niveau dans les sources consultées : les positions peuvent ' +
   'différer de son graphique.';
 

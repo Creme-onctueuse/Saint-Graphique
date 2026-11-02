@@ -1,11 +1,8 @@
 """Méthode « continuous » : scores bruts → z-scores → min/max vers [-10, 10], sans rangs.
 
-Dérivée de ``ranks_jnthnbs``. Algorithme reconstruit par JnthnBS
-(https://github.com/JnthnBS/saint-graphique), réimplémenté
-sans copie de code, d'après sa description et la lecture de son implémentation.
-Saint-Graphique original : Chris et la PaduTeam.
+Dérivée de ``ranks`` : voir ce module pour l'origine de l'algorithme.
 
-Mêmes scores que ``ranks_jnthnbs`` (x : patrimoine / niveau de vie × 100 ; y : diplômes
+Mêmes scores que ``ranks`` (x : patrimoine / niveau de vie × 100 ; y : diplômes
 pondérés), mais sans forçage des retraités par défaut (``retired_y_override: null``) : leur
 répartition de diplômes est utilisée telle quelle. Chaque score est standardisé
 (z = (s - moyenne) / écart-type, non pondéré, sur les N PCS) puis ramené linéairement sur

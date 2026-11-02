@@ -81,11 +81,11 @@ Nos compositions de 2017 et 2022 coïncident avec celles affichées dans ces pan
 - **Le logiciel.** L'interface (« Retour au rapport », champs « Somme de », filtres « PCS LEVEL 2 » et « Année ») évoque Power BI. Aucune source ne le dit.
 - **La date des fichiers montrés.** Une vidéo peut montrer un fichier plus ancien : une date de version est une borne, pas une date de création.
 
-## 4. Reconstruction tierce : JnthnBS
+## 4. Reconstruction tierce
 
-Le dépôt [JnthnBS/saint-graphique](https://github.com/JnthnBS/saint-graphique), sans lien avec la PaduTeam, propose une reconstruction déclarée comme telle : X par le rang du ratio patrimoine / niveau de vie, Y par le rang d'un score de diplômes, un score fixe pour les retraités, et un barycentre des groupes de niveau 1. Notre méthode `ranks_jnthnbs` suit cette description.
+Le dépôt [JnthnBS/saint-graphique](https://github.com/JnthnBS/saint-graphique), sans lien avec la PaduTeam, propose une reconstruction déclarée comme telle : X par le rang du ratio patrimoine / niveau de vie, Y par le rang d'un score de diplômes, un score fixe pour les retraités, et un barycentre des groupes de niveau 1. Notre méthode `ranks` suit cette description.
 
-Ce ratio ne figure dans aucun énoncé relevé de Chris. Un accord avec cette reconstruction n'est donc pas une preuve indépendante : elle a été conçue pour ressembler au graphique, et l'accord de `ranks_jnthnbs` avec les candidats lui doit une partie de sa qualité.
+Ce ratio ne figure dans aucun énoncé relevé de Chris. Un accord avec cette reconstruction n'est donc pas une preuve indépendante : elle a été conçue pour ressembler au graphique, et l'accord de `ranks` avec les candidats lui doit une partie de sa qualité.
 
 Des commentateurs proposent d'autres lectures, non vérifiées ici. Ventre Presse lit X comme la part des revenus du capital ([71NMMwmEfsg 08:05](https://youtu.be/71NMMwmEfsg?t=485)), puis rapporte une discussion avec Chris : « ça raisonne plus en termes de patrimoine que de revenus » ([z-phWkqNqyg 14:31](https://youtu.be/z-phWkqNqyg?t=871)).
 
@@ -100,7 +100,7 @@ Reproduction : `scripts/analyze/compare.py`, `check_barycenter.py`, `x_variants.
 | Méthode | Candidats du tableau (19) | Avec janvier 2025 pour 2022 (27) | Matrice v11 (21) | Catégories lues |
 |---|---|---|---|---|
 | `read_positions` | 0,18 / 0,21 : **atteint** | 0,44 / 0,28 : non atteint | 2,74 / 2,15 : non atteint | sans valeur de preuve (voir ci-dessous) |
-| `ranks_jnthnbs` | 0,22 / 1,01 : non atteint | 0,43 / 1,02 : non atteint | 2,53 / 2,39 : non atteint | 3,75 / 4,04 : non atteint |
+| `ranks` | 0,22 / 1,01 : non atteint | 0,43 / 1,02 : non atteint | 2,53 / 2,39 : non atteint | 3,75 / 4,04 : non atteint |
 | `continuous` | 5,18 / 0,80 : non atteint | 5,26 / 0,92 : non atteint | 7,48 / 2,86 : non atteint | 4,80 / 3,24 : non atteint |
 | `mca` | 3,15 / 1,86 : non atteint | 3,32 / 1,80 : non atteint | 5,49 / 2,61 : non atteint | 5,74 / 10,21 : non atteint |
 
@@ -132,24 +132,24 @@ Sans la ligne de janvier 2025 pour 2022, les 19 candidats du tableau donnent 0,1
 
 | Version lue | Méthode | Points | RMSE X | RMSE Y | Spearman X | Spearman Y |
 |---|---|---|---|---|---|---|
-| Tableau du 28 février 2026, PCS | `ranks_jnthnbs` | 24 | 3,75 | 4,04 | 0,84 | 0,83 |
+| Tableau du 28 février 2026, PCS | `ranks` | 24 | 3,75 | 4,04 | 0,84 | 0,83 |
 | | `continuous` | 24 | 4,80 | 3,24 | 0,84 | 0,83 |
 | | `mca` | 24 | 5,74 | 10,21 | 0,74 | -0,31 |
-| Tableau du 27 mars 2025, candidats 2022 | `ranks_jnthnbs` | 7 | 0,16 | 0,91 | 0,96 | 0,29 |
+| Tableau du 27 mars 2025, candidats 2022 | `ranks` | 7 | 0,16 | 0,91 | 0,96 | 0,29 |
 | | `continuous` | 7 | 5,19 | 0,78 | 0,93 | 0,89 |
-| Tableau du 26 janvier 2025, candidats 2017 | `ranks_jnthnbs` | 5 | 0,26 | 1,23 | 1,00 | 0,67 |
-| Matrice v11, 7 lignes agrégées | `ranks_jnthnbs` | 5 | 2,73 | 2,03 | 1,00 | 1,00 |
-| Matrice v11, candidats 2022 | `ranks_jnthnbs` | 12 | 2,49 | 2,57 | 0,93 | 0,03 |
+| Tableau du 26 janvier 2025, candidats 2017 | `ranks` | 5 | 0,26 | 1,23 | 1,00 | 0,67 |
+| Matrice v11, 7 lignes agrégées | `ranks` | 5 | 2,73 | 2,03 | 1,00 | 1,00 |
+| Matrice v11, candidats 2022 | `ranks` | 12 | 2,49 | 2,57 | 0,93 | 0,03 |
 | | `continuous` | 12 | 7,51 | 3,03 | 0,91 | 0,38 |
-| Matrice v11, candidats 2017 | `ranks_jnthnbs` | 9 | 2,58 | 2,14 | 0,93 | 0,13 |
+| Matrice v11, candidats 2017 | `ranks` | 9 | 2,58 | 2,14 | 0,93 | 0,13 |
 
-Les plus grands écarts de PCS, avec `ranks_jnthnbs` : Employés administratifs d'entreprise, Clergé, professions de santé et du travail social, Professeurs et professions scientifiques.
+Les plus grands écarts de PCS, avec `ranks` : Employés administratifs d'entreprise, Clergé, professions de santé et du travail social, Professeurs et professions scientifiques.
 
 Le plus grand écart sur les électorats vient des retraités. Nous les plaçons en un seul point à Y = -10, là où la matrice v11 affiche Y = -0,69. Comme ils pèsent lourd, cela explique que l'ordre des candidats en Y soit presque perdu (Spearman 0,03 et 0,13) alors que les 5 groupes d'actifs sont bien ordonnés.
 
 ### Définitions possibles de X
 
-Chaque variable de `data/pcs.json` est classée, ramenée sur [-10 ; +10], puis agrégée en groupes et en barycentres. La variante du ratio reproduit exactement `ranks_jnthnbs`, ce qui valide le calcul.
+Chaque variable de `data/pcs.json` est classée, ramenée sur [-10 ; +10], puis agrégée en groupes et en barycentres. La variante du ratio reproduit exactement `ranks`, ce qui valide le calcul.
 
 | Variable | Valeurs distinctes | PCS, février 2026 (24) RMSE / Spearman | Candidats, tableau 2025 (27) RMSE / Spearman | Candidats, matrice v11 (21) RMSE / Spearman |
 |---|---|---|---|---|
@@ -170,7 +170,7 @@ Ces chiffres ne tranchent pas entre ratio et composition, pour trois raisons.
 
 ## 6. Choix de la v1
 
-La formule des coordonnées reste inconnue : la v1 ne la devine pas. `read_positions` reprend les positions lues et sert de réplique. `ranks_jnthnbs` reste la méthode calculée sur données ouvertes.
+La formule des coordonnées reste inconnue : la v1 ne la devine pas. `read_positions` reprend les positions lues et sert de réplique. `ranks` reste la méthode calculée sur données ouvertes.
 
 - **Positions.** 41 postes, lus sur quatre versions du tableau, de janvier 2025 à février 2026, puis ramenés sur la grille de 0,5. Une lecture qui change de case ouvre une révision et seule la dernière compte : cela garde le déplacement des deux catégories d'employés. `scripts/analyze/build_positions.py` écrit `data/positions_chris.json`.
 - **Poids.** 18 sont lus en infobulle, 16 viennent du recensement 2022 multiplié par le rapport médian avec les infobulles (0,79), 7 de l'aire du disque calibrée sur les infobulles. Leur somme atteint 99,2 sans contrainte imposée, ce qui les conforte sans les prouver.
@@ -183,7 +183,7 @@ Limites des lectures : certaines attributions reposent sur des libellés déplac
 
 ### Pistes pour une méthode calculée
 
-- **Retraités.** Une position unique très basse est incompatible avec les versions lues. Les distinguer par ancienne catégorie retire le plus gros écart en Y de `ranks_jnthnbs`.
+- **Retraités.** Une position unique très basse est incompatible avec les versions lues. Les distinguer par ancienne catégorie retire le plus gros écart en Y de `ranks`.
 - **Grain.** Une méthode en 30 codes ne peut pas représenter les 41 postes, en particulier les trois tailles d'exploitation agricole et les six catégories de retraités.
 - **Barycentre.** Pour Y, le barycentre linéaire suffit, y compris dans la matrice v11. Pour X, il reproduit le tableau de 2025 mais pas la matrice v11.
 - **Cible.** Le tableau de 2025 à février 2026 reste la seule source détaillée par PCS.

@@ -1,5 +1,5 @@
 {
-  "method": "ranks_jnthnbs",
+  "method": "ranks",
   "params": {
     "x_score": "patrimoine_over_niveau_vie",
     "y_weights": {
@@ -21,7 +21,7 @@
       10
     ]
   },
-  "election_id": "population",
+  "election_id": "exemple_presidentielle",
   "generated_at": "2026-10-31T00:00:00Z",
   "axes": {
     "x_label": "Exploitation",
@@ -303,7 +303,113 @@
       "weight": 32.99999890000004
     }
   ],
-  "candidates": [],
+  "candidates": [
+    {
+      "id": "ambre",
+      "label": "Candidate Ambre",
+      "color": "#e69f00",
+      "x": 2.9481148231327094,
+      "y": -3.055404705529924,
+      "national_share_pct": 27,
+      "ellipse": {
+        "rx": 0.5716,
+        "ry": 0.4947,
+        "angle_deg": -83.48
+      }
+    },
+    {
+      "id": "ardoise",
+      "label": "Candidate Ardoise",
+      "color": "#4a5560",
+      "x": 0.4793096123837816,
+      "y": -3.8927319390020916,
+      "national_share_pct": 24,
+      "ellipse": {
+        "rx": 0.5438,
+        "ry": 0.4822,
+        "angle_deg": 53.1
+      }
+    },
+    {
+      "id": "carmin",
+      "label": "Candidate Carmin",
+      "color": "#c0392b",
+      "x": 0.1377990449706274,
+      "y": -1.833761668802564,
+      "national_share_pct": 21,
+      "ellipse": {
+        "rx": 0.5531,
+        "ry": 0.4755,
+        "angle_deg": 55.32
+      }
+    },
+    {
+      "id": "azur",
+      "label": "Candidat Azur",
+      "color": "#0072b2",
+      "x": 3.699704746066423,
+      "y": -4.462395029556854,
+      "national_share_pct": 9,
+      "ellipse": {
+        "rx": 0.5911,
+        "ry": 0.4573,
+        "angle_deg": -67.68
+      }
+    },
+    {
+      "id": "olive",
+      "label": "Candidat Olive",
+      "color": "#5f8f2f",
+      "x": 2.0517567930790817,
+      "y": 0.10343878350430345,
+      "national_share_pct": 8,
+      "ellipse": {
+        "rx": 0.5823,
+        "ry": 0.5122,
+        "angle_deg": 81.41
+      }
+    },
+    {
+      "id": "lilas",
+      "label": "Candidate Lilas",
+      "color": "#9b72cf",
+      "x": 2.1170202451439746,
+      "y": 0.11267991958524143,
+      "national_share_pct": 7,
+      "ellipse": {
+        "rx": 0.5646,
+        "ry": 0.5155,
+        "angle_deg": 71.68
+      }
+    },
+    {
+      "id": "safran",
+      "label": "Candidat Safran",
+      "color": "#d4a017",
+      "x": 2.2054247151794546,
+      "y": -3.455008894596214,
+      "national_share_pct": 4,
+      "ellipse": {
+        "rx": 0.5697,
+        "ry": 0.4602,
+        "angle_deg": 71.25
+      }
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "x": 0.20295218252612385,
+      "y": -3.2427378439722947,
+      "national_share_pct": 26,
+      "is_abstention": true,
+      "ellipse": {
+        "rx": 0.6325,
+        "ry": 0.5412,
+        "angle_deg": 47.01
+      }
+    }
+  ],
   "population_barycenter": {
     "x": 1.5585144423023929,
     "y": -2.731206954936779

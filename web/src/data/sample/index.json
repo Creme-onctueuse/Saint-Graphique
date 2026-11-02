@@ -13,12 +13,12 @@
     ]
   },
   "path_template": "{method}/{election}.json",
-  "default_method": "ranks_jnthnbs",
+  "default_method": "ranks",
   "methods": [
     {
-      "id": "ranks_jnthnbs",
+      "id": "ranks",
       "label": "Rangs (réplique Chris v1)",
-      "description": "Réplique : rangs 1..N normalisés sur [-10, 10] (algorithme reconstruit par JnthnBS ; graphique original de Chris et de la PaduTeam)",
+      "description": "Réplique : rangs 1..N normalisés sur [-10, 10] (graphique original de Chris et de la PaduTeam)",
       "ellipses": true,
       "elections": [
         "population",

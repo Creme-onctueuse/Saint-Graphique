@@ -6,7 +6,7 @@ et liste les plus grands écarts. Mêmes mesures pour les candidats si possible.
 (ratio patrimoine / niveau de vie, etc.), sans rien modifier aux méthodes.
 
 Usage :
-    uv run python scripts/analyze/compare.py research/digitized/v.json --method ranks_jnthnbs \
+    uv run python scripts/analyze/compare.py research/digitized/v.json --method ranks \
         --election 2022_presidentielle_t1 --hypotheses
     uv run python scripts/analyze/compare.py research/digitized/v.json --computed fichier.json
 """
@@ -220,7 +220,7 @@ def ratio(item: Mapping[str, Any]) -> float | None:
 
 
 def diploma_score(item: Mapping[str, Any]) -> float | None:
-    """Score de diplôme de JnthnBS, avec les poids 5, 3, 2, 1, -1, -2, -3."""
+    """Score de diplôme de la méthode des rangs, avec les poids 5, 3, 2, 1, -1, -2, -3."""
     diplomas = item.get("diplomes")
     if not diplomas:
         return None
@@ -360,7 +360,7 @@ def print_metrics(title: str, block: Mapping[str, Any]) -> None:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("digitized", type=Path)
-    parser.add_argument("--method", default="ranks_jnthnbs")
+    parser.add_argument("--method", default="ranks")
     parser.add_argument("--election", default="population")
     parser.add_argument("--computed", type=Path, help="fichier calculé à la place de la méthode")
     parser.add_argument("--min-confidence", type=float, default=0.0)

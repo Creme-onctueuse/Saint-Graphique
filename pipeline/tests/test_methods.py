@@ -28,7 +28,7 @@ from pipeline.model import (
 )
 
 FAKE = ROOT / "pipeline" / "tests" / "fixtures" / "fake"
-ALL_METHODS = ("ranks_jnthnbs", "continuous", "mca")
+ALL_METHODS = ("ranks", "continuous", "mca")
 PRES = "2099_presidentielle_t1"
 EURO = "2099_europeennes"
 TOL = 1e-12
@@ -81,7 +81,7 @@ def test_methods_registry_contains_all_methods() -> None:
         method = get_method(name)
         assert isinstance(method, Method)
         assert method.name == name and method.label
-    assert METHODS["ranks_jnthnbs"].bootstrap and METHODS["continuous"].bootstrap
+    assert METHODS["ranks"].bootstrap and METHODS["continuous"].bootstrap
     assert not METHODS["mca"].bootstrap
 
 
@@ -112,7 +112,7 @@ def test_methods_register_new_method_without_touching_the_rest(pcs_data: PcsData
 
 def test_methods_register_rejects_duplicates_and_non_methods() -> None:
     class Imposteur:
-        name = "ranks_jnthnbs"
+        name = "ranks"
         label = "Imposteur"
         bootstrap = False
 
@@ -125,7 +125,7 @@ def test_methods_register_rejects_duplicates_and_non_methods() -> None:
         register(Imposteur)
     with pytest.raises(TypeError):
         register(Incomplete)
-    assert type(METHODS["ranks_jnthnbs"]).__name__ == "RanksJnthnbs"
+    assert type(METHODS["ranks"]).__name__ == "Ranks"
     assert "incomplete" not in METHODS
 
 
@@ -205,7 +205,7 @@ def test_methods_level2_composition(name: str, pcs_data: PcsData,
 
 
 def test_methods_candidate_edge_cases(pcs_data: PcsData, elections: dict[str, Election]) -> None:
-    method = METHODS["ranks_jnthnbs"]
+    method = METHODS["ranks"]
     base = method.compute(pcs_data.items, None, {})
     solo = method.compute(pcs_data.items, _single(elections[PRES], {"3": 100.0}), {})
     assert solo.candidates["solo"] == pytest.approx(base.groups["3"], abs=TOL)
@@ -220,12 +220,12 @@ def test_methods_candidate_edge_cases(pcs_data: PcsData, elections: dict[str, El
     )
 
 
-# --- ranks_jnthnbs --------------------------------------------------------------------------
+# --- ranks --------------------------------------------------------------------------
 
 
 def test_methods_ranks_grid_and_formula(results: dict, pcs_data: PcsData) -> None:
     """Coordonnées = -10 + (20/29)·(30 - rang), rangs décroissants des scores."""
-    result = results[("ranks_jnthnbs", PRES)]
+    result = results[("ranks", PRES)]
     n = len(pcs_data.items)
     grid = sorted(-10 + (20 / (n - 1)) * (n - r) for r in range(1, n + 1))
     assert sorted(p.x for p in result.pcs.values()) == grid
@@ -246,7 +246,7 @@ def test_methods_ranks_tie_break_by_code(results: dict, pcs_data: PcsData) -> No
     by_code = {p.code: p for p in pcs_data.items}
     assert x_scores([by_code["62"]])[0] == x_scores([by_code["63"]])[0]
     assert by_code["67"].diplomes == by_code["68"].diplomes
-    pcs = results[("ranks_jnthnbs", PRES)].pcs
+    pcs = results[("ranks", PRES)].pcs
     step = 20 / (len(by_code) - 1)
     assert pcs["62"].x - pcs["63"].x == pytest.approx(step)
     assert pcs["67"].y - pcs["68"].y == pytest.approx(step)
@@ -259,7 +259,7 @@ def test_methods_ranks_retired_override(pcs_data: PcsData) -> None:
     learned = {k: 0.0 for k in ("bac3", "bac2", "bac", "cap", "brevet", "certif_aucun")}
     items = tuple(replace(p, diplomes={"bac5": 100.0, **learned}) if p.code == "7" else p
                   for p in pcs_data.items)
-    ranks = METHODS["ranks_jnthnbs"]
+    ranks = METHODS["ranks"]
     forced = ranks.compute(pcs_data.items, None, {}).pcs["7"].y
     assert ranks.compute(items, None, {}).pcs["7"].y == forced == -10
     assert ranks.compute(items, None, {"retired_y_override": None}).pcs["7"].y == 10
@@ -287,7 +287,7 @@ def test_methods_y_score_is_a_left_to_right_sum(pcs_data: PcsData) -> None:
 
 
 def test_methods_params_override(pcs_data: PcsData) -> None:
-    result = METHODS["ranks_jnthnbs"].compute(
+    result = METHODS["ranks"].compute(
         pcs_data.items, None, {"y_weights": {"bac5": 1}, "retired_y_override": None,
                                "description": "ignorée"}
     )
