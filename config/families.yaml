@@ -1,0 +1,129 @@
+# Familles politiques et blocs : ce qui relie les électorats d'une élection à l'autre.
+#
+# C'est une simplification, à lire comme telle :
+# - une famille réunit des candidats et des listes qui ne se confondent pas (Hamon 2017 était aussi
+#   soutenu par EELV, Mélenchon 2017 par le PCF) ;
+# - les coalitions NUPES (2022) et NFP (2024) ne sont attribuées à aucun parti : elles apparaissent
+#   comme des trous dans les trajectoires, et comptent dans le bloc de gauche ;
+# - le classement dans un bloc est un choix de ce projet, pas une donnée des sondages.
+#
+# projection: true : la famille entre dans le test sur le passé et la projection 2027
+# (scripts/analyze/projection.py). Les autres n'ont qu'une trajectoire.
+
+# Date approximative de chaque scrutin, en années décimales : l'échelle de temps des trajectoires.
+dates:
+  2017_presidentielle_t1: 2017.31
+  2017_legislatives_t1: 2017.44
+  2019_europeennes: 2019.40
+  2022_presidentielle_t1: 2022.28
+  2022_legislatives_t1: 2022.44
+  2024_europeennes: 2024.44
+  2024_legislatives_t1: 2024.50
+
+families:
+  lfi:
+    label: "France insoumise"
+    projection: true
+    candidates:
+      2017_presidentielle_t1: melenchon
+      2017_legislatives_t1: lfi
+      2019_europeennes: lfi
+      2022_presidentielle_t1: melenchon
+      2024_europeennes: lfi
+  rn:
+    label: "Rassemblement national"
+    projection: true
+    candidates:
+      2017_presidentielle_t1: le-pen
+      2017_legislatives_t1: fn
+      2019_europeennes: rn
+      2022_presidentielle_t1: le-pen
+      2022_legislatives_t1: rn
+      2024_europeennes: rn
+      2024_legislatives_t1: rn
+  macron:
+    label: "Majorité présidentielle"
+    projection: true
+    candidates:
+      2017_presidentielle_t1: macron
+      2017_legislatives_t1: lrem
+      2019_europeennes: lrem
+      2022_presidentielle_t1: macron
+      2022_legislatives_t1: ensemble
+      2024_europeennes: renaissance
+      2024_legislatives_t1: ensemble
+  lr:
+    label: "Les Républicains"
+    projection: true
+    candidates:
+      2017_presidentielle_t1: fillon
+      2017_legislatives_t1: lr-udi
+      2019_europeennes: lr
+      2022_presidentielle_t1: pecresse
+      2022_legislatives_t1: lr
+      2024_europeennes: lr
+      2024_legislatives_t1: lr-dvd
+  ps:
+    label: "Parti socialiste"
+    projection: true
+    candidates:
+      2017_presidentielle_t1: hamon
+      2017_legislatives_t1: ps
+      2019_europeennes: ps-pp
+      2022_presidentielle_t1: hidalgo
+      2024_europeennes: ps-pp
+  eelv:
+    label: "Écologistes"
+    projection: true
+    candidates:
+      2017_legislatives_t1: eelv
+      2019_europeennes: eelv
+      2022_presidentielle_t1: jadot
+      2024_europeennes: ecologistes
+  pcf:
+    label: "Parti communiste"
+    projection: false
+    candidates:
+      2017_legislatives_t1: pcf
+      2019_europeennes: pcf
+      2022_presidentielle_t1: roussel
+      2024_europeennes: pcf
+  reconquete:
+    label: "Reconquête"
+    projection: false
+    candidates:
+      2022_presidentielle_t1: zemmour
+      2022_legislatives_t1: reconquete
+      2024_europeennes: reconquete
+      2024_legislatives_t1: reconquete
+  abstention:
+    label: "Abstention"
+    projection: false
+    candidates:
+      2017_presidentielle_t1: abstention
+      2017_legislatives_t1: abstention
+      2019_europeennes: abstention
+      2022_presidentielle_t1: abstention
+      2022_legislatives_t1: abstention
+      2024_europeennes: abstention
+      2024_legislatives_t1: abstention
+
+blocs:
+  gauche:
+    label: "Gauche"
+    candidates: [arthaud, poutou, melenchon, hamon, roussel, hidalgo, jadot, extreme-gauche, lfi, pcf, ps, eelv, divers-gauche, lo, generation-s, ps-pp, nupes, ecologistes, nfp]
+  centre:
+    label: "Centre"
+    candidates: [macron, lrem, ensemble, renaissance, udi, divers-centre]
+  droite:
+    label: "Droite"
+    candidates: [fillon, pecresse, lr-udi, lr, lr-dvd, divers-droite]
+  extreme_droite:
+    label: "Extrême droite"
+    candidates: [le-pen, fn, rn, zemmour, reconquete, dupont-aignan, dlf, droite-souverainiste, asselineau, patriotes, upr]
+  abstention:
+    label: "Abstention"
+    candidates: [abstention]
+
+# Candidats et listes rangés dans aucun bloc : ils comptent seulement dans « autres ».
+unclassified: [lassalle, cheminade, divers, alliance-jaune, autres-listes, animaliste]

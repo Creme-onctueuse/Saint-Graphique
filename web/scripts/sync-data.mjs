@@ -4,7 +4,7 @@
  *     à défaut de fichiers calculés, copie la fixture fictive src/data/sample/** ;
  *  2. copie les données brutes ../data/pcs.json et ../data/elections/*.json dans _raw/
  *     (elles permettent le recalcul côté client quand l'utilisateur modifie les poids) ;
- *  3. convertit ../config/{pcs,methods,elections}.yaml en _config.json (libellés, couleurs,
+ *  3. convertit ../config/{pcs,methods,elections,families}.yaml en _config.json (libellés, couleurs,
  *     paramètres par défaut).
  *
  * Usage : node scripts/sync-data.mjs [--sample]   (ou SG_DATA=sample)
@@ -82,7 +82,7 @@ if (useReal) {
 
 // 3. Configuration déclarative
 const config = {};
-for (const name of ['pcs', 'methods', 'elections']) {
+for (const name of ['pcs', 'methods', 'elections', 'families']) {
   const file = join(configDir, `${name}.yaml`);
   if (!existsSync(file)) continue;
   try {
