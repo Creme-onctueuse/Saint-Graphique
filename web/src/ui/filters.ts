@@ -1,4 +1,4 @@
-/** Options d'affichage des panneaux : tout afficher ou masquer, libellés, ellipses, territoires. */
+/** Options d'affichage des panneaux : tout afficher ou masquer, libellés, ellipses. */
 import type { AppState } from '../core/state.ts';
 import type { ResolvedView } from '../view.ts';
 import type { AppActions, Feature } from './actions.ts';
@@ -14,9 +14,6 @@ export class Filters implements Feature {
   private readonly showLabels = el('input', { attrs: { type: 'checkbox', id: 'sg-show-labels' } });
   private readonly showEllipses = el('input', {
     attrs: { type: 'checkbox', id: 'sg-show-ellipses' },
-  });
-  private readonly showTerritories = el('input', {
-    attrs: { type: 'checkbox', id: 'sg-show-territories' },
   });
   private readonly square = el('input', { attrs: { type: 'checkbox', id: 'sg-square' } });
   private readonly ellipsesLabel: HTMLLabelElement;
@@ -44,7 +41,6 @@ export class Filters implements Feature {
     hosts.electorates.append(el('div', { class: 'sg-row' }, allOn, allOff), this.ellipsesLabel);
     hosts.categories.append(
       el('label', { class: 'sg-check' }, this.showLabels, 'Libellés sur la carte'),
-      el('label', { class: 'sg-check' }, this.showTerritories, 'Territoires et noms des régions'),
     );
     hosts.method.append(
       el(
@@ -60,9 +56,6 @@ export class Filters implements Feature {
     this.showEllipses.addEventListener('change', () =>
       actions.setShowEllipses(this.showEllipses.checked),
     );
-    this.showTerritories.addEventListener('change', () =>
-      actions.patch({ showTerritories: this.showTerritories.checked }, 'fast'),
-    );
     this.square.addEventListener('change', () =>
       actions.patch({ square: this.square.checked }, 'normal'),
     );
@@ -72,7 +65,6 @@ export class Filters implements Feature {
     this.candidateIds = view.model.candidates.map((c) => c.id);
     this.showLabels.checked = state.showLabels;
     this.showEllipses.checked = state.showEllipses;
-    this.showTerritories.checked = state.showTerritories;
     this.square.checked = state.square;
     this.ellipsesLabel.hidden = !view.hasEllipses;
   }

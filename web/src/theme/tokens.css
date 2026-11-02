@@ -65,7 +65,8 @@
   --sg-diagonal: #85847d;
   --sg-axis-text: #56554f;
   --sg-region: rgb(28 28 26 / 0.34);
-  --sg-territory-opacity: 0.2;
+  --sg-cand-area-opacity: 0.3;
+  --sg-cand-edge-mix: 0%;
 
   /* Carte : repères et libellés */
   --sg-label: #2a2a27;
@@ -152,7 +153,8 @@
     --sg-diagonal: #85847d;
     --sg-axis-text: #b8b7ad;
     --sg-region: rgb(240 239 236 / 0.3);
-    --sg-territory-opacity: 0.2;
+    --sg-cand-area-opacity: 0.34;
+    --sg-cand-edge-mix: 45%; /* des couleurs de partis très sombres restent visibles sur le fond */
     --sg-label: #e8e7e2;
     --sg-label-halo: #161615;
     --sg-ring: #161615;
@@ -221,7 +223,8 @@
   --sg-diagonal: #85847d;
   --sg-axis-text: #b8b7ad;
   --sg-region: rgb(240 239 236 / 0.3);
-  --sg-territory-opacity: 0.2;
+  --sg-cand-area-opacity: 0.34;
+  --sg-cand-edge-mix: 45%;
   --sg-label: #e8e7e2;
   --sg-label-halo: #161615;
   --sg-ring: #161615;

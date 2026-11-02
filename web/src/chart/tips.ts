@@ -55,8 +55,11 @@ export function candTip(
       ...(d.share !== null
         ? [[d.isAbstention ? 'Part des inscrits' : 'Score', formatPct(d.share)] as [string, string]]
         : []),
+      ...(d.registeredShare !== undefined && d.registeredShare !== null && !d.isAbstention
+        ? [['Part des inscrits', formatPct(d.registeredShare)] as [string, string]]
+        : []),
       ...(d.sizeShare !== undefined && d.sizeShare !== null
-        ? [['Vote du groupe', formatPct(d.sizeShare)] as [string, string]]
+        ? [[d.sizeLabel ?? 'Vote du groupe', formatPct(d.sizeShare)] as [string, string]]
         : []),
       ...coordinateRows(m, d),
     ],

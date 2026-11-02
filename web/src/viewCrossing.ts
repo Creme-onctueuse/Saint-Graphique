@@ -5,6 +5,7 @@
  * Module pur (sans DOM), testé dans viewCrossing.test.ts.
  */
 import type { ChartCandidate, ChartModel, ChartPcs } from './chart/types.ts';
+import { bubbleSizeLabel, bubbleSizes, parseBubbleSize } from './core/bubbleSize.ts';
 import { compositionByGroup, compositionGap, pollGroupOf, voteByGroup } from './core/crossing.ts';
 import { computeFreeLayout, type FreeLayout } from './core/freeAxes.ts';
 import { classicalMds, distanceMatrix, fitToRange, orient } from './core/mds.ts';
@@ -37,6 +38,8 @@ export interface LensInfo {
 }
 
 export interface CrossingInfo {
+  /** Ce que mesure l'aire des bulles, en toutes lettres. */
+  sizeLabel: string;
   mode: CrossingMode;
   selected: SelectedItem | null;
   compared: SelectedItem | null;
@@ -166,7 +169,6 @@ function applyFree(
     barycenter: layout.barycenter,
     axes: {
       plain: true,
-      halos: layout.color === null,
       ends: {
         xLow: xVariable.format(layout.x.min),
         xHigh: xVariable.format(layout.x.max),
@@ -236,7 +238,7 @@ function applyProximity(
       ellipse: null,
     })),
     barycenter: null,
-    axes: { plain: true, none: true, halos: false },
+    axes: { plain: true, none: true },
   };
   return {
     explained,
@@ -384,7 +386,22 @@ export function applyCrossing(ds: Dataset, state: AppState, base: ResolvedView):
   const selected = first.item;
   const compared = selected && second.item?.key !== selected.key ? second.item : null;
 
-  // Vue depuis un groupe : la taille des losanges montre le vote de ce groupe.
+  // Le panneau Croiser choisit ce que mesure l'aire des bulles.
+  const measure = parseBubbleSize(state.bubbleSize, crossVariables(ds));
+  let sizeLabel = bubbleSizeLabel(measure);
+  const sizes = view.rawElection
+    ? bubbleSizes(view.rawElection, measure, ds.rawPcs?.items ?? [], groupOf)
+    : null;
+  if (sizes) {
+    const candidates = view.model.candidates.map((c) => ({
+      ...c,
+      sizeShare: sizes.get(c.id) ?? 0,
+      sizeLabel: `Aire : ${sizeLabel}`,
+    }));
+    view = { ...view, model: { ...view.model, candidates } };
+  }
+
+  // Vue depuis un groupe : l'aire des bulles montre le vote de ce groupe, le temps de la sélection.
   let lens: LensInfo | null = null;
   if (selected?.kind === 'pcs' && mode !== 'proximity') {
     lens = lensForPcs(view, selected.pcs, groupOf);
@@ -393,8 +410,10 @@ export function applyCrossing(ds: Dataset, state: AppState, base: ResolvedView):
       const candidates = view.model.candidates.map((c) => ({
         ...c,
         sizeShare: shares.get(c.id) ?? 0,
+        sizeLabel: 'Vote du groupe',
       }));
       view = { ...view, model: { ...view.model, candidates } };
+      sizeLabel = 'vote du groupe choisi';
     }
   }
 
@@ -409,6 +428,7 @@ export function applyCrossing(ds: Dataset, state: AppState, base: ResolvedView):
     free,
     explained,
     groupOf,
+    sizeLabel,
   };
   return { ...view, crossing };
 }

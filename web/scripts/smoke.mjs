@@ -207,7 +207,8 @@ async function main() {
   /** Ouvre un panneau du rail, ou le referme. */
   const openPanel = async (id) => {
     await evaluate(`document.querySelector('#sg-rail button[data-panel="${id}"]').click()`);
-    await sleep(120);
+    // La carte glisse pendant 180 ms.
+    await sleep(320);
   };
   /** La carte remplit la fenêtre, et la page ne défile dans aucun sens. */
   const fillsWindow = () =>
@@ -673,6 +674,81 @@ async function main() {
   );
   check('mini-carte masquée sans zoom', miniHidden);
 
+  // --- Les axes restent au bord de la carte : panneau ouvert, zoomé, déplacé --------------------------
+  const axisAudit = `(() => {
+    const clip = document.querySelector('.sg-svg clipPath rect');
+    const box = { x: +clip.getAttribute('x'), y: +clip.getAttribute('y'), w: +clip.getAttribute('width'), h: +clip.getAttribute('height') };
+    const ctm = document.querySelector('.sg-plot').getScreenCTM();
+    const left = box.x * ctm.a + ctm.e;
+    const bottom = (box.y + box.h) * ctm.d + ctm.f;
+    const yTicks = [...document.querySelectorAll('.sg-tick-y')].map((t) => t.getBoundingClientRect());
+    const xTicks = [...document.querySelectorAll('.sg-tick-x')].map((t) => t.getBoundingClientRect());
+    const clipped = !!document.querySelector('.sg-clipped .sg-marks') && !!document.querySelector('.sg-clipped .sg-grid');
+    const grid = [...document.querySelectorAll('.sg-grid line')].every((l) => +l.getAttribute('x1') >= box.x - 1 && +l.getAttribute('x2') <= box.x + box.w + 1 && +l.getAttribute('y1') >= box.y - 1 && +l.getAttribute('y2') <= box.y + box.h + 1);
+    return {
+      clipped,
+      grid,
+      rules: document.querySelectorAll('.sg-axis-rule').length,
+      yInBand: yTicks.length > 0 && yTicks.every((r) => r.right <= left + 1),
+      xInBand: xTicks.length > 0 && xTicks.every((r) => r.top >= bottom - 1),
+    };
+  })()`;
+  const checkAxes = async (label) => {
+    const a = await evaluate(axisAudit);
+    check(
+      `axes au bord de la carte : ${label}`,
+      a.clipped && a.grid && a.rules === 2 && a.yInBand && a.xInBand,
+      JSON.stringify(a),
+    );
+  };
+  await checkAxes('vue d’ensemble');
+  await openPanel('method');
+  await settle();
+  await checkAxes('panneau ouvert');
+  await evaluate(`document.getElementById('sg-zoom-electorates').click()`);
+  await settle();
+  await checkAxes('panneau ouvert et zoomé');
+  await cdp.send('Input.dispatchMouseEvent', {
+    type: 'mousePressed',
+    x: 800,
+    y: 400,
+    button: 'left',
+    clickCount: 1,
+  });
+  await cdp.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 650, y: 320, buttons: 1 });
+  await cdp.send('Input.dispatchMouseEvent', {
+    type: 'mouseReleased',
+    x: 650,
+    y: 320,
+    button: 'left',
+    clickCount: 1,
+  });
+  await settle();
+  await checkAxes('panneau ouvert, zoomé et déplacé');
+  await openPanel('method');
+  await settle();
+  await checkAxes('panneau refermé en gardant le zoom');
+  await evaluate(`document.getElementById('sg-zoom-reset').click()`);
+  await settle();
+
+  // --- Bulles : pas de zone, une aire qui dit la taille --------------------------------------------------
+  const bubbles = await evaluate(`(() => {
+    const areas = [...document.querySelectorAll('.sg-cand__area')];
+    return {
+      halos: document.querySelectorAll('.sg-territory').length,
+      ellipses: document.querySelectorAll('.sg-ellipse:not(.sg-exiting)').length,
+      areas: areas.length,
+      dots: document.querySelectorAll('.sg-cand__dot').length,
+    };
+  })()`);
+  check('aucun halo autour des catégories', bubbles.halos === 0);
+  check('pas d’ellipse par défaut', bubbles.ellipses === 0, String(bubbles.ellipses));
+  check(
+    'une bulle et un point par électorat',
+    bubbles.areas > 0 && bubbles.areas === bubbles.dots,
+    JSON.stringify(bubbles),
+  );
+
   // --- Sélection : un clic, l'URL, Échap ----------------------------------------------------------------
   const selected = await evaluate(`(async () => {
     const point = document.querySelector('.sg-cand');
@@ -809,6 +885,64 @@ async function main() {
       JSON.stringify(proximity),
     );
     await shot('14-proximite', false);
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1'`);
+    await settle();
+
+    // --- Croiser : l'aire des bulles réagit ---------------------------------------------------------
+    const radii = `Object.fromEntries([...document.querySelectorAll('.sg-cand')].map((c) => [c.dataset.key, +c.querySelector('.sg-cand__area').getAttribute('r')]))`;
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1'`);
+    await settle();
+    const registeredRadii = await evaluate(radii);
+    const pcsDisc = await evaluate(
+      `(() => { const d = document.querySelector('.sg-pcs[data-key="p:62"]'); return +d.getAttribute('r'); })()`,
+    );
+    const ratio = (registeredRadii['c:macron'] / registeredRadii['c:le-pen']) ** 2;
+    check(
+      'aire des bulles : part des inscrits',
+      Math.abs(ratio - 27.5 / 23.3) < 0.15,
+      String(ratio),
+    );
+    check(
+      'bulles et disques à la même échelle',
+      pcsDisc > 0 && registeredRadii['c:abstention'] > pcsDisc,
+    );
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1&bs=dans%3A6&p=cross'`);
+    await settle();
+    const workersRadii = await evaluate(radii);
+    const sizeKey = await evaluate(`document.getElementById('sg-size-key').textContent`);
+    check(
+      'croiser : l’aire change avec la mesure',
+      workersRadii['c:le-pen'] !== registeredRadii['c:le-pen'] &&
+        workersRadii['c:macron'] < workersRadii['c:le-pen'],
+      JSON.stringify(workersRadii),
+    );
+    check('croiser : la légende dit ce que mesure l’aire', /Ouvriers/.test(sizeKey), sizeKey);
+    await shot('13b-aire-croisee', false);
+    await evaluate(
+      `location.hash = 'e=2022_presidentielle_t1&ax=patrimoine&ay=bac5&bs=var%3Apatrimoine&p=cross'`,
+    );
+    await settle();
+    const wealthRadii = await evaluate(radii);
+    const wealthPlaces = await evaluate(
+      `document.querySelector('.sg-cand[data-key="c:macron"]').getAttribute('transform')`,
+    );
+    await evaluate(
+      `location.hash = 'e=2022_presidentielle_t1&ax=niveau_vie&ay=cap&bs=var%3Apatrimoine&p=cross'`,
+    );
+    await settle();
+    const otherPlaces = await evaluate(
+      `document.querySelector('.sg-cand[data-key="c:macron"]').getAttribute('transform')`,
+    );
+    check(
+      'croiser : les électorats bougent avec les axes',
+      wealthPlaces !== otherPlaces,
+      `${wealthPlaces} / ${otherPlaces}`,
+    );
+    check(
+      'croiser : part du total d’une variable',
+      wealthRadii['c:macron'] > wealthRadii['c:le-pen'],
+      JSON.stringify(wealthRadii),
+    );
     await evaluate(`location.hash = 'e=2022_presidentielle_t1'`);
     await settle();
 

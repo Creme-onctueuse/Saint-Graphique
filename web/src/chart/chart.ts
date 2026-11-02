@@ -33,9 +33,8 @@ import {
   type Insets,
   type Scale,
 } from './geometry.ts';
-import { drawTerritories } from './layers/territories.ts';
 import { placeLabels, type Anchor, type LabelItem, type Obstacle, type Segment } from './labels.ts';
-import { clamp, diamondPath } from './shapes.ts';
+import { clamp } from './shapes.ts';
 import { CHART_STYLE } from './style.ts';
 import { baryTip, candTip, coordinatesText, pcsTip } from './tips.ts';
 import { Tooltip, type TooltipContent } from './tooltip.ts';
@@ -112,7 +111,7 @@ export class SaintChart {
   private readonly plot: G;
   private readonly frameLayers: FrameLayers;
   private readonly below: G;
-  private readonly territoryLayer: G;
+  private readonly clipRect: Selection<SVGRectElement, unknown, null, undefined>;
   private readonly under: G;
   private readonly ellipseLayer: G;
   private readonly pcsLayer: G;
@@ -135,8 +134,7 @@ export class SaintChart {
     hiddenGroups: new Set(),
     hiddenCandidates: new Set(),
     showLabels: true,
-    showEllipses: true,
-    showTerritories: true,
+    showEllipses: false,
     focus: null,
     selected: new Set(),
     square: false,
@@ -150,6 +148,9 @@ export class SaintChart {
   private measureCtx: CanvasRenderingContext2D | null | undefined;
   private readonly textWidths = new Map<string, number>();
   private zooming = false;
+  /** Glissement de la carte en cours (panneau qui s'ouvre) : les tailles poursuivent leur transition. */
+  private sliding = false;
+  private slideFrame: number | null = null;
   private fontFamily = 'sans-serif';
 
   constructor(host: HTMLElement) {
@@ -176,21 +177,22 @@ export class SaintChart {
       .attr('id', `sg-chart-desc-${id}`)
       .node()!;
 
+    // La carte ne déborde pas de la zone de tracé : les axes restent à son bord.
+    const clipId = `sg-plot-clip-${id}`;
+    this.clipRect = this.svgSel.append('defs').append('clipPath').attr('id', clipId).append('rect');
+    const clip = `url(#${clipId})`;
     this.plot = this.svgSel.append('g').attr('class', 'sg-plot');
     const bg = this.plot.append('rect').attr('class', 'sg-plot-bg');
-    const quads = this.plot.append('g').attr('class', 'sg-quadrants');
-    const grid = this.plot.append('g').attr('class', 'sg-grid');
-    const diagonal = this.plot
+    const clipped = this.plot.append('g').attr('class', 'sg-clipped').attr('clip-path', clip);
+    const quads = clipped.append('g').attr('class', 'sg-quadrants');
+    const grid = clipped.append('g').attr('class', 'sg-grid');
+    const diagonal = clipped
       .append('line')
       .attr('class', 'sg-diagonal')
       .attr('aria-hidden', 'true');
-    const regions = this.plot.append('g').attr('class', 'sg-regions').attr('aria-hidden', 'true');
-    this.below = this.plot.append('g').attr('class', 'sg-layer-below');
-    const marks = this.plot.append('g').attr('class', 'sg-marks');
-    this.territoryLayer = marks
-      .append('g')
-      .attr('class', 'sg-territories')
-      .attr('aria-hidden', 'true');
+    const regions = clipped.append('g').attr('class', 'sg-regions').attr('aria-hidden', 'true');
+    this.below = clipped.append('g').attr('class', 'sg-layer-below');
+    const marks = clipped.append('g').attr('class', 'sg-marks');
     this.under = marks.append('g').attr('class', 'sg-under').attr('aria-hidden', 'true');
     this.ellipseLayer = marks.append('g').attr('class', 'sg-ellipses').attr('aria-hidden', 'true');
     this.pcsLayer = marks
@@ -205,11 +207,8 @@ export class SaintChart {
       .attr('role', 'group')
       .attr('aria-label', 'Électorats');
     this.over = marks.append('g').attr('class', 'sg-over').attr('aria-hidden', 'true');
-    this.leaderLayer = this.plot
-      .append('g')
-      .attr('class', 'sg-leaders')
-      .attr('aria-hidden', 'true');
-    this.labelLayer = this.plot.append('g').attr('class', 'sg-labels').attr('aria-hidden', 'true');
+    this.leaderLayer = clipped.append('g').attr('class', 'sg-leaders').attr('aria-hidden', 'true');
+    this.labelLayer = clipped.append('g').attr('class', 'sg-labels').attr('aria-hidden', 'true');
     const axes = this.plot.append('g').attr('class', 'sg-axes').attr('aria-hidden', 'true');
     this.above = this.plot.append('g').attr('class', 'sg-layer-above');
     this.frameLayers = { bg, quads, grid, diagonal, axes, regions };
@@ -260,10 +259,7 @@ export class SaintChart {
       this.transform = zoomIdentity;
       this.plot.property('__zoom', zoomIdentity);
     }
-    if (shapeChanged) {
-      this.geom = this.measureGeometry();
-      this.applyGeometry();
-    }
+    if (shapeChanged) this.replot();
     this.clearHover();
     this.draw(animation);
   }
@@ -279,11 +275,72 @@ export class SaintChart {
     ) {
       return;
     }
-    this.insets = insets;
     this.tooltip.setBounds(insets);
+    this.slideTo(insets, animation);
+  }
+
+  /**
+   * Fait glisser la carte image par image : axes, grille et repères bougent ensemble. Sans animation
+   * possible (mouvement réduit, onglet masqué), elle saute directement à sa place.
+   */
+  private slideTo(target: Insets, animation: Animation): void {
+    if (this.slideFrame !== null) cancelAnimationFrame(this.slideFrame);
+    this.slideFrame = null;
+    this.sliding = false;
+    const animated = this.duration(animation) > 0 && !document.hidden && this.model !== null;
+    if (!animated) {
+      this.insets = target;
+      this.replot();
+      this.draw(animation);
+      return;
+    }
+    const from = this.insets;
+    const start = performance.now();
+    const mix = (a: number, b: number, u: number): number => a + (b - a) * u;
+    const step = (now: number): void => {
+      const t = Math.min(1, (now - start) / CHART_STYLE.slideDuration);
+      const u = t * (2 - t);
+      this.insets = {
+        top: mix(from.top, target.top, u),
+        right: mix(from.right, target.right, u),
+        bottom: mix(from.bottom, target.bottom, u),
+        left: mix(from.left, target.left, u),
+      };
+      this.replot();
+      this.sliding = t < 1;
+      this.zooming = t < 1;
+      this.draw(t < 1 ? 'none' : 'fast');
+      this.slideFrame = t < 1 ? requestAnimationFrame(step) : null;
+    };
+    this.slideFrame = requestAnimationFrame(step);
+  }
+
+  /** Recalcule la zone de tracé en gardant au centre ce qu'on y regardait. */
+  private replot(): void {
+    const k = this.transform.k;
+    const previous = this.geom.plot;
+    const { x, y } = this.scales();
+    const centerX = x.invert(previous.x + previous.w / 2);
+    const centerY = y.invert(previous.y + previous.h / 2);
     this.geom = this.measureGeometry();
     this.applyGeometry();
-    this.draw(animation);
+    const { plot } = this.geom;
+    const base = this.base();
+    const target =
+      k <= 1
+        ? zoomIdentity
+        : zoomIdentity
+            .translate(
+              plot.x + plot.w / 2 - k * base.x(centerX),
+              plot.y + plot.h / 2 - k * base.y(centerY),
+            )
+            .scale(k);
+    const bounds: [[number, number], [number, number]] = [
+      [plot.x, plot.y],
+      [plot.x + plot.w, plot.y + plot.h],
+    ];
+    this.transform = this.zoomBehavior.constrain()(target, bounds, bounds);
+    this.plot.property('__zoom', this.transform);
   }
 
   /** Échelles courantes (zoom compris), données → px dans le SVG. */
@@ -434,20 +491,17 @@ export class SaintChart {
   }
 
   private applyGeometry(): void {
-    const { width, height } = this.geom;
+    const { width, height, plot } = this.geom;
     this.svgSel
       .attr('width', width)
       .attr('height', height)
       .attr('viewBox', `0 0 ${width} ${height}`);
-    this.zoomBehavior
-      .extent([
-        [0, 0],
-        [width, height],
-      ])
-      .translateExtent([
-        [0, 0],
-        [width, height],
-      ]);
+    this.clipRect.attr('x', plot.x).attr('y', plot.y).attr('width', plot.w).attr('height', plot.h);
+    const bounds: [[number, number], [number, number]] = [
+      [plot.x, plot.y],
+      [plot.x + plot.w, plot.y + plot.h],
+    ];
+    this.zoomBehavior.extent(bounds).translateExtent(bounds);
   }
 
   private onResize(): void {
@@ -477,11 +531,17 @@ export class SaintChart {
     return Math.max(CHART_STYLE.pcsMinRadius, r);
   }
 
-  private candHalf(d: ChartCandidate): number {
-    const share = d.sizeShare ?? d.share ?? CHART_STYLE.candidateDefaultShare;
-    const h =
-      CHART_STYLE.candidateHalfDiagonalPerSqrtPct * this.geom.unit * Math.sqrt(Math.max(0, share));
-    return Math.max(CHART_STYLE.candidateMinHalfDiagonal, h);
+  /** Rayon de la bulle : même échelle que les disques, pour que les aires se comparent. */
+  private bubbleRadius(d: ChartCandidate): number {
+    const share = d.sizeShare ?? d.registeredShare ?? d.share;
+    if (share === null || share === undefined) return 0;
+    return CHART_STYLE.pcsRadiusPerSqrtPct * this.geom.unit * Math.sqrt(Math.max(0, share));
+  }
+
+  private dotRadius(d: ChartCandidate): number {
+    return this.bubbleRadius(d) > 0
+      ? CHART_STYLE.candidateDotRadius
+      : CHART_STYLE.candidateDotRadiusAlone;
   }
 
   // --- Rendu --------------------------------------------------------------------------------
@@ -500,17 +560,9 @@ export class SaintChart {
       .sort((a, b) => b.weight - a.weight);
     const cands = model.candidates
       .filter((c) => !this.view.hiddenCandidates.has(c.id))
-      .sort((a, b) => (b.share ?? 0) - (a.share ?? 0));
+      .sort((a, b) => this.bubbleRadius(b) - this.bubbleRadius(a));
 
-    drawFrame(this.frameLayers, this.geom, x, y, model, this.view.showTerritories);
-    drawTerritories(
-      this.territoryLayer,
-      this.view.showTerritories && model.axes?.halos !== false ? pcs : [],
-      x,
-      y,
-      (p) => this.pcsRadius(p),
-      this.geom.unit,
-    );
+    drawFrame(this.frameLayers, this.geom, x, y, model);
     this.drawEllipses(this.view.showEllipses ? cands.filter((c) => c.ellipse) : [], x, y, duration);
     this.drawPcs(pcs, x, y, duration);
     this.drawBarycenter(model.barycenter, x, y, duration);
@@ -623,17 +675,18 @@ export class SaintChart {
   private drawCandidates(data: ChartCandidate[], x: Scale, y: Scale, duration: number): void {
     const transform = (d: ChartCandidate): string => `translate(${x(d.x)},${y(d.y)})`;
     const sel = this.candLayer
-      .selectAll<SVGPathElement, ChartCandidate>('path.sg-cand')
+      .selectAll<SVGGElement, ChartCandidate>('g.sg-cand')
       .data(data, (d) => d.id);
     exitSel(sel.exit<ChartCandidate>(), 'sg-cand', duration);
     const entered = sel
       .enter()
-      .append('path')
+      .append('g')
       .attr('class', 'sg-cand sg-point')
       .attr('role', 'img')
       .attr('tabindex', -1)
-      .attr('transform', transform)
-      .attr('d', diamondPath(0));
+      .attr('transform', transform);
+    entered.append('circle').attr('class', 'sg-cand__area').attr('r', 0);
+    entered.append('circle').attr('class', 'sg-cand__dot').attr('r', 0);
     const all = entered.merge(sel).order();
     const model = this.model;
     all
@@ -644,12 +697,16 @@ export class SaintChart {
           `${d.label}${d.share !== null ? ` : ${formatPct(d.share)}` : ''}, ` +
           coordinatesText(model, d),
       )
-      .classed('sg-cand--abstention', (d) => d.isAbstention)
-      .style('fill', (d) => this.candidateFill(d));
-    setAttrs(all, duration, {
-      transform,
-      d: (d) => diamondPath(this.candHalf(d)),
-    });
+      .classed('sg-cand--abstention', (d) => d.isAbstention);
+    const area = all.select<SVGCircleElement>('circle.sg-cand__area');
+    const dot = all.select<SVGCircleElement>('circle.sg-cand__dot');
+    all.style('--sg-cand-color', (d) => this.candidateFill(d));
+    setAttrs(all, duration, { transform });
+    // Pendant un glissement, seule la position suit : la taille finit sa propre transition.
+    if (!this.sliding) {
+      setAttrs(area, duration, { r: (d) => this.bubbleRadius(d) });
+      setAttrs(dot, duration, { r: (d) => this.dotRadius(d) });
+    }
   }
 
   private measure = (text: string, font: number, weight: number): number => {
@@ -721,7 +778,7 @@ export class SaintChart {
         key: `c:${c.id}`,
         cx: x(c.x),
         cy: y(c.y),
-        r: this.candHalf(c) * 0.85,
+        r: this.dotRadius(c),
         strong: true,
       })),
     ];
@@ -735,7 +792,7 @@ export class SaintChart {
         text: c.label,
         cx,
         cy,
-        r: this.candHalf(c) * 0.85,
+        r: this.dotRadius(c),
         priority: 1000 + (c.share ?? 0),
         font: candFont,
         weight: 650,
@@ -899,6 +956,9 @@ export class SaintChart {
     if (!model || !ctm) return null;
     const px = (e.clientX - ctm.e) / ctm.a;
     const py = (e.clientY - ctm.f) / ctm.d;
+    const { plot } = this.geom;
+    // Dans la bande des axes, la carte ne réagit pas : ses repères y sont masqués.
+    if (px < plot.x || py < plot.y || px > plot.x + plot.w || py > plot.y + plot.h) return null;
     const { x, y } = this.scales();
     let best: string | null = null;
     let bestGap = Number.POSITIVE_INFINITY;
@@ -917,9 +977,17 @@ export class SaintChart {
         consider(`p:${p.code}`, x(p.x), y(p.y), this.pcsRadius(p));
       }
     }
-    for (const c of model.candidates) {
-      if (!this.view.hiddenCandidates.has(c.id)) {
-        consider(`c:${c.id}`, x(c.x), y(c.y), this.candHalf(c) * 0.75);
+    const shown = model.candidates.filter((c) => !this.view.hiddenCandidates.has(c.id));
+    for (const c of shown) consider(`c:${c.id}`, x(c.x), y(c.y), this.dotRadius(c));
+    // Hors de tout point, c'est la plus petite bulle sous le pointeur : les bulles se chevauchent.
+    if (best === null) {
+      let smallest = Number.POSITIVE_INFINITY;
+      for (const c of shown) {
+        const radius = this.bubbleRadius(c);
+        if (radius < smallest && Math.hypot(px - x(c.x), py - y(c.y)) <= radius) {
+          best = `c:${c.id}`;
+          smallest = radius;
+        }
       }
     }
     if (best === null && model.barycenter) {

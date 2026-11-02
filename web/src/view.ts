@@ -53,6 +53,7 @@ import {
   type RawElection,
   type SourceRef,
 } from './core/types.ts';
+import { registeredShares } from './core/crossing.ts';
 import { computedKey, type Dataset, type MethodInfo } from './data/dataset.ts';
 import { applyCrossing, type CrossingInfo } from './viewCrossing.ts';
 
@@ -278,6 +279,7 @@ function candidateFromRaw(
     x,
     y,
     share: c.national_share_pct ?? null,
+    registeredShare: registeredShares(election).get(c.id) ?? null,
     isAbstention: c.is_abstention === true,
     ellipse: null,
     composition: compositionOf(ds, election, c.id),
@@ -412,6 +414,7 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
     barycenter = fallbackFile.population_barycenter;
     range = fallbackFile.axes.range;
     if (exact) {
+      const registered = rawElection ? registeredShares(rawElection) : null;
       candidates = exact.candidates.map((c) => ({
         id: c.id,
         label: c.label,
@@ -419,6 +422,7 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
         x: c.x,
         y: c.y,
         share: c.national_share_pct ?? null,
+        registeredShare: registered?.get(c.id) ?? null,
         isAbstention: c.is_abstention === true,
         ellipse: c.ellipse ?? null,
         composition: compositionOf(ds, rawElection, c.id),

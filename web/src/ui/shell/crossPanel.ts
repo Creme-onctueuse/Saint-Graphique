@@ -3,6 +3,7 @@
  * variables Insee, ou la carte de proximité. La légende de la couleur flotte sur la carte.
  */
 import './crossing.css';
+import { GROUP_SHORT_NAMES } from '../../core/groups.ts';
 import { COLOR_CLASSES } from '../../core/freeAxes.ts';
 import type { AppState, MapLayout } from '../../core/state.ts';
 import type { Variable } from '../../core/variables.ts';
@@ -20,7 +21,12 @@ interface Preset {
   x: string;
   y: string;
   color: string | null;
+  /** Mesure de l'aire des bulles (core/bubbleSize.ts). */
+  size?: string;
 }
+
+/** Groupes détaillés par les sondages. */
+const POLL_GROUPS = ['2', '3', '4', '5', '6', '7'] as const;
 
 /** Quelques croisements pour commencer. Un préréglage dont une variable manque n'est pas proposé. */
 const PRESETS: readonly Preset[] = [
@@ -45,6 +51,14 @@ const PRESETS: readonly Preset[] = [
     x: 'immobilier',
     y: 'professionnel',
     color: 'patrimoine',
+  },
+  {
+    id: 'qui-detient',
+    label: 'Qui détient le patrimoine ?',
+    x: 'patrimoine',
+    y: 'niveau_vie',
+    color: null,
+    size: 'var:patrimoine',
   },
   {
     id: 'proprietaires',
@@ -73,6 +87,7 @@ export class CrossPanel implements Feature {
   private readonly onLayoutChange: () => void;
   private readonly modes = new Map<CrossMode, HTMLInputElement>();
   private readonly note = el('p', { class: 'sg-note', attrs: { id: 'sg-cross-note' } });
+  private readonly sizeNote = el('p', { class: 'sg-note', attrs: { id: 'sg-size-note' } });
   private readonly freeBox = el('div', {
     class: 'sg-panel__group',
     attrs: { id: 'sg-cross-free' },
@@ -80,6 +95,7 @@ export class CrossPanel implements Feature {
   private readonly axisX = el('select', { attrs: { id: 'sg-axis-x' } });
   private readonly axisY = el('select', { attrs: { id: 'sg-axis-y' } });
   private readonly colorBy = el('select', { attrs: { id: 'sg-color-by' } });
+  private readonly bubbleSize = el('select', { attrs: { id: 'sg-bubble-size' } });
   private readonly imputedNote = el('p', {
     class: 'sg-ins__alert',
     attrs: { id: 'sg-cross-imputed' },
@@ -142,6 +158,33 @@ export class CrossPanel implements Feature {
       this.actions.patch({ colorBy: this.colorBy.value || null }, 'fast'),
     );
 
+    const group = (label: string, values: readonly [string, string][]): HTMLOptGroupElement =>
+      el(
+        'optgroup',
+        { attrs: { label } },
+        ...values.map(([value, text]) => el('option', { text, attrs: { value } })),
+      );
+    const groups = POLL_GROUPS.map((g) => [g, GROUP_SHORT_NAMES[g] ?? g] as const);
+    this.bubbleSize.append(
+      el('option', { text: 'Part des inscrits', attrs: { value: '' } }),
+      el('option', { text: 'Score parmi les exprimés', attrs: { value: 'score' } }),
+      group(
+        'Part d’un groupe dans l’électorat',
+        groups.map(([g, name]) => [`dans:${g}`, name]),
+      ),
+      group(
+        'Vote d’un groupe',
+        groups.map(([g, name]) => [`vote:${g}`, name]),
+      ),
+      group(
+        'Part du total rassemblée',
+        this.variables.filter((v) => !v.imputed).map((v) => [`var:${v.id}`, v.label]),
+      ),
+    );
+    this.bubbleSize.addEventListener('change', () =>
+      this.actions.patch({ bubbleSize: this.bubbleSize.value || null }, 'normal'),
+    );
+
     const known = new Set(this.variables.map((v) => v.id));
     const presets = PRESETS.filter(
       (p) => known.has(p.x) && known.has(p.y) && (p.color === null || known.has(p.color)),
@@ -153,7 +196,14 @@ export class CrossPanel implements Feature {
       });
       button.addEventListener('click', () => {
         this.actions.patch(
-          { axisX: p.x, axisY: p.y, colorBy: p.color, layout: 'map', compared: null },
+          {
+            axisX: p.x,
+            axisY: p.y,
+            colorBy: p.color,
+            bubbleSize: p.size ?? null,
+            layout: 'map',
+            compared: null,
+          },
           'normal',
         );
         this.onLayoutChange();
@@ -171,6 +221,8 @@ export class CrossPanel implements Feature {
       segmented,
       this.note,
       this.freeBox,
+      el('label', { class: 'sg-field' }, 'Aire des bulles', this.bubbleSize),
+      this.sizeNote,
       el(
         'section',
         { class: 'sg-ins__section' },
@@ -214,7 +266,7 @@ export class CrossPanel implements Feature {
       mode === 'free'
         ? { axisX: this.axisX.value || DEFAULT_X, axisY: this.axisY.value || DEFAULT_Y, layout }
         : mode === 'map'
-          ? { axisX: null, axisY: null, colorBy: null, layout }
+          ? { axisX: null, axisY: null, colorBy: null, bubbleSize: null, layout }
           : { layout };
     this.actions.patch({ ...patch, compared: null }, 'normal');
   }
@@ -226,7 +278,7 @@ export class CrossPanel implements Feature {
       state.layout === 'proximity' ? 'proximity' : state.axisX || state.axisY ? 'free' : 'map';
     for (const [id, input] of this.modes) input.checked = id === asked;
     this.freeBox.hidden = asked !== 'free';
-    this.reset.hidden = asked === 'map';
+    this.reset.hidden = asked === 'map' && !state.bubbleSize;
 
     const free = crossing?.free ?? null;
     if (free) {
@@ -237,6 +289,11 @@ export class CrossPanel implements Feature {
       this.axisY.value = DEFAULT_Y;
     }
     this.colorBy.value = free?.color?.variable.id ?? '';
+    this.bubbleSize.value = state.bubbleSize ?? '';
+    this.sizeNote.textContent = state.bubbleSize?.startsWith('var:')
+      ? 'Ordre de grandeur : part des inscrits de l’électorat × moyenne de la variable selon sa composition, à partir des médianes par catégorie.'
+      : '';
+    this.sizeNote.hidden = this.sizeNote.textContent === '';
     this.initialized = true;
 
     this.note.textContent = this.noteFor(asked, mode, view);

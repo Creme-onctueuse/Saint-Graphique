@@ -120,7 +120,6 @@ export function startApp(): void {
     hiddenCandidates: new Set(state.hiddenCandidates),
     showLabels: state.showLabels,
     showEllipses: state.showEllipses,
-    showTerritories: state.showTerritories,
     focus: view?.crossing?.focus ?? null,
     selected: new Set(view?.crossing?.keys ?? []),
     square: state.square || view?.crossing?.mode === 'proximity',
@@ -306,7 +305,7 @@ export function startApp(): void {
           .map((c) => ({
             label: c.label,
             color: c.isAbstention ? `var(--sg-abstention, ${c.color})` : c.color,
-            shape: 'diamond' as const,
+            shape: 'bubble' as const,
           })),
       ],
     };

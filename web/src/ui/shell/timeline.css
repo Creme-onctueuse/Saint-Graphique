@@ -138,10 +138,6 @@
   fill-opacity: 0.28;
 }
 
-.sg-rings-on .sg-territory {
-  opacity: 0.35;
-}
-
 .sg-rings-on .sg-label:not(.sg-label--cand),
 .sg-rings-on .sg-leader[data-key^='p:'] {
   opacity: 0;

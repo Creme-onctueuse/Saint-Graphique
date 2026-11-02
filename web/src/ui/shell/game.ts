@@ -21,7 +21,7 @@ import { icon } from '../icons.ts';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 /** Classe posée sur <body> pendant une manche : elle coupe les infobulles (voir facts.css). */
 const ROUND_CLASS = 'sg-game-round';
-/** Écart (px) entre le losange et le cercle qui le désigne. */
+/** Écart (px) entre le point de l'électorat et le cercle qui le désigne. */
 const MARKER_GAP = 7;
 
 export class Game implements Feature {
@@ -162,11 +162,7 @@ export class Game implements Feature {
     }
     if (this.marker.parentNode !== this.chart.layerOver) this.chart.layerOver.append(this.marker);
     const { x, y } = this.chart.scales();
-    const half =
-      CHART_STYLE.candidateHalfDiagonalPerSqrtPct *
-      this.chart.geometry.unit *
-      Math.sqrt(Math.max(0, candidate.share ?? CHART_STYLE.candidateDefaultShare));
-    const r = Math.max(CHART_STYLE.candidateMinHalfDiagonal, half) + MARKER_GAP;
+    const r = CHART_STYLE.candidateDotRadius + MARKER_GAP;
     this.marker.setAttribute('cx', String(x(candidate.x)));
     this.marker.setAttribute('cy', String(y(candidate.y)));
     this.marker.setAttribute('r', String(r));

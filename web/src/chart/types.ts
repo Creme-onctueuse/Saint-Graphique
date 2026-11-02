@@ -30,8 +30,12 @@ export interface ChartCandidate {
   y: number;
   /** Score national (%), ou null s'il est inconnu. */
   share: number | null;
-  /** Taille du losange (%) quand elle diffère du score (vue depuis un groupe). */
+  /** Part des inscrits (%) : l'aire de la bulle, sur la même échelle que les disques. */
+  registeredShare?: number | null;
+  /** Aire de la bulle (%) quand on la croise avec autre chose (vue depuis un groupe, panneau Croiser). */
   sizeShare?: number | null;
+  /** Ce que mesure `sizeShare`, pour l'infobulle. */
+  sizeLabel?: string;
   isAbstention: boolean;
   ellipse: Ellipse | null;
   /** Composition sociale de l'électorat, si les données brutes sont disponibles. */
@@ -46,8 +50,6 @@ export interface ChartAxes {
   plain?: boolean;
   /** Aucun axe : ni graduation, ni titre, ni grille, ni quadrants. */
   none?: boolean;
-  /** Vrai par défaut : halos des territoires. */
-  halos?: boolean;
   /** Textes des extrémités des axes. */
   ends?: { xLow: string; xHigh: string; yLow: string; yHigh: string };
   /** Position sur la carte → valeur réelle à afficher. */
@@ -72,8 +74,6 @@ export interface ChartView {
   hiddenCandidates: ReadonlySet<string>;
   showLabels: boolean;
   showEllipses: boolean;
-  /** Territoires et noms de régions. */
-  showTerritories: boolean;
   /** Repères mis en avant (clés `p:…` ou `c:…`) ; les autres s'estompent. Null : aucun estompage. */
   focus: ReadonlySet<string> | null;
   /** Repères sélectionnés : leur contour et leur libellé restent visibles. */

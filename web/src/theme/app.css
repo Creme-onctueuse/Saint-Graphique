@@ -573,12 +573,10 @@ p {
   border-radius: 50%;
 }
 
-.sg-swatch--diamond {
-  width: 10px;
-  height: 10px;
-  margin: 1px;
-  box-shadow: 0 0 0 1px var(--sg-cand-ring);
-  transform: rotate(45deg);
+.sg-swatch--bubble {
+  border: 1.5px solid var(--sg-swatch);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--sg-swatch) 30%, transparent 34%);
 }
 
 .sg-swatch--ring {
@@ -891,14 +889,8 @@ p {
   height: 10px;
 }
 
-.sg-key .sg-swatch--diamond {
-  width: 8px;
-  height: 8px;
-}
-
 .sg-swatch--plain {
-  background: var(--sg-text-muted);
-  box-shadow: none;
+  --sg-swatch: var(--sg-text-muted);
 }
 
 /* Messages */
@@ -963,7 +955,14 @@ p {
 }
 
 .sg-plot-bg {
-  fill: var(--sg-plot-bg);
+  fill: var(--sg-page);
+}
+
+.sg-axis-rule {
+  stroke: var(--sg-border-strong);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+  pointer-events: none;
 }
 
 .sg-quadrant {
@@ -1013,19 +1012,6 @@ p {
   pointer-events: none;
 }
 
-.sg-territory {
-  stroke: none;
-  pointer-events: none;
-}
-
-.sg-halo-stop--in {
-  stop-opacity: var(--sg-territory-opacity);
-}
-
-.sg-halo-stop--out {
-  stop-opacity: 0;
-}
-
 .sg-tick {
   fill: var(--sg-axis-text);
   font-size: 11px;
@@ -1050,9 +1036,20 @@ p {
 }
 
 .sg-cand {
+  transition: opacity 170ms ease;
+}
+
+.sg-cand__area {
+  fill: var(--sg-cand-color);
+  fill-opacity: var(--sg-cand-area-opacity);
+  stroke: color-mix(in srgb, var(--sg-cand-color), white var(--sg-cand-edge-mix));
+  stroke-width: 1.25;
+}
+
+.sg-cand__dot {
+  fill: var(--sg-cand-color);
   stroke: var(--sg-cand-ring);
   stroke-width: 1.25;
-  transition: opacity 170ms ease;
 }
 
 .sg-ellipse {
@@ -1103,17 +1100,25 @@ p {
 }
 
 .sg-pcs.sg-point--active,
-.sg-cand.sg-point--active,
-.sg-pcs:focus-visible,
-.sg-cand:focus-visible {
+.sg-pcs:focus-visible {
   stroke: var(--sg-focus);
   stroke-width: 2.5;
 }
 
-.sg-pcs.sg-point--selected,
-.sg-cand.sg-point--selected {
+.sg-cand.sg-point--active .sg-cand__area,
+.sg-cand:focus-visible .sg-cand__area {
+  stroke: var(--sg-focus);
+  stroke-width: 2.5;
+}
+
+.sg-pcs.sg-point--selected {
   stroke: var(--sg-text);
   stroke-width: 3;
+}
+
+.sg-cand.sg-point--selected .sg-cand__area {
+  stroke: var(--sg-text);
+  stroke-width: 2.5;
 }
 
 .sg-bary.sg-point--active .sg-bary__ring,

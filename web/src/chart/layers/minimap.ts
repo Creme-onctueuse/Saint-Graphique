@@ -67,11 +67,11 @@ export class Minimap {
       );
     }
     const { x, y } = this.chart.scales();
-    const { width, height } = this.chart.geometry;
-    const x0 = px(x.invert(0));
-    const x1 = px(x.invert(width));
-    const y0 = py(y.invert(0));
-    const y1 = py(y.invert(height));
+    const { plot } = this.chart.geometry;
+    const x0 = px(x.invert(plot.x));
+    const x1 = px(x.invert(plot.x + plot.w));
+    const y0 = py(y.invert(plot.y));
+    const y1 = py(y.invert(plot.y + plot.h));
     this.frame.setAttribute('x', String(x0));
     this.frame.setAttribute('y', String(y0));
     this.frame.setAttribute('width', String(Math.max(2, x1 - x0)));

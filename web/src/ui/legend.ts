@@ -45,7 +45,7 @@ export class Legend implements Feature {
       el('span', { class: 'sg-legend__key' }, dots, 'Diagonale de (−10, −10) à (10, 10)'),
       el('span', {
         class: 'sg-legend__key',
-        text: 'Aire des disques : part de la population. Taille des losanges : score.',
+        text: 'Aire des disques : part de la population. Aire des bulles : part des inscrits, sauf si vous la croisez avec autre chose.',
       }),
     );
   }
@@ -61,7 +61,7 @@ export class Legend implements Feature {
   private row(
     label: string,
     color: string,
-    shape: 'disc' | 'diamond',
+    shape: 'disc' | 'bubble',
     value: string | null,
     onToggle: (visible: boolean) => void,
     id: string,
@@ -142,7 +142,7 @@ export class Legend implements Feature {
           this.row(
             c.label,
             c.isAbstention ? `var(--sg-abstention, ${c.color})` : c.color,
-            'diamond',
+            'bubble',
             c.share !== null ? formatPct(c.share) : null,
             (visible) => this.actions.setCandidateVisible(c.id, visible),
             `c:${c.id}`,

@@ -16,11 +16,10 @@ export const CHART_STYLE = {
   /** Rayon d'un disque PCS = k · unité · √(part de population en %). */
   pcsRadiusPerSqrtPct: 0.0125,
   pcsMinRadius: 2.5,
-  /** Demi-diagonale d'un losange = k · unité · √(score en %). */
-  candidateHalfDiagonalPerSqrtPct: 0.0062,
-  candidateMinHalfDiagonal: 4.5,
-  /** Score utilisé quand un candidat n'a pas de score national. */
-  candidateDefaultShare: 5,
+  /** Point qui marque la position exacte d'un électorat, au centre de sa bulle (px). */
+  candidateDotRadius: 3.5,
+  /** Le même, sans bulle : un électorat sans taille connue (projection 2027). */
+  candidateDotRadiusAlone: 5.5,
   /** Rayon du cercle ouvert du barycentre de la population (fraction de l'unité). */
   barycenterRadius: 0.028,
   labelFont: 11.5,
@@ -48,6 +47,8 @@ export const CHART_STYLE = {
   zoomExtent: [1, 12] as [number, number],
   /** Marge (en unités de données) autour d'une zone cadrée par le bouton dédié. */
   fitPadding: 0.6,
+  /** Durée du glissement de la carte quand un panneau s'ouvre (ms). */
+  slideDuration: 180,
   /** Durées des transitions (ms). */
   durations: { normal: 650, fast: 170 },
 } as const;

@@ -33,7 +33,7 @@ function candidateColor(c: { color: string; isAbstention: boolean }): string {
   return c.isAbstention ? `var(--sg-abstention, ${c.color})` : c.color;
 }
 
-function swatch(color: string, shape: 'disc' | 'diamond'): HTMLSpanElement {
+function swatch(color: string, shape: 'disc' | 'bubble'): HTMLSpanElement {
   const node = el('span', {
     class: `sg-swatch sg-swatch--${shape}`,
     attrs: { 'aria-hidden': 'true' },
@@ -89,7 +89,7 @@ export class Inspector implements Feature {
   private readonly bannerText = el('span', { attrs: { id: 'sg-lens-text' } });
   private readonly bannerMore = el('span', {
     class: 'sg-lens-banner__more',
-    text: ' La taille des losanges montre le vote de ce groupe.',
+    text: ' L’aire des bulles montre le vote de ce groupe.',
   });
   private view: ResolvedView | null = null;
   private state: AppState | null = null;
@@ -322,7 +322,7 @@ export class Inspector implements Feature {
       : null;
     if (history) body.append(history);
     return [
-      this.head(c.label, subtitle, swatch(candidateColor(c), 'diamond'), election !== null),
+      this.head(c.label, subtitle, swatch(candidateColor(c), 'bubble'), election !== null),
       body,
     ];
   }
@@ -353,7 +353,7 @@ export class Inspector implements Feature {
         el(
           'span',
           { class: 'sg-neighbors__name' },
-          swatch(candidateColor(other), 'diamond'),
+          swatch(candidateColor(other), 'bubble'),
           other.label,
         ),
         el('span', { class: 'sg-num', text: `${formatNumber(row.gap, 1)}${NBSP}pts` }),
@@ -374,7 +374,7 @@ export class Inspector implements Feature {
       const button = el(
         'button',
         { class: 'sg-compare__item', attrs: { type: 'button', 'data-compare': `c:${other.id}` } },
-        swatch(candidateColor(other), 'diamond'),
+        swatch(candidateColor(other), 'bubble'),
         other.label,
       );
       button.addEventListener('click', () => this.compareWith(`c:${other.id}`));
@@ -467,8 +467,8 @@ export class Inspector implements Feature {
       el(
         'div',
         { class: 'sg-duel__legend' },
-        el('span', {}, swatch(colorA, 'diamond'), nameA),
-        el('span', {}, swatch(colorB, 'diamond'), nameB),
+        el('span', {}, swatch(colorA, 'bubble'), nameA),
+        el('span', {}, swatch(colorB, 'bubble'), nameB),
       ),
       ...rows.flatMap((r) => [
         el('span', { class: 'sg-duel__label', text: r.label }),
@@ -503,7 +503,7 @@ export class Inspector implements Feature {
               el(
                 'li',
                 {},
-                swatch(candidateColor(c), 'diamond'),
+                swatch(candidateColor(c), 'bubble'),
                 el('span', { class: 'sg-plainlist__label', text: c.label }),
                 el('span', { class: 'sg-num', text: formatNumber(distance) }),
               ),

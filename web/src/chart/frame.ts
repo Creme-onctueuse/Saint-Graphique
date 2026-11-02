@@ -61,20 +61,21 @@ export function drawFrame(
   x: Scale,
   y: Scale,
   model: { xLabel: string; yLabel: string; range: [number, number]; axes?: ChartAxes },
-  showRegions: boolean,
 ): void {
   const { width, height, plot, small } = geom;
   const axes = model.axes;
   const none = axes?.none === true;
   layers.bg.attr('width', width).attr('height', height);
 
-  const cx = clamp(x(0), 0, width);
-  const cy = clamp(y(0), 0, height);
+  const right0 = plot.x + plot.w;
+  const bottom0 = plot.y + plot.h;
+  const cx = clamp(x(0), plot.x, right0);
+  const cy = clamp(y(0), plot.y, bottom0);
   const quads: Quadrant[] = [
-    { k: 'tl', x: 0, y: 0, w: cx, h: cy },
-    { k: 'tr', x: cx, y: 0, w: width - cx, h: cy },
-    { k: 'bl', x: 0, y: cy, w: cx, h: height - cy },
-    { k: 'br', x: cx, y: cy, w: width - cx, h: height - cy },
+    { k: 'tl', x: plot.x, y: plot.y, w: cx - plot.x, h: cy - plot.y },
+    { k: 'tr', x: cx, y: plot.y, w: right0 - cx, h: cy - plot.y },
+    { k: 'bl', x: plot.x, y: cy, w: cx - plot.x, h: bottom0 - cy },
+    { k: 'br', x: cx, y: cy, w: right0 - cx, h: bottom0 - cy },
   ];
   layers.quads
     .selectAll<SVGRectElement, Quadrant>('rect')
@@ -97,15 +98,15 @@ export function drawFrame(
     .attr('class', (d) => (d.value === 0 ? 'sg-grid-x sg-zero' : 'sg-grid-x'))
     .attr('x1', (d) => d.pos)
     .attr('x2', (d) => d.pos)
-    .attr('y1', 0)
-    .attr('y2', height);
+    .attr('y1', plot.y)
+    .attr('y2', bottom0);
   layers.grid
     .selectAll<SVGLineElement, Tick>('line.sg-grid-y')
     .data(yt, (d) => d.key)
     .join('line')
     .attr('class', (d) => (d.value === 0 ? 'sg-grid-y sg-zero' : 'sg-grid-y'))
-    .attr('x1', 0)
-    .attr('x2', width)
+    .attr('x1', plot.x)
+    .attr('x2', right0)
     .attr('y1', (d) => d.pos)
     .attr('y2', (d) => d.pos);
 
@@ -121,6 +122,16 @@ export function drawFrame(
   const bottom = plot.y + plot.h;
   const inX = (p: number): boolean => p >= plot.x - 0.5 && p <= plot.x + plot.w + 0.5;
   const inY = (p: number): boolean => p >= plot.y - 0.5 && p <= bottom + 0.5;
+  // Les deux traits qui bornent la carte : les axes restent à son bord, quoi qu'on y fasse.
+  layers.axes
+    .selectAll<SVGLineElement, string>('line.sg-axis-rule')
+    .data(none ? [] : ['y', 'x'])
+    .join('line')
+    .attr('class', 'sg-axis-rule')
+    .attr('x1', plot.x)
+    .attr('y1', (d) => (d === 'y' ? plot.y : bottom))
+    .attr('x2', (d) => (d === 'y' ? plot.x : right0))
+    .attr('y2', bottom);
   layers.axes
     .selectAll<SVGTextElement, Tick>('text.sg-tick-x')
     .data(
@@ -220,7 +231,7 @@ export function drawFrame(
   const pad = 14;
   const right = plot.x + plot.w - pad;
   const regions =
-    showRegions && !small && !axes?.plain
+    !small && !axes?.plain
       ? [
           {
             key: 'tl',

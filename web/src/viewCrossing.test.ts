@@ -138,11 +138,9 @@ describe('axes libres', () => {
     expect(v.reserveSummary).toContain('30 catégories');
   });
 
-  it('colore par classes quand on choisit une variable, sans halos', () => {
+  it('colore par classes quand on choisit une variable', () => {
     const colored = view({ axisX: 'niveau_vie', axisY: 'bac5', colorBy: 'patrimoine' });
     expect(colored.model.pcs.every((p) => /^var\(--sg-seq-[1-5]\)$/.test(p.fill ?? ''))).toBe(true);
-    expect(colored.model.axes?.halos).toBe(false);
-    expect(v.model.axes?.halos).toBe(true);
     expect(v.model.pcs.every((p) => p.fill === undefined)).toBe(true);
   });
 

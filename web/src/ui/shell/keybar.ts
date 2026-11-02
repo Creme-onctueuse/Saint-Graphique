@@ -14,6 +14,8 @@ export class Keybar implements Feature {
   private readonly groups = el('div', { class: 'sg-keybar__groups' });
   private readonly marks: HTMLElement;
   private key = '';
+  /** Ce que mesure l'aire des bulles : la légende le dit, puisque cela change. */
+  private readonly sizeText = el('span');
 
   constructor(host: HTMLElement, actions: AppActions) {
     this.host = host;
@@ -51,8 +53,8 @@ export class Keybar implements Feature {
           return button;
         }),
       );
-      const diamond = el('span', {
-        class: 'sg-swatch sg-swatch--diamond sg-swatch--plain',
+      const bubble = el('span', {
+        class: 'sg-swatch sg-swatch--bubble sg-swatch--plain',
         attrs: { 'aria-hidden': 'true' },
       });
       const ring = el('span', {
@@ -60,7 +62,12 @@ export class Keybar implements Feature {
         attrs: { 'aria-hidden': 'true' },
       });
       this.marks.replaceChildren(
-        el('span', { class: 'sg-key sg-key--static' }, diamond, 'Électorat'),
+        el(
+          'span',
+          { class: 'sg-key sg-key--static', attrs: { id: 'sg-size-key' } },
+          bubble,
+          this.sizeText,
+        ),
         el('span', { class: 'sg-key sg-key--static' }, ring, 'Population'),
       );
     }
@@ -68,6 +75,7 @@ export class Keybar implements Feature {
       const code = button.dataset['group'] ?? '';
       button.setAttribute('aria-pressed', String(!state.hiddenGroups.includes(code)));
     }
+    this.sizeText.textContent = `Électorat, aire : ${view.crossing?.sizeLabel ?? 'part des inscrits'}`;
     this.host.hidden = groups.length === 0;
   }
 }

@@ -5,7 +5,7 @@
  * Clés : e = élection, m = méthode, h = candidat masqué (répétable), g = groupe PCS masqué
  * (répétable), w = poids des diplômes (7 nombres séparés par « _ », ordre DIPLOMA_KEYS),
  * r = score Y imposé aux retraités (nombre ou « off »), t = thème (light|dark),
- * lbl=0 = libellés masqués, ci=0 = ellipses masquées, terr=0 = territoires masqués,
+ * lbl=0 = libellés masqués, ci=1 = ellipses de confiance affichées, bs = mesure de l'aire des bulles,
  * s = repère sélectionné (p:… ou c:…), c2 = repère comparé, p = panneau ouvert, sq=1 = proportions
  * d'origine, tr=0 = trajectoires masquées, rg=1 = anneaux de vote, ty = type d'élection du filtre,
  * sc=trend = scénario de la projection, ax, ay, ac = variables libres des axes et de la couleur,
@@ -40,7 +40,8 @@ export interface AppState {
   theme: ThemeChoice;
   showLabels: boolean;
   showEllipses: boolean;
-  showTerritories: boolean;
+  /** Ce que mesure l'aire des bulles (core/bubbleSize.ts) ; null = part des inscrits. */
+  bubbleSize: string | null;
   /** Repère sélectionné : `p:<code>` ou `c:<id>`. */
   selected: string | null;
   /** Second repère, pour un duel. */
@@ -69,8 +70,8 @@ export function defaultState(): AppState {
     retired: 'default',
     theme: 'system',
     showLabels: true,
-    showEllipses: true,
-    showTerritories: true,
+    showEllipses: false,
+    bubbleSize: null,
     selected: null,
     compared: null,
     panel: null,
@@ -120,7 +121,7 @@ export function normalizeState(s: AppState): AppState {
     theme: s.theme,
     showLabels: s.showLabels,
     showEllipses: s.showEllipses,
-    showTerritories: s.showTerritories,
+    bubbleSize: s.bubbleSize || null,
     selected: s.selected || null,
     compared: s.selected ? s.compared || null : null,
     panel: s.panel,
@@ -152,8 +153,8 @@ export function serializeState(state: AppState): string {
   if (s.retired !== 'default') add('r', s.retired === 'off' ? 'off' : String(s.retired));
   if (s.theme !== 'system') add('t', s.theme);
   if (!s.showLabels) add('lbl', '0');
-  if (!s.showEllipses) add('ci', '0');
-  if (!s.showTerritories) add('terr', '0');
+  if (s.showEllipses) add('ci', '1');
+  if (s.bubbleSize) add('bs', s.bubbleSize);
   if (s.selected) add('s', s.selected);
   if (s.compared) add('c2', s.compared);
   if (s.panel) add('p', s.panel);
@@ -208,8 +209,8 @@ export function parseState(input: string): AppState {
   const t = params.get('t');
   if (t === 'light' || t === 'dark') s.theme = t;
   s.showLabels = params.get('lbl') !== '0';
-  s.showEllipses = params.get('ci') !== '0';
-  s.showTerritories = params.get('terr') !== '0';
+  s.showEllipses = params.get('ci') === '1';
+  s.bubbleSize = params.get('bs') || null;
   s.selected = params.get('s') || null;
   s.compared = params.get('c2') || null;
   s.panel = oneOf(params.get('p'), PANELS);

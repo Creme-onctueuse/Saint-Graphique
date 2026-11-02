@@ -16,8 +16,8 @@ const custom: AppState = {
   retired: -180,
   theme: 'dark',
   showLabels: false,
-  showEllipses: false,
-  showTerritories: false,
+  showEllipses: true,
+  bubbleSize: 'vote:6',
   selected: 'c:macron',
   compared: 'p:31',
   panel: 'cross',
@@ -127,7 +127,7 @@ describe('lecture tolérante', () => {
     expect(state.retired).toBe('default');
     expect(state.theme).toBe('system');
     expect(state.showLabels).toBe(true);
-    expect(state.showEllipses).toBe(true);
+    expect(state.showEllipses).toBe(false);
   });
 
   it('refuse des poids incomplets ou vides', () => {

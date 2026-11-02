@@ -35,7 +35,7 @@ const DROP_ATTRS = ['tabindex', 'role', 'class', 'data-key', 'aria-label', 'aria
 export interface LegendEntry {
   label: string;
   color: string;
-  shape: 'disc' | 'diamond';
+  shape: 'disc' | 'bubble';
 }
 
 export interface ExportMeta {
@@ -132,7 +132,6 @@ export function buildExportSvg(source: SVGSVGElement, meta: ExportMeta): Exporte
   const muted = cs.getPropertyValue('--sg-text-muted').trim() || '#555555';
   const warningColor = cs.getPropertyValue('--sg-warning-text').trim() || ink;
   const warningBg = cs.getPropertyValue('--sg-warning-bg').trim() || background;
-  const candidateRing = cs.getPropertyValue('--sg-cand-ring').trim() || 'none';
   const family = cs.fontFamily;
 
   const width = Number(source.getAttribute('width')) || source.clientWidth;
@@ -222,12 +221,16 @@ export function buildExportSvg(source: SVGSVGElement, meta: ExportMeta): Exporte
       parts.push(svgEl('circle', { cx: cursorX + 6, cy: y - 4, r: 5.5, fill: color }));
     } else {
       parts.push(
-        svgEl('path', {
-          d: `M${cursorX + 6},${y - 10}l6,6l-6,6l-6,-6z`,
+        svgEl('circle', {
+          cx: cursorX + 6,
+          cy: y - 4,
+          r: 5.5,
           fill: color,
-          stroke: candidateRing,
-          'stroke-width': 1,
+          'fill-opacity': 0.3,
+          stroke: color,
+          'stroke-width': 1.25,
         }),
+        svgEl('circle', { cx: cursorX + 6, cy: y - 4, r: 2, fill: color }),
       );
     }
     parts.push(svgEl('text', { x: cursorX + 16, y, fill: ink, 'font-size': 12 }, entry.label));
