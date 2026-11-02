@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-01T23:56:13+00:00",
+  "generated_at": "2026-11-02T08:03:46+00:00",
   "path_template": "{method}/{election}.json",
   "axes": {
     "x_label": "Exploitation",
@@ -11,12 +11,28 @@
       10
     ]
   },
-  "default_method": "ranks_chris_v1",
+  "default_method": "read_positions",
   "methods": [
     {
-      "id": "ranks_chris_v1",
-      "label": "Rangs (réplique Chris v1)",
-      "description": "Réplique : rangs 1..N normalisés sur [-10,10] (algorithme reconstruit par JnthnBS, https://github.com/JnthnBS/saint-graphique ; graphique original de Chris / PaduTeam)",
+      "id": "read_positions",
+      "label": "Positions lues (Chris)",
+      "description": "Réplique : les 41 catégories sont placées là où le graphique de Chris les affiche (lecture de ses vidéos, grille de 0,5). Les électorats en sont les barycentres.",
+      "ellipses": true,
+      "elections": [
+        "population",
+        "2017_presidentielle_t1",
+        "2017_legislatives_t1",
+        "2019_europeennes",
+        "2022_presidentielle_t1",
+        "2022_legislatives_t1",
+        "2024_europeennes",
+        "2024_legislatives_t1"
+      ]
+    },
+    {
+      "id": "ranks_jnthnbs",
+      "label": "Rangs (reconstruction JnthnBS)",
+      "description": "Calculée sur données ouvertes : rangs 1..N normalisés sur [-10,10] (reconstruction de JnthnBS, https://github.com/JnthnBS/saint-graphique). Elle s'écarte du graphique de Chris, notamment pour les retraités.",
       "ellipses": true,
       "elections": [
         "population",
@@ -154,6 +170,11 @@
       "code": "7",
       "label": "Retraités",
       "color": "#7f7f7f"
+    },
+    {
+      "code": "8",
+      "label": "Autres personnes sans activité professionnelle",
+      "color": "#8e82b8"
     }
   ]
 }

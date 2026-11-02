@@ -1,5 +1,5 @@
 {
-  "method": "ranks_chris_v1",
+  "method": "ranks_jnthnbs",
   "params": {
     "x_score": "patrimoine_over_niveau_vie",
     "y_weights": {
@@ -21,8 +21,8 @@
       10
     ]
   },
-  "election_id": "population",
-  "election_label": "Population (sans élection)",
+  "election_id": "2019_europeennes",
+  "election_label": "Européennes 2019",
   "axes": {
     "x_label": "Exploitation",
     "y_label": "Domination",
@@ -361,9 +361,241 @@
       "weight": 33.065769
     }
   ],
-  "candidates": [],
+  "candidates": [
+    {
+      "id": "lo",
+      "label": "Lutte ouvrière",
+      "color": "#7b1113",
+      "x": -1.016554,
+      "y": -3.74834,
+      "is_abstention": false,
+      "national_share_pct": 0.8,
+      "ellipse": {
+        "rx": 0.473687,
+        "ry": 0.296297,
+        "angle_deg": 65.289267
+      }
+    },
+    {
+      "id": "pcf",
+      "label": "Parti communiste",
+      "color": "#c8102e",
+      "x": -1.688734,
+      "y": -4.720693,
+      "is_abstention": false,
+      "national_share_pct": 2.5,
+      "ellipse": {
+        "rx": 0.413069,
+        "ry": 0.21386,
+        "angle_deg": -83.537988
+      }
+    },
+    {
+      "id": "lfi",
+      "label": "La France insoumise",
+      "color": "#e5383b",
+      "x": -1.469714,
+      "y": -2.597118,
+      "is_abstention": false,
+      "national_share_pct": 6.3,
+      "ellipse": {
+        "rx": 0.506198,
+        "ry": 0.268913,
+        "angle_deg": 65.795371
+      }
+    },
+    {
+      "id": "generation-s",
+      "label": "Génération.s et DiEM25",
+      "color": "#d81b8c",
+      "x": -0.932526,
+      "y": 1.02774,
+      "is_abstention": false,
+      "national_share_pct": 3.1,
+      "ellipse": {
+        "rx": 0.493029,
+        "ry": 0.174023,
+        "angle_deg": 57.774933
+      }
+    },
+    {
+      "id": "ps-pp",
+      "label": "Place publique, Parti socialiste et Nouvelle Donne",
+      "color": "#f06292",
+      "x": 0.410384,
+      "y": -3.959179,
+      "is_abstention": false,
+      "national_share_pct": 6.2,
+      "ellipse": {
+        "rx": 0.520755,
+        "ry": 0.224926,
+        "angle_deg": 82.54263
+      }
+    },
+    {
+      "id": "eelv",
+      "label": "Europe Écologie Les Verts, AEI et R&PS",
+      "color": "#2e9e4f",
+      "x": 0.279558,
+      "y": -0.938463,
+      "is_abstention": false,
+      "national_share_pct": 13.1,
+      "ellipse": {
+        "rx": 0.538489,
+        "ry": 0.248447,
+        "angle_deg": 73.763294
+      }
+    },
+    {
+      "id": "lrem",
+      "label": "La République en marche, Modem, Agir et Radicaux",
+      "color": "#f9a825",
+      "x": 0.86063,
+      "y": -4.086604,
+      "is_abstention": false,
+      "national_share_pct": 22.6,
+      "ellipse": {
+        "rx": 0.570318,
+        "ry": 0.228048,
+        "angle_deg": 79.450141
+      }
+    },
+    {
+      "id": "udi",
+      "label": "UDI",
+      "color": "#4fa3d1",
+      "x": 0.770525,
+      "y": -3.997205,
+      "is_abstention": false,
+      "national_share_pct": 2.4,
+      "ellipse": {
+        "rx": 0.579817,
+        "ry": 0.200777,
+        "angle_deg": 84.306827
+      }
+    },
+    {
+      "id": "lr",
+      "label": "Les Républicains et Centristes",
+      "color": "#1565c0",
+      "x": 0.785062,
+      "y": -5.943342,
+      "is_abstention": false,
+      "national_share_pct": 8.1,
+      "ellipse": {
+        "rx": 0.479582,
+        "ry": 0.216504,
+        "angle_deg": 82.399076
+      }
+    },
+    {
+      "id": "dlf",
+      "label": "Debout la France et CNIP",
+      "color": "#303f9f",
+      "x": -0.582609,
+      "y": -3.09751,
+      "is_abstention": false,
+      "national_share_pct": 3.4,
+      "ellipse": {
+        "rx": 0.488404,
+        "ry": 0.280845,
+        "angle_deg": 81.366484
+      }
+    },
+    {
+      "id": "rn",
+      "label": "Rassemblement national",
+      "color": "#0d1b4c",
+      "x": -1.442427,
+      "y": -4.792342,
+      "is_abstention": false,
+      "national_share_pct": 23.6,
+      "ellipse": {
+        "rx": 0.407853,
+        "ry": 0.301394,
+        "angle_deg": 71.132172
+      }
+    },
+    {
+      "id": "patriotes",
+      "label": "Patriotes et Jaunes et Citoyens",
+      "color": "#283593",
+      "x": -1.310932,
+      "y": -2.468491,
+      "is_abstention": false,
+      "national_share_pct": 0.7,
+      "ellipse": {
+        "rx": 0.463737,
+        "ry": 0.233387,
+        "angle_deg": 83.307589
+      }
+    },
+    {
+      "id": "upr",
+      "label": "Union populaire républicaine",
+      "color": "#00897b",
+      "x": -0.853871,
+      "y": -3.40209,
+      "is_abstention": false,
+      "national_share_pct": 1.2,
+      "ellipse": {
+        "rx": 0.527151,
+        "ry": 0.28011,
+        "angle_deg": 68.032865
+      }
+    },
+    {
+      "id": "alliance-jaune",
+      "label": "Alliance jaune",
+      "color": "#fdd835",
+      "x": 2.095341,
+      "y": 3.912901,
+      "is_abstention": false,
+      "national_share_pct": 0.5,
+      "ellipse": {
+        "rx": 0.462383,
+        "ry": 0.215296,
+        "angle_deg": 55.290478
+      }
+    },
+    {
+      "id": "autres-listes",
+      "label": "Autres listes",
+      "color": "#8e8e8e",
+      "x": -0.597999,
+      "y": -1.166391,
+      "is_abstention": false,
+      "national_share_pct": 5.5,
+      "ellipse": {
+        "rx": 0.485309,
+        "ry": 0.274829,
+        "angle_deg": 66.468648
+      }
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "x": -1.241329,
+      "y": -2.219155,
+      "is_abstention": true,
+      "national_share_pct": 49.0,
+      "ellipse": {
+        "rx": 0.487064,
+        "ry": 0.274009,
+        "angle_deg": 67.376105
+      }
+    }
+  ],
   "population_barycenter": {
     "x": -0.355499,
     "y": -3.131686
+  },
+  "bootstrap": {
+    "n_boot": 500,
+    "margin_pts": 3.0,
+    "kind": "dirichlet",
+    "seed": 0,
+    "level": 0.95
   }
 }

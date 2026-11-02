@@ -1,5 +1,5 @@
 {
-  "method": "ranks_chris_v1",
+  "method": "ranks_jnthnbs",
   "params": {
     "x_score": "patrimoine_over_niveau_vie",
     "y_weights": {
@@ -21,8 +21,8 @@
       10
     ]
   },
-  "election_id": "2022_presidentielle_t1",
-  "election_label": "Présidentielle 2022 (1er tour)",
+  "election_id": "2024_legislatives_t1",
+  "election_label": "Législatives 2024 (1er tour)",
   "axes": {
     "x_label": "Exploitation",
     "y_label": "Domination",
@@ -363,185 +363,143 @@
   ],
   "candidates": [
     {
-      "id": "arthaud",
-      "label": "Nathalie Arthaud",
+      "id": "extreme-gauche",
+      "label": "Extrême gauche",
       "color": "#7b1113",
-      "x": -1.653421,
-      "y": -4.102723,
+      "x": 0.699636,
+      "y": -1.683017,
       "is_abstention": false,
-      "national_share_pct": 0.6,
+      "national_share_pct": 1.1,
       "ellipse": {
-        "rx": 0.46435,
-        "ry": 0.254149,
-        "angle_deg": 81.640944
+        "rx": 0.604942,
+        "ry": 0.286953,
+        "angle_deg": 67.430623
       }
     },
     {
-      "id": "poutou",
-      "label": "Philippe Poutou",
-      "color": "#b3261e",
-      "x": -1.725382,
-      "y": -3.046379,
-      "is_abstention": false,
-      "national_share_pct": 0.8,
-      "ellipse": {
-        "rx": 0.511911,
-        "ry": 0.248617,
-        "angle_deg": 64.300449
-      }
-    },
-    {
-      "id": "roussel",
-      "label": "Fabien Roussel",
-      "color": "#c8102e",
-      "x": 0.156424,
-      "y": -3.205681,
-      "is_abstention": false,
-      "national_share_pct": 2.3,
-      "ellipse": {
-        "rx": 0.526821,
-        "ry": 0.217526,
-        "angle_deg": 83.078159
-      }
-    },
-    {
-      "id": "melenchon",
-      "label": "Jean-Luc Mélenchon",
+      "id": "nfp",
+      "label": "Nouveau Front populaire et divers NFP",
       "color": "#e5383b",
-      "x": -0.866528,
-      "y": -2.709628,
+      "x": -0.315411,
+      "y": -2.119857,
       "is_abstention": false,
-      "national_share_pct": 22.0,
+      "national_share_pct": 28.1,
       "ellipse": {
-        "rx": 0.488205,
-        "ry": 0.307626,
-        "angle_deg": 69.185094
+        "rx": 0.511824,
+        "ry": 0.279271,
+        "angle_deg": 73.110435
       }
     },
     {
-      "id": "hidalgo",
-      "label": "Anne Hidalgo",
-      "color": "#f06292",
-      "x": -1.188602,
-      "y": -2.655736,
+      "id": "divers-gauche",
+      "label": "Divers gauche",
+      "color": "#ef9a9a",
+      "x": 1.381214,
+      "y": -5.101915,
       "is_abstention": false,
-      "national_share_pct": 1.7,
+      "national_share_pct": 1.6,
       "ellipse": {
-        "rx": 0.44108,
-        "ry": 0.259762,
-        "angle_deg": 85.153586
+        "rx": 0.510232,
+        "ry": 0.253332,
+        "angle_deg": 73.66326
       }
     },
     {
-      "id": "jadot",
-      "label": "Yannick Jadot",
-      "color": "#2e9e4f",
-      "x": 0.023658,
-      "y": -0.389537,
-      "is_abstention": false,
-      "national_share_pct": 4.6,
-      "ellipse": {
-        "rx": 0.51794,
-        "ry": 0.244165,
-        "angle_deg": 74.662182
-      }
-    },
-    {
-      "id": "macron",
-      "label": "Emmanuel Macron",
+      "id": "ensemble",
+      "label": "Majorité présidentielle et divers majorité",
       "color": "#f9a825",
-      "x": 0.421387,
-      "y": -3.957628,
+      "x": 0.737084,
+      "y": -4.23268,
       "is_abstention": false,
-      "national_share_pct": 27.5,
+      "national_share_pct": 21.3,
       "ellipse": {
-        "rx": 0.515615,
-        "ry": 0.263156,
-        "angle_deg": 79.719559
+        "rx": 0.507792,
+        "ry": 0.251686,
+        "angle_deg": 79.181729
       }
     },
     {
-      "id": "pecresse",
-      "label": "Valérie Pécresse",
+      "id": "divers-centre",
+      "label": "Divers centre",
+      "color": "#ffcc80",
+      "x": -0.25851,
+      "y": -3.600783,
+      "is_abstention": false,
+      "national_share_pct": 1.2,
+      "ellipse": {
+        "rx": 0.525352,
+        "ry": 0.237468,
+        "angle_deg": 79.875044
+      }
+    },
+    {
+      "id": "lr-dvd",
+      "label": "Les Républicains ou divers droite",
       "color": "#1565c0",
-      "x": 1.143944,
-      "y": -5.231115,
+      "x": 0.077918,
+      "y": -3.784914,
       "is_abstention": false,
-      "national_share_pct": 4.8,
+      "national_share_pct": 10.2,
       "ellipse": {
-        "rx": 0.51691,
-        "ry": 0.243859,
-        "angle_deg": 77.969434
+        "rx": 0.486607,
+        "ry": 0.2895,
+        "angle_deg": 74.58456
       }
     },
     {
-      "id": "dupont-aignan",
-      "label": "Nicolas Dupont-Aignan",
-      "color": "#303f9f",
-      "x": -0.240085,
-      "y": -3.919194,
-      "is_abstention": false,
-      "national_share_pct": 2.1,
-      "ellipse": {
-        "rx": 0.517922,
-        "ry": 0.278425,
-        "angle_deg": 69.90166
-      }
-    },
-    {
-      "id": "le-pen",
-      "label": "Marine Le Pen",
+      "id": "rn",
+      "label": "Investi ou soutenu par le Rassemblement national",
       "color": "#0d1b4c",
-      "x": -1.322497,
-      "y": -3.586183,
+      "x": -1.052842,
+      "y": -3.777318,
       "is_abstention": false,
-      "national_share_pct": 23.3,
+      "national_share_pct": 33.2,
       "ellipse": {
-        "rx": 0.440069,
-        "ry": 0.290528,
-        "angle_deg": 68.113941
+        "rx": 0.469291,
+        "ry": 0.294462,
+        "angle_deg": 69.392078
       }
     },
     {
-      "id": "zemmour",
-      "label": "Éric Zemmour",
+      "id": "reconquete",
+      "label": "Reconquête",
       "color": "#3e2723",
-      "x": 0.466704,
-      "y": -3.892211,
+      "x": 1.479446,
+      "y": -1.760412,
       "is_abstention": false,
-      "national_share_pct": 7.1,
+      "national_share_pct": 0.7,
       "ellipse": {
-        "rx": 0.529461,
-        "ry": 0.281004,
-        "angle_deg": 70.761852
+        "rx": 0.535303,
+        "ry": 0.237076,
+        "angle_deg": 81.172585
       }
     },
     {
-      "id": "lassalle",
-      "label": "Jean Lassalle",
-      "color": "#8d8d5a",
-      "x": -0.83381,
-      "y": -1.740096,
+      "id": "divers",
+      "label": "Divers",
+      "color": "#8e8e8e",
+      "x": -0.368185,
+      "y": -3.694662,
       "is_abstention": false,
-      "national_share_pct": 3.2,
+      "national_share_pct": 2.6,
       "ellipse": {
-        "rx": 0.457764,
-        "ry": 0.28415,
-        "angle_deg": 77.826188
+        "rx": 0.462292,
+        "ry": 0.293457,
+        "angle_deg": 76.158636
       }
     },
     {
       "id": "abstention",
       "label": "Abstention",
       "color": "#000000",
-      "x": -0.698103,
-      "y": -3.757921,
+      "x": -1.009757,
+      "y": -3.239969,
       "is_abstention": true,
-      "national_share_pct": 25.1,
+      "national_share_pct": 33.3,
       "ellipse": {
-        "rx": 0.465261,
-        "ry": 0.29532,
-        "angle_deg": 67.913728
+        "rx": 0.452033,
+        "ry": 0.301969,
+        "angle_deg": 70.828518
       }
     }
   ],

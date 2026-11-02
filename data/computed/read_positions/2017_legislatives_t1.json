@@ -1,0 +1,741 @@
+{
+  "method": "read_positions",
+  "params": {
+    "merge_groups": {
+      "2": [
+        "1",
+        "2"
+      ]
+    },
+    "range": [
+      -10,
+      10
+    ]
+  },
+  "election_id": "2017_legislatives_t1",
+  "election_label": "Législatives 2017 (1er tour)",
+  "axes": {
+    "x_label": "Exploitation",
+    "y_label": "Domination",
+    "range": [
+      -10,
+      10
+    ]
+  },
+  "pcs": [
+    {
+      "code": "11",
+      "group": "1",
+      "label": "Agriculteurs sur petite exploitation",
+      "short": "Agri. petite expl.",
+      "x": 2.0,
+      "y": -5.0,
+      "weight": 0.5,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après la taille du disque."
+    },
+    {
+      "code": "12",
+      "group": "1",
+      "label": "Agriculteurs sur moyenne exploitation",
+      "short": "Agri. moyenne expl.",
+      "x": 6.0,
+      "y": -3.0,
+      "weight": 0.22,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après la taille du disque."
+    },
+    {
+      "code": "13",
+      "group": "1",
+      "label": "Agriculteurs sur grande exploitation",
+      "short": "Agri. grande expl.",
+      "x": 8.0,
+      "y": 4.0,
+      "weight": 0.49,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après la taille du disque."
+    },
+    {
+      "code": "21",
+      "group": "2",
+      "label": "Artisans",
+      "short": "Artisans",
+      "x": 4.0,
+      "y": -6.0,
+      "weight": 1.6,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "22",
+      "group": "2",
+      "label": "Commerçants et assimilés",
+      "short": "Commerçants",
+      "x": 7.0,
+      "y": -3.0,
+      "weight": 1.3,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "23",
+      "group": "2",
+      "label": "Chefs d'entreprise 10 salariés ou plus",
+      "short": "Chefs d'entreprise",
+      "x": 7.0,
+      "y": 9.0,
+      "weight": 0.4,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "31",
+      "group": "3",
+      "label": "Professions libérales",
+      "short": "Prof. libérales",
+      "x": 5.0,
+      "y": 6.0,
+      "weight": 1.21,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "33",
+      "group": "3",
+      "label": "Cadres de la fonction publique",
+      "short": "Cadres FP",
+      "x": 2.0,
+      "y": 8.0,
+      "weight": 0.9,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "34",
+      "group": "3",
+      "label": "Professeurs, professions scientifiques",
+      "short": "Professeurs",
+      "x": -1.0,
+      "y": 6.0,
+      "weight": 1.5,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "35",
+      "group": "3",
+      "label": "Professions de l'information, des arts et des spectacles",
+      "short": "Info/arts",
+      "x": 0.0,
+      "y": -2.0,
+      "weight": 0.69,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "37",
+      "group": "3",
+      "label": "Cadres administratifs et commerciaux d'entreprise",
+      "short": "Cadres admin.",
+      "x": 3.0,
+      "y": 5.0,
+      "weight": 2.8,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "38",
+      "group": "3",
+      "label": "Ingénieurs et cadres techniques d'entreprise",
+      "short": "Ingénieurs",
+      "x": 7.0,
+      "y": 5.5,
+      "weight": 2.7,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "42",
+      "group": "4",
+      "label": "Professeurs des écoles, instituteurs et assimilés",
+      "short": "Prof. des écoles",
+      "x": -2.0,
+      "y": 3.0,
+      "weight": 2.0,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "43",
+      "group": "4",
+      "label": "Professions intermédiaires de la santé et du travail social",
+      "short": "PI santé/social",
+      "x": -3.0,
+      "y": -3.0,
+      "weight": 3.1,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "44",
+      "group": "4",
+      "label": "Clergé, religieux",
+      "short": "Clergé",
+      "x": 0.0,
+      "y": -6.0,
+      "weight": 0.04,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "45",
+      "group": "4",
+      "label": "Professions intermédiaires administratives de la fonction publique",
+      "short": "PI admin. FP",
+      "x": -3.0,
+      "y": -1.0,
+      "weight": 0.87,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "46",
+      "group": "4",
+      "label": "Professions intermédiaires administratives et commerciales des entreprises",
+      "short": "PI admin. entr.",
+      "x": -2.0,
+      "y": -1.0,
+      "weight": 4.1,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "47",
+      "group": "4",
+      "label": "Techniciens",
+      "short": "Techniciens",
+      "x": 1.0,
+      "y": 2.0,
+      "weight": 2.5,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "48",
+      "group": "4",
+      "label": "Contremaîtres, agents de maîtrise",
+      "short": "Contremaîtres",
+      "x": -1.0,
+      "y": -2.0,
+      "weight": 1.07,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "52",
+      "group": "5",
+      "label": "Employés civils et agents de service de la fonction publique",
+      "short": "Employés FP",
+      "x": -1.0,
+      "y": -2.5,
+      "weight": 4.7,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "53",
+      "group": "5",
+      "label": "Policiers et militaires",
+      "short": "Policiers/militaires",
+      "x": 0.0,
+      "y": -5.0,
+      "weight": 1.06,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "54",
+      "group": "5",
+      "label": "Employés administratifs d'entreprise",
+      "short": "Employés admin.",
+      "x": -7.5,
+      "y": -7.0,
+      "weight": 3.28,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "55",
+      "group": "5",
+      "label": "Employés de commerce",
+      "short": "Employés commerce",
+      "x": -7.0,
+      "y": -7.0,
+      "weight": 2.39,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "56",
+      "group": "5",
+      "label": "Personnels des services directs aux particuliers",
+      "short": "Services particuliers",
+      "x": -8.5,
+      "y": -9.5,
+      "weight": 3.39,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "62",
+      "group": "6",
+      "label": "Ouvriers qualifiés de type industriel",
+      "short": "OQ industriels",
+      "x": -5.0,
+      "y": -5.0,
+      "weight": 1.61,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "63",
+      "group": "6",
+      "label": "Ouvriers qualifiés de type artisanal",
+      "short": "OQ artisanaux",
+      "x": -5.0,
+      "y": -6.0,
+      "weight": 2.8,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "64",
+      "group": "6",
+      "label": "Chauffeurs",
+      "short": "Chauffeurs",
+      "x": -6.0,
+      "y": -6.0,
+      "weight": 1.3,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "65",
+      "group": "6",
+      "label": "Ouvriers qualifiés de la manutention, du magasinage et du transport",
+      "short": "OQ manutention",
+      "x": -6.0,
+      "y": -5.5,
+      "weight": 0.71,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "67",
+      "group": "6",
+      "label": "Ouvriers non qualifiés de type industriel",
+      "short": "ONQ industriels",
+      "x": -9.0,
+      "y": -9.5,
+      "weight": 2.1,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "68",
+      "group": "6",
+      "label": "Ouvriers non qualifiés de type artisanal",
+      "short": "ONQ artisanaux",
+      "x": -8.5,
+      "y": -8.5,
+      "weight": 1.7,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "69",
+      "group": "6",
+      "label": "Ouvriers agricoles",
+      "short": "Ouvriers agricoles",
+      "x": -9.0,
+      "y": -9.0,
+      "weight": 0.5,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après le recensement."
+    },
+    {
+      "code": "71",
+      "group": "7",
+      "label": "Anciens agriculteurs exploitants",
+      "short": "Anciens agriculteurs",
+      "x": 8.0,
+      "y": 1.0,
+      "weight": 1.46,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après la taille du disque."
+    },
+    {
+      "code": "72",
+      "group": "7",
+      "label": "Anciens artisans, commerçants, chefs d'entreprises",
+      "short": "Anciens indépendants",
+      "x": 7.0,
+      "y": 0.0,
+      "weight": 2.66,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après la taille du disque."
+    },
+    {
+      "code": "74",
+      "group": "7",
+      "label": "Anciens cadres, professions intellectuelles supérieures",
+      "short": "Anciens cadres",
+      "x": 5.0,
+      "y": 5.0,
+      "weight": 4.02,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après la taille du disque."
+    },
+    {
+      "code": "75",
+      "group": "7",
+      "label": "Anciennes professions intermédiaires",
+      "short": "Anciennes prof. interm.",
+      "x": 5.0,
+      "y": -5.0,
+      "weight": 6.6,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "77",
+      "group": "7",
+      "label": "Anciens employés",
+      "short": "Anciens employés",
+      "x": 0.0,
+      "y": -7.0,
+      "weight": 10.0,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "78",
+      "group": "7",
+      "label": "Anciens ouvriers",
+      "short": "Anciens ouvriers",
+      "x": 1.0,
+      "y": -8.5,
+      "weight": 8.2,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "81",
+      "group": "8",
+      "label": "Chômeurs n'ayant jamais travaillé",
+      "short": "Chômeurs sans emploi passé",
+      "x": 0.0,
+      "y": -10.0,
+      "weight": 0.8,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "84",
+      "group": "8",
+      "label": "Élèves ou étudiants",
+      "short": "Élèves, étudiants",
+      "x": 0.0,
+      "y": 0.0,
+      "weight": 7.8,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "85",
+      "group": "8",
+      "label": "Personnes n'ayant jamais travaillé de moins de 60 ans",
+      "short": "Sans emploi passé, -60 ans",
+      "x": 0.0,
+      "y": -9.5,
+      "weight": 2.1,
+      "note": "Position et poids lus sur le graphique de Chris."
+    },
+    {
+      "code": "86",
+      "group": "8",
+      "label": "Personnes n'ayant jamais travaillé de 60 ans ou plus",
+      "short": "Sans emploi passé, 60 ans et +",
+      "x": -0.5,
+      "y": -10.5,
+      "weight": 2.07,
+      "note": "Position lue sur le graphique de Chris, poids estimé d'après la taille du disque."
+    }
+  ],
+  "groups": [
+    {
+      "code": "1",
+      "label": "Agriculteurs exploitants",
+      "color": "#6b8e23",
+      "x": 5.157025,
+      "y": -0.991736,
+      "weight": 1.21
+    },
+    {
+      "code": "2",
+      "label": "Artisans, commerçants et chefs d'entreprise",
+      "color": "#b8860b",
+      "x": 5.545455,
+      "y": -3.0,
+      "weight": 3.3
+    },
+    {
+      "code": "3",
+      "label": "Cadres et professions intellectuelles supérieures",
+      "color": "#4b0082",
+      "x": 3.433673,
+      "y": 5.196939,
+      "weight": 9.8
+    },
+    {
+      "code": "4",
+      "label": "Professions intermédiaires",
+      "color": "#1f77b4",
+      "x": -1.657895,
+      "y": -0.413012,
+      "weight": 13.68
+    },
+    {
+      "code": "5",
+      "label": "Employés",
+      "color": "#d62728",
+      "x": -5.05027,
+      "y": -6.001687,
+      "weight": 14.82
+    },
+    {
+      "code": "6",
+      "label": "Ouvriers",
+      "color": "#8c2d04",
+      "x": -6.712687,
+      "y": -7.038713,
+      "weight": 10.72
+    },
+    {
+      "code": "7",
+      "label": "Retraités",
+      "color": "#7f7f7f",
+      "x": 2.780814,
+      "y": -4.588342,
+      "weight": 32.94
+    },
+    {
+      "code": "8",
+      "label": "Autres personnes sans activité professionnelle",
+      "color": "#8e82b8",
+      "x": -0.081049,
+      "y": -3.89076,
+      "weight": 12.77
+    }
+  ],
+  "candidates": [
+    {
+      "id": "extreme-gauche",
+      "label": "Extrême gauche",
+      "color": "#7b1113",
+      "x": -1.932708,
+      "y": -3.242999,
+      "is_abstention": false,
+      "national_share_pct": 0.8,
+      "ellipse": {
+        "rx": 0.426687,
+        "ry": 0.165905,
+        "angle_deg": 48.566241
+      }
+    },
+    {
+      "id": "lfi",
+      "label": "La France insoumise",
+      "color": "#e5383b",
+      "x": -1.687412,
+      "y": -3.50756,
+      "is_abstention": false,
+      "national_share_pct": 11.0,
+      "ellipse": {
+        "rx": 0.359028,
+        "ry": 0.184271,
+        "angle_deg": 38.617616
+      }
+    },
+    {
+      "id": "pcf",
+      "label": "Parti communiste français",
+      "color": "#c8102e",
+      "x": -0.124769,
+      "y": -3.063376,
+      "is_abstention": false,
+      "national_share_pct": 2.7,
+      "ellipse": {
+        "rx": 0.318912,
+        "ry": 0.213781,
+        "angle_deg": 36.138118
+      }
+    },
+    {
+      "id": "ps",
+      "label": "Parti socialiste",
+      "color": "#f06292",
+      "x": 0.740955,
+      "y": -3.128946,
+      "is_abstention": false,
+      "national_share_pct": 7.4,
+      "ellipse": {
+        "rx": 0.312643,
+        "ry": 0.204597,
+        "angle_deg": 44.929722
+      }
+    },
+    {
+      "id": "eelv",
+      "label": "Europe Écologie Les Verts",
+      "color": "#2e9e4f",
+      "x": -0.986405,
+      "y": -0.952964,
+      "is_abstention": false,
+      "national_share_pct": 3.4,
+      "ellipse": {
+        "rx": 0.431136,
+        "ry": 0.112552,
+        "angle_deg": 52.505722
+      }
+    },
+    {
+      "id": "divers-gauche",
+      "label": "Divers gauche",
+      "color": "#ef9a9a",
+      "x": 0.192164,
+      "y": -3.550703,
+      "is_abstention": false,
+      "national_share_pct": 2.0,
+      "ellipse": {
+        "rx": 0.305463,
+        "ry": 0.199426,
+        "angle_deg": 34.193555
+      }
+    },
+    {
+      "id": "lrem",
+      "label": "La République en marche",
+      "color": "#f9a825",
+      "x": 0.562174,
+      "y": -3.016662,
+      "is_abstention": false,
+      "national_share_pct": 32.3,
+      "ellipse": {
+        "rx": 0.32982,
+        "ry": 0.217553,
+        "angle_deg": 42.486818
+      }
+    },
+    {
+      "id": "lr-udi",
+      "label": "Les Républicains et UDI",
+      "color": "#1565c0",
+      "x": 1.168725,
+      "y": -3.744209,
+      "is_abstention": false,
+      "national_share_pct": 18.8,
+      "ellipse": {
+        "rx": 0.269321,
+        "ry": 0.184592,
+        "angle_deg": 26.859744
+      }
+    },
+    {
+      "id": "divers-droite",
+      "label": "Divers droite",
+      "color": "#6f9fd8",
+      "x": 0.994523,
+      "y": -2.425553,
+      "is_abstention": false,
+      "national_share_pct": 3.4,
+      "ellipse": {
+        "rx": 0.354706,
+        "ry": 0.216285,
+        "angle_deg": 51.334085
+      }
+    },
+    {
+      "id": "dlf",
+      "label": "Debout la France",
+      "color": "#303f9f",
+      "x": -0.275332,
+      "y": -4.483805,
+      "is_abstention": false,
+      "national_share_pct": 1.2,
+      "ellipse": {
+        "rx": 0.350788,
+        "ry": 0.138606,
+        "angle_deg": 21.988361
+      }
+    },
+    {
+      "id": "fn",
+      "label": "Front national",
+      "color": "#0d1b4c",
+      "x": -1.762407,
+      "y": -4.408341,
+      "is_abstention": false,
+      "national_share_pct": 13.2,
+      "ellipse": {
+        "rx": 0.363991,
+        "ry": 0.163496,
+        "angle_deg": 30.549138
+      }
+    },
+    {
+      "id": "divers",
+      "label": "Divers ou sans étiquette",
+      "color": "#8e8e8e",
+      "x": -1.094187,
+      "y": -2.77268,
+      "is_abstention": false,
+      "national_share_pct": 3.8,
+      "ellipse": {
+        "rx": 0.382725,
+        "ry": 0.184232,
+        "angle_deg": 40.940491
+      }
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "x": -0.990212,
+      "y": -3.106688,
+      "is_abstention": true,
+      "national_share_pct": 49.8,
+      "ellipse": {
+        "rx": 0.379286,
+        "ry": 0.190811,
+        "angle_deg": 43.754187
+      }
+    }
+  ],
+  "population_barycenter": {
+    "x": -0.208888,
+    "y": -3.335802
+  },
+  "bootstrap": {
+    "n_boot": 500,
+    "margin_pts": 3.0,
+    "kind": "dirichlet",
+    "seed": 0,
+    "level": 0.95
+  },
+  "sources": [
+    {
+      "id": "paduteam_MJsGgEA_Slw",
+      "title": "PaduTeam, Première présentation du graphique (diapositive), 2025-01-07",
+      "url": "https://youtu.be/MJsGgEA_Slw?t=421",
+      "publisher": "PaduTeam",
+      "accessed": "2026-11-02",
+      "notes": "Valeurs lues à l'écran. Le graphique et son algorithme sont de Chris."
+    },
+    {
+      "id": "paduteam_GTN2rUgOdFo",
+      "title": "PaduTeam, Tableau interactif, infobulles lues, 2025-03-27",
+      "url": "https://youtu.be/GTN2rUgOdFo?t=345",
+      "publisher": "PaduTeam",
+      "accessed": "2026-11-02",
+      "notes": "Valeurs lues à l'écran. Le graphique et son algorithme sont de Chris."
+    },
+    {
+      "id": "paduteam_iXImwyHjrwM",
+      "title": "PaduTeam, Tableau en plein écran, 2026-02-14",
+      "url": "https://youtu.be/iXImwyHjrwM?t=656",
+      "publisher": "PaduTeam",
+      "accessed": "2026-11-02",
+      "notes": "Valeurs lues à l'écran. Le graphique et son algorithme sont de Chris."
+    },
+    {
+      "id": "paduteam_81kznHfk78k",
+      "title": "PaduTeam, Tableau révisé : deux catégories d'employés déplacées, 2026-02-28",
+      "url": "https://youtu.be/81kznHfk78k?t=700",
+      "publisher": "PaduTeam",
+      "accessed": "2026-11-02",
+      "notes": "Valeurs lues à l'écran. Le graphique et son algorithme sont de Chris."
+    },
+    {
+      "id": "insee_rp2022_fd_indreg",
+      "title": "Recensement de la population 2022 — Fichier détail « Individus localisés à la région »",
+      "url": "https://www.insee.fr/fr/statistiques/8590183",
+      "accessed": "2026-10-31",
+      "publisher": "Insee",
+      "license": "Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation",
+      "notes": "Zip national https://www.insee.fr/fr/statistiques/fichier/8590183/RP2022_indreg.zip (France hors Mayotte, exploitation complémentaire, pondération IPONDI). Dictionnaire des variables : https://www.insee.fr/fr/statistiques/fichier/8590183/contenu_RP2022_indreg.pdf"
+    }
+  ]
+}
