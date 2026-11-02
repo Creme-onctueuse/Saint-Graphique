@@ -44,6 +44,8 @@ Les formulations varient donc : niveau de capital, pondération salaire, patrimo
 | « c'est moi qui l'ai codé, il va être rendu public » | [GTN2rUgOdFo 04:48](https://youtu.be/GTN2rUgOdFo?t=288) | Chris |
 | Accès annoncé à « quelles données de l'Insee », « quels calculs » | [ns7qtJdHAm4 42:05](https://youtu.be/ns7qtJdHAm4?t=2525) | Équipe |
 
+Une recherche par mots-clés dans les transcriptions des 38 autres vidéos centrales n'a fait ressortir aucun nouvel énoncé sur la formule. Seules les occurrences ont été relues, pas ces vidéos en entier. La vidéo la plus riche en occurrences ([bSERpJcmCso](https://youtu.be/bSERpJcmCso?t=474)) rediffuse et commente la séquence de mars 2025 déjà citée.
+
 ## 2. Établi par lecture de l'écran
 
 Ces faits viennent de valeurs affichées ou de mesures reproductibles sur des images, pas d'une déclaration.

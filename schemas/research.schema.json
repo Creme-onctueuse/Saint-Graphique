@@ -41,7 +41,7 @@
         "version_id": { "type": "string" },
         "date": { "type": "string" },
         "source": { "type": "object", "properties": { "video_id": { "type": "string" }, "timestamp_s": { "type": "number" }, "capture": { "type": "string" } } },
-        "axes": { "type": "object", "properties": { "x_label": { "type": "string" }, "y_label": { "type": "string" }, "range": { "type": "array" } } },
+        "axes": { "type": "object", "description": "Valeurs nulles : axes sans libellé ni graduation à l'écran", "properties": { "x_label": { "type": ["string", "null"] }, "y_label": { "type": ["string", "null"] }, "range": { "type": ["array", "null"] } } },
         "election_id": { "type": ["string", "null"] },
         "points": {
           "type": "array",

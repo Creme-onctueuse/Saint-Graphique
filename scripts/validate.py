@@ -77,7 +77,8 @@ def main(argv: list[str] | None = None) -> int:
                     n_files += 1
                     n_err += check(v, json.loads(line), f"{f.name}:{i}")
         v = validator("research.schema.json", reg, "/$defs/digitized")
-        for f in sorted((r / "digitized").glob("*.json")):
+        # Un nom commençant par « _ » désigne un fichier de travail, hors de ce contrat.
+        for f in sorted((r / "digitized").glob("[!_]*.json")):
             n_files += 1
             n_err += check(v, json.loads(f.read_text(encoding="utf-8")), f.name)
 

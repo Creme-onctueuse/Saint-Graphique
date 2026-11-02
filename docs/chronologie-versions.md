@@ -1,12 +1,13 @@
 # Chronologie des versions du graphique
 
-Chaque ligne indique la date de mise en ligne de la vidéo. Le graphique montré peut être plus ancien. Le relevé repose sur les vidéos que nous avons capturées : les vidéos où le graphique n'est que mentionné ne sont pas toutes inspectées, et une version peut donc nous échapper. La méthode et les citations sont dans [methodologie.md](methodologie.md).
+Chaque ligne indique la date de mise en ligne de la vidéo. Le graphique montré peut être plus ancien. Le relevé repose sur les vidéos que nous avons capturées : les vidéos où le graphique n'est que mentionné ne sont pas toutes inspectées, et une version peut donc nous échapper (voir [Limites du relevé](#limites-du-relevé)). La méthode et les citations sont dans [methodologie.md](methodologie.md).
 
 ## Versions distinctes
 
 | Période | Version | Forme | Numérisée |
 |---|---|---|---|
 | 2025-01-07 à 2025-03 | Diapositive | Cercles creux, 40 postes, sans graduation | Oui, 40 points |
+| 2025-01-12 à 2025-02 | Vue stylisée | Fond noir, disques clairs et ellipses de classes | Non (voir plus bas) |
 | 2025-01-26 à 2026-02-14 | Tableau interactif | Disques colorés, infobulles, axes gradués | Oui : PCS, puis candidats 2017, 2022, 2024 et 2002 |
 | 2026-02-28 | Tableau révisé | Même forme, deux PCS déplacées | Oui, 32 points |
 | 2026-04-21 | Outil PollBuster, bêta | Web sur fond sombre, onglets | Non (voir plus bas) |
@@ -17,9 +18,10 @@ Chaque ligne indique la date de mise en ligne de la vidéo. Le graphique montré
 | Date | Vidéo | Changements observés |
 |---|---|---|
 | 2025-01-07 | [MJsGgEA_Slw](https://youtu.be/MJsGgEA_Slw?t=421) | Première présentation. Cercles noirs sur fond blanc, libellés à droite. Candidats sur fond dégradé avec un cercle « centre élec ». Pas de graduation. Chris : « là c'est du Excel et du Powerpoint » ([76:52](https://youtu.be/MJsGgEA_Slw?t=4612)). |
+| 2025-01-12 | [f5eZq8_ZUuc](https://youtu.be/f5eZq8_ZUuc?t=518) | Vue stylisée sur fond noir : disques clairs, ellipses « PI & Cadres », « Ouvrier & employés actifs » et « Retraités & petite bourgeoisie », points Oui et Non. Non numérisée. |
 | 2025-01-17 | [oquHE4YCMXA](https://youtu.be/oquHE4YCMXA?t=179) | Même diapositive. Premières précisions sur ce que contiennent les axes. |
 | 2025-01-26 | [0fGLh8MvMco](https://youtu.be/0fGLh8MvMco?t=372) | « La nouvelle version du graphique ». Disques colorés, axes `Somme de DOMINANT` et `Somme de EXPLOITEUR` gradués, infobulles, curseurs, filtres « ELECTIONS », « PCS LEVEL 2 » et « Année ». Abstention en losange noir. |
-| 2025-02-24 | [X0tXWZsjENQ](https://youtu.be/X0tXWZsjENQ?t=428) | Vue stylisée sur fond noir, avec halos colorés. Non numérisée. |
+| 2025-02-24 | [X0tXWZsjENQ](https://youtu.be/X0tXWZsjENQ?t=428) | Même vue stylisée sur fond noir, avec halos colorés. Non numérisée. |
 | 2025-03-27 | [GTN2rUgOdFo](https://youtu.be/GTN2rUgOdFo?t=360) | Mêmes PCS qu'en janvier (écart de 0,05 au plus sur 20 mesures indépendantes). Les candidats de 2022 ont bougé depuis janvier : jusqu'à 0,7 en X et 0,4 en Y sur 6 candidats communs. |
 | 2025-04-26 | [VFiHhZiOWZ8](https://youtu.be/VFiHhZiOWZ8?t=1369) | Même outil, élection de 2002 et scénarios 2027. |
 | 2025-08-07 | [nBPS8I4ioRs](https://youtu.be/nBPS8I4ioRs?t=307) | Pas de changement visuel relevé. L'équipe parle de « matrice ACM » et de « ranking ». |
@@ -45,6 +47,13 @@ Rien ci-dessous n'est établi par une source.
 ## Non numérisé, et pourquoi
 
 - **Outil PollBuster (avril 2026).** Graduations très peu contrastées sur fond sombre, et image souvent couverte par les webcams. La lecture serait possible mais peu sûre, pour une version intermédiaire.
-- **Vue sur fond noir (février 2025).** Pas de graduation, formes floues.
+- **Vue sur fond noir (janvier et février 2025).** Pas de graduation, formes floues.
 - **Candidats sans infobulle dans le tableau.** Seuls les candidats lus en infobulle sont saisis : la liste par élection reste donc partielle.
 - **Candidats hors cadre en 2017 dans la matrice v11.** Arthaud et Cheminade ne sont pas visibles sur la vue utilisée.
+
+## Limites du relevé
+
+- **Couverture.** 174 vidéos sont indexées et transcrites, dont 56 centrales et 118 où le graphique n'est que mentionné. 381 autres vidéos de la PaduTeam et de Positions depuis 2025 n'ont aucun signal dans leur transcription et n'ont pas été balayées à l'image : un échantillon de 9 ne montre aucun graphique. Le relevé des chaînes s'arrête au 31 octobre 2026.
+- **Après le 16 septembre 2026.** Aucune nouvelle version n'a été vue, sur environ 90 des 249 captures de 8 vidéos. C'est un échantillon, pas une preuve d'absence.
+- **Captures.** Le fichier local des captures est très bruité : moins d'une image sur deux montre vraiment le graphique, même après filtrage.
+- **Réseaux.** Le fil Threads n'a pu être lu qu'en partie (1 message sur 17), son contenu étant rendu en JavaScript.

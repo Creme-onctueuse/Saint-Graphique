@@ -4,6 +4,11 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnage [
 
 ## [Unreleased]
 
+### Corrigé
+
+- Chronologie : la vue stylisée sur fond noir apparaît dès le 12 janvier 2025. Ajout des limites du relevé, une fois la collecte terminée.
+- Validation de `research/` : les axes sans libellé d'une diapositive sont admis, et les fichiers de travail préfixés par `_` ne relèvent plus du contrat.
+
 ## [1.0.0] - 2026-11-02
 
 Première version complète : réplique du tableau de Chris de février 2026, à usage personnel et non commercial.
