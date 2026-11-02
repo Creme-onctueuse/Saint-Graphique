@@ -184,12 +184,18 @@ export class RingsLayer implements Feature {
       .style('fill', (d) => `var(--sg-bloc-${d.bloc.replace('_', '-')})`);
     parts.select('title').text((d) => `${d.name} : ${d.label} ${formatPct(d.share, 0)}`);
 
-    const duration = this.reducedMotion?.matches ? 0 : CHART_STYLE.durations.normal;
+    const playing = this.chart.playing;
+    const duration = this.reducedMotion?.matches
+      ? 0
+      : playing
+        ? CHART_STYLE.playSegmentMs
+        : CHART_STYLE.durations.normal;
     const previous = this.previous;
     if (duration > 0) {
       parts
         .transition('sg-ring')
         .duration(duration)
+        .ease((t) => (playing ? t : t * (2 - t)))
         .attrTween('d', function (d) {
           const from = previous.get(this) ?? d.angles;
           previous.set(this, d.angles);

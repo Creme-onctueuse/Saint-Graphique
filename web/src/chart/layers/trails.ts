@@ -124,7 +124,7 @@ export class TrailsLayer implements Feature {
       families,
       stopsForFilter(all, state.typeFilter),
       (election, id) => this.position(view.method.id, election, id),
-      current?.date ?? Number.POSITIVE_INFINITY,
+      this.chart.playhead?.date ?? current?.date ?? Number.POSITIVE_INFINITY,
     );
     this.strong = new Set(
       [state.selected, state.compared].flatMap((key) => {
@@ -141,8 +141,15 @@ export class TrailsLayer implements Feature {
 
   private render(): void {
     const { x, y } = this.chart.scales();
+    const start = this.chart.playhead?.election;
     const segments: SegmentDatum[] = this.trails.flatMap((t) =>
       t.segments
+        .map((points) => {
+          // Pendant la lecture, le dernier tronçon va jusqu'au repère : la trajectoire pousse avec lui.
+          const last = points.at(-1);
+          const tip = start && last?.election === start ? this.chart.trackPosition(t.family) : null;
+          return tip && last ? [...points, { ...last, x: tip.x, y: tip.y }] : points;
+        })
         .filter((points) => points.length > 1)
         .map((points, i) => ({
           key: `${t.family}:${i}`,

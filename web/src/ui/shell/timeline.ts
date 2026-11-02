@@ -3,7 +3,9 @@
  * et la projection 2027 en dernier. Boutons radio natifs : Tab et les flèches du clavier fonctionnent
  * sans code. Sur la carte, ←, → et Espace parcourent la frise ; Échap arrête la lecture.
  *
- * La lecture cadre les électorats, puisque ce sont eux qui bougent, et avance d'une étape à la fois.
+ * La lecture cadre les électorats, puisque ce sont eux qui bougent, et avance à vitesse constante, sans
+ * pause : l'état passe au scrutin suivant au début de chaque segment, et une boucle d'animation amène
+ * les repères à leur place (core/playback.ts). Avec les animations réduites, elle avance par étapes.
  */
 import './timeline.css';
 import type { SaintChart } from '../../chart/chart.ts';
@@ -20,7 +22,10 @@ import {
   type TimelineStop,
 } from '../../core/timeline.ts';
 import { POPULATION_ID, PROJECTION_ID, type Point } from '../../core/types.ts';
+import { interpolateMarks } from '../../core/playback.ts';
 import { computedKey, type Dataset } from '../../data/dataset.ts';
+import type { ChartCandidate } from '../../chart/types.ts';
+import { CHART_STYLE } from '../../chart/style.ts';
 import type { ResolvedView } from '../../view.ts';
 import type { AppActions, Feature } from '../actions.ts';
 import { byId, el } from '../dom.ts';
@@ -39,8 +44,7 @@ const FILTER_LABELS: Record<TypeFilter, string> = {
   europeennes: 'Européennes',
 };
 
-/** Temps passé sur chaque étape pendant la lecture (ms). */
-const STEP_MS = 1700;
+/** Temps passé sur chaque étape quand les animations sont réduites (ms). */
 const STEP_REDUCED_MS = 2600;
 /** En dessous de ce zoom, l'arrivée sur la projection cadre les électorats : c'est eux qu'elle montre. */
 const FRAME_BELOW_ZOOM = 1.05;
@@ -93,6 +97,20 @@ export class Timeline implements Feature {
   private readonly ringsCheck = el('input', { attrs: { type: 'checkbox', id: 'sg-check-rings' } });
   private readonly reducedMotion: MediaQueryList | null;
   private timer: number | undefined;
+  private frame: number | null = null;
+  private segment: {
+    from: ChartCandidate[];
+    to: ChartCandidate[];
+    start: number;
+    fromPosition: number;
+    toPosition: number;
+  } | null = null;
+  /** Ce qui avance sur la frise pendant la lecture. */
+  private readonly head = el('span', {
+    class: 'sg-timeline__head',
+    attrs: { id: 'sg-timeline-head', 'aria-hidden': 'true' },
+  });
+  private positionOf: (date: number) => number = () => 0;
   private view: ResolvedView | null = null;
   private state: AppState | null = null;
 
@@ -147,8 +165,10 @@ export class Timeline implements Feature {
     const first = sorted[0] ?? 0;
     const span = Math.max(1, (sorted.at(-1) ?? 0) - first);
     const position = (year: number): number => (100 * (year - first)) / span;
+    this.positionOf = position;
+    this.head.hidden = true;
 
-    const track = el('div', { class: 'sg-timeline__track' });
+    const track = el('div', { class: 'sg-timeline__track' }, this.head);
     const lastReal = this.stops.filter((s) => !s.projection).at(-1);
     const hasProjection = this.stops.some((s) => s.projection);
     if (hasProjection && lastReal) {
@@ -242,7 +262,7 @@ export class Timeline implements Feature {
   }
 
   private get playing(): boolean {
-    return this.timer !== undefined;
+    return this.timer !== undefined || this.frame !== null;
   }
 
   private togglePlay(): void {
@@ -273,8 +293,13 @@ export class Timeline implements Feature {
     if (!start) return;
     this.chart.fitElectorates(true, this.framePoints(stops));
     if (start !== this.view?.electionId) this.choose(start);
-    const delay = this.reducedMotion?.matches ? STEP_REDUCED_MS : STEP_MS;
-    this.timer = window.setInterval(() => this.tick(), delay);
+    if (this.reducedMotion?.matches) {
+      this.timer = window.setInterval(() => this.tick(), STEP_REDUCED_MS);
+    } else {
+      this.chart.startPlayback(this.view?.model.candidates ?? []);
+      this.beginSegment(performance.now());
+      this.frame = requestAnimationFrame((now) => this.step(now));
+    }
     this.syncPlay();
   }
 
@@ -284,10 +309,70 @@ export class Timeline implements Feature {
     if (!next || !nextStopId(this.filtered(), next)) this.stopPlaying();
   }
 
+  /** Passe au scrutin suivant : l'état y est déjà, les repères y arrivent pendant le segment. */
+  private beginSegment(start: number): boolean {
+    const fromId = this.view?.electionId ?? '';
+    const next = nextStopId(this.filtered(), fromId);
+    const fromStop = this.stops.find((s) => s.id === fromId);
+    if (!next || !this.view) {
+      this.segment = null;
+      return false;
+    }
+    const from = this.view.model.candidates;
+    this.chart.playhead = fromStop ? { election: fromStop.id, date: fromStop.date } : null;
+    const selected = carrySelection(this.ds.families, next, this.state?.selected ?? null);
+    this.actions.patch({ election: next, selected }, 'none');
+    const to = this.view?.model.candidates ?? [];
+    const toStop = this.stops.find((s) => s.id === next);
+    this.segment = {
+      from,
+      to,
+      start,
+      fromPosition: this.positionOf(fromStop?.year ?? 0),
+      toPosition: this.positionOf(toStop?.year ?? 0),
+    };
+    this.chart.beginPlaySegment(interpolateMarks(from, to, 1));
+    return true;
+  }
+
+  private step(now: number): void {
+    const segment = this.segment;
+    if (!segment) {
+      this.stopPlaying();
+      return;
+    }
+    const u = (now - segment.start) / CHART_STYLE.playSegmentMs;
+    this.head.hidden = false;
+    const t = Math.min(1, u);
+    this.head.style.left = `${segment.fromPosition + (segment.toPosition - segment.fromPosition) * t}%`;
+    if (u < 1) {
+      this.chart.playFrame(interpolateMarks(segment.from, segment.to, u), u);
+    } else {
+      this.chart.playFrame(interpolateMarks(segment.from, segment.to, 1), 1);
+      if (!this.beginSegment(segment.start + CHART_STYLE.playSegmentMs)) {
+        this.stopPlaying();
+        return;
+      }
+    }
+    this.frame = requestAnimationFrame((t) => this.step(t));
+  }
+
   private stopPlaying(): void {
-    if (this.timer === undefined) return;
-    window.clearInterval(this.timer);
-    this.timer = undefined;
+    if (this.timer !== undefined) {
+      window.clearInterval(this.timer);
+      this.timer = undefined;
+    }
+    if (this.frame !== null) {
+      cancelAnimationFrame(this.frame);
+      this.frame = null;
+    }
+    this.head.hidden = true;
+    if (this.chart.playing) {
+      this.segment = null;
+      this.chart.stopPlayback();
+      // Les trajectoires reprennent jusqu'au scrutin affiché.
+      this.actions.patch({}, 'fast');
+    }
     this.syncPlay();
   }
 

@@ -952,6 +952,7 @@ async function main() {
       const button = document.getElementById('sg-timeline-play');
       document.querySelector('#sg-timeline input[value="2017_presidentielle_t1"]').click();
       await new Promise((r) => setTimeout(r, 300));
+      seen.add(document.querySelector('#sg-timeline input:checked')?.value);
       button.click();
       for (let i = 0; i < 120 && button.getAttribute('aria-pressed') === 'true'; i++) {
         seen.add(document.querySelector('#sg-timeline input:checked')?.value);
@@ -967,6 +968,75 @@ async function main() {
       'lecture : passe par chaque étape',
       played.stops.every((s) => played.seen.includes(s)),
       `vues ${played.seen.join(', ')} ; attendues ${played.stops.join(', ')}`,
+    );
+    // La lecture est fluide : un même repère glisse d'un scrutin à l'autre, sans saut ni pause.
+    const glide = await evaluate(`(async () => {
+      document.querySelector('#sg-timeline input[value="2017_presidentielle_t1"]').click();
+      await new Promise((r) => setTimeout(r, 900));
+      const node = document.querySelector('.sg-cand[data-key="c:le-pen"]');
+      const button = document.getElementById('sg-timeline-play');
+      const firstKey = node.getAttribute('data-key');
+      button.click();
+      await new Promise((r) => setTimeout(r, 900));
+      const read = () => {
+        const m = /translate\\(([-\\d.]+),([-\\d.]+)\\)/.exec(node.getAttribute('transform') ?? '');
+        return m ? [Number(m[1]), Number(m[2])] : null;
+      };
+      let last = read();
+      let maxStep = 0;
+      let still = 0;
+      let frames = 0;
+      let longest = 0;
+      let then = performance.now();
+      const keys = new Set([firstKey]);
+      const head = document.getElementById('sg-timeline-head');
+      const heads = new Set();
+      const end = then + 3000;
+      while (performance.now() < end) {
+        await new Promise((r) => requestAnimationFrame(r));
+        const now = performance.now();
+        longest = Math.max(longest, now - then);
+        then = now;
+        keys.add(node.getAttribute('data-key'));
+        heads.add(head?.style.left);
+        const p = read();
+        if (!p || !last) continue;
+        const d = Math.hypot(p[0] - last[0], p[1] - last[1]);
+        maxStep = Math.max(maxStep, d);
+        if (d < 0.001) still++;
+        frames++;
+        last = p;
+      }
+      const sameNode = node.isConnected;
+      button.click();
+      await new Promise((r) => setTimeout(r, 500));
+      const playingClass = document.querySelector('.sg-svg').classList.contains('sg-playing');
+      return { keys: [...keys], sameNode, maxStep, still, frames, longest, playingClass, heads: heads.size, headHidden: head?.hidden, labels: document.querySelectorAll('.sg-play-label').length };
+    })()`);
+    check(
+      'lecture : le repère garde son identité entre scrutins',
+      glide.sameNode && glide.keys.length >= 2,
+      JSON.stringify(glide),
+    );
+    check('lecture : pas de saut d’une image à l’autre', glide.maxStep < 40, JSON.stringify(glide));
+    check(
+      'lecture : pas de pause entre deux scrutins',
+      glide.frames > 20 && glide.still <= 3,
+      JSON.stringify(glide),
+    );
+    check('lecture : les images s’enchaînent vite', glide.longest < 200, JSON.stringify(glide));
+    check(
+      'lecture : un repère avance sur la frise',
+      glide.heads > 20 && glide.headHidden === true,
+      JSON.stringify(glide),
+    );
+    check(
+      'lecture : retour aux libellés placés',
+      !glide.playingClass && glide.labels === 0,
+      JSON.stringify(glide),
+    );
+    console.log(
+      `[smoke] lecture : ${glide.frames} images en 3 s, plus longue ${glide.longest.toFixed(0)} ms, plus grand pas ${glide.maxStep.toFixed(1)} px`,
     );
     await evaluate(`document.getElementById('sg-zoom-reset').click()`);
     await evaluate(`location.hash = 'e=2024_legislatives_t1&rg=1&s=c%3Arn'`);

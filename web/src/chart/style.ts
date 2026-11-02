@@ -47,6 +47,8 @@ export const CHART_STYLE = {
   zoomExtent: [1, 12] as [number, number],
   /** Marge (en unités de données) autour d'une zone cadrée par le bouton dédié. */
   fitPadding: 0.6,
+  /** Temps passé entre deux scrutins pendant la lecture de la frise (ms). */
+  playSegmentMs: 1500,
   /** Durée du glissement de la carte quand un panneau s'ouvre (ms). */
   slideDuration: 180,
   /** Durées des transitions (ms). */

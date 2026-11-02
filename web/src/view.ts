@@ -54,6 +54,7 @@ import {
   type SourceRef,
 } from './core/types.ts';
 import { registeredShares } from './core/crossing.ts';
+import { familyOfCandidate } from './core/timeline.ts';
 import { computedKey, type Dataset, type MethodInfo } from './data/dataset.ts';
 import { applyCrossing, type CrossingInfo } from './viewCrossing.ts';
 
@@ -434,6 +435,15 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
     }
   } else {
     return null;
+  }
+
+  // Un parti garde son identité d'une élection à l'autre : son repère glisse au lieu de s'effacer.
+  const families = ds.families;
+  if (families) {
+    candidates = candidates.map((c) => {
+      const family = familyOfCandidate(families, c.id);
+      return family ? { ...c, trackKey: family.id, trackLabel: family.label } : c;
+    });
   }
 
   const model: ChartModel = {

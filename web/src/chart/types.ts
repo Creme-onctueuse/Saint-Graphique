@@ -36,6 +36,12 @@ export interface ChartCandidate {
   sizeShare?: number | null;
   /** Ce que mesure `sizeShare`, pour l'infobulle. */
   sizeLabel?: string;
+  /** Identité d'une élection à l'autre (famille politique) : le repère glisse au lieu de s'effacer. */
+  trackKey?: string;
+  /** Nom de cette identité, affiché pendant la lecture de la frise. */
+  trackLabel?: string;
+  /** Opacité pendant la lecture : un électorat sans équivalent apparaît ou s'efface. */
+  alpha?: number;
   isAbstention: boolean;
   ellipse: Ellipse | null;
   /** Composition sociale de l'électorat, si les données brutes sont disponibles. */

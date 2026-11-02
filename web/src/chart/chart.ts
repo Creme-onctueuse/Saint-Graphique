@@ -64,6 +64,13 @@ export interface DataBox {
 }
 
 type G = Selection<SVGGElement, unknown, null, undefined>;
+
+/** Position d'un libellé par rapport à son repère, pendant la lecture (px, texte aligné à gauche). */
+interface LabelOffset {
+  dx: number;
+  dy: number;
+  visible: boolean;
+}
 type SelectListener = (key: string | null, additive: boolean) => void;
 
 /** Applique des attributs, en transition si `duration` > 0, immédiatement sinon. */
@@ -151,6 +158,15 @@ export class SaintChart {
   /** Glissement de la carte en cours (panneau qui s'ouvre) : les tailles poursuivent leur transition. */
   private sliding = false;
   private slideFrame: number | null = null;
+  /** Lecture de la frise en cours : les électorats suivent `frameCandidates`. */
+  private frameCandidates: ChartCandidate[] | null = null;
+  private frameProgress = 0;
+  private labelFrom = new Map<string, LabelOffset>();
+  private labelTo = new Map<string, LabelOffset>();
+  private labelNow = new Map<string, LabelOffset>();
+  private playLayer!: G;
+  /** Scrutin de départ pendant la lecture : les trajectoires s'y arrêtent, puis suivent le repère. */
+  playhead: { election: string; date: number } | null = null;
   private fontFamily = 'sans-serif';
 
   constructor(host: HTMLElement) {
@@ -209,6 +225,10 @@ export class SaintChart {
     this.over = marks.append('g').attr('class', 'sg-over').attr('aria-hidden', 'true');
     this.leaderLayer = clipped.append('g').attr('class', 'sg-leaders').attr('aria-hidden', 'true');
     this.labelLayer = clipped.append('g').attr('class', 'sg-labels').attr('aria-hidden', 'true');
+    this.playLayer = clipped
+      .append('g')
+      .attr('class', 'sg-play-labels')
+      .attr('aria-hidden', 'true');
     const axes = this.plot.append('g').attr('class', 'sg-axes').attr('aria-hidden', 'true');
     this.above = this.plot.append('g').attr('class', 'sg-layer-above');
     this.frameLayers = { bg, quads, grid, diagonal, axes, regions };
@@ -341,6 +361,112 @@ export class SaintChart {
     ];
     this.transform = this.zoomBehavior.constrain()(target, bounds, bounds);
     this.plot.property('__zoom', this.transform);
+  }
+
+  get playing(): boolean {
+    return this.frameCandidates !== null;
+  }
+
+  /** Position courante d'un repère pendant la lecture, pour que sa trajectoire le suive. */
+  trackPosition(key: string): Point | null {
+    const c = this.frameCandidates?.find((m) => (m.trackKey ?? m.id) === key);
+    return c ? { x: c.x, y: c.y } : null;
+  }
+
+  /** Démarre la lecture de la frise : les électorats ne suivent plus que `playFrame`. */
+  startPlayback(candidates: readonly ChartCandidate[]): void {
+    this.frameCandidates = [...candidates];
+    this.frameProgress = 0;
+    this.labelNow = new Map();
+    this.svg.classList.add('sg-playing');
+  }
+
+  /** Nouveau segment : les libellés glisseront vers leur place à l'arrivée, sans se chevaucher. */
+  beginPlaySegment(target: readonly ChartCandidate[]): void {
+    this.labelFrom = this.labelNow;
+    const { x, y } = this.scales();
+    const { plot, small } = this.geom;
+    const font = small ? CHART_STYLE.candidateLabelFontSmall : CHART_STYLE.candidateLabelFont;
+    const reach = small ? CHART_STYLE.candidateLabelReachSmall : CHART_STYLE.candidateLabelReach;
+    const shown = target.filter((c) => !this.view.hiddenCandidates.has(c.id));
+    const items: LabelItem[] = shown.map((c) => ({
+      key: c.trackKey ?? c.id,
+      text: c.label,
+      cx: x(c.x),
+      cy: y(c.y),
+      r: this.dotRadius(c),
+      priority: 1000 + (c.share ?? 0),
+      font,
+      weight: 650,
+      reach: Math.min(reach, 40),
+    }));
+    const obstacles: Obstacle[] = items.map((it) => ({
+      key: it.key,
+      cx: it.cx,
+      cy: it.cy,
+      r: it.r,
+      strong: true,
+    }));
+    const placed = placeLabels(items, obstacles, plot, this.measure, { passes: 0 });
+    const next = new Map<string, LabelOffset>();
+    for (const it of items) {
+      const p = placed.get(it.key);
+      if (!p) continue;
+      const width = this.measure(it.text, font, 650);
+      const left = p.anchor === 'start' ? p.x : p.anchor === 'end' ? p.x - width : p.x - width / 2;
+      next.set(it.key, { dx: left - it.cx, dy: p.y - it.cy, visible: p.visible });
+    }
+    this.labelTo = next;
+  }
+
+  /** Une image de la lecture. `progress` : avancement du segment, de 0 à 1. */
+  playFrame(candidates: ChartCandidate[], progress: number): void {
+    this.frameCandidates = candidates;
+    this.frameProgress = progress;
+    this.draw('none');
+  }
+
+  /** Fin de la lecture : les repères rejoignent leur place, et les libellés sont replacés. */
+  stopPlayback(): void {
+    this.frameCandidates = null;
+    this.playhead = null;
+    this.svg.classList.remove('sg-playing');
+    this.playLayer.selectAll('text').remove();
+    this.draw('fast');
+  }
+
+  private drawPlayLabels(cands: readonly ChartCandidate[], x: Scale, y: Scale): void {
+    const u = this.frameProgress;
+    const fallback: LabelOffset = { dx: 8, dy: 0, visible: true };
+    const now = new Map<string, LabelOffset>();
+    const data = cands.map((c) => {
+      const key = c.trackKey ?? c.id;
+      const a = this.labelFrom.get(key);
+      const b = this.labelTo.get(key) ?? a ?? fallback;
+      const from = a ?? b;
+      const offset: LabelOffset = {
+        dx: from.dx + (b.dx - from.dx) * u,
+        dy: from.dy + (b.dy - from.dy) * u,
+        visible: from.visible || b.visible,
+      };
+      now.set(key, offset);
+      return { key, c, offset };
+    });
+    this.labelNow = now;
+    const font = this.geom.small
+      ? CHART_STYLE.candidateLabelFontSmall
+      : CHART_STYLE.candidateLabelFont;
+    this.playLayer
+      .selectAll<SVGTextElement, (typeof data)[number]>('text')
+      .data(data, (d) => d.key)
+      .join('text')
+      .attr('class', 'sg-label sg-play-label')
+      .attr('dy', '0.35em')
+      .attr('x', (d) => x(d.c.x) + d.offset.dx)
+      .attr('y', (d) => y(d.c.y) + d.offset.dy)
+      .attr('opacity', (d) => (d.offset.visible ? (d.c.alpha ?? 1) : 0))
+      .style('font-size', `${font}px`)
+      .text((d) => d.c.label);
   }
 
   /** Échelles courantes (zoom compris), données → px dans le SVG. */
@@ -558,7 +684,7 @@ export class SaintChart {
     const pcs = model.pcs
       .filter((p) => !this.view.hiddenGroups.has(p.group))
       .sort((a, b) => b.weight - a.weight);
-    const cands = model.candidates
+    const cands = (this.frameCandidates ?? model.candidates)
       .filter((c) => !this.view.hiddenCandidates.has(c.id))
       .sort((a, b) => this.bubbleRadius(b) - this.bubbleRadius(a));
 
@@ -567,13 +693,18 @@ export class SaintChart {
     this.drawPcs(pcs, x, y, duration);
     this.drawBarycenter(model.barycenter, x, y, duration);
     this.drawCandidates(cands, x, y, duration);
-    this.drawLabels(
-      this.view.showLabels ? pcs : [],
-      this.view.showLabels ? cands : [],
-      x,
-      y,
-      duration,
-    );
+    // Pendant la lecture, seuls les noms des électorats suivent : les catégories ne bougent pas.
+    if (this.frameCandidates) {
+      if (this.view.showLabels) this.drawPlayLabels(cands, x, y);
+    } else {
+      this.drawLabels(
+        this.view.showLabels ? pcs : [],
+        this.view.showLabels ? cands : [],
+        x,
+        y,
+        duration,
+      );
+    }
     this.updateFocusOrder(pcs, cands);
     this.applyEmphasis();
     for (const cb of this.listeners) cb();
@@ -676,7 +807,7 @@ export class SaintChart {
     const transform = (d: ChartCandidate): string => `translate(${x(d.x)},${y(d.y)})`;
     const sel = this.candLayer
       .selectAll<SVGGElement, ChartCandidate>('g.sg-cand')
-      .data(data, (d) => d.id);
+      .data(data, (d) => d.trackKey ?? d.id);
     exitSel(sel.exit<ChartCandidate>(), 'sg-cand', duration);
     const entered = sel
       .enter()
@@ -700,7 +831,9 @@ export class SaintChart {
       .classed('sg-cand--abstention', (d) => d.isAbstention);
     const area = all.select<SVGCircleElement>('circle.sg-cand__area');
     const dot = all.select<SVGCircleElement>('circle.sg-cand__dot');
-    all.style('--sg-cand-color', (d) => this.candidateFill(d));
+    all
+      .style('--sg-cand-color', (d) => this.candidateFill(d))
+      .style('opacity', (d) => (d.alpha === undefined || d.alpha === 1 ? null : String(d.alpha)));
     setAttrs(all, duration, { transform });
     // Pendant un glissement, seule la position suit : la taille finit sa propre transition.
     if (!this.sliding) {

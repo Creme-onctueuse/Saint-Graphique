@@ -1086,8 +1086,15 @@ p {
   pointer-events: none;
 }
 
-.sg-label--cand {
+.sg-label--cand,
+.sg-play-label {
   font-weight: 650;
+}
+
+/* Pendant la lecture, ces noms suivent leur repère : les libellés placés et leurs traits attendent. */
+.sg-playing .sg-label--cand,
+.sg-playing .sg-leader {
+  display: none;
 }
 
 .sg-point {
