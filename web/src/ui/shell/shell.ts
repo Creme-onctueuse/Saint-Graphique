@@ -47,6 +47,7 @@ export class Shell implements Feature {
   private readonly heading = byId('sg-chart-heading');
   private readonly methodChip = byId<HTMLButtonElement>('sg-method-chip');
   private readonly status = byId('sg-status');
+  private readonly mapControls = document.querySelector<HTMLElement>('.sg-mapctl');
   private openDrawer: Drawer = null;
 
   constructor(actions: AppActions, onInsets: (insets: Insets) => void) {
@@ -162,6 +163,8 @@ export class Shell implements Feature {
     root.setProperty('--sg-inset-right', `${insets.right}px`);
     root.setProperty('--sg-inset-bottom', `${insets.bottom}px`);
     root.setProperty('--sg-inset-left', `${insets.left}px`);
-    this.onInsets(insets);
+    // Sur grand écran, les boutons de la carte ont leur colonne : ils ne cachent aucun repère.
+    const gutter = phone ? 0 : (this.mapControls?.offsetWidth ?? 0) + INSET_GAP;
+    this.onInsets({ ...insets, right: insets.right + gutter });
   }
 }

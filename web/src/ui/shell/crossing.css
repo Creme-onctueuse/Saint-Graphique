@@ -46,6 +46,7 @@ body:has(#sg-color-legend:not([hidden])) .sg-hint {
   display: flex;
   align-items: center;
   gap: 10px;
+  width: max-content;
   max-width: calc(100vw - var(--sg-inset-left, 0px) - var(--sg-inset-right, 0px) - 16px);
   padding: 4px 6px 4px 12px;
   border-radius: 999px;
@@ -580,10 +581,19 @@ body:has(#sg-color-legend:not([hidden])) .sg-hint {
 
 @media (max-width: 719px) {
   .sg-lens-banner {
-    left: 50%;
-    max-width: calc(100vw - 16px);
+    left: 8px;
+    right: 8px;
+    justify-content: space-between;
+    width: auto;
+    max-width: none;
+    padding-left: 10px;
     border-radius: var(--sg-radius);
     font-size: 0.74rem;
+    transform: none;
+  }
+
+  .sg-lens-banner__more {
+    display: none;
   }
 
   .sg-scale {

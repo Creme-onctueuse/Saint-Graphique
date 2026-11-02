@@ -219,8 +219,6 @@ export function drawFrame(
   // Noms discrets des quatre régions, fixes à l'écran. Masqués sur téléphone, faute de place.
   const pad = 14;
   const right = plot.x + plot.w - pad;
-  // En bas à droite, le nom laisse la place aux boutons de la carte.
-  const rightBottom = right - CHART_STYLE.mapControlsGutter;
   const regions =
     showRegions && !small && !axes?.plain
       ? [
@@ -239,7 +237,7 @@ export function drawFrame(
             anchor: 'start',
             text: 'Travail · dominé',
           },
-          { key: 'br', x: rightBottom, y: bottom - pad, anchor: 'end', text: 'Capital · dominé' },
+          { key: 'br', x: right, y: bottom - pad, anchor: 'end', text: 'Capital · dominé' },
         ]
       : [];
   layers.regions

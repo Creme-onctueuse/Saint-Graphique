@@ -137,7 +137,8 @@ export class Spokes {
     this.layer
       .selectAll<SVGTextElement, Spoke>('text.sg-spoke-label')
       .data(
-        spokes.filter((s) => s.share >= LABEL_MIN_SHARE),
+        // Sur téléphone, les chiffres sont dans l'inspecteur : la petite carte reste lisible.
+        this.chart.geometry.small ? [] : spokes.filter((s) => s.share >= LABEL_MIN_SHARE),
         (d) => d.group,
       )
       .join('text')

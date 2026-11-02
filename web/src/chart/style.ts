@@ -9,8 +9,6 @@ export const CHART_STYLE = {
   minPlot: 160,
   /** En dessous de cette largeur (px), marges et polices réduites. */
   smallWidth: 560,
-  /** Largeur des boutons de la carte, en bas à droite (px). */
-  mapControlsGutter: 48,
   /** Marge autour de l'intervalle des axes, en fraction de son étendue. */
   domainPadding: 0.06,
   /** Nombre indicatif de graduations par axe. */

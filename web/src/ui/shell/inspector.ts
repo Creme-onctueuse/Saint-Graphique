@@ -83,6 +83,10 @@ export class Inspector implements Feature {
   private readonly actions: AppActions;
   private readonly banner: HTMLElement;
   private readonly bannerText = el('span', { attrs: { id: 'sg-lens-text' } });
+  private readonly bannerMore = el('span', {
+    class: 'sg-lens-banner__more',
+    text: ' La taille des losanges montre le vote de ce groupe.',
+  });
   private view: ResolvedView | null = null;
   private state: AppState | null = null;
   private renderKey = '';
@@ -100,7 +104,7 @@ export class Inspector implements Feature {
     this.banner = el(
       'div',
       { class: 'sg-lens-banner sg-float', attrs: { id: 'sg-lens-banner', role: 'status' } },
-      this.bannerText,
+      el('span', {}, this.bannerText, this.bannerMore),
       reset,
     );
     this.banner.hidden = true;
@@ -156,7 +160,7 @@ export class Inspector implements Feature {
     this.banner.hidden = !shown;
     if (pollGroup && election && crossing) {
       const name = groupName(pollGroup, election, crossing.groupOf);
-      this.bannerText.textContent = `Vue depuis : ${name}. La taille des losanges montre le vote de ce groupe.`;
+      this.bannerText.textContent = `Vue depuis : ${name}.`;
     }
   }
 
@@ -223,13 +227,13 @@ export class Inspector implements Feature {
     const { selected, compared, absent } = crossing;
     if (!selected) {
       return [
-        this.head(absent ?? 'Sélection', 'Pas d’électorat à cette élection.', null, false),
+        this.head(absent ?? 'Sélection', 'Pas d’électorat distinct à ce scrutin.', null, false),
         el(
           'div',
           { class: 'sg-ins__body' },
           el('p', {
             class: 'sg-note',
-            text: 'Cette famille ne se présentait pas seule à ce scrutin. Changez d’élection sur la frise pour la retrouver.',
+            text: 'Coalition ou absence de liste : cette famille n’a pas ici d’électorat qui lui soit propre. Changez d’élection sur la frise pour la retrouver.',
           }),
         ),
       ];
