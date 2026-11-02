@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-02T20:33:22+00:00",
+  "generated_at": "2026-11-02T20:40:47+00:00",
   "path_template": "{method}/{election}.json",
   "axes": {
     "x_label": "Exploitation",
@@ -79,7 +79,7 @@
     },
     {
       "id": "espace_social",
-      "label": "Espace social (Bourdieu)",
+      "label": "Espace social",
       "description": "D'après Bourdieu (La Distinction, 1979) : en hauteur le volume du capital, en largeur sa structure, du culturel à gauche à l'économique à droite. Capital économique : patrimoine et niveau de vie, en logarithme ; capital culturel : diplômes, pondérés par la durée théorique des études. Ce n'est pas une reconstruction du graphique de Chris. Le volume porte l'essentiel des écarts : l'axe horizontal est étiré par la mise à l'échelle. Les retraités restent placés selon leurs propres diplômes, qui reflètent leur génération : leur position à droite est en partie un effet d'âge.",
       "ellipses": true,
       "elections": [
@@ -95,7 +95,7 @@
     },
     {
       "id": "acm_individus",
-      "label": "ACM sur les individus",
+      "label": "ACM individus",
       "description": "Analyse des correspondances multiples sur les individus du recensement 2022 (Le Roux et Rouanet, 2010) : diplôme, logement, statut d'emploi. Les PCS n'y sont pas actives : chacune est le barycentre de ses individus. Le recensement ne donne ni revenu ni patrimoine : le capital économique n'est approché que par la propriété du logement et le statut d'emploi. L'axe 1 (10,0 % de l'inertie brute, 91,4 % en taux modifié) va du logement HLM, du chômage et de l'absence de diplôme à la propriété, au bac+5 et à l'emploi stable. L'axe 2 (7,9 %, 6,1 % en taux modifié) oppose locataires du privé, emplois à durée limitée et bac+5 aux personnes installées, souvent à temps partiel : ce n'est pas la structure du capital, et sa lecture reste fragile. Les retraités, sans condition d'emploi, sont projetés selon leur seul diplôme et leur seul logement, qui reflètent leur génération.",
       "ellipses": true,
       "elections": [

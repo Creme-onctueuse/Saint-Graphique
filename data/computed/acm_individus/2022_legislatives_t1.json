@@ -14,8 +14,8 @@
   "election_id": "2022_legislatives_t1",
   "election_label": "Législatives 2022 (1er tour)",
   "axes": {
-    "x_label": "Axe 1 de l'ACM : ressources",
-    "y_label": "Axe 2 de l'ACM : mobilité ou installation",
+    "x_label": "Axe 1 : ressources",
+    "y_label": "Axe 2 : mobilité ou installation",
     "range": [
       -10,
       10
