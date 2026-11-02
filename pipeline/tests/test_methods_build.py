@@ -29,11 +29,14 @@ FAKE = ROOT / "pipeline" / "tests" / "fixtures" / "fake"
 PRES = "2099_presidentielle_t1"
 EURO = "2099_europeennes"
 TARGETS = ("population", EURO, PRES)
-BOOTSTRAPPED = ("read_positions", "ranks", "continuous", "espace_social")
+BOOTSTRAPPED = ("read_positions", "ranks", "continuous", "espace_social", "acm_individus")
 PARITY = ("ranks", "continuous", "espace_social")
-ALL_METHODS = ("read_positions", "ranks", "continuous", "mca", "espace_social")
+ALL_METHODS = ("read_positions", "ranks", "continuous", "mca", "espace_social", "acm_individus")
 #: Méthodes dont les axes ont leur propre sens : voir ``methods.<nom>.axes``.
-OWN_AXES = {"espace_social": ("Structure du capital", "Volume du capital")}
+OWN_AXES = {
+    "espace_social": ("Structure du capital", "Volume du capital"),
+    "acm_individus": ("Axe 1 de l'ACM : ressources", "Axe 2 de l'ACM : mobilité ou installation"),
+}
 
 
 def _load_fake_data_module() -> ModuleType:

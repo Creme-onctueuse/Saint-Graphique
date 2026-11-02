@@ -140,10 +140,11 @@ const METHOD_LABELS: Record<string, string> = {
   continuous: 'Valeurs continues',
   mca: 'ACM (terciles)',
   espace_social: 'Espace social (Bourdieu)',
+  acm_individus: 'ACM sur les individus',
 };
 
 /** Méthodes exploratoires, en plus de celles que index.json marque `exploratory: true`. */
-const EXPLORATORY_METHODS: ReadonlySet<string> = new Set(['mca']);
+const EXPLORATORY_METHODS: ReadonlySet<string> = new Set(['mca', 'acm_individus']);
 const EXPLORATORY_SUFFIX = ' (exploratoire)';
 
 const DEFAULT_GROUP_LABELS: Record<string, string> = {

@@ -128,6 +128,18 @@ export const METHOD_RESERVES: Readonly<Record<string, MethodReserve>> = {
       'Espace social d’après Bourdieu, pas le graphique de Chris ; retraités biaisés par leur génération',
     usesWealth: true,
   },
+  acm_individus: {
+    text:
+      'ACM sur les individus : le recensement ne donne ni revenu ni patrimoine, et le capital ' +
+      'économique n’y est approché que par la propriété du logement et le statut d’emploi. Les axes ' +
+      'viennent des données : ils ne valent ni exploitation et domination, ni volume et structure. ' +
+      'L’axe 2 dépasse à peine la moyenne des axes : sa lecture est fragile. Les retraités, faute de ' +
+      'condition d’emploi, sont projetés selon leur seul diplôme et leur seul logement, qui reflètent ' +
+      'leur génération.',
+    summary:
+      'ACM exploratoire : recensement sans revenu ni patrimoine, axes tirés des données et fragiles',
+    usesWealth: false,
+  },
 };
 
 /** Méthode dont les PCS sont lues sur le graphique de Chris au lieu d'être calculées. */

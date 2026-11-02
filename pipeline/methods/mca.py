@@ -114,6 +114,26 @@ def _orient(
     return axis if covariance >= 0 else -axis
 
 
+def orient_axes(
+    coords: np.ndarray,
+    pcs: Sequence[Pcs],
+    weights: np.ndarray,
+    orientation: Mapping[str, Any],
+    y_weights: Mapping[str, float],
+) -> tuple[np.ndarray, np.ndarray]:
+    """Axes 1 et 2 orientés selon les repères de ``orientation`` (voir l'en-tête du module)."""
+    codes = [q.code for q in pcs]
+    cx, cy = _weighted_mean(coords[:, 0], weights), _weighted_mean(coords[:, 1], weights)
+    right = orientation.get("right_pcs")
+    x_anchor = coords[codes.index(right), 0] - cx if right in codes else None
+    up = np.array([q.group == orientation.get("up_group") for q in pcs])
+    y_anchor = _weighted_mean(coords[up, 1], weights[up]) - cy if up.any() else None
+    return (
+        _orient(coords[:, 0], x_anchor, x_scores(pcs), weights),
+        _orient(coords[:, 1], y_anchor, y_scores(pcs, y_weights), weights),
+    )
+
+
 @register
 class Mca:
     """ACM pondérée par la population sur des variables en quantiles."""
@@ -142,21 +162,14 @@ class Mca:
         weights = np.array([q.population for q in pcs], dtype=float)
         if np.any(weights <= 0):
             raise ValueError("ACM : chaque PCS doit avoir une population strictement positive")
-        codes = [q.code for q in pcs]
         indicator = indicator_table(pcs, p["y_weights"], n_bins)
         model = fit_weighted_mca(indicator, weights, max(2, int(p["n_components"])))
         # Profils lus sur le tableau 0/1 : deux PCS de même profil ont des coordonnées identiques.
         coords = model.row_coordinates(indicator).to_numpy()[:, :2]
 
-        orientation = p.get("orientation") or {}
-        cx, cy = _weighted_mean(coords[:, 0], weights), _weighted_mean(coords[:, 1], weights)
-        right = orientation.get("right_pcs")
-        x_anchor = coords[codes.index(right), 0] - cx if right in codes else None
-        up = np.array([q.group == orientation.get("up_group") for q in pcs])
-        y_anchor = _weighted_mean(coords[up, 1], weights[up]) - cy if up.any() else None
-        x_raw = _orient(coords[:, 0], x_anchor, x_scores(pcs), weights)
-        y_raw = _orient(coords[:, 1], y_anchor, y_scores(pcs, p["y_weights"]), weights)
-
+        x_raw, y_raw = orient_axes(
+            coords, pcs, weights, p.get("orientation") or {}, p["y_weights"]
+        )
         lo, hi = p["range"]
         return assemble_result(
             self.name, p, pcs, minmax_coordinates(x_raw, lo, hi),
