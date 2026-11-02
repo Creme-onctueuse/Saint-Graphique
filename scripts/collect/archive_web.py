@@ -91,15 +91,26 @@ def _meta_section(meta: dict[str, Any]) -> str:
     """Métadonnées de page (Open Graph) en Markdown."""
     tags = meta["meta"]
     lines = []
-    for key in ("og:title", "og:description", "description", "og:image", "article:published_time",
-                "article:author", "author"):
+    for key in (
+        "og:title",
+        "og:description",
+        "description",
+        "og:image",
+        "article:published_time",
+        "article:author",
+        "author",
+    ):
         if tags.get(key):
             lines.append(f"- **{key}** : {tags[key]}")
     return "\n".join(lines)
 
 
 def archive_page(
-    session: requests.Session, title: str, url: str, filename: str, root_id: str | None = None,
+    session: requests.Session,
+    title: str,
+    url: str,
+    filename: str,
+    root_id: str | None = None,
     min_body: int = 400,
 ) -> Result:
     """Archive une page HTML ; ``partiel`` si seules les métadonnées sont exploitables."""
@@ -205,25 +216,36 @@ def run_step(force: bool = False, images: bool = True) -> dict[str, dict[str, An
     sources: dict[str, tuple[str, Callable[[], Result]]] = {
         "politiwiki": (
             "https://politiwiki.fr/wiki/Positions_Revue",
-            lambda: archive_page(session, "Politiwiki : Positions Revue",
-                                 "https://politiwiki.fr/wiki/Positions_Revue", "politiwiki.md",
-                                 root_id="mw-content-text"),
+            lambda: archive_page(
+                session,
+                "Politiwiki : Positions Revue",
+                "https://politiwiki.fr/wiki/Positions_Revue",
+                "politiwiki.md",
+                root_id="mw-content-text",
+            ),
         ),
-        "jnthnbs": ("https://github.com/JnthnBS/saint-graphique",
-                    lambda: archive_readme(session)),
+        "jnthnbs": ("https://github.com/JnthnBS/saint-graphique", lambda: archive_readme(session)),
         "threads": (
             "https://www.threads.com/@albertonorato/post/DKCKDj6Nmlr",
-            lambda: archive_page(session, "Threads : fil d'albertonorato",
-                                 "https://www.threads.com/@albertonorato/post/DKCKDj6Nmlr",
-                                 "threads_albertonorato.md"),
+            lambda: archive_page(
+                session,
+                "Threads : fil d'albertonorato",
+                "https://www.threads.com/@albertonorato/post/DKCKDj6Nmlr",
+                "threads_albertonorato.md",
+            ),
         ),
-        "bluesky": (f"https://bsky.app/profile/{BSKY_ACTOR}",
-                    lambda: archive_bluesky(session, images=images)),
+        "bluesky": (
+            f"https://bsky.app/profile/{BSKY_ACTOR}",
+            lambda: archive_bluesky(session, images=images),
+        ),
         "senscritique": (
             "https://www.senscritique.com/serie/paduteam/critique/335478435",
-            lambda: archive_page(session, "SensCritique : critique de la PaduTeam",
-                                 "https://www.senscritique.com/serie/paduteam/critique/335478435",
-                                 "senscritique.md"),
+            lambda: archive_page(
+                session,
+                "SensCritique : critique de la PaduTeam",
+                "https://www.senscritique.com/serie/paduteam/critique/335478435",
+                "senscritique.md",
+            ),
         ),
     }
     state: dict[str, dict[str, Any]] = read_json(STATUS_FILE) or {}
@@ -233,24 +255,42 @@ def run_step(force: bool = False, images: bool = True) -> dict[str, dict[str, An
             log.info("%s : déjà archivé", name)
             continue
         result = action()
-        state[name] = {"url": url, "status": result.status, "file": result.file,
-                       "note": result.note, "at": _now()}
+        state[name] = {
+            "url": url,
+            "status": result.status,
+            "file": result.file,
+            "note": result.note,
+            "at": _now(),
+        }
         write_json_atomic(STATUS_FILE, state)
-        log.log(logging.INFO if result.status == OK else logging.WARNING,
-                "%s : %s %s", name, result.status, result.note)
-    lines = ["# Archive web du Saint-Graphique", "",
-             "Matériel de recherche local, jamais publié.", "",
-             "| Source | État | Fichier | Note | Date |", "|---|---|---|---|---|"]
+        log.log(
+            logging.INFO if result.status == OK else logging.WARNING,
+            "%s : %s %s",
+            name,
+            result.status,
+            result.note,
+        )
+    lines = [
+        "# Archive web du Saint-Graphique",
+        "",
+        "Matériel de recherche local, jamais publié.",
+        "",
+        "| Source | État | Fichier | Note | Date |",
+        "|---|---|---|---|---|",
+    ]
     for entry in state.values():
-        lines.append(f"| {entry['url']} | {entry['status']} | {entry['file'] or ''} | "
-                     f"{entry['note']} | {entry['at']} |")
+        lines.append(
+            f"| {entry['url']} | {entry['status']} | {entry['file'] or ''} | "
+            f"{entry['note']} | {entry['at']} |"
+        )
     write_text_atomic(WEB_DIR / "_index.md", "\n".join(lines) + "\n")
     return state
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("--force", action="store_true", help="réarchive les sources déjà archivées")
     ap.add_argument("--no-images", action="store_true", help="ne télécharge pas les images Bluesky")
     ap.add_argument("-v", "--verbose", action="store_true")

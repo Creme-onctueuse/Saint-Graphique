@@ -108,15 +108,39 @@ VIDEO_ID_RE = re.compile(r"^[A-Za-z0-9_-]{11}$")
 
 # Champs conservés dans le cache de métadonnées (les formats, très volumineux, sont omis).
 META_FIELDS = (
-    "id", "title", "fulltitle", "channel", "channel_id", "uploader", "uploader_id",
-    "upload_date", "timestamp", "release_timestamp", "description", "duration",
-    "webpage_url", "tags", "categories", "language", "view_count", "live_status",
-    "was_live", "availability", "chapters",
+    "id",
+    "title",
+    "fulltitle",
+    "channel",
+    "channel_id",
+    "uploader",
+    "uploader_id",
+    "upload_date",
+    "timestamp",
+    "release_timestamp",
+    "description",
+    "duration",
+    "webpage_url",
+    "tags",
+    "categories",
+    "language",
+    "view_count",
+    "live_status",
+    "was_live",
+    "availability",
+    "chapters",
 )
 PERMANENT_ERRORS = (
-    "Private video", "Video unavailable", "This video is unavailable", "members-only",
-    "Join this channel", "has been removed", "confirm your age", "This live event will begin",
-    "Premieres in", "not available in your country",
+    "Private video",
+    "Video unavailable",
+    "This video is unavailable",
+    "members-only",
+    "Join this channel",
+    "has been removed",
+    "confirm your age",
+    "This live event will begin",
+    "Premieres in",
+    "not available in your country",
 )
 
 
@@ -182,8 +206,13 @@ def flat_listing(
         log.info("%s : %d vidéos listées", source.label, len(entries))
     write_json_atomic(
         cache,
-        {"label": source.label, "url": source.url, "fetched_at": _now(), "note": note,
-         "entries": entries},
+        {
+            "label": source.label,
+            "url": source.url,
+            "fetched_at": _now(),
+            "note": note,
+            "entries": entries,
+        },
     )
     return entries
 
@@ -232,7 +261,8 @@ class MetaFetcher:
             try:
                 proc = ytdlp(
                     ["-J", "--skip-download", "--ignore-no-formats-error", video_url(video_id)],
-                    timeout=300, max_wait=self.max_wait,
+                    timeout=300,
+                    max_wait=self.max_wait,
                 )
             except YouTubeBlocked as exc:
                 log.error("métadonnées interrompues : %s", exc)
@@ -259,8 +289,13 @@ class MetaFetcher:
                 meta = {"id": video_id, "error": last, "fetched_at": _now()}
                 write_json_atomic(path, meta)
                 return meta
-            log.warning("%s : échec des métadonnées (essai %d/%d) : %s",
-                        video_id, attempt, self.retries, err[-300:])
+            log.warning(
+                "%s : échec des métadonnées (essai %d/%d) : %s",
+                video_id,
+                attempt,
+                self.retries,
+                err[-300:],
+            )
             time.sleep(3 * attempt)
         return None
 
@@ -277,8 +312,14 @@ def collect_candidates(
         for e in flat_listing(src, refresh=refresh, offline=offline):
             c = candidates.setdefault(
                 e["id"],
-                {"id": e["id"], "flat_title": e.get("title") or "", "channel": e.get("channel"),
-                 "found_in": [], "curated": False, "search_hit": False},
+                {
+                    "id": e["id"],
+                    "flat_title": e.get("title") or "",
+                    "channel": e.get("channel"),
+                    "found_in": [],
+                    "curated": False,
+                    "search_hit": False,
+                },
             )
             if src.label not in c["found_in"]:
                 c["found_in"].append(src.label)
@@ -292,9 +333,7 @@ def channel_key(meta: dict[str, Any]) -> str:
     return meta.get("uploader_id") or meta.get("channel") or meta.get("channel_id") or "?"
 
 
-def fetch_all_meta(
-    ids: list[str], workers: int, retry_errors: bool, max_fetch: int | None
-) -> None:
+def fetch_all_meta(ids: list[str], workers: int, retry_errors: bool, max_fetch: int | None) -> None:
     """Complète le cache de métadonnées (requêtes yt-dlp en parallèle)."""
     todo = []
     for vid in ids:
@@ -382,27 +421,50 @@ def build_records(
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--refresh-listings", action="store_true",
-                    help="relance les listages à plat même s'ils sont en cache")
-    ap.add_argument("--offline", action="store_true",
-                    help="n'interroge pas YouTube : reclasse depuis le cache")
-    ap.add_argument("--workers", type=int, default=4,
-                    help="requêtes yt-dlp parallèles (4 ; voir aussi SG_YTDLP_MIN_INTERVAL)")
-    ap.add_argument("--retry-errors", action="store_true",
-                    help="redemande les vidéos marquées indisponibles")
-    ap.add_argument("--max-fetch", type=int, default=None,
-                    help="nombre maximal de métadonnées à récupérer (essais)")
-    ap.add_argument("--extra", action="append", default=[], metavar="URL",
-                    help="source supplémentaire (playlist, chaîne ou ytsearchN:...)")
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    ap.add_argument(
+        "--refresh-listings",
+        action="store_true",
+        help="relance les listages à plat même s'ils sont en cache",
+    )
+    ap.add_argument(
+        "--offline", action="store_true", help="n'interroge pas YouTube : reclasse depuis le cache"
+    )
+    ap.add_argument(
+        "--workers",
+        type=int,
+        default=4,
+        help="requêtes yt-dlp parallèles (4 ; voir aussi SG_YTDLP_MIN_INTERVAL)",
+    )
+    ap.add_argument(
+        "--retry-errors", action="store_true", help="redemande les vidéos marquées indisponibles"
+    )
+    ap.add_argument(
+        "--max-fetch",
+        type=int,
+        default=None,
+        help="nombre maximal de métadonnées à récupérer (essais)",
+    )
+    ap.add_argument(
+        "--extra",
+        action="append",
+        default=[],
+        metavar="URL",
+        help="source supplémentaire (playlist, chaîne ou ytsearchN:...)",
+    )
     ap.add_argument("-v", "--verbose", action="store_true")
     return ap.parse_args(argv)
 
 
 def run_step(
-    refresh: bool = False, offline: bool = False, workers: int = 4, retry_errors: bool = False,
-    max_fetch: int | None = None, extra: list[str] | None = None,
+    refresh: bool = False,
+    offline: bool = False,
+    workers: int = 4,
+    retry_errors: bool = False,
+    max_fetch: int | None = None,
+    extra: list[str] | None = None,
 ) -> Counter[str]:
     """Exécute l'étape 1 complète et renvoie le décompte par pertinence."""
     sources = list(DEFAULT_SOURCES) + [Source(f"extra:{u}", u) for u in extra or []]
@@ -415,7 +477,10 @@ def run_step(
         save_index(records)
     log.info(
         "index écrit : %d core, %d mention (%d unrelated écartées, %d sans métadonnées) -> %s",
-        counts["core"], counts["mention"], counts["unrelated"], counts["sans_metadonnees"],
+        counts["core"],
+        counts["mention"],
+        counts["unrelated"],
+        counts["sans_metadonnees"],
         VIDEOS_JSONL,
     )
     return counts
@@ -424,8 +489,14 @@ def run_step(
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     setup_logging(args.verbose)
-    run_step(args.refresh_listings, args.offline, args.workers, args.retry_errors,
-             args.max_fetch, args.extra)
+    run_step(
+        args.refresh_listings,
+        args.offline,
+        args.workers,
+        args.retry_errors,
+        args.max_fetch,
+        args.extra,
+    )
     return 0
 
 

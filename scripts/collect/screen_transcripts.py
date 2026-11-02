@@ -96,8 +96,11 @@ def screen_video(meta: dict[str, Any], stop: threading.Event) -> dict[str, Any] 
     vid = meta["id"]
     choice = choose_subtitle(meta)
     if choice is None:
-        result: dict[str, Any] = {"upload_date": meta.get("upload_date"), "no_subtitles": True,
-                                  "relevance": None}
+        result: dict[str, Any] = {
+            "upload_date": meta.get("upload_date"),
+            "no_subtitles": True,
+            "relevance": None,
+        }
         _store(vid, result)
         return result
     lang, kind = choice
@@ -106,8 +109,13 @@ def screen_video(meta: dict[str, Any], stop: threading.Event) -> dict[str, Any] 
         return None
     signal = spoken_signal(subtitle_file_to_lines(path))
     relevance = screening_relevance(signal)
-    result = {"upload_date": meta.get("upload_date"), "duration_s": meta.get("duration"),
-              "title": (meta.get("title") or "")[:100], **signal, "relevance": relevance}
+    result = {
+        "upload_date": meta.get("upload_date"),
+        "duration_s": meta.get("duration"),
+        "title": (meta.get("title") or "")[:100],
+        **signal,
+        "relevance": relevance,
+    }
     _store(vid, result)
     return result
 
@@ -118,8 +126,12 @@ def run_step(limit: int | None = None, workers: int = 3, max_failures: int = 5) 
     todo, incomplete = candidates(screened)
     if limit:
         todo = todo[:limit]
-    log.info("dépistage : %d déjà faites, %d à faire, %d fiches incomplètes écartées",
-             len(screened), len(todo), incomplete)
+    log.info(
+        "dépistage : %d déjà faites, %d à faire, %d fiches incomplètes écartées",
+        len(screened),
+        len(todo),
+        incomplete,
+    )
     counts = {"core": 0, "mention": 0, "aucun": 0, "sans_sous_titres": 0, "reporte": 0}
     stop = threading.Event()
     failures = 0
@@ -150,8 +162,9 @@ def run_step(limit: int | None = None, workers: int = 3, max_failures: int = 5) 
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("--limit", type=int, default=None, help="au plus N vidéos (les plus récentes)")
     ap.add_argument("--workers", type=int, default=3, help="téléchargements parallèles (3)")
     ap.add_argument("-v", "--verbose", action="store_true")

@@ -167,7 +167,8 @@ def strip_boilerplate(description: str, boilerplate: set[str]) -> str:
     """Retire d'une description les lignes récurrentes de sa chaîne et les renvois
     vers des playlists."""
     return "\n".join(
-        ln for ln in description.splitlines()
+        ln
+        for ln in description.splitlines()
         if _norm_line(ln) not in boilerplate and not is_navigation_line(ln)
     )
 
@@ -372,13 +373,26 @@ CHART_KEYWORDS: dict[str, tuple[str, int]] = {
     "retraités": (r"\bretraité(?:e|es|s)?\b", 1),
     "artisans/commerçants": (r"\bartisans?\b|\bcommer[çc]ants?\b", 1),
     "position sur le graphique": (
-        r"\ben (?:haut|bas) (?:[àa] )?(?:droite|gauche)\b|\bvers le (?:haut|bas)\b", 1),
+        r"\ben (?:haut|bas) (?:[àa] )?(?:droite|gauche)\b|\bvers le (?:haut|bas)\b",
+        1,
+    ),
 }
 # Au moins un de ces mots-clés (ou un poids cumulé élevé) pour retenir un passage.
-CHART_ANCHORS = frozenset({
-    "saint graphique", "graphique", "barycentre", "abscisse", "ordonnée", "axe", "pcs",
-    "électorat", "exécutants", "professions intermédiaires", "position sur le graphique",
-})
+CHART_ANCHORS = frozenset(
+    {
+        "saint graphique",
+        "graphique",
+        "barycentre",
+        "abscisse",
+        "ordonnée",
+        "axe",
+        "pcs",
+        "électorat",
+        "exécutants",
+        "professions intermédiaires",
+        "position sur le graphique",
+    }
+)
 _CHART = {k: (re.compile(v), w) for k, (v, w) in CHART_KEYWORDS.items()}
 
 
@@ -460,8 +474,12 @@ def chart_segments(
         if duration:
             end = min(end, float(duration))
         segments.append(
-            {"start_s": float(start), "end_s": float(end), "keywords": sorted(labels),
-             "score": score}
+            {
+                "start_s": float(start),
+                "end_s": float(end),
+                "keywords": sorted(labels),
+                "score": score,
+            }
         )
     return merge_segments(segments, merge_gap)
 

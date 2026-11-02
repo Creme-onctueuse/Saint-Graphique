@@ -103,8 +103,13 @@ def download_subtitle(
     args = [
         "--skip-download",
         "--write-subs" if kind == "manual" else "--write-auto-subs",
-        "--sub-langs", lang, "--sub-format", "vtt/json3/best",
-        "-o", str(TRANSCRIPTS_DIR / "%(id)s.%(ext)s"), video_url(video_id),
+        "--sub-langs",
+        lang,
+        "--sub-format",
+        "vtt/json3/best",
+        "-o",
+        str(TRANSCRIPTS_DIR / "%(id)s.%(ext)s"),
+        video_url(video_id),
     ]
     for attempt in range(1, attempts + 1):
         try:
@@ -115,8 +120,14 @@ def download_subtitle(
         found = find_subtitle_file(video_id, lang)
         if found:
             return found
-        log.warning("%s : sous-titres %s non obtenus (essai %d/%d) : %s", video_id, lang,
-                    attempt, attempts, stderr_tail(proc)[-300:] or proc.returncode)
+        log.warning(
+            "%s : sous-titres %s non obtenus (essai %d/%d) : %s",
+            video_id,
+            lang,
+            attempt,
+            attempts,
+            stderr_tail(proc)[-300:] or proc.returncode,
+        )
         if not is_throttled(proc):
             time.sleep(5 * attempt)
     return None
@@ -135,9 +146,25 @@ def decode_audio_16k(path: Path) -> Any:
     import numpy as np
 
     proc = subprocess.run(
-        ["ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin", "-i", str(path),
-         "-vn", "-ac", "1", "-ar", "16000", "-f", "f32le", "pipe:1"],
-        capture_output=True, check=True,
+        [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-nostdin",
+            "-i",
+            str(path),
+            "-vn",
+            "-ac",
+            "1",
+            "-ar",
+            "16000",
+            "-f",
+            "f32le",
+            "pipe:1",
+        ],
+        capture_output=True,
+        check=True,
     )
     return np.frombuffer(proc.stdout, dtype=np.float32)
 
@@ -152,34 +179,45 @@ def whisper_transcribe(
 
     with tempfile.TemporaryDirectory(prefix="sg_audio_", ignore_cleanup_errors=True) as tmp:
         proc = ytdlp(
-            ["-f", "ba[ext=m4a]/ba/b", "--no-part",
-             "-o", str(Path(tmp) / "%(id)s.%(ext)s"), video_url(video_id)],
-            timeout=7200, max_wait=1800,
+            [
+                "-f",
+                "ba[ext=m4a]/ba/b",
+                "--no-part",
+                "-o",
+                str(Path(tmp) / "%(id)s.%(ext)s"),
+                video_url(video_id),
+            ],
+            timeout=7200,
+            max_wait=1800,
         )
         audio = next(Path(tmp).glob(f"{video_id}.*"), None)
         if proc.returncode != 0 or audio is None:
             raise RuntimeError(f"audio non téléchargé : {stderr_tail(proc)}")
         with _MODEL_LOCK:
             if _MODEL is None:
-                log.info("chargement de faster-whisper %s (cpu, int8, %d threads)",
-                         model_size, threads)
-                _MODEL = WhisperModel(model_size, device="cpu", compute_type="int8",
-                                      cpu_threads=threads)
+                log.info(
+                    "chargement de faster-whisper %s (cpu, int8, %d threads)", model_size, threads
+                )
+                _MODEL = WhisperModel(
+                    model_size, device="cpu", compute_type="int8", cpu_threads=threads
+                )
             t0 = time.monotonic()
             segments, info = _MODEL.transcribe(
                 decode_audio_16k(audio), language="fr", vad_filter=True
             )
             result = [(s.start, s.end, s.text.strip()) for s in segments]
-            log.info("%s : whisper, %.0f s d'audio en %.0f s", video_id, info.duration,
-                     time.monotonic() - t0)
+            log.info(
+                "%s : whisper, %.0f s d'audio en %.0f s",
+                video_id,
+                info.duration,
+                time.monotonic() - t0,
+            )
     return result
 
 
 def is_done(video: Video) -> bool:
     """Transcription déjà produite et référencée dans l'index."""
-    return bool(video.get("transcript_path")) and (
-        TRANSCRIPTS_DIR / f"{video['id']}.txt"
-    ).exists()
+    return bool(video.get("transcript_path")) and (TRANSCRIPTS_DIR / f"{video['id']}.txt").exists()
 
 
 def process_video(
@@ -219,9 +257,14 @@ def process_video(
         segments = whisper_transcribe(vid, whisper_model, whisper_threads)
         write_json_atomic(
             TRANSCRIPTS_DIR / f"{vid}.whisper.json",
-            {"video_id": vid, "model": whisper_model, "language": "fr",
-             "segments": [{"start": round(s, 2), "end": round(e, 2), "text": t}
-                          for s, e, t in segments]},
+            {
+                "video_id": vid,
+                "model": whisper_model,
+                "language": "fr",
+                "segments": [
+                    {"start": round(s, 2), "end": round(e, 2), "text": t} for s, e, t in segments
+                ],
+            },
         )
         lines = dedupe((s, t) for s, _, t in segments if t)
         source = "whisper"
@@ -236,15 +279,20 @@ def process_video(
 
 
 def run_batch(
-    videos: Sequence[Video], workers: int = 3, force: bool = False, allow_whisper: bool = True,
-    whisper_model: str = "small", whisper_threads: int = 4,
+    videos: Sequence[Video],
+    workers: int = 3,
+    force: bool = False,
+    allow_whisper: bool = True,
+    whisper_model: str = "small",
+    whisper_threads: int = 4,
 ) -> int:
     """Traite une liste de vidéos (sous-titres en parallèle, whisper un à la fois)."""
     n_ok = 0
     with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
         futures = {
-            pool.submit(process_video, v, force, allow_whisper, whisper_model,
-                        whisper_threads): v["id"]
+            pool.submit(process_video, v, force, allow_whisper, whisper_model, whisper_threads): v[
+                "id"
+            ]
             for v in videos
         }
         for fut in as_completed(futures):
@@ -257,19 +305,33 @@ def run_batch(
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("--ids", nargs="*", help="restreint à ces identifiants de vidéo")
-    ap.add_argument("--limit", type=int, default=None,
-                    help="au plus N vidéos (par priorité : core, « graphique » dans le titre)")
-    ap.add_argument("--relevance", nargs="+", default=["core", "mention"],
-                    choices=["core", "mention"], help="pertinences traitées")
+    ap.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="au plus N vidéos (par priorité : core, « graphique » dans le titre)",
+    )
+    ap.add_argument(
+        "--relevance",
+        nargs="+",
+        default=["core", "mention"],
+        choices=["core", "mention"],
+        help="pertinences traitées",
+    )
     ap.add_argument("--workers", type=int, default=3, help="téléchargements parallèles (3)")
     ap.add_argument("--force", action="store_true", help="refait les transcriptions existantes")
     ap.add_argument("--no-whisper", action="store_true", help="n'utilise jamais faster-whisper")
     ap.add_argument("--whisper-model", default="small", help="modèle faster-whisper (small)")
-    ap.add_argument("--whisper-threads", type=int, default=max(1, (os.cpu_count() or 4) // 2),
-                    help="threads CPU de faster-whisper")
+    ap.add_argument(
+        "--whisper-threads",
+        type=int,
+        default=max(1, (os.cpu_count() or 4) // 2),
+        help="threads CPU de faster-whisper",
+    )
     ap.add_argument("-v", "--verbose", action="store_true")
     return ap.parse_args(argv)
 
@@ -280,8 +342,14 @@ def main(argv: list[str] | None = None) -> int:
     videos = select_videos(load_index(), args.relevance, args.ids, args.limit)
     todo = [v for v in videos if args.force or not is_done(v)]
     log.info("transcriptions : %d vidéos retenues, %d à traiter", len(videos), len(todo))
-    n_ok = run_batch(todo, args.workers, args.force, not args.no_whisper,
-                     args.whisper_model, args.whisper_threads)
+    n_ok = run_batch(
+        todo,
+        args.workers,
+        args.force,
+        not args.no_whisper,
+        args.whisper_model,
+        args.whisper_threads,
+    )
     log.info("transcriptions : %d produites", n_ok)
     return 0
 

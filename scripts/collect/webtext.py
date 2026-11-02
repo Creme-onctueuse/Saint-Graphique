@@ -19,12 +19,34 @@ SKIPPED_TAGS = frozenset(
 VOID_TAGS = frozenset({"br", "hr", "img", "meta", "link", "input", "wbr", "area", "base", "col"})
 HEADINGS = {f"h{i}": "#" * i for i in range(1, 7)}
 BLOCK_TAGS = frozenset(
-    {"p", "div", "section", "article", "main", "aside", "header", "ul", "ol", "table", "tr",
-     "blockquote", "pre", "figure", "figcaption", "dl", "dt", "dd"}
+    {
+        "p",
+        "div",
+        "section",
+        "article",
+        "main",
+        "aside",
+        "header",
+        "ul",
+        "ol",
+        "table",
+        "tr",
+        "blockquote",
+        "pre",
+        "figure",
+        "figcaption",
+        "dl",
+        "dt",
+        "dd",
+    }
 )
 BLOCK_MARKERS = (
-    "just a moment", "cf-browser-verification", "challenge-platform",
-    "enable javascript and cookies", "attention required", "access denied",
+    "just a moment",
+    "cf-browser-verification",
+    "challenge-platform",
+    "enable javascript and cookies",
+    "attention required",
+    "access denied",
     "verify you are human",
 )
 

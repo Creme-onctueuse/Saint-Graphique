@@ -38,7 +38,11 @@ from scripts.collect.pure import Segment, chart_segments, parse_transcript  # no
 log = logging.getLogger("collect.segments")
 
 DEFAULT_PARAMS: dict[str, Any] = {
-    "margin": 20.0, "max_gap": 60.0, "merge_gap": 30.0, "min_score": 4, "strong_score": 8,
+    "margin": 20.0,
+    "max_gap": 60.0,
+    "merge_gap": 30.0,
+    "min_score": 4,
+    "strong_score": 8,
 }
 
 
@@ -65,19 +69,36 @@ def process_video(video: Video, force: bool = False, **params: Any) -> list[Segm
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("--ids", nargs="*", help="restreint à ces identifiants de vidéo")
     ap.add_argument("--limit", type=int, default=None, help="au plus N vidéos (par priorité)")
     ap.add_argument("--force", action="store_true", help="recalcule les segments existants")
-    ap.add_argument("--margin", type=float, default=DEFAULT_PARAMS["margin"],
-                    help="marge ajoutée de part et d'autre (20 s)")
-    ap.add_argument("--max-gap", type=float, default=DEFAULT_PARAMS["max_gap"],
-                    help="écart maximal entre deux mots-clés d'une même fenêtre (60 s)")
-    ap.add_argument("--merge-gap", type=float, default=DEFAULT_PARAMS["merge_gap"],
-                    help="fusion des fenêtres séparées de moins de (30 s)")
-    ap.add_argument("--min-score", type=int, default=DEFAULT_PARAMS["min_score"],
-                    help="poids minimal d'une fenêtre ancrée (4)")
+    ap.add_argument(
+        "--margin",
+        type=float,
+        default=DEFAULT_PARAMS["margin"],
+        help="marge ajoutée de part et d'autre (20 s)",
+    )
+    ap.add_argument(
+        "--max-gap",
+        type=float,
+        default=DEFAULT_PARAMS["max_gap"],
+        help="écart maximal entre deux mots-clés d'une même fenêtre (60 s)",
+    )
+    ap.add_argument(
+        "--merge-gap",
+        type=float,
+        default=DEFAULT_PARAMS["merge_gap"],
+        help="fusion des fenêtres séparées de moins de (30 s)",
+    )
+    ap.add_argument(
+        "--min-score",
+        type=int,
+        default=DEFAULT_PARAMS["min_score"],
+        help="poids minimal d'une fenêtre ancrée (4)",
+    )
     ap.add_argument("-v", "--verbose", action="store_true")
     return ap.parse_args(argv)
 
@@ -85,8 +106,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     setup_logging(args.verbose)
-    params = {"margin": args.margin, "max_gap": args.max_gap, "merge_gap": args.merge_gap,
-              "min_score": args.min_score}
+    params = {
+        "margin": args.margin,
+        "max_gap": args.max_gap,
+        "merge_gap": args.merge_gap,
+        "min_score": args.min_score,
+    }
     videos = select_videos(load_index(), ("core", "mention"), args.ids, args.limit)
     updates: dict[str, dict[str, Any]] = {}
     for video in videos:
