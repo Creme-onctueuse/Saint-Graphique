@@ -14,10 +14,10 @@ bootstrap des compositions (voir ``pipeline.methods.bootstrap``). Sans ``--elect
 fichiers d'élections disparues sont supprimés. ``index.json`` décrit ensuite, pour le front, les
 méthodes, élections, axes, groupes et fichiers disponibles.
 
-``--parity`` écrit les entrées et sorties attendues de ``ranks`` et ``continuous``,
-calculées sur le jeu FICTIF (``pipeline/tests/fixtures/fake/``, voir ``scripts/fake_data.py``),
-dans ``web/src/core/__fixtures__/parity.json``. Cette fixture sert aux tests vitest du portage
-TypeScript.
+``--parity`` écrit les entrées et sorties attendues de ``ranks``, ``continuous`` et
+``espace_social``, calculées sur le jeu FICTIF (``pipeline/tests/fixtures/fake/``, voir
+``scripts/fake_data.py``), dans ``web/src/core/__fixtures__/parity.json``. Cette fixture sert aux
+tests vitest du portage TypeScript.
 
 Champs facultatifs ajoutés au schéma : ``election_label``, ``pcs[].short``, ``groups``
 (barycentres des groupes de niveau 1), ``candidates[].is_abstention`` et ``bootstrap``
@@ -61,7 +61,7 @@ from pipeline.model import (
 FAKE_DIR = ROOT / "pipeline" / "tests" / "fixtures" / "fake"
 PARITY_PATH = ROOT / "web" / "src" / "core" / "__fixtures__" / "parity.json"
 DEFAULT_METHOD = "read_positions"
-PARITY_METHODS = ("ranks", "continuous")
+PARITY_METHODS = ("ranks", "continuous", "espace_social")
 POPULATION_LABEL = "Population (sans élection)"
 DECIMALS = 6
 
@@ -96,6 +96,13 @@ def method_params(name: str, methods_cfg: Mapping[str, Any]) -> dict[str, Any]:
     params: dict[str, Any] = {"range": list(methods_cfg["axes"].get("range", [-10, 10]))}
     params.update(methods_cfg["methods"].get(name) or {})
     return params
+
+
+def method_axes(name: str, methods_cfg: Mapping[str, Any]) -> dict[str, Any]:
+    """Axes d'une méthode : ceux de la configuration, sauf ``methods.<nom>.axes`` s'il existe."""
+    axes = dict(methods_cfg["axes"])
+    axes.update((methods_cfg["methods"].get(name) or {}).get("axes") or {})
+    return axes
 
 
 def computed_document(
@@ -270,6 +277,10 @@ def parity_document(
             "meilleur rang. Le jeu contient des ex æquo volontaires (x : 62/63, y : 67/68).",
             "continuous : z-score non pondéré (écart-type ddof 0) puis min/max : lo + (hi - lo) * "
             "((z - zmin) / (zmax - zmin)).",
+            "espace_social : z = (v - m) / s, avec m et s pondérés par la population, retraités "
+            "(code '7') exclus de m et de s. E = z(z(ln patrimoine) + z(ln niveau de vie)), "
+            "C = z(somme des y_weights * diplomes). x : placement de continuous sur E - C ; "
+            "y : placement de continuous sur E + C.",
             "Groupes : barycentre des PCS du groupe pondéré par la population. Population : "
             "barycentre de toutes les PCS pondéré par la population.",
             "Candidats : barycentre des groupes pondéré par composition[candidat][groupe]. Une "
@@ -386,7 +397,7 @@ def main(argv: Sequence[str] | None = None) -> int:
                 result,
                 display_data(pcs_data) if display_data else pcs_data,
                 election,
-                methods_cfg["axes"],
+                method_axes(name, methods_cfg),
                 ellipses,
                 info,
                 weight_total=getattr(method, "weight_total", None),

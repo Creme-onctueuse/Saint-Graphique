@@ -24,3 +24,11 @@ methods:
     description: "Analyse des correspondances multiples sur variables patrimoine/revenu/diplôme"
     n_components: 2
     candidate_pcs_level: 1
+  espace_social:
+    description: "D'après Bourdieu (La Distinction, 1979) : en hauteur le volume du capital, en largeur sa structure, du culturel à gauche à l'économique à droite. Capital économique : patrimoine et niveau de vie, en logarithme ; capital culturel : diplômes, pondérés par la durée théorique des études. Ce n'est pas une reconstruction du graphique de Chris. Le volume porte l'essentiel des écarts : l'axe horizontal est étiré par la mise à l'échelle. Les retraités restent placés selon leurs propres diplômes, qui reflètent leur génération : leur position à droite est en partie un effet d'âge."
+    axes:
+      x: { label: Structure du capital, hint: "plus à droite = capital surtout économique, plus à gauche = capital surtout culturel", low: capital culturel, high: capital économique }
+      y: { label: Volume du capital, hint: "plus haut = plus de capital, économique et culturel réunis", low: moins de capital, high: plus de capital }
+    y_weights: { bac5: 5, bac3: 3.5, bac2: 2, bac: 0, cap: -1, brevet: -3, certif_aucun: -4 }  # années d'études par rapport au bac
+    retired_y_override: null
+    candidate_pcs_level: 1
