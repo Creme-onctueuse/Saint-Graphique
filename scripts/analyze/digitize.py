@@ -36,6 +36,16 @@ from scripts.analyze.pure import AxisCalibration, fit_axis  # noqa: E402
 OUTPUT_DIR = Path("research/digitized")
 TOOLTIP_CONFIDENCE = 0.98
 DEFAULT_PIXEL_CONFIDENCE = 0.7
+KEPT_POINT_FIELDS = (
+    "level",
+    "weight",
+    "note",
+    "capture",
+    "video_id",
+    "timestamp_s",
+    "linear_x",
+    "score_pct",
+)
 
 
 def calibration_from_marks(
@@ -73,7 +83,7 @@ def resolve_point(
         result["method"] = point.get("method", "pixel")
         default_confidence = DEFAULT_PIXEL_CONFIDENCE
     result["confidence"] = float(point.get("confidence", default_confidence))
-    for key in ("weight", "note", "capture"):
+    for key in KEPT_POINT_FIELDS:
         if point.get(key) is not None:
             result[key] = point[key]
     return result
@@ -107,32 +117,59 @@ def snap_to_discs(
     return result
 
 
+def calibration_report(marks: Mapping[str, Any]) -> tuple[AxisCalibration, AxisCalibration, dict]:
+    """Calibre les deux axes d'une image et décrit les repères et les résidus."""
+    x_cal, x_residual = calibration_from_marks(marks["x"])
+    y_cal, y_residual = calibration_from_marks(marks["y"])
+    report = {
+        "x_marks": marks["x"],
+        "y_marks": marks["y"],
+        "x_units_per_pixel": round(x_cal.a, 5),
+        "y_units_per_pixel": round(y_cal.a, 5),
+        "x_max_residual": round(x_residual, 3),
+        "y_max_residual": round(y_residual, 3),
+    }
+    for key in ("capture", "video_id", "timestamp_s", "note"):
+        if marks.get(key) is not None:
+            report[key] = marks[key]
+    return x_cal, y_cal, report
+
+
 def build_document(spec: Mapping[str, Any]) -> dict[str, Any]:
-    """Assemble le document ``digitized`` à partir d'un fichier de points chargé."""
-    calibration = spec.get("calibration") or {}
-    x_cal = y_cal = None
-    report: dict[str, Any] = {}
-    if calibration.get("x") and calibration.get("y"):
-        x_cal, x_residual = calibration_from_marks(calibration["x"])
-        y_cal, y_residual = calibration_from_marks(calibration["y"])
-        report = {
-            "x_marks": calibration["x"],
-            "y_marks": calibration["y"],
-            "x_units_per_pixel": round(x_cal.a, 5),
-            "y_units_per_pixel": round(y_cal.a, 5),
-            "x_max_residual": round(x_residual, 3),
-            "y_max_residual": round(y_residual, 3),
-        }
+    """Assemble le document ``digitized`` à partir d'un fichier de points chargé.
+
+    ``calibration`` décrit l'image principale. ``calibrations`` nomme d'autres images ou
+    zooms, qu'un point choisit par sa clé ``calibration``. Un point hérite de la provenance
+    de son calibrage, puis de ``source``, sauf s'il porte la sienne.
+    """
+    named: dict[str, tuple[AxisCalibration, AxisCalibration, dict]] = {}
+    if spec.get("calibration"):
+        named["default"] = calibration_report(spec["calibration"])
+    for name, marks in (spec.get("calibrations") or {}).items():
+        named[name] = calibration_report(marks)
+    source = spec.get("source", {})
+    points = []
+    for point in spec.get("points", []):
+        name = point.get("calibration", "default")
+        x_cal, y_cal, report = named.get(name, (None, None, {}))
+        merged = dict(point)
+        for key in ("capture", "video_id", "timestamp_s"):
+            if merged.get(key) is None:
+                merged[key] = report.get(key, source.get(key))
+        points.append(resolve_point(merged, x_cal, y_cal))
     document: dict[str, Any] = {
         "version_id": spec["version_id"],
         "date": str(spec["date"]),
-        "source": spec.get("source", {}),
+        "source": source,
         "axes": spec.get("axes", {}),
         "election_id": spec.get("election_id"),
-        "points": [resolve_point(p, x_cal, y_cal) for p in spec.get("points", [])],
+        "points": points,
     }
-    if report:
-        document["calibration"] = report
+    if "default" in named:
+        document["calibration"] = named["default"][2]
+    others = {name: value[2] for name, value in named.items() if name != "default"}
+    if others:
+        document["calibrations"] = others
     if spec.get("notes"):
         document["notes"] = spec["notes"]
     return document

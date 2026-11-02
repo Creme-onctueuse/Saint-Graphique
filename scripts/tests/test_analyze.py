@@ -6,12 +6,19 @@ from pathlib import Path
 
 import pytest
 
+from scripts.analyze.check_barycenter import (
+    collect_group_positions,
+    composition_vector,
+    linear_check,
+    rows_from_election,
+)
 from scripts.analyze.compare import (
     aggregate_points,
     candidate_key,
     evaluate_hypotheses,
     grid_report,
     match_candidates,
+    match_groups,
     match_pcs,
     metrics,
 )
@@ -31,6 +38,15 @@ from scripts.analyze.pure import (
     spearman,
     to_ranks_scale,
     weighted_mean,
+)
+from scripts.analyze.summarize_compare import summary_rows
+from scripts.analyze.x_variants import (
+    agreement,
+    candidate_x,
+    group_axis,
+    rank_axis,
+    read_candidate_pairs,
+    within_groups,
 )
 
 
@@ -183,6 +199,202 @@ def test_candidate_matching() -> None:
     assert missing == ["J. Personne"]
 
 
+def test_candidate_key_ignores_parenthesis() -> None:
+    assert candidate_key("Le Pen (M)") == "le pen"
+
+
+def test_match_groups_merges_codes_by_weight() -> None:
+    groups = [
+        {"code": "1", "x": 0.0, "y": 0.0, "weight": 1.0},
+        {"code": "2", "x": 4.0, "y": 8.0, "weight": 3.0},
+        {"code": "3", "x": 1.0, "y": 1.0, "weight": 5.0},
+    ]
+    pairs, missing = match_groups(
+        [
+            {"label": "indep", "code": "1+2", "x": 0, "y": 0},
+            {"label": "cadres", "code": "3", "x": 0, "y": 0},
+            {"label": "inconnu", "code": "9", "x": 0, "y": 0},
+        ],
+        groups,
+    )
+    assert pairs[0][1]["x"] == pytest.approx(3)
+    assert pairs[0][1]["y"] == pytest.approx(6)
+    assert pairs[1][1]["x"] == 1
+    assert missing == ["inconnu"]
+
+
+def test_group_level_hypotheses_average_by_population() -> None:
+    items = [
+        {
+            "code": "10",
+            "group": "1",
+            "population": 1,
+            "patrimoine_keur": 10,
+            "niveau_vie_mensuel_eur": 10,
+        },
+        {
+            "code": "21",
+            "group": "2",
+            "population": 3,
+            "patrimoine_keur": 50,
+            "niveau_vie_mensuel_eur": 10,
+        },
+        {
+            "code": "33",
+            "group": "3",
+            "population": 1,
+            "patrimoine_keur": 1,
+            "niveau_vie_mensuel_eur": 10,
+        },
+        {
+            "code": "42",
+            "group": "4",
+            "population": 1,
+            "patrimoine_keur": 100,
+            "niveau_vie_mensuel_eur": 10,
+        },
+    ]
+    read = [
+        {"code": "1+2", "label": "a", "x": 2, "y": 0},
+        {"code": "3", "label": "b", "x": 1, "y": 0},
+        {"code": "4", "label": "c", "x": 3, "y": 1},
+    ]
+    rows = {r["variable"]: r for r in evaluate_hypotheses(read, items, level="group")}
+    assert rows["patrimoine médian"]["n"] == 3
+    assert rows["patrimoine médian"]["spearman_x"] == pytest.approx(1)
+
+
+def test_match_candidates_prefers_explicit_code() -> None:
+    pairs, _ = match_candidates(
+        [{"label": "Jordan Bardella", "code": "rn", "x": 0, "y": 0}],
+        [{"id": "rn", "label": "Rassemblement national (J. Bardella)", "x": 1, "y": 2}],
+    )
+    assert pairs[0][1]["id"] == "rn"
+
+
+def test_linear_barycenter_check() -> None:
+    positions = collect_group_positions(
+        [
+            {
+                "points": [
+                    {"level": "group", "code": "3", "x": 4.0, "y": 6.0},
+                    {"level": "group", "code": "1+2", "x": 2.0, "y": -2.0},
+                    {"level": "group", "code": "6", "x": -2.0, "y": -6.0},
+                    {"code": "9", "x": 0, "y": 0},
+                ]
+            }
+        ]
+    )
+    assert set(positions) == {"3", "1+2", "6"}
+    codes = ["1+2", "3", "6"]
+    assert composition_vector({"1": 1, "2": 2, "3": 5}, codes) == [3, 5, 0]
+    election = {
+        "candidates": [
+            {"id": "a", "label": "Alice Martin"},
+            {"id": "b", "label": "Bob Durand"},
+            {"id": "c", "label": "Carla Petit"},
+            {"id": "d", "label": "Dan Roux"},
+        ],
+        "composition": {
+            "a": {"1": 25, "2": 25, "3": 50},
+            "b": {"3": 100},
+            "c": {"6": 100},
+            "d": {"1": 50, "6": 50},
+        },
+    }
+    document = {
+        "points": [
+            {"kind": "candidate", "label": "A. Martin", "x": 3.0, "y": 2.0},
+            {"kind": "candidate", "label": "B. Durand", "x": 4.0, "y": 6.0},
+            {"kind": "candidate", "label": "C. Petit", "x": -2.0, "y": -6.0},
+            {"kind": "candidate", "label": "D. Roux", "x": 0.0, "y": -4.0},
+            {"kind": "candidate", "label": "E. Absent", "x": 0.0, "y": 0.0},
+        ]
+    }
+    rows, missing = rows_from_election(document, election, codes)
+    assert missing == ["E. Absent"]
+    report = linear_check(rows, positions, codes)
+    assert report["n"] == 4
+    assert report["rmse_y_linear"] == 0
+    assert report["rmse_x_linear"] == 0
+    assert report["free_fit_max_residual_x"] == pytest.approx(0, abs=1e-6)
+    assert linear_check([], positions, codes) == {"n": 0}
+
+
+def test_summary_rows_skip_empty_blocks() -> None:
+    report = {
+        "version_id": "v",
+        "computed": "data/computed/ranks_chris_v1/population.json",
+        "pcs": {"n": 2, "rmse_x": 1, "rmse_y": 2, "spearman_x": 0.5, "spearman_y": 0.6},
+        "candidates": {"n": 0},
+    }
+    rows = summary_rows([report])
+    assert len(rows) == 1
+    assert rows[0]["method"] == "ranks_chris_v1"
+    assert rows[0]["election"] == "population"
+
+
+def test_x_variant_pipeline_is_a_rank_then_barycenter() -> None:
+    items = [
+        {
+            "code": "a",
+            "group": "1",
+            "population": 1,
+            "patrimoine_keur": 10,
+            "niveau_vie_mensuel_eur": 10,
+        },
+        {
+            "code": "b",
+            "group": "1",
+            "population": 3,
+            "patrimoine_keur": 20,
+            "niveau_vie_mensuel_eur": 10,
+        },
+        {
+            "code": "c",
+            "group": "2",
+            "population": 1,
+            "patrimoine_keur": 30,
+            "niveau_vie_mensuel_eur": 10,
+        },
+    ]
+    axis = rank_axis(items, "patrimoine médian")
+    assert axis == {"a": -10, "b": 0, "c": 10}
+    groups = group_axis(items, axis)
+    assert groups["1"] == pytest.approx(-2.5)
+    assert rank_axis(items, "part de l'immobilier") is None
+    election = {
+        "candidates": [{"id": "x", "label": "Xavier Lebrun"}, {"id": "y", "label": "Yves Noir"}],
+        "composition": {"x": {"1": 50, "2": 50}, "y": {"2": 100}},
+    }
+    predicted = candidate_x(election, groups)
+    assert predicted["x"] == pytest.approx(3.75)
+    document = {
+        "points": [
+            {"kind": "candidate", "label": "X. Lebrun", "x": 4.0, "y": 0},
+            {"kind": "candidate", "label": "Autre", "code": "y", "x": 9.0, "y": 0},
+            {"kind": "pcs", "label": "ignoré", "x": 0, "y": 0},
+        ]
+    }
+    pairs = read_candidate_pairs(document, election, predicted)
+    assert pairs == [(4.0, predicted["x"]), (9.0, 10.0)]
+    assert agreement(pairs)["n"] == 2
+    assert agreement([]) == {"n": 0}
+
+
+def test_within_groups_skips_small_groups() -> None:
+    items = [{"code": c, "group": g} for c, g in [("a", "1"), ("b", "1"), ("c", "1"), ("d", "2")]]
+    axis = {"a": 1.0, "b": 2.0, "c": 3.0, "d": 4.0}
+    points = [
+        {"code": "a", "x": 3.0},
+        {"code": "b", "x": 2.0},
+        {"code": "c", "x": 1.0},
+        {"code": "d", "x": 0.0},
+    ]
+    result = within_groups(points, items, axis)
+    assert result == {"1": {"n": 3, "spearman": -1.0}}
+
+
 def test_metrics_lists_largest_gap_first() -> None:
     pairs = [
         ({"label": "a", "x": 0, "y": 0}, {"code": "1", "x": 0, "y": 0}),
@@ -248,6 +460,35 @@ def test_snap_to_discs() -> None:
     assert far["method"] == "pixel_manual"
     read = snap_to_discs({"label": "c", "x": 1, "y": 2}, discs)
     assert "method" not in read
+
+
+def test_build_document_named_calibrations_keep_provenance() -> None:
+    document = build_document(
+        {
+            "version_id": "v",
+            "date": "2026-09-16",
+            "source": {"video_id": "abc", "timestamp_s": 10, "capture": "a.png"},
+            "calibrations": {
+                "zoom": {
+                    "x": [{"pixel": 0, "value": 0}, {"pixel": 10, "value": 1}],
+                    "y": [{"pixel": 10, "value": 0}, {"pixel": 0, "value": 1}],
+                    "timestamp_s": 20,
+                    "capture": "b.png",
+                }
+            },
+            "points": [
+                {"label": "lu", "x": 1.0, "y": 2.0, "timestamp_s": 30},
+                {"label": "zoom", "px": 5, "py": 5, "calibration": "zoom"},
+            ],
+        }
+    )
+    read, zoomed = document["points"]
+    assert read["timestamp_s"] == 30
+    assert read["capture"] == "a.png"
+    assert zoomed["x"] == pytest.approx(0.5)
+    assert zoomed["timestamp_s"] == 20
+    assert zoomed["capture"] == "b.png"
+    assert document["calibrations"]["zoom"]["x_max_residual"] == 0
 
 
 def test_build_document_matches_schema_shape() -> None:

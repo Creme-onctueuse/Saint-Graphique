@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from pathlib import Path
@@ -26,6 +27,7 @@ if __package__ in (None, ""):
 from scripts.analyze.pure import (  # noqa: E402
     best_label_match,
     normalize_label,
+    pearson,
     rmse,
     spearman,
 )
@@ -147,7 +149,7 @@ def aggregate_points(points: Iterable[Point]) -> list[dict[str, Any]]:
 
 def candidate_key(label: str) -> str:
     """Dernier mot significatif d'un nom de candidat (« E. Macron » devient « macron »)."""
-    words = normalize_label(label).split()
+    words = normalize_label(re.sub(r"\(.*?\)", " ", label)).split()
     if len(words) >= 2 and words[-2] in {"le", "de", "la"}:
         return " ".join(words[-2:])
     return words[-1] if words else ""
@@ -164,13 +166,46 @@ def match_candidates(
     pairs: list[tuple[Point, Point]] = []
     missing: list[str] = []
     for point in read:
-        found = table.get(candidate_key(point["label"]))
+        found = table.get(normalize_label(str(point.get("code") or "")))
+        if found is None:
+            found = table.get(candidate_key(point["label"]))
         if found is None:
             found = table.get(normalize_label(point["label"]))
         if found is None:
             missing.append(point["label"])
         else:
             pairs.append((point, found))
+    return pairs, missing
+
+
+def match_groups(
+    read: Iterable[Point], groups: Iterable[Point]
+) -> tuple[list[tuple[Point, Point]], list[str]]:
+    """Apparie des points de niveau groupe, un code ``1+2`` fusionnant plusieurs groupes.
+
+    La fusion est le barycentre de nos groupes, pondéré par leur poids.
+    """
+    by_code = {g["code"]: g for g in groups}
+    pairs: list[tuple[Point, Point]] = []
+    missing: list[str] = []
+    for point in read:
+        codes = str(point.get("code", "")).split("+")
+        members = [by_code[c] for c in codes if c in by_code]
+        if len(members) != len(codes) or not members:
+            missing.append(point["label"])
+            continue
+        total = sum(float(m.get("weight") or 0) for m in members) or float(len(members))
+        share = [(float(m.get("weight") or 0) or total / len(members)) / total for m in members]
+        pairs.append(
+            (
+                point,
+                {
+                    "code": "+".join(codes),
+                    "x": sum(w * float(m["x"]) for w, m in zip(share, members, strict=True)),
+                    "y": sum(w * float(m["y"]) for w, m in zip(share, members, strict=True)),
+                },
+            )
+        )
     return pairs, missing
 
 
@@ -216,23 +251,69 @@ HYPOTHESES: dict[str, Callable[[Mapping[str, Any]], float | None]] = {
 }
 
 
+def merge_items(items: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Moyenne pondérée par la population des variables de plusieurs lignes de PCS."""
+    weights = [float(i.get("population") or 0) for i in items]
+    total = sum(weights)
+    weights = [w / total for w in weights] if total else [1 / len(items)] * len(items)
+
+    def mean(read: Callable[[Mapping[str, Any]], Any]) -> float | None:
+        pairs = [(read(i), w) for i, w in zip(items, weights, strict=True)]
+        pairs = [(float(v), w) for v, w in pairs if v is not None]
+        weight = sum(w for _, w in pairs)
+        return sum(v * w for v, w in pairs) / weight if weight else None
+
+    merged: dict[str, Any] = {
+        "patrimoine_keur": mean(lambda i: i.get("patrimoine_keur")),
+        "niveau_vie_mensuel_eur": mean(lambda i: i.get("niveau_vie_mensuel_eur")),
+    }
+    for field in ("diplomes", "patrimoine_composition"):
+        keys = {k for i in items for k in (i.get(field) or {})}
+        merged[field] = {
+            k: mean(lambda i, name=k, f=field: (i.get(f) or {}).get(name)) for k in keys
+        }
+    return merged
+
+
 def evaluate_hypotheses(
-    read_pcs: Iterable[Point], pcs_items: Iterable[Mapping[str, Any]]
+    read_pcs: Iterable[Point],
+    pcs_items: Iterable[Mapping[str, Any]],
+    *,
+    level: str = "pcs",
 ) -> list[dict[str, Any]]:
-    """Corrèle (Spearman) X et Y lus à chaque variable candidate, sur les codes communs."""
-    items = {item["code"]: item for item in pcs_items}
-    points = [p for p in read_pcs if p.get("code") in items]
+    """Corrèle (Spearman, Pearson) X et Y lus à chaque variable, sur les codes communs.
+
+    Au niveau ``group``, le code d'un point désigne des groupes (``3``, ``1+2``) et les
+    variables sont moyennées par population. ``distinct`` compte les valeurs différentes :
+    une variable connue seulement par groupe a beaucoup d'ex aequo, et son rang dit peu.
+    """
+    catalog = list(pcs_items)
+    if level == "group":
+        rows_by_point = []
+        for point in read_pcs:
+            codes = str(point.get("code", "")).split("+")
+            members = [i for i in catalog if str(i.get("group")) in codes]
+            if members:
+                rows_by_point.append((point, merge_items(members)))
+    else:
+        items = {item["code"]: item for item in catalog}
+        rows_by_point = [(p, items[p["code"]]) for p in read_pcs if p.get("code") in items]
     results = []
     for name, variable in HYPOTHESES.items():
-        rows = [(p, variable(items[p["code"]])) for p in points]
+        rows = [(p, variable(item)) for p, item in rows_by_point]
         rows = [(p, v) for p, v in rows if v is not None]
-        values = [v for _, v in rows]
+        values = [float(v) for _, v in rows]
+        xs = [float(p["x"]) for p, _ in rows]
+        ys = [float(p["y"]) for p, _ in rows]
         results.append(
             {
                 "variable": name,
                 "n": len(rows),
-                "spearman_x": round_or_none(spearman([float(p["x"]) for p, _ in rows], values)),
-                "spearman_y": round_or_none(spearman([float(p["y"]) for p, _ in rows], values)),
+                "distinct": len({round(v, 6) for v in values}),
+                "spearman_x": round_or_none(spearman(xs, values)),
+                "spearman_y": round_or_none(spearman(ys, values)),
+                "pearson_x": round_or_none(pearson(xs, values)),
+                "pearson_y": round_or_none(pearson(ys, values)),
             }
         )
     return results
@@ -293,7 +374,8 @@ def main(argv: list[str] | None = None) -> int:
     document = json.loads(args.digitized.read_text(encoding="utf-8"))
     computed, computed_name = load_computed(args)
     points = [p for p in document["points"] if p.get("confidence", 1) >= args.min_confidence]
-    read_pcs = [p for p in points if p["kind"] == "pcs"]
+    read_groups = [p for p in points if p.get("level") == "group"]
+    read_pcs = [p for p in points if p["kind"] == "pcs" and p.get("level") != "group"]
     read_candidates = [p for p in points if p["kind"] == "candidate"]
 
     exact_pairs, exact_missing = match_pcs(read_pcs, computed.get("pcs", []))
@@ -301,9 +383,12 @@ def main(argv: list[str] | None = None) -> int:
     candidate_pairs, candidate_missing = match_candidates(
         read_candidates, computed.get("candidates", [])
     )
+    group_pairs, group_missing = match_groups(read_groups, computed.get("groups", []))
     report: dict[str, Any] = {
         "version_id": document["version_id"],
         "computed": computed_name,
+        "groups": metrics(group_pairs, args.top),
+        "groups_unmatched": group_missing,
         "pcs": metrics(exact_pairs, args.top),
         "pcs_unmatched": exact_missing,
         "pcs_with_aggregates": metrics(merged_pairs, args.top),
@@ -320,9 +405,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     if args.hypotheses:
         report["hypotheses"] = evaluate_hypotheses(read_pcs, items)
+        report["hypotheses_groups"] = evaluate_hypotheses(read_groups, items, level="group")
 
     if not args.quiet:
         print(f"{document['version_id']} contre {computed_name}")
+        print_metrics("Groupes", report["groups"])
         print_metrics("PCS, codes communs", report["pcs"])
         print_metrics("PCS, postes détaillés agrégés", report["pcs_with_aggregates"])
         print_metrics("Candidats", report["candidates"])
@@ -331,11 +418,15 @@ def main(argv: list[str] | None = None) -> int:
         if candidate_missing:
             print("Candidats sans équivalent : " + " ; ".join(candidate_missing))
         print(f"Grille 0,5 sur les infobulles : X {report['grid_x']} Y {report['grid_y']}")
-        for row in report.get("hypotheses", []):
-            print(
-                f"  hypothèse {row['variable']:<34} n={row['n']:<3} "
-                f"Spearman X={row['spearman_x']} Y={row['spearman_y']}"
-            )
+        for title, key in (("PCS", "hypotheses"), ("groupes", "hypotheses_groups")):
+            for row in report.get(key, []):
+                if not row["n"]:
+                    continue
+                print(
+                    f"  {title} : {row['variable']:<34} n={row['n']:<3} "
+                    f"valeurs={row['distinct']:<3} "
+                    f"Spearman X={row['spearman_x']} Y={row['spearman_y']}"
+                )
         if report["patrimoine_composition_in_pcs_json"]:
             print("SIGNAL : patrimoine_composition figure dans data/pcs.json (méthodes inchangées)")
     if args.json:
