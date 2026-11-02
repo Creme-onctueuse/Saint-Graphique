@@ -26,6 +26,8 @@ import { Legend } from './ui/legend.ts';
 import { MethodPanel } from './ui/methodPanel.ts';
 import { CrossPanel } from './ui/shell/crossPanel.ts';
 import { Inspector } from './ui/shell/inspector.ts';
+import { FactCard } from './ui/shell/factCard.ts';
+import { Game } from './ui/shell/game.ts';
 import { Keybar } from './ui/shell/keybar.ts';
 import { ProjectionCard } from './ui/shell/projectionCard.ts';
 import { RingsKey } from './ui/shell/ringsKey.ts';
@@ -197,7 +199,9 @@ export function startApp(): void {
     new CrossPanel(byId('sg-cross-panel'), ds, actions, () => chart.resetZoom()),
     new Inspector(byId('sg-inspector'), actions),
     new Spokes(chart),
+    new Game(byId('sg-game-panel'), ds, actions, chart),
     new Shell(actions, (insets) => chart.setInsets(insets)),
+    new FactCard(byId('sg-fact'), ds, actions, chart),
   ];
 
   function render(animation: Animation): void {
