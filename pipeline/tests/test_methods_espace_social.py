@@ -72,7 +72,7 @@ def test_espace_social_retired_are_placed_but_stay_out_of_the_scale() -> None:
     # Mêmes valeurs que « 61 », donc même point.
     assert result.pcs[RETIRED_CODE].x == pytest.approx(result.pcs["61"].x, abs=1e-12)
     assert result.pcs[RETIRED_CODE].y == pytest.approx(result.pcs["61"].y, abs=1e-12)
-    # Mais ils pèsent dans le barycentre de la population.
+    # Leur poids compte quand même dans le barycentre de la population.
     assert result.population.y == pytest.approx(-10, abs=1e-3)
 
 

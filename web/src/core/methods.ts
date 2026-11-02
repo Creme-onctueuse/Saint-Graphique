@@ -160,7 +160,7 @@ export function weightedStandardize(
 /**
  * Espace social (pipeline/methods/espace_social.py). Capital économique E : z(z(ln patrimoine) +
  * z(ln niveau de vie)). Capital culturel C : z(score de diplômes). Les z-scores sont pondérés par
- * la population, hors retraités : ils gardent leurs valeurs, mais ne fixent pas l'échelle.
+ * la population, hors retraités : leurs valeurs sont gardées, mais ne fixent pas l'échelle.
  * Score X : structure E − C. Score Y : volume E + C.
  */
 export function espaceSocialScores(

@@ -231,13 +231,13 @@ D'après Bourdieu (*La Distinction*, Minuit, 1979). En hauteur le volume du capi
 - `z` centre et réduit avec les poids de population, pour que E et C aient la même dispersion ;
 - `x = minmax(z(E − C))` et `y = minmax(z(E + C))` sur [-10 ; +10], comme `continuous`.
 
-**Logarithme.** Le patrimoine médian va de 32 à 1 532 k€ : en euros, les chefs d'entreprise tireraient toute l'échelle à eux seuls. Le logarithme réduit l'asymétrie pondérée, de 2,69 à -0,71 pour le patrimoine et de 1,07 à 0,67 pour le niveau de vie, sans l'annuler.
+**Logarithme.** Le patrimoine médian va de 32 à 1 532 k€ : en euros, une seule catégorie, celle des chefs d'entreprise, tirerait toute l'échelle. Le logarithme réduit l'asymétrie pondérée, de 2,69 à -0,71 pour le patrimoine et de 1,07 à 0,67 pour le niveau de vie, sans l'annuler.
 
 **Réglage.** Dans le navigateur, les curseurs du panneau Méthode règlent les poids de diplômes, donc le capital culturel. Le capital économique n'a pas de réglage, et l'option de score imposé aux retraités est retirée. La fixture de parité vérifie le portage TypeScript.
 
-**Retraités.** Ils gardent leurs propres valeurs, sans score imposé ni correction, mais n'entrent pas dans la moyenne et l'écart-type de référence, calculés sur les 29 PCS actives. Un point unique qui pèse 33 % de la population fixerait sinon le zéro et la dispersion du capital culturel : le déplacement moyen des PCS actives serait de 1,03 unité, 1,92 au plus.
+**Retraités.** Leurs propres valeurs sont conservées, sans score imposé ni correction, mais restent hors de la moyenne et de l'écart-type de référence, calculés sur les 29 PCS actives. Un point unique qui pèse 33 % de la population fixerait sinon le zéro et la dispersion du capital culturel : le déplacement moyen des PCS actives serait de 1,03 unité, 1,92 au plus.
 
-Le biais reste donc visible sur leur point, et il est fort. Leurs diplômes reflètent leur génération : 34,5 % n'ont qu'un certificat ou aucun diplôme, contre 9,6 % dans les PCS actives, et 5,6 % ont un bac+5, contre 16,8 %. Ils se retrouvent à (+3,18 ; -5,28). Avec les diplômes moyens des PCS actives, ils seraient à (-4,39 ; -1,70). Ce calcul donne un ordre de grandeur, pas une correction : il faudrait pour cela les diplômes à âge égal, par ancienne catégorie. Leur position à droite ne dit donc pas qu'ils détiennent surtout un capital économique, et elle entraîne les électorats âgés.
+Le biais reste donc visible sur leur point, et il est fort. Leurs diplômes reflètent leur génération : 34,5 % n'ont qu'un certificat ou aucun diplôme, contre 9,6 % dans les PCS actives, et 5,6 % ont un bac+5, contre 16,8 %. Leur point se trouve à (+3,18 ; -5,28). Avec les diplômes moyens des PCS actives, ce point serait à (-4,39 ; -1,70). Ce calcul donne un ordre de grandeur, pas une correction : il faudrait pour cela les diplômes à âge égal, par ancienne catégorie. Leur position à droite ne dit donc pas que leur capital est surtout économique, et cette position entraîne les électorats âgés.
 
 **Ce que le résultat veut dire.**
 
@@ -286,4 +286,4 @@ Le nuage est donc presque à une dimension. La méthode reste **exploratoire** :
 
 **Contre les positions lues.** Le seuil n'est atteint nulle part. En X, l'ordre des catégories est proche de celui de Chris (Spearman 0,81, RMSE 3,52 sur 24 points) : une échelle de ressources et l'axe de l'exploitation classent les catégories dans un ordre voisin, sans que l'un valide l'autre. En Y, l'écart est grand (RMSE 6,21, Spearman 0,46), et c'est attendu : l'axe 2 ne mesure pas la division du travail.
 
-**Une méthode non mise en œuvre.** Wright (*Classes*, Verso, 1985) définit les classes par l'exploitation et la domination, d'où l'intérêt de sa grille pour ce graphique. Elle demande l'autorité exercée au travail, que le recensement ne renseigne pas : elle n'est donc citée qu'en arrière-plan.
+**Une méthode non mise en œuvre.** Wright (*Classes*, Verso, 1985) définit les classes par l'exploitation et la domination, d'où l'intérêt de sa grille pour ce graphique. Cette grille demande l'autorité exercée au travail, que le recensement ne renseigne pas : Wright n'est donc cité qu'en arrière-plan.

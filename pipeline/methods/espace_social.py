@@ -7,9 +7,9 @@ Construction, à partir de ``data/pcs.json`` seul :
 
 1. Capital économique : ``E = z(z(ln patrimoine) + z(ln niveau de vie))``. Le patrimoine et le
    niveau de vie comptent à parts égales. Le logarithme répond à l'asymétrie des montants : le
-   patrimoine médian va de 32 à 1 532 k€, et les chefs d'entreprise tireraient sinon toute l'échelle
-   à eux seuls (asymétrie pondérée sur les PCS actives : de 2,69 à -0,71 pour le patrimoine, de 1,07
-   à 0,67 pour le niveau de vie). Il compare aussi des rapports plutôt que des écarts : 100 k€ de
+   patrimoine médian va de 32 à 1 532 k€, et une seule catégorie, celle des chefs d'entreprise,
+   tirerait sinon toute l'échelle (asymétrie pondérée sur les PCS actives : de 2,69 à -0,71 pour le
+   patrimoine, de 1,07 à 0,67 pour le niveau de vie). Il compare aussi des rapports plutôt que des écarts : 100 k€ de
    plus ne pèsent pas pareil à 30 k€ et à 1 500 k€.
 2. Capital culturel : ``C = z(Σ poids[k] · part[k])``, les poids ``y_weights`` étant la durée
    théorique des études, en années par rapport au bac (bac+5 : 5 ; bac+3 ou +4 : 3,5 ; bac+2 : 2 ;
@@ -21,12 +21,12 @@ Construction, à partir de ``data/pcs.json`` seul :
 4. Volume ``V = E + C``, structure ``S = E - C``, puis ``y = minmax(z(V))`` et ``x = minmax(z(S))``
    sur [-10, 10], comme ``continuous`` (z-score non pondéré, absorbé par la mise à l'échelle).
 
-Retraités : ils gardent leurs propres valeurs, sans score imposé ni correction, mais n'entrent pas
-dans ``m`` et ``s`` (échelle de référence calculée sur les 29 PCS actives). Leurs diplômes reflètent
-leur génération plus que leur position : un point unique qui pèse un tiers de la population fixerait
-sinon le zéro et la dispersion du capital culturel, et ce biais déformerait toute la carte. Ainsi
-contenu, il reste visible sur leur seul point : à droite et bas, parce que peu diplômés. Ce point ne
-dit donc pas que les retraités détiennent surtout un capital économique. Voir
+Retraités : leurs propres valeurs sont conservées, sans score imposé ni correction, mais restent
+hors de ``m`` et ``s`` (échelle de référence calculée sur les 29 PCS actives). Leurs diplômes
+reflètent leur génération plus que leur position : un point unique qui pèse un tiers de la
+population fixerait sinon le zéro et la dispersion du capital culturel, et ce biais déformerait
+toute la carte. Ainsi contenu, le biais reste visible sur ce seul point : à droite et bas, faute de
+diplômes. Ce point ne dit donc pas que le capital des retraités est surtout économique. Voir
 ``docs/methodologie.md`` pour la mesure de ce biais.
 
 Le capital culturel n'est mesuré ici que par les titres scolaires, et le capital économique par deux

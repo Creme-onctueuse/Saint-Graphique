@@ -34,8 +34,8 @@ Trois choix sur l'emploi, pris pour éviter un artefact de codage et non pour or
   codage. Il ne distingue que les emplois stables : temps complet et partiel se comptent ailleurs
   en trop faibles effectifs ;
 - les retraités n'ont ni ``EMPL`` ni ``TP`` : leur donner une modalité ferait de l'axe 1 une
-  opposition entre générations (vérifié, voir ``docs/methodologie.md``). Ils restent donc hors du
-  calcul des axes.
+  opposition entre générations (vérifié, voir ``docs/methodologie.md``). Les retraités restent donc
+  hors du calcul des axes.
 
 Le recensement ne donne ni revenu ni patrimoine : le capital économique n'y est approché que par la
 propriété du logement et le statut d'emploi.
@@ -69,7 +69,7 @@ TEXT = {key: "string" for key in KEYS}
 LOGEMENTS = ("proprietaire", "locataire_prive", "hlm", "autre")
 EMPLOIS = ("employeur", "independant", "stable_complet", "stable_partiel", "duree_limitee",
            "chomage")
-#: Personnes sans modalité d'emploi : elles ne participent pas au calcul des axes.
+#: Personnes sans modalité d'emploi, hors du calcul des axes.
 RETRAITE = "retraite"
 AGES = ("15-29", "30-44", "45-59", "60+")
 AGE_BINS = (14, 29, 44, 59, 200)

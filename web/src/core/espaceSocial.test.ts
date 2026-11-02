@@ -88,7 +88,7 @@ describe('espace social', () => {
     expect(scores.find((s) => s.code === '23')?.x).toBeCloseTo(2, 12);
   });
 
-  it('place les retraités sans qu’ils fixent l’échelle', () => {
+  it('place les retraités sans leur laisser fixer l’échelle', () => {
     const base = positions(SQUARE);
     const at = positions([...SQUARE, item('7', '7', 1e6, -1, 'cap')]);
     for (const code of ['61', '34', '23', '31']) {
@@ -158,7 +158,7 @@ describe('espace social', () => {
     expect(() => positions(broke)).toThrow(/PCS 34/);
   });
 
-  it('se recalcule, avec ses poids à elle, sans score imposé aux retraités', () => {
+  it('se recalcule, avec ses propres poids, sans score imposé aux retraités', () => {
     expect(isClientComputable('espace_social', params)).toBe(true);
     expect(params.y_weights).toEqual(STUDY_YEARS);
     expect(params.retired_y_override).toBeNull();

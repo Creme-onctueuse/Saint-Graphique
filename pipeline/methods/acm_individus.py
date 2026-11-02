@@ -12,9 +12,9 @@ Construction (``data/acm_individus.json``, voir ``pipeline/sources/insee_acm_ind
    des ``IPONDI``. L'ACM est celle de ``mca.fit_weighted_mca`` : exacte, donc déterministe.
 3. Supplémentaire : chaque PCS est le barycentre de ses individus, pondérés par ``IPONDI``.
 4. Retraités : individus supplémentaires, faute de condition d'emploi. Leur variable manquante
-   compte pour zéro, c'est-à-dire qu'elle ne les pousse d'aucun côté : la coordonnée d'un individu
-   est la moyenne des coordonnées standard de ses modalités, divisée par les 3 variables actives
-   même s'il n'en renseigne que 2. Leur diplôme et leur logement reflètent leur génération.
+   compte pour zéro, donc pour aucun côté : la coordonnée d'un individu est la somme des coordonnées
+   standard de ses modalités, divisée par les 3 variables actives, même avec 2 variables
+   renseignées. Leur diplôme et leur logement reflètent leur génération.
 5. Orientation et échelle : celles de ``mca`` (chefs d'entreprise à droite du barycentre de la
    population, cadres au-dessus), puis min/max sur [-10, 10].
 
