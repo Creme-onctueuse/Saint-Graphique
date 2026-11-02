@@ -45,7 +45,8 @@ function overlapArea(a: Box, b: Box): number {
 
 /**
  * Place du nom autour d'un anneau : dessous, sinon dessus, à droite ou à gauche, là où il recouvre le
- * moins de libellés. Le dessous l'emporte à égalité : les noms restent alignés quand c'est possible.
+ * moins de libellés et ne sort pas de l'écran. Le dessous l'emporte à égalité : les noms restent
+ * alignés quand c'est possible.
  */
 export function bestNamePlace(
   cx: number,
@@ -53,6 +54,7 @@ export function bestNamePlace(
   outer: number,
   width: number,
   obstacles: readonly Box[],
+  screenWidth = Number.POSITIVE_INFINITY,
 ): { dx: number; dy: number; anchor: 'middle' | 'start' | 'end' } {
   const half = width / 2;
   const places = [
@@ -70,7 +72,9 @@ export function bestNamePlace(
       top: cy + p.dy - NAME_HEIGHT + 4,
       bottom: cy + p.dy + 4,
     };
-    const cost = obstacles.reduce((sum, o) => sum + overlapArea(box, o), 0);
+    const outside = Math.max(0, -box.left) + Math.max(0, box.right - screenWidth);
+    const cost =
+      outside * NAME_HEIGHT * 4 + obstacles.reduce((sum, o) => sum + overlapArea(box, o), 0);
     if (cost < bestCost) {
       bestCost = cost;
       best = p;
@@ -213,9 +217,17 @@ export class RingsLayer implements Feature {
     if (this.rings.length === 0) return;
     const labels = this.labelBoxes();
     const outerRadius = (d: Ring): number => this.outerRadius(d.weight);
+    const screenWidth = this.chart.geometry.width;
     this.layer.selectAll<SVGTextElement, Ring>('text.sg-ring__name').each(function (d) {
       const width = this.getComputedTextLength();
-      const place = bestNamePlace(x(d.center.x), y(d.center.y), outerRadius(d), width, labels);
+      const place = bestNamePlace(
+        x(d.center.x),
+        y(d.center.y),
+        outerRadius(d),
+        width,
+        labels,
+        screenWidth,
+      );
       this.setAttribute('x', String(place.dx));
       this.setAttribute('y', String(place.dy));
       this.setAttribute('text-anchor', place.anchor);

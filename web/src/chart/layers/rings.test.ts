@@ -35,6 +35,14 @@ describe('bestNamePlace', () => {
   });
 });
 
+describe('bestNamePlace, au bord de l’écran', () => {
+  it('ne laisse pas le nom sortir de l’écran', () => {
+    // Dessous et dessus débordent à droite : le nom passe à gauche de l'anneau.
+    const place = bestNamePlace(380, 100, 20, 120, [], 400);
+    expect(place.anchor).toBe('end');
+  });
+});
+
 describe('ringName', () => {
   it('nomme le groupe', () => {
     expect(ringName('6', false)).toBe('Ouvriers');
