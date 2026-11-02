@@ -94,6 +94,9 @@ export class CrossPanel implements Feature {
   private readonly scaleMin = el('span', { class: 'sg-scale__end' });
   private readonly scaleMax = el('span', { class: 'sg-scale__end' });
   private readonly variables: Variable[];
+  /** Catégories Insee, et celles dont la composition du patrimoine est imputée. */
+  private readonly itemCount: number;
+  private readonly imputedCount: number;
   private lastMode: CrossMode = 'map';
   private initialized = false;
 
@@ -101,6 +104,9 @@ export class CrossPanel implements Feature {
     this.actions = actions;
     this.onLayoutChange = onLayoutChange;
     this.variables = crossVariables(ds);
+    const items = ds.rawPcs?.items ?? [];
+    this.itemCount = items.length;
+    this.imputedCount = items.filter((it) => it.patrimoine_composition_status === 'imputed').length;
 
     const segmented = el('div', {
       class: 'sg-segmented',
@@ -241,8 +247,7 @@ export class CrossPanel implements Feature {
       : false;
     this.imputedNote.hidden = !flagged;
     if (flagged) {
-      this.imputedNote.textContent =
-        'Composition du patrimoine : valeurs imputées pour 27 catégories sur 30. Lecture indicative.';
+      this.imputedNote.textContent = `Composition du patrimoine : valeurs imputées pour ${this.imputedCount} catégories sur ${this.itemCount}. Lecture indicative.`;
     }
 
     const color = free?.color ?? null;
@@ -276,9 +281,9 @@ export class CrossPanel implements Feature {
       const free = crossing?.free;
       const omitted =
         free && free.omitted > 0 ? ` ${free.omitted} sans valeur ne sont pas placées.` : '';
-      const count = free?.pcs.length ?? 30;
+      const count = free?.pcs.length ?? this.itemCount;
       return (
-        `Ces axes utilisent ${count} catégories Insee, et non les 41 positions lues sur les vidéos.` +
+        `Ces axes utilisent ${count} catégories Insee, et non les positions lues sur les vidéos.` +
         omitted
       );
     }
