@@ -7,6 +7,7 @@ import { formatNumber } from '../core/format.ts';
 import type { ChartGeometry, Scale } from './geometry.ts';
 import { clamp } from './shapes.ts';
 import { CHART_STYLE, CHART_TEXT } from './style.ts';
+import type { ChartAxes } from './types.ts';
 
 type G = Selection<SVGGElement, unknown, null, undefined>;
 
@@ -40,13 +41,17 @@ function tickDigits(ticks: readonly number[]): number {
   return step >= 1 || step === 0 ? 0 : Math.ceil(-Math.log10(step) - 1e-9);
 }
 
-function toTicks(values: readonly number[], scale: Scale): Tick[] {
+function toTicks(
+  values: readonly number[],
+  scale: Scale,
+  text?: (position: number) => string,
+): Tick[] {
   const digits = tickDigits(values);
   return values.map((v) => ({
     key: String(v),
     value: v,
     pos: scale(v),
-    text: formatNumber(v, digits),
+    text: text ? text(v) : formatNumber(v, digits),
   }));
 }
 
@@ -55,10 +60,12 @@ export function drawFrame(
   geom: ChartGeometry,
   x: Scale,
   y: Scale,
-  model: { xLabel: string; yLabel: string; range: [number, number] },
+  model: { xLabel: string; yLabel: string; range: [number, number]; axes?: ChartAxes },
   showRegions: boolean,
 ): void {
   const { width, height, plot, small } = geom;
+  const axes = model.axes;
+  const none = axes?.none === true;
   layers.bg.attr('width', width).attr('height', height);
 
   const cx = clamp(x(0), 0, width);
@@ -71,7 +78,7 @@ export function drawFrame(
   ];
   layers.quads
     .selectAll<SVGRectElement, Quadrant>('rect')
-    .data(quads, (d) => d.k)
+    .data(none ? [] : quads, (d) => d.k)
     .join('rect')
     .attr('class', (d) => `sg-quadrant sg-quadrant--${d.k}`)
     .attr('x', (d) => d.x)
@@ -80,8 +87,8 @@ export function drawFrame(
     .attr('height', (d) => Math.max(0, d.h));
 
   const count = small ? 4 : CHART_STYLE.ticks;
-  const xt = toTicks(x.ticks(count), x);
-  const yt = toTicks(y.ticks(count), y);
+  const xt = none ? [] : toTicks(x.ticks(count), x, axes?.text?.x);
+  const yt = none ? [] : toTicks(y.ticks(count), y, axes?.text?.y);
 
   layers.grid
     .selectAll<SVGLineElement, Tick>('line.sg-grid-x')
@@ -103,7 +110,12 @@ export function drawFrame(
     .attr('y2', (d) => d.pos);
 
   const [lo, hi] = model.range;
-  layers.diagonal.attr('x1', x(lo)).attr('y1', y(lo)).attr('x2', x(hi)).attr('y2', y(hi));
+  layers.diagonal
+    .style('display', () => (axes?.plain ? 'none' : null))
+    .attr('x1', x(lo))
+    .attr('y1', y(lo))
+    .attr('x2', x(hi))
+    .attr('y2', y(hi));
 
   // Graduations et titres des axes, dans la bande réservée sous la zone de tracé et à sa gauche.
   const bottom = plot.y + plot.h;
@@ -129,10 +141,11 @@ export function drawFrame(
     )
     .join('text')
     .attr('class', 'sg-tick sg-tick-y')
-    .attr('x', plot.x - 6)
+    // Des valeurs réelles sont plus larges que la bande de l'axe : elles passent dans la carte.
+    .attr('x', axes?.text ? plot.x + 5 : plot.x - 6)
     .attr('y', (d) => d.pos)
-    .attr('dy', '0.35em')
-    .attr('text-anchor', 'end')
+    .attr('dy', axes?.text ? '-0.4em' : '0.35em')
+    .attr('text-anchor', axes?.text ? 'start' : 'end')
     .text((d) => d.text);
 
   const titleY = bottom + (small ? 24 : 27);
@@ -154,7 +167,7 @@ export function drawFrame(
       y: titleY,
       rotate: 0,
       anchor: 'start',
-      text: `← ${CHART_TEXT.xLow}`,
+      text: axes?.ends ? `← ${axes.ends.xLow}` : `← ${CHART_TEXT.xLow}`,
     },
     {
       key: 'x-hi',
@@ -163,7 +176,7 @@ export function drawFrame(
       y: titleY,
       rotate: 0,
       anchor: 'end',
-      text: `${CHART_TEXT.xHigh} →`,
+      text: axes?.ends ? `${axes.ends.xHigh} →` : `${CHART_TEXT.xHigh} →`,
     },
     {
       key: 'y',
@@ -181,7 +194,7 @@ export function drawFrame(
       y: bottom,
       rotate: -90,
       anchor: 'start',
-      text: `← ${CHART_TEXT.yLow}`,
+      text: axes?.ends ? `← ${axes.ends.yLow}` : `← ${CHART_TEXT.yLow}`,
     },
     {
       key: 'y-hi',
@@ -190,12 +203,12 @@ export function drawFrame(
       y: plot.y,
       rotate: -90,
       anchor: 'end',
-      text: `${CHART_TEXT.yHigh} →`,
+      text: axes?.ends ? `${axes.ends.yHigh} →` : `${CHART_TEXT.yHigh} →`,
     },
   ];
   layers.axes
     .selectAll<SVGTextElement, (typeof titles)[number]>('text.sg-axis-label')
-    .data(titles, (d) => d.key)
+    .data(none ? [] : titles, (d) => d.key)
     .join('text')
     .attr('class', (d) => `sg-axis-label ${d.cls}`)
     .attr('text-anchor', (d) => d.anchor)
@@ -209,7 +222,7 @@ export function drawFrame(
   // En bas à droite, le nom laisse la place aux boutons de la carte.
   const rightBottom = right - CHART_STYLE.mapControlsGutter;
   const regions =
-    showRegions && !small
+    showRegions && !small && !axes?.plain
       ? [
           {
             key: 'tl',

@@ -21,7 +21,7 @@ import {
   type ZoomBehavior,
   type ZoomTransform,
 } from 'd3-zoom';
-import { formatNumber, formatPct } from '../core/format.ts';
+import { formatPct } from '../core/format.ts';
 import { formatStatus } from '../core/reserves.ts';
 import type { Point } from '../core/types.ts';
 import { drawFrame, type FrameLayers } from './frame.ts';
@@ -37,7 +37,7 @@ import { drawTerritories } from './layers/territories.ts';
 import { placeLabels, type Anchor, type LabelItem, type Obstacle, type Segment } from './labels.ts';
 import { clamp, diamondPath } from './shapes.ts';
 import { CHART_STYLE } from './style.ts';
-import { baryTip, candTip, pcsTip } from './tips.ts';
+import { baryTip, candTip, coordinatesText, pcsTip } from './tips.ts';
 import { Tooltip, type TooltipContent } from './tooltip.ts';
 import type { Animation, ChartCandidate, ChartModel, ChartPcs, ChartView } from './types.ts';
 
@@ -501,7 +501,7 @@ export class SaintChart {
     drawFrame(this.frameLayers, this.geom, x, y, model, this.view.showTerritories);
     drawTerritories(
       this.territoryLayer,
-      this.view.showTerritories ? pcs : [],
+      this.view.showTerritories && model.axes?.halos !== false ? pcs : [],
       x,
       y,
       (p) => this.pcsRadius(p),
@@ -575,13 +575,13 @@ export class SaintChart {
         'aria-label',
         (d) =>
           `${d.label} (${d.groupLabel}) : ${formatPct(d.weight)} de la population, ` +
-          `${model?.xLabel ?? 'x'} ${formatNumber(d.x)}, ${model?.yLabel ?? 'y'} ${formatNumber(d.y)}` +
+          coordinatesText(model, d) +
           (d.status
             ? `, patrimoine : ${formatStatus(d.status.patrimoine)}` +
               `, niveau de vie : ${formatStatus(d.status.niveauVie)}`
             : ''),
       )
-      .style('fill', (d) => `var(--sg-group-${d.group}, ${d.color})`);
+      .style('fill', (d) => d.fill ?? `var(--sg-group-${d.group}, ${d.color})`);
     setAttrs(all, duration, {
       cx: (d) => x(d.x),
       cy: (d) => y(d.y),
@@ -605,12 +605,7 @@ export class SaintChart {
     entered.append('circle').attr('class', 'sg-bary__dot').attr('r', 2.5);
     const all = entered.merge(sel);
     const model = this.model;
-    all.attr(
-      'aria-label',
-      (d) =>
-        `Barycentre de la population : ${model?.xLabel ?? 'x'} ${formatNumber(d.x)}, ` +
-        `${model?.yLabel ?? 'y'} ${formatNumber(d.y)}`,
-    );
+    all.attr('aria-label', (d) => `Barycentre de la population : ${coordinatesText(model, d)}`);
     all
       .select('circle.sg-bary__ring')
       .attr('r', Math.max(8, this.geom.unit * CHART_STYLE.barycenterRadius));
@@ -643,7 +638,7 @@ export class SaintChart {
         'aria-label',
         (d) =>
           `${d.label}${d.share !== null ? ` : ${formatPct(d.share)}` : ''}, ` +
-          `${model?.xLabel ?? 'x'} ${formatNumber(d.x)}, ${model?.yLabel ?? 'y'} ${formatNumber(d.y)}`,
+          coordinatesText(model, d),
       )
       .classed('sg-cand--abstention', (d) => d.isAbstention)
       .style('fill', (d) => this.candidateFill(d));

@@ -5,14 +5,34 @@ import type { Point } from '../core/types.ts';
 import type { TooltipContent } from './tooltip.ts';
 import type { ChartCandidate, ChartModel, ChartPcs } from './types.ts';
 
+/** Valeur à afficher pour une position : la valeur réelle si les axes sont libres. */
+export function axisText(m: ChartModel | null, axis: 'x' | 'y', position: number): string {
+  return m?.axes?.text?.[axis](position) ?? formatNumber(position);
+}
+
+/** Lignes des coordonnées : aucune sur une carte sans axes. */
+function coordinateRows(m: ChartModel | null, d: Point): [string, string][] {
+  if (m?.axes?.none) return [];
+  return [
+    [m?.xLabel ?? 'x', axisText(m, 'x', d.x)],
+    [m?.yLabel ?? 'y', axisText(m, 'y', d.y)],
+  ];
+}
+
+/** Coordonnées en toutes lettres, pour les lecteurs d'écran. */
+export function coordinatesText(m: ChartModel | null, d: Point): string {
+  return coordinateRows(m, d)
+    .map(([label, value]) => `${label} ${value}`)
+    .join(', ');
+}
+
 export function pcsTip(d: ChartPcs, m: ChartModel | null): TooltipContent {
   return {
     title: d.label,
     subtitle: `${d.groupLabel} · code ${d.code}`,
     rows: [
       ['Part de la population', formatPct(d.weight)],
-      [m?.xLabel ?? 'x', formatNumber(d.x)],
-      [m?.yLabel ?? 'y', formatNumber(d.y)],
+      ...coordinateRows(m, d),
       ...(d.status
         ? ([
             ['Patrimoine', formatStatus(d.status.patrimoine)],
@@ -35,8 +55,10 @@ export function candTip(
       ...(d.share !== null
         ? [[d.isAbstention ? 'Part des inscrits' : 'Score', formatPct(d.share)] as [string, string]]
         : []),
-      [m?.xLabel ?? 'x', formatNumber(d.x)],
-      [m?.yLabel ?? 'y', formatNumber(d.y)],
+      ...(d.sizeShare !== undefined && d.sizeShare !== null
+        ? [['Vote du groupe', formatPct(d.sizeShare)] as [string, string]]
+        : []),
+      ...coordinateRows(m, d),
     ],
   };
   if (d.ellipse && showEllipses) content.subtitle = 'Ellipse : intervalle de confiance à 95 %';
@@ -55,9 +77,6 @@ export function baryTip(d: Point, m: ChartModel | null): TooltipContent {
   return {
     title: 'Barycentre de la population',
     subtitle: 'Moyenne des PCS pondérée par leurs effectifs',
-    rows: [
-      [m?.xLabel ?? 'x', formatNumber(d.x)],
-      [m?.yLabel ?? 'y', formatNumber(d.y)],
-    ],
+    rows: coordinateRows(m, d),
   };
 }

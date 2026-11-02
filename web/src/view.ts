@@ -42,6 +42,7 @@ import {
   type SourceRef,
 } from './core/types.ts';
 import { computedKey, type Dataset, type MethodInfo } from './data/dataset.ts';
+import { applyCrossing, type CrossingInfo } from './viewCrossing.ts';
 
 const NEUTRAL_COLOR = '#888888';
 
@@ -71,6 +72,8 @@ export interface ResolvedView {
   reserveSummary: string;
   /** Sources lues dans les données brutes : sondage de l'élection, données sur les PCS. */
   sources: { poll: SourceRef[]; pcs: SourceRef[]; positions: SourceRef[] };
+  /** Axes libres, carte de proximité, sélection : voir viewCrossing.ts. */
+  crossing?: CrossingInfo;
 }
 
 /** Méthodes utilisables : avec fichiers précalculés, ou recalculables depuis les données brutes. */
@@ -388,7 +391,7 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
     barycenter,
   };
 
-  return {
+  return applyCrossing(ds, state, {
     method,
     electionId,
     electionLabel,
@@ -410,5 +413,5 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
       pcs: ds.rawPcs?.sources ?? [],
       positions: fallbackFile?.sources ?? [],
     },
-  };
+  });
 }

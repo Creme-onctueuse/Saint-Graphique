@@ -79,6 +79,15 @@
   --sg-ellipse-fill-opacity: 0.1;
   --sg-dim-opacity: 0.2;
 
+  /* Variable de couleur : une seule teinte, du clair au foncé */
+  --sg-seq-1: #86afd9;
+  --sg-seq-2: #6199cc;
+  --sg-seq-3: #4080ba;
+  --sg-seq-4: #22649f;
+  --sg-seq-5: #0b477c;
+  --sg-spoke-opacity: 0.6;
+  --sg-bar-ring: rgb(28 28 26 / 0.18);
+
   /* Infobulle */
   --sg-tooltip-bg: #1f1f1d;
   --sg-tooltip-text: #f5f5f2;
@@ -143,6 +152,13 @@
     --sg-barycenter: #f0efec;
     --sg-ellipse-fill-opacity: 0.14;
     --sg-dim-opacity: 0.18;
+    --sg-seq-1: #2f5f8f;
+    --sg-seq-2: #3f7fb8;
+    --sg-seq-3: #62a0d4;
+    --sg-seq-4: #92c2e8;
+    --sg-seq-5: #c9e3f7;
+    --sg-spoke-opacity: 0.65;
+    --sg-bar-ring: rgb(240 239 236 / 0.4);
     --sg-tooltip-bg: #2b2b28;
     --sg-tooltip-text: #f5f5f2;
     --sg-tooltip-muted: #c9c8c0;
@@ -198,6 +214,13 @@
   --sg-barycenter: #f0efec;
   --sg-ellipse-fill-opacity: 0.14;
   --sg-dim-opacity: 0.18;
+  --sg-seq-1: #2f5f8f;
+  --sg-seq-2: #3f7fb8;
+  --sg-seq-3: #62a0d4;
+  --sg-seq-4: #92c2e8;
+  --sg-seq-5: #c9e3f7;
+  --sg-spoke-opacity: 0.65;
+  --sg-bar-ring: rgb(240 239 236 / 0.4);
   --sg-tooltip-bg: #2b2b28;
   --sg-tooltip-text: #f5f5f2;
   --sg-tooltip-muted: #c9c8c0;
