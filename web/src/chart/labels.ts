@@ -3,8 +3,8 @@
  *
  * Chaque libellé cherche sa place sur des anneaux de plus en plus éloignés de son repère, dans
  * seize directions. Un libellé ne chevauche jamais un autre libellé. Parmi les places libres, on
- * retient la moins coûteuse : éloignement, repères recouverts, lignes de rappel qui se croisent ou
- * qui traversent un libellé. Un libellé écarté de son repère est relié à lui par une ligne de
+ * retient la moins coûteuse : éloignement, repères recouverts ou voisins d'un libellé qui n'est pas
+ * le leur, lignes de rappel qui se croisent, qui traversent un libellé ou un repère. Un libellé écarté de son repère est relié à lui par une ligne de
  * rappel.
  *
  * Passe gloutonne par priorité, puis déplacement itératif : chaque libellé est retiré et replacé en
@@ -86,12 +86,15 @@ export const LABEL_LINE_HEIGHT = 1.4;
 /** Éloignements successifs au-delà du contact (px). */
 const RINGS = [0, 8, 16, 26, 38, 52, 68, 86, 106, 128, 152];
 const DISTANCE_COST = 0.06;
-const COVER_STRONG_COST = 12;
-const COVER_SMALL_COST = 6;
-const COVER_LARGE_COST = 4;
+const COVER_STRONG_COST = 18;
+const COVER_SMALL_COST = 12;
+const COVER_LARGE_COST = 12;
 const LEADER_CROSS_COST = 8;
 const LEADER_OVER_STRONG_COST = 6;
-const LEADER_OVER_MARK_COST = 1;
+const LEADER_OVER_MARK_COST = 5;
+/** Un libellé posé contre un repère qui n'est pas le sien se lit comme le libellé de ce repère. */
+const NEAR_FOREIGN_MARK_COST = 3;
+const NEAR_FOREIGN_MARK_GAP = 6;
 /** En dessous de ce rayon (px), un disque recouvert gêne autant qu'un petit repère. */
 const SMALL_MARK_RADIUS = 12;
 
@@ -235,7 +238,7 @@ function coverCost(o: Obstacle, rect: Rect, h: number): number {
     : o.r < SMALL_MARK_RADIUS
       ? COVER_SMALL_COST
       : COVER_LARGE_COST;
-  return weight * Math.min(1, pen / h);
+  return weight * (0.5 + 0.5 * Math.min(1, pen / h));
 }
 
 function bestSlot(
@@ -262,7 +265,11 @@ function bestSlot(
 
       let cost = dir.penalty + distance * DISTANCE_COST;
       for (const o of obstacles) {
-        if (o.key !== it.key) cost += coverCost(o, r, h);
+        if (o.key === it.key) continue;
+        cost += coverCost(o, r, h);
+        if (circlePenetration({ ...o, r: o.r + NEAR_FOREIGN_MARK_GAP }, r) > 0) {
+          cost += NEAR_FOREIGN_MARK_COST;
+        }
       }
       for (const other of others) {
         // Ce libellé ne doit pas se poser sur la ligne de rappel d'un autre.

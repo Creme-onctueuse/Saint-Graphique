@@ -160,6 +160,48 @@ describe('groupe dense (cas de la présidentielle)', () => {
   });
 });
 
+describe('repères qui ne sont pas les siens', () => {
+  // Un groupe serré d'électorats à côté d'un grand disque, comme les employés du graphique réel.
+  const positions: [number, number][] = [
+    [240, 200],
+    [250, 192],
+    [232, 208],
+    [258, 204],
+    [226, 192],
+    [246, 214],
+    [256, 184],
+    [236, 182],
+    [266, 196],
+    [222, 206],
+  ];
+  const items: LabelItem[] = positions.map(([cx, cy], i) => ({
+    ...label(`c${i}`, cx, cy, 100 - i),
+    text: 'Libellé long',
+    reach: 152,
+  }));
+  const disc: Obstacle = { key: 'p:grand', cx: 150, cy: 200, r: 24 };
+  const obstacles: Obstacle[] = [
+    disc,
+    ...items.map((it) => ({ key: it.key, cx: it.cx, cy: it.cy, r: it.r, strong: true })),
+  ];
+  const w = measure('Libellé long', 12);
+  const h = 12 * LABEL_LINE_HEIGHT;
+  const placed = [...placeLabels(items, obstacles, bounds, measure).values()];
+
+  it('ne pose pas un libellé contre un disque étranger quand il y a de la place', () => {
+    for (const p of placed) {
+      expect(circlePenetration({ ...disc, r: disc.r + 6 }, boxOf(p, w, h))).toBe(0);
+    }
+  });
+
+  it('ne fait pas passer une ligne de rappel à travers un disque étranger', () => {
+    const box = { x: disc.cx - 16, y: disc.cy - 16, w: 32, h: 32 };
+    for (const p of placed) {
+      if (p.leader) expect(segmentHitsRect(p.leader, box)).toBe(false);
+    }
+  });
+});
+
 describe('lignes de rappel', () => {
   it('n’en met pas quand le libellé touche son repère', () => {
     const p = placeLabels([{ ...label('a', 100, 100), reach: 152 }], [], bounds, measure).get('a');

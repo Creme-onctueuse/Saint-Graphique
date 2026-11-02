@@ -23,6 +23,9 @@ const outDir = option('--out');
 const target = option('--url') ?? pathToFileURL(join(web, 'dist', 'index.html')).href;
 const port = 9300 + Math.floor(Math.random() * 500);
 
+/** Profondeur (px) tolérée d'un libellé d'électorat sur un disque PCS. */
+const LABEL_DISC_TOLERANCE = 8;
+
 const BROWSERS = [
   process.env.CHROME_PATH,
   'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',
@@ -675,8 +678,30 @@ async function main() {
       }
     }
     const cands = document.querySelectorAll('.sg-cand').length;
+    const discs = [...document.querySelectorAll('.sg-pcs-layer circle')].map((c) => ({
+      x: Number(c.getAttribute('cx')),
+      y: Number(c.getAttribute('cy')),
+      r: Number(c.getAttribute('r')),
+    }));
+    const candOnDisc = boxes.filter((b) => b.cand).flatMap((b) => discs.flatMap((d) => {
+      const nx = Math.max(b.box.x, Math.min(d.x, b.box.x + b.box.width));
+      const ny = Math.max(b.box.y, Math.min(d.y, b.box.y + b.box.height));
+      const depth = d.r - Math.hypot(d.x - nx, d.y - ny);
+      return depth > 0 ? [{ text: b.text, depth }] : [];
+    }));
+    // Le repère d'origine est à exactement un rayon de sa ligne : il n'est pas compté.
+    const leaderThroughDisc = [...document.querySelectorAll('.sg-leader:not(.sg-exiting)')].filter((l) => {
+      const [x1, y1, x2, y2] = ['x1', 'y1', 'x2', 'y2'].map((k) => Number(l.getAttribute(k)));
+      const len2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+      return discs.some((d) => {
+        const t = len2 > 0 ? Math.max(0, Math.min(1, ((d.x - x1) * (x2 - x1) + (d.y - y1) * (y2 - y1)) / len2)) : 0;
+        return Math.hypot(d.x - (x1 + t * (x2 - x1)), d.y - (y1 + t * (y2 - y1))) < d.r - 1;
+      });
+    }).length;
     return {
       overlaps,
+      candOnDisc,
+      leaderThroughDisc,
       visibleCandidates: boxes.filter((b) => b.cand).length,
       candidates: cands,
       visiblePcs: boxes.filter((b) => !b.cand).length,
@@ -718,6 +743,41 @@ async function main() {
         (audit.hiddenCandidates.length ? `, masqués : ${audit.hiddenCandidates.join(', ')}` : ''),
     );
     await shot(name);
+  }
+
+  // Lisibilité sur chaque élection, pas seulement celle de la capture.
+  await setViewport(1400, 1500);
+  const electionIds = await evaluate(
+    `[...document.getElementById('sg-election').options].map((o) => o.value)`,
+  );
+  for (const id of electionIds) {
+    await evaluate(`(() => {
+      const e = document.getElementById('sg-election');
+      e.value = ${JSON.stringify(id)};
+      e.dispatchEvent(new Event('change', { bubbles: true }));
+    })()`);
+    await settle();
+    const audit = await evaluate(labelAudit);
+    check(
+      `${id} : aucun libellé superposé`,
+      audit.overlaps.length === 0,
+      audit.overlaps.join(' | '),
+    );
+    // Un nom long, dans un groupe dense, peut effleurer un disque voisin : toléré jusqu'à
+    // LABEL_DISC_TOLERANCE, et affiché pour rester visible.
+    const onDisc = audit.candOnDisc.map((c) => `${c.text} (${c.depth.toFixed(1)} px)`);
+    if (onDisc.length)
+      console.log(`[smoke] ${id} : libellés qui effleurent un disque : ${onDisc.join(', ')}`);
+    check(
+      `${id} : aucun libellé d'électorat sur un disque PCS`,
+      audit.candOnDisc.every((c) => c.depth <= LABEL_DISC_TOLERANCE),
+      onDisc.join(', '),
+    );
+    check(
+      `${id} : aucune ligne de rappel à travers un disque PCS`,
+      audit.leaderThroughDisc === 0,
+      String(audit.leaderThroughDisc),
+    );
   }
   await setViewport(1280, 1400);
   await settle();
