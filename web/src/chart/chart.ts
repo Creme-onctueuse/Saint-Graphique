@@ -368,11 +368,15 @@ export class SaintChart {
     else this.zoomBehavior.transform(this.plot, target);
   }
 
-  /** Cadre les électorats affichés : ils se serrent au centre, et c'est eux qui se déplacent. */
-  fitElectorates(animated = true): void {
-    const shown = (this.model?.candidates ?? []).filter(
-      (c) => !this.view.hiddenCandidates.has(c.id),
-    );
+  /**
+   * Cadre les électorats affichés : ils se serrent au centre, et c'est eux qui se déplacent.
+   * `points` élargit le cadre à des positions à venir, pour qu'il ne change pas pendant la lecture.
+   */
+  fitElectorates(animated = true, points?: readonly Point[]): void {
+    const shown: readonly Point[] =
+      points && points.length > 0
+        ? points
+        : (this.model?.candidates ?? []).filter((c) => !this.view.hiddenCandidates.has(c.id));
     if (shown.length === 0) {
       this.resetZoom(animated);
       return;

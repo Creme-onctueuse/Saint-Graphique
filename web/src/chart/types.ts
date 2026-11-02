@@ -34,6 +34,8 @@ export interface ChartCandidate {
   ellipse: Ellipse | null;
   /** Composition sociale de l'électorat, si les données brutes sont disponibles. */
   composition: { label: string; share: number }[] | null;
+  /** Précisions affichées en fin d'infobulle. */
+  notes?: string[];
 }
 
 export interface ChartModel {

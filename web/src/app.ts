@@ -7,6 +7,9 @@
  */
 import { SaintChart, type Animation, type ChartView } from './chart/chart.ts';
 import { Minimap } from './chart/layers/minimap.ts';
+import { ProjectionLayer } from './chart/layers/projection.ts';
+import { RingsLayer } from './chart/layers/rings.ts';
+import { TrailsLayer } from './chart/layers/trails.ts';
 import { sameWeights } from './core/scores.ts';
 import { parseState, serializeState, type AppState } from './core/state.ts';
 import { loadDataset } from './data/load.ts';
@@ -20,6 +23,8 @@ import { mountIcons } from './ui/icons.ts';
 import { Legend } from './ui/legend.ts';
 import { MethodPanel } from './ui/methodPanel.ts';
 import { Keybar } from './ui/shell/keybar.ts';
+import { ProjectionCard } from './ui/shell/projectionCard.ts';
+import { RingsKey } from './ui/shell/ringsKey.ts';
 import { Shell } from './ui/shell/shell.ts';
 import { Timeline } from './ui/shell/timeline.ts';
 import { sourceText } from './ui/sources.ts';
@@ -163,7 +168,12 @@ export function startApp(): void {
   initAbout(ds);
 
   const features: Feature[] = [
-    new Timeline(byId('sg-timeline'), ds, actions),
+    new Timeline(byId('sg-timeline'), ds, actions, chart),
+    new TrailsLayer(chart, ds),
+    new RingsLayer(chart, ds),
+    new ProjectionLayer(chart),
+    new ProjectionCard(actions),
+    new RingsKey(ds),
     new Keybar(byId('sg-keybar'), actions),
     new Legend(
       byId('sg-legend-groups'),

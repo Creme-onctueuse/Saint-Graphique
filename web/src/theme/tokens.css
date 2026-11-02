@@ -95,6 +95,16 @@
   --sg-group-6: #d55e00; /* Ouvriers */
   --sg-group-7: #c9c9c2; /* Retraités */
   --sg-group-8: #8e82b8; /* Autres inactifs */
+
+  /* Blocs politiques (anneaux, projection). Validés par validate_palette.js, toutes paires, sur le
+     fond de la carte. L'abstention et les « autres » sont des neutres, pas des teintes de série. */
+  --sg-bloc-gauche: #d43d51;
+  --sg-bloc-centre: #b98500;
+  --sg-bloc-droite: #1c7fd0;
+  --sg-bloc-extreme-droite: #6a3fa8;
+  --sg-bloc-autres: #c9c8c0;
+  --sg-bloc-abstention: #8f8e87;
+  --sg-trail-opacity: 0.4;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -150,6 +160,13 @@
     --sg-tooltip-track: #4a4a46;
     --sg-group-7: #5c5c56;
     --sg-group-8: #8e82b8;
+    --sg-bloc-gauche: #e0556a;
+    --sg-bloc-centre: #a88a10;
+    --sg-bloc-droite: #2a90d8;
+    --sg-bloc-extreme-droite: #8a4cc0;
+    --sg-bloc-autres: #454541;
+    --sg-bloc-abstention: #75756e;
+    --sg-trail-opacity: 0.45;
   }
 }
 
@@ -205,4 +222,11 @@
   --sg-tooltip-track: #4a4a46;
   --sg-group-7: #5c5c56;
   --sg-group-8: #8e82b8;
+  --sg-bloc-gauche: #e0556a;
+  --sg-bloc-centre: #a88a10;
+  --sg-bloc-droite: #2a90d8;
+  --sg-bloc-extreme-droite: #8a4cc0;
+  --sg-bloc-autres: #454541;
+  --sg-bloc-abstention: #75756e;
+  --sg-trail-opacity: 0.45;
 }
