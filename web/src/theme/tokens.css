@@ -45,9 +45,9 @@
   --sg-active: rgb(36 82 122 / 0.13);
 
   /* Logo */
-  --sg-logo-bg: #24527a;
+  --sg-logo-bg: #c1121f;
   --sg-logo-ink: #ffffff;
-  --sg-logo-halo: #f0b429;
+  --sg-logo-halo: #ffd23f;
 
   /* Avertissements (réserves, données fictives) */
   --sg-warning-bg: #fbf0d0;
@@ -137,9 +137,9 @@
     --sg-chrome-shadow: 0 8px 28px rgb(0 0 0 / 0.45);
     --sg-hover: rgb(240 239 236 / 0.08);
     --sg-active: rgb(140 184 227 / 0.2);
-    --sg-logo-bg: #2b5f8e;
+    --sg-logo-bg: #c1121f;
     --sg-logo-ink: #ffffff;
-    --sg-logo-halo: #f6c453;
+    --sg-logo-halo: #ffd23f;
     --sg-warning-bg: #3a2e0c;
     --sg-warning-text: #f4e3ac;
     --sg-warning-border: #8a6f16;
@@ -207,9 +207,9 @@
   --sg-chrome-shadow: 0 8px 28px rgb(0 0 0 / 0.45);
   --sg-hover: rgb(240 239 236 / 0.08);
   --sg-active: rgb(140 184 227 / 0.2);
-  --sg-logo-bg: #2b5f8e;
+  --sg-logo-bg: #c1121f;
   --sg-logo-ink: #ffffff;
-  --sg-logo-halo: #f6c453;
+  --sg-logo-halo: #ffd23f;
   --sg-warning-bg: #3a2e0c;
   --sg-warning-text: #f4e3ac;
   --sg-warning-border: #8a6f16;

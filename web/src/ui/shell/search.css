@@ -1,0 +1,134 @@
+/* Recherche « Où suis-je ? », dans la barre du haut */
+.sg-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 230px;
+  margin-right: 4px;
+}
+
+.sg-search__icon {
+  position: absolute;
+  left: 9px;
+  width: 15px;
+  height: 15px;
+  color: var(--sg-text-muted);
+  pointer-events: none;
+}
+
+.sg-search__input {
+  width: 100%;
+  min-height: 32px;
+  padding: 2px 8px 2px 30px;
+  border: 1px solid var(--sg-border);
+  border-radius: 999px;
+  background: var(--sg-surface);
+  color: var(--sg-text);
+  font: inherit;
+  font-size: 0.82rem;
+}
+
+.sg-search__input::placeholder {
+  color: var(--sg-text-muted);
+}
+
+.sg-search__list {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 12;
+  width: 340px;
+  max-width: calc(100vw - 16px);
+  max-height: 60vh;
+  margin: 0;
+  padding: 4px;
+  overflow-y: auto;
+  background: var(--sg-chrome-solid);
+  list-style: none;
+}
+
+.sg-search__item {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 8px;
+  border-radius: var(--sg-radius);
+  cursor: pointer;
+}
+
+.sg-search__item:hover,
+.sg-search__item[aria-selected='true'] {
+  background: var(--sg-hover);
+}
+
+.sg-search__label {
+  font-size: 0.85rem;
+}
+
+.sg-search__detail {
+  color: var(--sg-text-muted);
+  font-size: 0.74rem;
+}
+
+.sg-search__empty {
+  padding: 8px;
+  color: var(--sg-text-muted);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 1500px) {
+  .sg-search {
+    width: 170px;
+  }
+}
+
+@media (max-width: 719px) {
+  /* Sur téléphone, la loupe seule ; le champ s'ouvre par-dessus le titre. */
+  .sg-search {
+    flex: none;
+    width: 30px;
+    margin-right: 0;
+  }
+
+  .sg-search__input {
+    padding: 2px 4px 2px 28px;
+    border-color: transparent;
+    background: transparent;
+    color: transparent;
+    cursor: pointer;
+  }
+
+  .sg-search__input::placeholder {
+    color: transparent;
+  }
+
+  .sg-search:focus-within {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    right: 8px;
+    z-index: 12;
+    width: auto;
+  }
+
+  .sg-search:focus-within .sg-search__input {
+    border-color: var(--sg-border);
+    background: var(--sg-surface);
+    color: var(--sg-text);
+    cursor: text;
+  }
+
+  .sg-search:focus-within .sg-search__input::placeholder {
+    color: var(--sg-text-muted);
+  }
+
+  #sg-export-svg {
+    display: none;
+  }
+
+  .sg-search__list {
+    top: calc(100% + 4px);
+    right: 4px;
+    left: 4px;
+    width: auto;
+  }
+}

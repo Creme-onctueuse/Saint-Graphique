@@ -16,7 +16,8 @@ function walk(dir, prefix = '') {
 
 const errors = [];
 const files = walk(dist);
-const extra = files.filter((f) => f !== 'index.html');
+// La page se suffit à elle-même : seule l'image de partage l'accompagne, et elle ne la charge pas.
+const extra = files.filter((f) => f !== 'index.html' && f !== 'og.png');
 if (!files.includes('index.html')) errors.push('dist/index.html absent');
 if (extra.length > 0) errors.push(`fichiers en trop dans dist/ : ${extra.join(', ')}`);
 
@@ -40,6 +41,15 @@ const checks = [
 ];
 for (const [re, label] of checks) if (re.test(html)) errors.push(label);
 if (!/http-equiv="Content-Security-Policy"/.test(html)) errors.push('CSP absente');
+if (/%SITE_URL%/.test(html)) errors.push('adresse du site non remplacée');
+if (!files.includes('og.png')) errors.push('image de partage absente (public/og.png)');
+
+// Budget de poids : la page reste un fichier unique, à garder léger.
+const MAX_PAGE_KIB = 1024;
+const pageKib = statSync(join(dist, 'index.html')).size / 1024;
+if (pageKib > MAX_PAGE_KIB) {
+  errors.push(`page trop lourde : ${pageKib.toFixed(0)} Kio pour ${MAX_PAGE_KIB} Kio au plus`);
+}
 
 if (errors.length > 0) {
   for (const e of errors) console.error(`[check-dist] ÉCHEC : ${e}`);

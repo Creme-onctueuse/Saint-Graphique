@@ -19,6 +19,16 @@ const CSP = [
   "form-action 'none'",
 ].join('; ');
 
+/** Adresse publique du site, pour les balises de partage. Remplaçable par SG_SITE_URL au build. */
+const SITE_URL = process.env['SG_SITE_URL'] ?? 'https://creme-onctueuse.github.io/Saint-Graphique/';
+
+function siteUrl(): Plugin {
+  return {
+    name: 'saint-graphique:site-url',
+    transformIndexHtml: (html) => html.replaceAll('%SITE_URL%', SITE_URL),
+  };
+}
+
 function contentSecurityPolicy(): Plugin {
   return {
     name: 'saint-graphique:csp',
@@ -36,7 +46,7 @@ function contentSecurityPolicy(): Plugin {
 
 export default defineConfig({
   base: './',
-  plugins: [contentSecurityPolicy(), viteSingleFile({ removeViteModuleLoader: true })],
+  plugins: [siteUrl(), contentSecurityPolicy(), viteSingleFile({ removeViteModuleLoader: true })],
   build: {
     target: 'es2022',
   },

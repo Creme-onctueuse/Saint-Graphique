@@ -1133,6 +1133,95 @@ async function main() {
     await evaluate(`location.hash = 'e=2022_presidentielle_t1'`);
     await settle();
 
+    // --- Recherche « Où suis-je ? » ---------------------------------------------------------------------
+    const searched = await evaluate(`(async () => {
+      const input = document.getElementById('sg-search-input');
+      input.focus();
+      input.value = 'infirmière';
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      await new Promise((r) => setTimeout(r, 50));
+      const first = document.querySelector('#sg-search-list [role="option"]');
+      const detail = first?.textContent ?? '';
+      const key = first?.dataset.key;
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      await new Promise((r) => setTimeout(r, 700));
+      return { key, detail, hash: location.hash, inspector: !document.getElementById('sg-inspector').hidden, closed: document.getElementById('sg-search-list').hidden };
+    })()`);
+    check(
+      'recherche : un métier mène à sa catégorie',
+      searched.key === 'p:43',
+      JSON.stringify(searched),
+    );
+    check(
+      'recherche : le choix ouvre le détail',
+      searched.inspector && searched.closed && searched.hash.includes('p%3A43'),
+      JSON.stringify(searched),
+    );
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1'`);
+    await settle();
+    await evaluate(
+      `document.body.dispatchEvent(new KeyboardEvent('keydown', { key: '/', bubbles: true }))`,
+    );
+    const slash = await evaluate(`document.activeElement?.id`);
+    check('recherche : raccourci « / »', slash === 'sg-search-input', String(slash));
+    await evaluate(`document.activeElement.blur()`);
+
+    // --- Visite guidée ------------------------------------------------------------------------------------
+    const tour = await evaluate(`(async () => {
+      const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+      const before = location.hash;
+      document.getElementById('sg-tour-open').click();
+      await wait(900);
+      const seen = [];
+      const next = document.getElementById('sg-tour-next');
+      for (let i = 0; i < 5; i++) {
+        seen.push({
+          step: document.getElementById('sg-tour-step').textContent,
+          title: document.getElementById('sg-tour-title').textContent,
+          hash: location.hash,
+          selected: document.querySelectorAll('.sg-point--selected').length,
+          panel: !document.getElementById('sg-panel').hidden,
+        });
+        if (i < 4) {
+          next.click();
+          await wait(900);
+        }
+      }
+      const lastLabel = next.textContent;
+      next.click();
+      await wait(1000);
+      return { seen, lastLabel, closed: document.getElementById('sg-tour').hidden, before, after: location.hash, panelAfter: !document.getElementById('sg-panel').hidden };
+    })()`);
+    check(
+      'visite : cinq étapes',
+      new Set(tour.seen.map((s) => s.title)).size === 5,
+      JSON.stringify(tour.seen),
+    );
+    check(
+      'visite : une catégorie, puis un électorat, sont sélectionnés',
+      tour.seen[2]?.selected === 1 && tour.seen[3]?.selected === 1,
+      JSON.stringify(tour.seen),
+    );
+    check(
+      'visite : le dernier écran ouvre le panneau',
+      tour.seen[4]?.panel === true,
+      JSON.stringify(tour.seen),
+    );
+    check(
+      'visite : se termine et rend la vue d’avant',
+      tour.lastLabel === 'Terminer' &&
+        tour.closed &&
+        !tour.panelAfter &&
+        tour.after === tour.before,
+      JSON.stringify({
+        last: tour.lastLabel,
+        closed: tour.closed,
+        before: tour.before,
+        after: tour.after,
+      }),
+    );
+    await settle();
+
     // --- « Le saviez-vous ? » -------------------------------------------------------------------------
     const fact = await evaluate(`(() => {
       const host = document.getElementById('sg-fact');

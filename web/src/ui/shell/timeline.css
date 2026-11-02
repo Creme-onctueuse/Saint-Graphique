@@ -365,7 +365,7 @@
 }
 
 /* Fenêtres moyennes : la frise passe sur sa propre ligne, plus tôt que le reste de l'en-tête. */
-@media (max-width: 1240px) {
+@media (max-width: 1560px) {
   .sg-top {
     grid-template-columns: minmax(0, 1fr) auto;
   }

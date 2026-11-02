@@ -63,6 +63,8 @@ const ICONS = {
   ],
   'eye-off': ['M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z', 'M4 4l16 16'],
   target: [{ cx: 12, cy: 12, r: 8.5 }, 'M12 2v4M12 18v4M2 12h4M18 12h4'],
+  search: [{ cx: 11, cy: 11, r: 6.5 }, 'M16 16l4.5 4.5'],
+  compass: [{ cx: 12, cy: 12, r: 8.5 }, 'M15.5 8.5l-2 5-5 2 2-5z'],
 } satisfies Record<string, readonly Shape[]>;
 
 export type IconName = keyof typeof ICONS;

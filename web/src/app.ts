@@ -32,7 +32,9 @@ import { Game } from './ui/shell/game.ts';
 import { Keybar } from './ui/shell/keybar.ts';
 import { ProjectionCard } from './ui/shell/projectionCard.ts';
 import { RingsKey } from './ui/shell/ringsKey.ts';
+import { Search } from './ui/shell/search.ts';
 import { Shell } from './ui/shell/shell.ts';
+import { Tour } from './ui/shell/tour.ts';
 import { Timeline } from './ui/shell/timeline.ts';
 import { sourceText } from './ui/sources.ts';
 import { renderTables } from './ui/table.ts';
@@ -176,6 +178,8 @@ export function startApp(): void {
   initAbout(ds);
 
   const features: Feature[] = [
+    new Search(byId('sg-search'), actions, chart),
+    new Tour(actions, chart),
     new Timeline(byId('sg-timeline'), ds, actions, chart),
     new TrailsLayer(chart, ds),
     new RingsLayer(chart, ds),
