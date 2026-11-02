@@ -5,7 +5,11 @@
  * Clés : e = élection, m = méthode, h = candidat masqué (répétable), g = groupe PCS masqué
  * (répétable), w = poids des diplômes (7 nombres séparés par « _ », ordre DIPLOMA_KEYS),
  * r = score Y imposé aux retraités (nombre ou « off »), t = thème (light|dark),
- * lbl=0 = libellés masqués, ci=0 = ellipses masquées.
+ * lbl=0 = libellés masqués, ci=0 = ellipses masquées, terr=0 = territoires masqués,
+ * s = repère sélectionné (p:… ou c:…), c2 = repère comparé, p = panneau ouvert, sq=1 = proportions
+ * d'origine, tr=0 = trajectoires masquées, rg=1 = anneaux de vote, ty = type d'élection du filtre,
+ * sc=trend = scénario de la projection, ax, ay, ac = variables libres des axes et de la couleur,
+ * vue=prox = carte de proximité.
  */
 import { DIPLOMA_KEYS, type DiplomaWeights } from './types.ts';
 
@@ -13,6 +17,15 @@ export type ThemeChoice = 'system' | 'light' | 'dark';
 
 /** Score Y imposé aux retraités : valeur de la méthode, désactivé, ou valeur choisie. */
 export type RetiredSetting = 'default' | 'off' | number;
+
+export const PANELS = ['electorates', 'categories', 'cross', 'game', 'method', 'data'] as const;
+export type PanelId = (typeof PANELS)[number];
+
+export const TYPE_FILTERS = ['all', 'presidentielle', 'legislatives', 'europeennes'] as const;
+export type TypeFilter = (typeof TYPE_FILTERS)[number];
+
+export type Scenario = 'still' | 'trend';
+export type MapLayout = 'map' | 'proximity';
 
 export interface AppState {
   /** null = élection par défaut. */
@@ -27,6 +40,23 @@ export interface AppState {
   theme: ThemeChoice;
   showLabels: boolean;
   showEllipses: boolean;
+  showTerritories: boolean;
+  /** Repère sélectionné : `p:<code>` ou `c:<id>`. */
+  selected: string | null;
+  /** Second repère, pour un duel. */
+  compared: string | null;
+  panel: PanelId | null;
+  /** Proportions d'origine : zone de tracé carrée. */
+  square: boolean;
+  showTrails: boolean;
+  showRings: boolean;
+  typeFilter: TypeFilter;
+  scenario: Scenario;
+  /** Variables libres : null = axes du Saint-Graphique. */
+  axisX: string | null;
+  axisY: string | null;
+  colorBy: string | null;
+  layout: MapLayout;
 }
 
 export function defaultState(): AppState {
@@ -40,6 +70,19 @@ export function defaultState(): AppState {
     theme: 'system',
     showLabels: true,
     showEllipses: true,
+    showTerritories: true,
+    selected: null,
+    compared: null,
+    panel: null,
+    square: false,
+    showTrails: true,
+    showRings: false,
+    typeFilter: 'all',
+    scenario: 'still',
+    axisX: null,
+    axisY: null,
+    colorBy: null,
+    layout: 'map',
   };
 }
 
@@ -77,6 +120,19 @@ export function normalizeState(s: AppState): AppState {
     theme: s.theme,
     showLabels: s.showLabels,
     showEllipses: s.showEllipses,
+    showTerritories: s.showTerritories,
+    selected: s.selected || null,
+    compared: s.selected ? s.compared || null : null,
+    panel: s.panel,
+    square: s.square,
+    showTrails: s.showTrails,
+    showRings: s.showRings,
+    typeFilter: s.typeFilter,
+    scenario: s.scenario,
+    axisX: s.axisX || null,
+    axisY: s.axisY || null,
+    colorBy: s.colorBy || null,
+    layout: s.layout,
   };
 }
 
@@ -97,6 +153,19 @@ export function serializeState(state: AppState): string {
   if (s.theme !== 'system') add('t', s.theme);
   if (!s.showLabels) add('lbl', '0');
   if (!s.showEllipses) add('ci', '0');
+  if (!s.showTerritories) add('terr', '0');
+  if (s.selected) add('s', s.selected);
+  if (s.compared) add('c2', s.compared);
+  if (s.panel) add('p', s.panel);
+  if (s.square) add('sq', '1');
+  if (!s.showTrails) add('tr', '0');
+  if (s.showRings) add('rg', '1');
+  if (s.typeFilter !== 'all') add('ty', s.typeFilter);
+  if (s.scenario !== 'still') add('sc', s.scenario);
+  if (s.axisX) add('ax', s.axisX);
+  if (s.axisY) add('ay', s.axisY);
+  if (s.colorBy) add('ac', s.colorBy);
+  if (s.layout === 'proximity') add('vue', 'prox');
   return parts.join('&');
 }
 
@@ -119,6 +188,10 @@ function parseWeightList(text: string): DiplomaWeights | null {
   return out;
 }
 
+function oneOf<T extends string>(value: string | null, allowed: readonly T[]): T | null {
+  return allowed.find((a) => a === value) ?? null;
+}
+
 /** Lit l'état depuis un fragment (« #… ») ou une chaîne de requête (« ?… »). Tolérant. */
 export function parseState(input: string): AppState {
   const params = new URLSearchParams(input.replace(/^[#?]/, ''));
@@ -136,5 +209,18 @@ export function parseState(input: string): AppState {
   if (t === 'light' || t === 'dark') s.theme = t;
   s.showLabels = params.get('lbl') !== '0';
   s.showEllipses = params.get('ci') !== '0';
+  s.showTerritories = params.get('terr') !== '0';
+  s.selected = params.get('s') || null;
+  s.compared = params.get('c2') || null;
+  s.panel = oneOf(params.get('p'), PANELS);
+  s.square = params.get('sq') === '1';
+  s.showTrails = params.get('tr') !== '0';
+  s.showRings = params.get('rg') === '1';
+  s.typeFilter = oneOf(params.get('ty'), TYPE_FILTERS) ?? 'all';
+  s.scenario = params.get('sc') === 'trend' ? 'trend' : 'still';
+  s.axisX = params.get('ax') || null;
+  s.axisY = params.get('ay') || null;
+  s.colorBy = params.get('ac') || null;
+  s.layout = params.get('vue') === 'prox' ? 'proximity' : 'map';
   return normalizeState(s);
 }

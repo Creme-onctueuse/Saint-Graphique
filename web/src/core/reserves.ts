@@ -90,6 +90,12 @@ export const X_DEFINITION_RESERVE =
   'PCS, une donnée introuvable à ce niveau dans les sources consultées : les positions peuvent ' +
   'différer de son graphique.';
 
+/** Résumés d'une ligne, toujours visibles ; le texte complet s'ouvre d'un clic. */
+export const COMPUTED_RESERVE_SUMMARY =
+  'Méthode calculée : axe Exploitation reconstruit, peut différer du graphique de Chris';
+export const READ_POSITIONS_RESERVE_SUMMARY =
+  'Positions lues sur les vidéos de Chris, formule non publiée, 2 à 3 unités de la matrice v11';
+
 /** Méthode dont les PCS sont lues sur le graphique de Chris au lieu d'être calculées. */
 export const READ_POSITIONS_METHOD = 'read_positions';
 

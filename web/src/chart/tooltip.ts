@@ -28,6 +28,7 @@ export class Tooltip {
   readonly el: HTMLDivElement;
   private readonly host: HTMLElement;
   private owner: Element | null = null;
+  private bounds = { top: 4, right: 4, bottom: 4, left: 4 };
 
   constructor(host: HTMLElement) {
     this.host = host;
@@ -37,6 +38,16 @@ export class Tooltip {
     this.el.setAttribute('role', 'tooltip');
     this.el.hidden = true;
     host.append(this.el);
+  }
+
+  /** Marges à ne pas recouvrir (interface flottante). */
+  setBounds(insets: { top: number; right: number; bottom: number; left: number }): void {
+    this.bounds = {
+      top: insets.top + 4,
+      right: insets.right + 4,
+      bottom: insets.bottom + 4,
+      left: insets.left + 4,
+    };
   }
 
   /** Affiche le contenu à côté du repère `anchor`. */
@@ -130,15 +141,20 @@ export class Tooltip {
     const hostH = this.host.clientHeight;
     const w = this.el.offsetWidth;
     const h = this.el.offsetHeight;
+    const b = this.bounds;
+    const centered = Math.max(
+      b.left,
+      Math.min(hostW - w - b.right, (a.left + a.right) / 2 - w / 2),
+    );
     let left = a.right + gap;
-    if (left + w > hostW - 4) left = a.left - gap - w;
-    if (left < 4) left = Math.max(4, Math.min(hostW - w - 4, (a.left + a.right) / 2 - w / 2));
+    if (left + w > hostW - b.right) left = a.left - gap - w;
     let top = (a.top + a.bottom) / 2 - h / 2;
-    if (left === Math.max(4, Math.min(hostW - w - 4, (a.left + a.right) / 2 - w / 2))) {
+    if (left < b.left) {
       // Pas de place sur les côtés : au-dessus ou au-dessous du repère.
-      top = a.top - gap - h >= 4 ? a.top - gap - h : a.bottom + gap;
+      left = centered;
+      top = a.top - gap - h >= b.top ? a.top - gap - h : a.bottom + gap;
     }
-    top = Math.max(4, Math.min(top, Math.max(4, hostH - h - 4)));
+    top = Math.max(b.top, Math.min(top, Math.max(b.top, hostH - h - b.bottom)));
     this.el.style.left = `${Math.round(left)}px`;
     this.el.style.top = `${Math.round(top)}px`;
   }

@@ -3,6 +3,8 @@
  * ou Chrome en mode headless par le protocole DevTools, sans dépendance, et vérifie que l'application
  * fonctionne : aucune erreur console, aucune requête réseau, interactions, exports, 400 px de large.
  *
+ * La page est une carte plein écran : le test vérifie aussi qu'elle remplit la fenêtre, sans défilement.
+ *
  * Usage : pnpm smoke [--url http://localhost:5173/ --dev] [--out DOSSIER]   (captures dans DOSSIER)
  * Navigateur : variable CHROME_PATH, sinon emplacements habituels.
  */
@@ -24,11 +26,11 @@ const target = option('--url') ?? pathToFileURL(join(web, 'dist', 'index.html'))
 const port = 9300 + Math.floor(Math.random() * 500);
 
 /**
- * Limites de lisibilité par élection. Avec 41 disques, le centre du graphique est trop dense pour
- * les annuler : un nom long peut mordre un disque voisin et une ligne de rappel en traverser.
+ * Limites de lisibilité par élection, à 1912 px. La carte étirée dégage le centre : aucun nom ne
+ * mord plus un disque, et une ou deux lignes de rappel seulement en traversent un.
  */
-const LABEL_DISC_TOLERANCE = 12;
-const LEADERS_THROUGH_DISCS_TOLERANCE = 5;
+const LABEL_DISC_TOLERANCE = 4;
+const LEADERS_THROUGH_DISCS_TOLERANCE = 3;
 
 const BROWSERS = [
   process.env.CHROME_PATH,
@@ -198,6 +200,27 @@ async function main() {
   };
   /** Laisse finir les transitions et l'écriture différée de l'URL. */
   const settle = () => sleep(800);
+  const chooseElection = async (id) => {
+    await evaluate(`document.querySelector('#sg-timeline input[value="${id}"]').click()`);
+    await settle();
+  };
+  /** Ouvre un panneau du rail, ou le referme. */
+  const openPanel = async (id) => {
+    await evaluate(`document.querySelector('#sg-rail button[data-panel="${id}"]').click()`);
+    await sleep(120);
+  };
+  /** La carte remplit la fenêtre, et la page ne défile dans aucun sens. */
+  const fillsWindow = () =>
+    evaluate(`(() => {
+      const r = document.querySelector('.sg-svg').getBoundingClientRect();
+      const root = document.documentElement;
+      return {
+        width: r.width,
+        height: r.height,
+        fills: r.width >= innerWidth - 1 && r.height >= innerHeight - 1,
+        scrolls: root.scrollWidth > innerWidth || root.scrollHeight > innerHeight,
+      };
+    })()`);
   const chooseMethod = async (id) => {
     await evaluate(`(() => {
       const m = document.getElementById('sg-method');
@@ -207,7 +230,7 @@ async function main() {
     await settle();
   };
 
-  await setViewport(1280, 1400);
+  await setViewport(1280, 800);
   await navigate(target);
 
   // --- Rendu initial ---------------------------------------------------------------------------
@@ -219,59 +242,109 @@ async function main() {
     labels: [...document.querySelectorAll('.sg-label')].filter((l) => l.getAttribute('opacity') !== '0').length,
     diagonal: !!document.querySelector('.sg-diagonal'),
     quadrants: document.querySelectorAll('.sg-quadrant').length,
-    elections: document.querySelectorAll('#sg-election option').length,
+    elections: document.querySelectorAll('#sg-timeline input[type="radio"]').length,
     methods: document.querySelectorAll('#sg-method option').length,
     legend: document.querySelectorAll('.sg-chip').length,
     rows: document.querySelectorAll('.sg-table tbody tr').length,
     banner: !document.getElementById('sg-banner').hidden,
     overlay: !!document.querySelector('.sg-devoverlay'),
-    scroll: document.documentElement.scrollWidth <= window.innerWidth,
   })`);
   check('disques PCS', initial.pcs === 41 || initial.pcs === 30, String(initial.pcs));
   check('losanges des électorats', initial.cands > 0, String(initial.cands));
   check('barycentre de la population', initial.bary === 1);
   check('diagonale et quadrants', initial.diagonal && initial.quadrants === 4);
   check('libellés visibles', initial.labels >= 15, String(initial.labels));
-  check('sélecteurs remplis', initial.elections > 0 && initial.methods > 0);
+  check('frise et méthodes remplies', initial.elections > 0 && initial.methods > 0);
   check('légende', initial.legend >= initial.cands + 2);
   check('tableaux de données', initial.rows === initial.pcs + initial.cands);
-  check('pas de débordement à 1280 px', initial.scroll);
   check(
     devMode ? 'mode calque présent en dev' : 'mode calque absent du build',
     initial.overlay === devMode,
   );
   await shot('01-clair');
 
-  // --- Réserves et sources visibles sans ouvrir de panneau ----------------------------------------
+  // --- La carte remplit l'écran ---------------------------------------------------------------------
+  for (const [width, height] of [
+    [1912, 948],
+    [1280, 800],
+    [400, 800],
+  ]) {
+    await setViewport(width, height);
+    await settle();
+    const filled = await fillsWindow();
+    check(`carte plein écran à ${width}×${height}`, filled.fills, JSON.stringify(filled));
+    check(`aucun défilement à ${width}×${height}`, !filled.scrolls, JSON.stringify(filled));
+  }
+  await setViewport(1280, 800);
+  await settle();
+
+  // --- Réserve et sources en bas de page : une ligne visible, le détail à l'ouverture -----------------
   const reserved = await evaluate(`(() => {
-    const box = document.getElementById('sg-reserves');
+    const visible = (id) => {
+      const r = document.getElementById(id).getBoundingClientRect();
+      return r.width > 0 && r.height > 0 && r.bottom <= innerHeight;
+    };
+    const end = document.getElementById('sg-end').getBoundingClientRect();
+    const caveat = document.getElementById('sg-caveat-text');
+    const line = document.getElementById('sg-sources-text');
+    const closed = document.getElementById('sg-drawer').hidden;
+    document.getElementById('sg-caveat-toggle').click();
+    const reserve = document.getElementById('sg-reserves');
+    const reserveOpen = !reserve.hidden && reserve.getBoundingClientRect().height > 0;
+    document.getElementById('sg-sources-toggle').click();
     const sources = document.getElementById('sg-sources');
-    const chart = document.getElementById('sg-chart-host').getBoundingClientRect();
-    const r = box.getBoundingClientRect();
-    const s = sources.getBoundingClientRect();
+    const sourcesOpen = !sources.hidden && sources.getBoundingClientRect().height > 0;
+    const links = [...sources.querySelectorAll('a')].map((a) => a.href);
+    const detail = sources.textContent;
+    document.getElementById('sg-sources-toggle').click();
     return {
-      reserveText: box.textContent,
-      reserveVisible: !box.hidden && r.height > 0,
-      aboveChart: r.bottom <= chart.top + 1,
-      sourcesBelow: s.top >= chart.bottom - 1,
-      links: [...sources.querySelectorAll('a')].map((a) => a.href),
-      sourcesText: sources.textContent,
+      summary: caveat.textContent,
+      summaryVisible: visible('sg-caveat-text'),
+      line: line.textContent,
+      lineVisible: visible('sg-sources-toggle'),
+      atEnd: end.bottom >= innerHeight - 12,
+      oneLine: end.height <= 44,
+      closed,
+      reserveOpen,
+      sourcesOpen,
+      links,
+      detail,
+      reserveText: reserve.textContent,
       fictional: !document.getElementById('sg-banner').hidden,
       mca: [...document.querySelectorAll('#sg-method option')].find((o) => o.value === 'mca')?.textContent ?? null,
     };
   })()`);
+  check('réserve résumée toujours visible', reserved.summaryVisible && reserved.summary.length > 0);
   check(
-    'réserve sur l’axe X au contact du graphique',
-    !reserved.reserveVisible || (reserved.aboveChart && /axe/.test(reserved.reserveText)),
-    reserved.reserveText,
+    'réserve complète à l’ouverture',
+    reserved.reserveOpen && reserved.reserveText.length > reserved.summary.length,
   );
   check(
-    'sources sous le graphique, avec liens',
+    'sources sur une ligne, en fin de page',
+    reserved.lineVisible && reserved.atEnd && reserved.oneLine,
+    reserved.line,
+  );
+  check(
+    'détail des sources avec liens',
     // La fixture fictive n'a pas d'URL : ses sources s'affichent en texte, sans lien.
-    reserved.sourcesBelow &&
-      reserved.sourcesText.length > 0 &&
+    reserved.sourcesOpen &&
+      reserved.detail.length > 0 &&
       (reserved.fictional || reserved.links.length >= 2),
-    reserved.sourcesText,
+    reserved.detail,
+  );
+  check('le détail est fermé par défaut', reserved.closed);
+
+  // --- JnthnBS : dans les crédits, nulle part ailleurs ------------------------------------------------
+  const creditLeaks = await evaluate(`(() => {
+    const about = document.getElementById('sg-about');
+    const rest = [...document.body.children].filter((n) => n !== about && n.tagName !== 'SCRIPT');
+    const text = rest.map((n) => n.textContent).join(' ');
+    return { body: /jnthnbs/i.test(text), url: /jnthnbs/i.test(location.href) };
+  })()`);
+  check(
+    'JnthnBS absent hors des crédits',
+    !creditLeaks.body && !creditLeaks.url,
+    JSON.stringify(creditLeaks),
   );
   if (reserved.mca !== null)
     check('ACM marquée exploratoire', reserved.mca.includes('exploratoire'), reserved.mca);
@@ -318,15 +391,13 @@ async function main() {
     const s = document.getElementById('sg-method');
     s.value = [...s.options].at(-1).value;
     s.dispatchEvent(new Event('change', { bubbles: true }));
-    const e = document.getElementById('sg-election');
-    e.value = [...e.options].at(-1).value;
-    e.dispatchEvent(new Event('change', { bubbles: true }));
+    [...document.querySelectorAll('#sg-timeline input[type="radio"]')].at(-1).click();
   })()`);
   await settle();
   const moved = await evaluate(`({
     hash: location.hash,
     method: document.getElementById('sg-method').value,
-    election: document.getElementById('sg-election').value,
+    election: document.querySelector('#sg-timeline input:checked')?.value,
     heading: document.getElementById('sg-chart-heading').textContent,
     live: document.getElementById('sg-live').textContent,
   })`);
@@ -342,7 +413,7 @@ async function main() {
   await cdp.send('Page.reload');
   await sleep(devMode ? 1000 : 400);
   const reloaded = await evaluate(
-    `document.getElementById('sg-method').value + '|' + document.getElementById('sg-election').value`,
+    `document.getElementById('sg-method').value + '|' + (document.querySelector('#sg-timeline input:checked')?.value ?? '')`,
   );
   check('vue restaurée depuis l’URL', reloaded === `${moved.method}|${moved.election}`, reloaded);
   await evaluate(`location.hash = ''`);
@@ -464,7 +535,7 @@ async function main() {
       firstTied,
       longest,
       overflowing,
-      reserveShown: !document.getElementById('sg-reserves').hidden,
+      reserveShown: document.getElementById('sg-caveat-text').textContent.length > 0,
       reserveTies: reserve.includes('Ex æquo'),
       reserveImputed: /[1-9][0-9]* valeurs? imputées?/.test(reserve),
       reserveDefinition: reserve.includes('composition du patrimoine'),
@@ -476,7 +547,8 @@ async function main() {
       `${notes.unknown} de statut inconnu, ${notes.tied} ex æquo ; ` +
       `réserve ${notes.reserveShown ? 'affichée' : 'absente'}`,
   );
-  // La définition de l'axe X reste affichée ; les autres réserves suivent ce que disent les infobulles.
+  // La réserve résumée reste affichée et la définition de l'axe X figure dans son détail ; les autres
+  // réserves suivent ce que disent les infobulles.
   check(
     'définition de l’axe X toujours affichée',
     notes.reserveShown && notes.reserveDefinition,
@@ -525,7 +597,7 @@ async function main() {
 
   // --- Légende, filtres, zoom ----------------------------------------------------------------------
   const filtered = await evaluate(`(async () => {
-    const chip = document.querySelector('#sg-legend button[data-id="g:6"]');
+    const chip = document.querySelector('#sg-legend-groups button[data-id="g:6"]');
     const n0 = document.querySelectorAll('.sg-pcs').length;
     chip.click();
     await new Promise((r) => setTimeout(r, 400));
@@ -556,6 +628,67 @@ async function main() {
     filtered.reset,
   );
 
+  // --- Navigation : molette sans Ctrl, cadrage sur les électorats, mini-carte --------------------------
+  const wheelBefore = await evaluate(
+    `[...document.querySelectorAll('.sg-tick-x')].map((t) => t.textContent).join(' ')`,
+  );
+  await cdp.send('Input.dispatchMouseEvent', {
+    type: 'mouseWheel',
+    x: 800,
+    y: 400,
+    deltaX: 0,
+    deltaY: -400,
+  });
+  await sleep(300);
+  const wheelAfter = await evaluate(
+    `[...document.querySelectorAll('.sg-tick-x')].map((t) => t.textContent).join(' ')`,
+  );
+  check(
+    'zoom à la molette, sans Ctrl',
+    wheelBefore !== wheelAfter,
+    `${wheelBefore} | ${wheelAfter}`,
+  );
+  await evaluate(`document.getElementById('sg-zoom-reset').click()`);
+  await settle();
+  const framed = await evaluate(`(async () => {
+    document.getElementById('sg-zoom-electorates').click();
+    await new Promise((r) => setTimeout(r, 900));
+    const box = document.querySelector('.sg-svg').getBoundingClientRect();
+    const inside = [...document.querySelectorAll('.sg-cand')].every((c) => {
+      const r = c.getBoundingClientRect();
+      return r.left >= box.left && r.right <= box.right && r.top >= box.top && r.bottom <= box.bottom;
+    });
+    const mini = document.querySelector('.sg-minimap');
+    return { inside, mini: !!mini && getComputedStyle(mini).display !== 'none' };
+  })()`);
+  check('cadrage : tous les électorats restent visibles', framed.inside);
+  check('mini-carte affichée une fois zoomé', framed.mini);
+  await shot('03c-electorats-cadres', false);
+  await evaluate(`document.getElementById('sg-zoom-reset').click()`);
+  await settle();
+  const miniHidden = await evaluate(
+    `getComputedStyle(document.querySelector('.sg-minimap')).display === 'none'`,
+  );
+  check('mini-carte masquée sans zoom', miniHidden);
+
+  // --- Sélection : un clic, l'URL, Échap ----------------------------------------------------------------
+  const selected = await evaluate(`(async () => {
+    const point = document.querySelector('.sg-cand');
+    const key = point.getAttribute('data-key');
+    const r = point.getBoundingClientRect();
+    const click = (extra = {}) => point.dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2, ...extra }));
+    click();
+    await new Promise((res) => setTimeout(res, 300));
+    const marked = document.querySelectorAll('.sg-point--selected').length;
+    const hash = location.hash;
+    click();
+    await new Promise((res) => setTimeout(res, 300));
+    return { key, marked, hash, after: document.querySelectorAll('.sg-point--selected').length };
+  })()`);
+  check('clic : repère sélectionné', selected.marked === 1, JSON.stringify(selected));
+  check('sélection dans l’URL', selected.hash.includes('s=c'), selected.hash);
+  check('second clic : sélection retirée', selected.after === 0, JSON.stringify(selected));
+
   // --- À propos : crédits exigés -------------------------------------------------------------------
   const about = await evaluate(`(() => {
     document.getElementById('sg-about-open').click();
@@ -563,9 +696,8 @@ async function main() {
     const open = d.open;
     const text = d.textContent;
     const links = [...d.querySelectorAll('a')].map((a) => a.href);
-    const sources = document.querySelectorAll('#sg-about-sources li').length;
     const methods = document.querySelectorAll('#sg-about-methods li').length;
-    return { open, text, links, sources, methods };
+    return { open, text, links, methods };
   })()`);
   check('À propos s’ouvre', about.open);
   check(
@@ -589,7 +721,7 @@ async function main() {
       about.links.some((l) => l.replace(/\/$/, '') === url),
     );
   }
-  check('sources et méthodes listées', about.sources > 0 && about.methods > 0);
+  check('méthodes listées', about.methods > 0);
   await shot('04-a-propos');
   await evaluate(`document.getElementById('sg-about-close').click()`);
 
@@ -666,28 +798,41 @@ async function main() {
   await sleep(100);
 
   // --- Largeur de 400 px --------------------------------------------------------------------------
-  await setViewport(400, 900);
+  await setViewport(400, 800);
   await settle();
-  const narrow = await evaluate(`({
-    overflow: document.documentElement.scrollWidth - window.innerWidth,
-    svg: document.querySelector('.sg-svg').getBoundingClientRect().width,
-    pcs: document.querySelectorAll('.sg-pcs').length,
-  })`);
-  check('pas de débordement à 400 px', narrow.overflow <= 0, `${narrow.overflow} px`);
-  check('graphique adapté à 400 px', narrow.svg <= 400 && narrow.svg > 250, String(narrow.svg));
-  await evaluate(`document.querySelectorAll('details').forEach((d) => { d.open = true; })`);
-  await sleep(200);
-  const narrowOpen = await evaluate(`document.documentElement.scrollWidth - window.innerWidth`);
-  check('pas de débordement à 400 px, panneaux ouverts', narrowOpen <= 0, `${narrowOpen} px`);
-  await shot('06b-400px-panneaux');
-  await evaluate(`document.querySelectorAll('details').forEach((d) => { d.open = false; })`);
-  await sleep(100);
-  await shot('06-400px');
-  await setViewport(1280, 1400);
+  const panelIds = await evaluate(
+    `[...document.querySelectorAll('#sg-rail button[data-panel]')].filter((b) => !b.hidden).map((b) => b.dataset.panel)`,
+  );
+  for (const id of panelIds) {
+    await openPanel(id);
+    const open = await evaluate(`(() => {
+      const panel = document.getElementById('sg-panel').getBoundingClientRect();
+      const root = document.documentElement;
+      return { shown: panel.height > 0 && panel.right <= innerWidth + 1 && panel.bottom <= innerHeight + 1, scrolls: root.scrollWidth > innerWidth || root.scrollHeight > innerHeight };
+    })()`);
+    check(`panneau ${id} à 400 px`, open.shown && !open.scrolls, JSON.stringify(open));
+    await shot(`06b-400px-${id}`, false);
+    await openPanel(id);
+  }
+  await shot('06-400px', false);
+  await setViewport(1280, 800);
   await settle();
-  await evaluate(`document.querySelectorAll('details').forEach((d) => { d.open = true; })`);
-  await sleep(100);
-  await shot('07-panneaux');
+  for (const id of panelIds) {
+    await openPanel(id);
+    const shifted = await evaluate(`(() => {
+      const panel = document.getElementById('sg-panel').getBoundingClientRect();
+      const ticks = [...document.querySelectorAll('.sg-tick-y')].map((t) => t.getBoundingClientRect().left);
+      return { panelRight: panel.right, firstTick: Math.min(...ticks) };
+    })()`);
+    check(
+      `panneau ${id} : la carte glisse à côté`,
+      shifted.firstTick >= shifted.panelRight - 1,
+      JSON.stringify(shifted),
+    );
+    await shot(`07-panneau-${id}`, false);
+    await openPanel(id);
+  }
+  await settle();
 
   // --- Lisibilité : chevauchement réel des libellés rendus, à 1400 et 400 px --------------------
   const labelAudit = `(() => {
@@ -736,22 +881,20 @@ async function main() {
     };
   })()`;
   await evaluate(`(() => {
-    document.querySelectorAll('details').forEach((d) => { d.open = false; });
-    const e = document.getElementById('sg-election');
-    const wanted = [...e.options].find((o) => o.value === '2022_presidentielle_t1') ?? e.options[e.options.length - 1];
-    e.value = wanted.value;
-    e.dispatchEvent(new Event('change', { bubbles: true }));
+    const radios = [...document.querySelectorAll('#sg-timeline input[type="radio"]')];
+    (radios.find((o) => o.value === '2022_presidentielle_t1') ?? radios.at(-1)).click();
     const m = document.getElementById('sg-method');
     m.value = m.options[0].value;
     m.dispatchEvent(new Event('change', { bubbles: true }));
   })()`);
   for (const [width, height, name] of [
-    [1400, 1500, '08-1400px'],
-    [400, 1300, '09-400px'],
+    [1912, 948, '08-1912px'],
+    [1280, 800, '08b-1280px'],
+    [400, 800, '09-400px'],
   ]) {
     await setViewport(width, height);
     await settle();
-    await shotOf(`${name}-graphique`, '.sg-svg', width >= 1000 ? 2 : 3);
+    await shotOf(`${name}-carte`, '.sg-svg', width >= 1000 ? 1 : 2);
     const audit = await evaluate(labelAudit);
     check(
       `aucun libellé superposé à ${width} px`,
@@ -772,17 +915,12 @@ async function main() {
   }
 
   // Lisibilité sur chaque élection, pas seulement celle de la capture.
-  await setViewport(1400, 1500);
+  await setViewport(1912, 948);
   const electionIds = await evaluate(
-    `[...document.getElementById('sg-election').options].map((o) => o.value)`,
+    `[...document.querySelectorAll('#sg-timeline input[type="radio"]')].map((o) => o.value)`,
   );
   for (const id of electionIds) {
-    await evaluate(`(() => {
-      const e = document.getElementById('sg-election');
-      e.value = ${JSON.stringify(id)};
-      e.dispatchEvent(new Event('change', { bubbles: true }));
-    })()`);
-    await settle();
+    await chooseElection(id);
     const audit = await evaluate(labelAudit);
     check(
       `${id} : aucun libellé superposé`,
@@ -810,7 +948,7 @@ async function main() {
       );
     }
   }
-  await setViewport(1280, 1400);
+  await setViewport(1280, 800);
   await settle();
 
   // --- Bilan ------------------------------------------------------------------------------------

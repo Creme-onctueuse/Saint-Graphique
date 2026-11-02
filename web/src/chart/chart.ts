@@ -1,15 +1,17 @@
 /**
- * Rendu SVG du Saint-Graphique avec D3 : quadrants, grille, axes, diagonale, disques PCS,
- * barycentre de la population, ellipses de confiance, losanges des électorats et libellés.
+ * Carte plein écran du Saint-Graphique, en SVG avec D3 : décor (frame.ts), territoires, ellipses de
+ * confiance, disques PCS, barycentre de la population, losanges des électorats et libellés.
  *
- * - Transitions animées entre deux états (élection, méthode, poids), désactivées si
- *   l'utilisateur préfère réduire les animations.
- * - Zoom et déplacement « sémantiques » : les positions sont recalculées, la taille des repères
- *   est conservée (Ctrl + molette, pincement, double-clic, ou boutons de l'interface).
- * - Infobulle accessible au survol, au toucher et au focus ; navigation au clavier entre les
- *   repères avec les flèches (tabindex itinérant).
+ * - Les échelles X et Y sont indépendantes : la carte remplit l'écran (geometry.ts).
+ * - Navigation de carte : molette, glisser, pincement, double-clic, boutons et cadrage.
+ * - Zoom « sémantique » : les positions sont recalculées, la taille des repères est conservée.
+ * - Transitions animées, désactivées si l'utilisateur préfère réduire les animations.
+ * - Infobulle au survol, au toucher et au focus ; flèches du clavier entre les repères (tabindex
+ *   itinérant) ; un clic ou Entrée sélectionne un repère (onSelect).
+ *
+ * Les fonctions de l'application dessinent leurs propres calques dans `layerUnder` et `layerOver`,
+ * à l'aide de `scales()` et `onRender()` : ce fichier n'a pas à les connaître.
  */
-import { scaleLinear, type ScaleLinear } from 'd3-scale';
 import { select, type BaseType, type Selection } from 'd3-selection';
 import 'd3-transition';
 import {
@@ -20,85 +22,27 @@ import {
   type ZoomTransform,
 } from 'd3-zoom';
 import { formatNumber, formatPct } from '../core/format.ts';
-import { formatStatus, type ValueStatus } from '../core/reserves.ts';
-import type { Ellipse, Point } from '../core/types.ts';
+import { formatStatus } from '../core/reserves.ts';
+import type { Point } from '../core/types.ts';
+import { drawFrame, type FrameLayers } from './frame.ts';
+import {
+  baseScales,
+  computeGeometry,
+  fitTransform,
+  type ChartGeometry,
+  type Insets,
+  type Scale,
+} from './geometry.ts';
+import { drawTerritories } from './layers/territories.ts';
 import { placeLabels, type Anchor, type LabelItem, type Obstacle, type Segment } from './labels.ts';
 import { clamp, diamondPath } from './shapes.ts';
-import { CHART_STYLE, CHART_TEXT } from './style.ts';
+import { CHART_STYLE } from './style.ts';
+import { baryTip, candTip, pcsTip } from './tips.ts';
 import { Tooltip, type TooltipContent } from './tooltip.ts';
+import type { Animation, ChartCandidate, ChartModel, ChartPcs, ChartView } from './types.ts';
 
-export interface ChartPcs {
-  code: string;
-  group: string;
-  label: string;
-  short: string;
-  groupLabel: string;
-  /** Couleur de repli si le thème ne définit pas --sg-group-<groupe>. */
-  color: string;
-  x: number;
-  y: number;
-  /** Part de la population (%). */
-  weight: number;
-  /** Statut des valeurs qui fondent l'axe X ; null si la position n'en dépend pas (position lue). */
-  status: { patrimoine: ValueStatus; niveauVie: ValueStatus } | null;
-  /** Réserves propres à cette PCS (ex æquo), affichées dans l'infobulle. */
-  notes: string[];
-}
-
-export interface ChartCandidate {
-  id: string;
-  label: string;
-  color: string;
-  x: number;
-  y: number;
-  /** Score national (%), ou null s'il est inconnu. */
-  share: number | null;
-  isAbstention: boolean;
-  ellipse: Ellipse | null;
-  /** Composition sociale de l'électorat, si les données brutes sont disponibles. */
-  composition: { label: string; share: number }[] | null;
-}
-
-export interface ChartModel {
-  /** Titre accessible du graphique. */
-  title: string;
-  description: string;
-  xLabel: string;
-  yLabel: string;
-  range: [number, number];
-  pcs: ChartPcs[];
-  candidates: ChartCandidate[];
-  barycenter: Point | null;
-}
-
-export interface ChartView {
-  hiddenGroups: ReadonlySet<string>;
-  hiddenCandidates: ReadonlySet<string>;
-  showLabels: boolean;
-  showEllipses: boolean;
-}
-
-export type Animation = 'none' | 'fast' | 'normal';
-export type Scale = ScaleLinear<number, number>;
-
-export interface ChartGeometry {
-  width: number;
-  height: number;
-  /** Côté de la zone de tracé carrée (px). */
-  side: number;
-  /** Position de la zone de tracé dans le SVG. */
-  left: number;
-  top: number;
-  small: boolean;
-}
-
-interface Quadrant {
-  k: 'tl' | 'tr' | 'bl' | 'br';
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
+export type { Animation, ChartCandidate, ChartModel, ChartPcs, ChartView } from './types.ts';
+export type { ChartGeometry, Insets, Scale } from './geometry.ts';
 
 interface LabelDatum {
   key: string;
@@ -112,14 +56,16 @@ interface LabelDatum {
   leader: Segment | null;
 }
 
-interface Tick {
-  key: string;
-  value: number;
-  pos: number;
-  text: string;
+/** Zone en coordonnées de données. */
+export interface DataBox {
+  x0: number;
+  x1: number;
+  y0: number;
+  y1: number;
 }
 
 type G = Selection<SVGGElement, unknown, null, undefined>;
+type SelectListener = (key: string | null, additive: boolean) => void;
 
 /** Applique des attributs, en transition si `duration` > 0, immédiatement sinon. */
 function setAttrs<E extends BaseType, D, P extends BaseType, PD>(
@@ -155,12 +101,6 @@ function exitSel<E extends Element, D, P extends BaseType, PD>(
   }
 }
 
-function tickDigits(ticks: readonly number[]): number {
-  if (ticks.length < 2) return 0;
-  const step = Math.abs((ticks[1] ?? 0) - (ticks[0] ?? 0));
-  return step >= 1 || step === 0 ? 0 : Math.ceil(-Math.log10(step) - 1e-9);
-}
-
 let instances = 0;
 
 export class SaintChart {
@@ -169,25 +109,23 @@ export class SaintChart {
   private readonly svgSel: Selection<SVGSVGElement, unknown, null, undefined>;
   private readonly titleEl: SVGTitleElement;
   private readonly descEl: SVGDescElement;
-  private readonly clipRect: Selection<SVGRectElement, unknown, null, undefined>;
   private readonly plot: G;
-  private readonly bg: Selection<SVGRectElement, unknown, null, undefined>;
-  private readonly frame: Selection<SVGRectElement, unknown, null, undefined>;
-  private readonly quads: G;
-  private readonly grid: G;
-  private readonly diagonal: Selection<SVGLineElement, unknown, null, undefined>;
+  private readonly frameLayers: FrameLayers;
   private readonly below: G;
+  private readonly territoryLayer: G;
+  private readonly under: G;
   private readonly ellipseLayer: G;
   private readonly pcsLayer: G;
   private readonly baryLayer: G;
   private readonly candLayer: G;
+  private readonly over: G;
   private readonly leaderLayer: G;
   private readonly labelLayer: G;
-  private readonly axes: G;
   private readonly above: G;
   private readonly tooltip: Tooltip;
   private readonly zoomBehavior: ZoomBehavior<SVGGElement, unknown>;
   private readonly listeners = new Set<() => void>();
+  private readonly selectListeners = new Set<SelectListener>();
   private readonly pointEls = new Map<string, SVGElement>();
   private readonly resizeObserver: ResizeObserver | null = null;
   private readonly reducedMotion: MediaQueryList | null;
@@ -198,8 +136,13 @@ export class SaintChart {
     hiddenCandidates: new Set(),
     showLabels: true,
     showEllipses: true,
+    showTerritories: true,
+    focus: null,
+    selected: new Set(),
+    square: false,
   };
-  private geom: ChartGeometry = { width: 0, height: 0, side: 0, left: 0, top: 0, small: false };
+  private insets: Insets = { top: 0, right: 0, bottom: 0, left: 0 };
+  private geom: ChartGeometry;
   private pcsOrder: string[] = [];
   private candOrder: string[] = [];
   private focusedKey: string | null = null;
@@ -232,21 +175,23 @@ export class SaintChart {
       .append<SVGDescElement>('desc')
       .attr('id', `sg-chart-desc-${id}`)
       .node()!;
-    const clipId = `sg-clip-${id}`;
-    this.clipRect = this.svgSel.append('defs').append('clipPath').attr('id', clipId).append('rect');
 
-    const clip = `url(#${clipId})`;
     this.plot = this.svgSel.append('g').attr('class', 'sg-plot');
-    this.bg = this.plot.append('rect').attr('class', 'sg-plot-bg');
-    this.quads = this.plot.append('g').attr('class', 'sg-quadrants').attr('clip-path', clip);
-    this.grid = this.plot.append('g').attr('class', 'sg-grid').attr('clip-path', clip);
-    this.diagonal = this.plot
+    const bg = this.plot.append('rect').attr('class', 'sg-plot-bg');
+    const quads = this.plot.append('g').attr('class', 'sg-quadrants');
+    const grid = this.plot.append('g').attr('class', 'sg-grid');
+    const diagonal = this.plot
       .append('line')
       .attr('class', 'sg-diagonal')
-      .attr('clip-path', clip)
       .attr('aria-hidden', 'true');
-    this.below = this.plot.append('g').attr('class', 'sg-layer-below').attr('clip-path', clip);
-    const marks = this.plot.append('g').attr('class', 'sg-marks').attr('clip-path', clip);
+    const regions = this.plot.append('g').attr('class', 'sg-regions').attr('aria-hidden', 'true');
+    this.below = this.plot.append('g').attr('class', 'sg-layer-below');
+    const marks = this.plot.append('g').attr('class', 'sg-marks');
+    this.territoryLayer = marks
+      .append('g')
+      .attr('class', 'sg-territories')
+      .attr('aria-hidden', 'true');
+    this.under = marks.append('g').attr('class', 'sg-under').attr('aria-hidden', 'true');
     this.ellipseLayer = marks.append('g').attr('class', 'sg-ellipses').attr('aria-hidden', 'true');
     this.pcsLayer = marks
       .append('g')
@@ -259,22 +204,15 @@ export class SaintChart {
       .attr('class', 'sg-cand-layer')
       .attr('role', 'group')
       .attr('aria-label', 'Électorats');
+    this.over = marks.append('g').attr('class', 'sg-over').attr('aria-hidden', 'true');
     this.leaderLayer = this.plot
       .append('g')
       .attr('class', 'sg-leaders')
-      .attr('clip-path', clip)
       .attr('aria-hidden', 'true');
-    this.labelLayer = this.plot
-      .append('g')
-      .attr('class', 'sg-labels')
-      .attr('clip-path', clip)
-      .attr('aria-hidden', 'true');
-    this.frame = this.plot
-      .append('rect')
-      .attr('class', 'sg-plot-frame')
-      .attr('aria-hidden', 'true');
-    this.axes = this.plot.append('g').attr('class', 'sg-axes').attr('aria-hidden', 'true');
+    this.labelLayer = this.plot.append('g').attr('class', 'sg-labels').attr('aria-hidden', 'true');
+    const axes = this.plot.append('g').attr('class', 'sg-axes').attr('aria-hidden', 'true');
     this.above = this.plot.append('g').attr('class', 'sg-layer-above');
+    this.frameLayers = { bg, quads, grid, diagonal, axes, regions };
 
     this.tooltip = new Tooltip(this.element);
     this.bindInteractions();
@@ -292,8 +230,6 @@ export class SaintChart {
       })
       .on('zoom', (event: D3ZoomEvent<SVGGElement, unknown>) => {
         this.transform = event.transform;
-        // Une fois zoomé, un doigt déplace le graphique ; sinon il fait défiler la page.
-        this.svgSel.style('touch-action', event.transform.k > 1 ? 'none' : 'pan-y');
         this.clearHover();
         this.draw('none');
       });
@@ -308,60 +244,101 @@ export class SaintChart {
       this.resizeObserver = new ResizeObserver(() => this.onResize());
       this.resizeObserver.observe(this.element);
     }
-    this.computeGeometry();
+    this.geom = this.measureGeometry();
+    this.applyGeometry();
   }
 
-  /** Met à jour le graphique. */
+  /** Met à jour la carte. */
   update(model: ChartModel, view: ChartView, animation: Animation = 'normal'): void {
     const rangeChanged =
       this.model !== null &&
       (this.model.range[0] !== model.range[0] || this.model.range[1] !== model.range[1]);
+    const shapeChanged = view.square !== this.view.square;
     this.model = model;
     this.view = view;
     if (rangeChanged) {
       this.transform = zoomIdentity;
       this.plot.property('__zoom', zoomIdentity);
     }
+    if (shapeChanged) {
+      this.geom = this.measureGeometry();
+      this.applyGeometry();
+    }
     this.clearHover();
     this.draw(animation);
   }
 
-  /** Échelles courantes (zoom compris), données → px dans la zone de tracé. */
+  /** Marges réservées par l'interface flottante. La carte glisse pour rester entièrement visible. */
+  setInsets(insets: Insets, animation: Animation = 'fast'): void {
+    const a = this.insets;
+    if (
+      a.top === insets.top &&
+      a.right === insets.right &&
+      a.bottom === insets.bottom &&
+      a.left === insets.left
+    ) {
+      return;
+    }
+    this.insets = insets;
+    this.tooltip.setBounds(insets);
+    this.geom = this.measureGeometry();
+    this.applyGeometry();
+    this.draw(animation);
+  }
+
+  /** Échelles courantes (zoom compris), données → px dans le SVG. */
   scales(): { x: Scale; y: Scale } {
-    const [lo, hi] = this.model?.range ?? [-10, 10];
-    const pad = (hi - lo) * CHART_STYLE.domainPadding;
-    const side = this.geom.side;
-    const x = scaleLinear()
-      .domain([lo - pad, hi + pad])
-      .range([0, side]);
-    const y = scaleLinear()
-      .domain([lo - pad, hi + pad])
-      .range([side, 0]);
+    const { x, y } = this.base();
     return { x: this.transform.rescaleX(x), y: this.transform.rescaleY(y) };
   }
 
+  /** Échelles sans le zoom. */
+  base(): { x: Scale; y: Scale } {
+    return baseScales(this.geom, this.model?.range ?? [-10, 10], CHART_STYLE.domainPadding);
+  }
+
   get geometry(): ChartGeometry {
-    return { ...this.geom };
+    return { ...this.geom, plot: { ...this.geom.plot } };
+  }
+
+  get currentModel(): ChartModel | null {
+    return this.model;
   }
 
   get zoomLevel(): number {
     return this.transform.k;
   }
 
-  /** Calque SVG sous les repères (coordonnées de la zone de tracé, découpé). */
+  /** Calque de développement sous les repères. */
   get layerBelow(): SVGGElement {
     return this.below.node()!;
   }
 
-  /** Calque SVG au-dessus de tout (coordonnées de la zone de tracé, non découpé). */
+  /** Calque de développement au-dessus de tout. */
   get layerAbove(): SVGGElement {
     return this.above.node()!;
+  }
+
+  /** Calque de l'application, sous les repères (exporté avec la carte). */
+  get layerUnder(): SVGGElement {
+    return this.under.node()!;
+  }
+
+  /** Calque de l'application, au-dessus des repères (exporté avec la carte). */
+  get layerOver(): SVGGElement {
+    return this.over.node()!;
   }
 
   /** Appelé après chaque rendu (zoom, redimensionnement, mise à jour). */
   onRender(cb: () => void): () => void {
     this.listeners.add(cb);
     return () => this.listeners.delete(cb);
+  }
+
+  /** Appelé quand l'utilisateur clique un repère (clé) ou le fond de la carte (null). */
+  onSelect(cb: SelectListener): () => void {
+    this.selectListeners.add(cb);
+    return () => this.selectListeners.delete(cb);
   }
 
   zoomBy(factor: number): void {
@@ -373,11 +350,56 @@ export class SaintChart {
   resetZoom(animated = true): void {
     const d = animated ? this.duration('fast') : 0;
     if (d > 0) {
-      this.zoomBehavior.transform(this.plot.transition().duration(d * 1.5), zoomIdentity);
+      this.zoomBehavior.transform(this.plot.transition().duration(d * 2), zoomIdentity);
     } else {
       this.transform = zoomIdentity;
       this.zoomBehavior.transform(this.plot, zoomIdentity);
     }
+  }
+
+  /** Cadre une zone de données. */
+  fitTo(box: DataBox, animated = true): void {
+    const { x, y } = this.base();
+    const [minK, maxK] = CHART_STYLE.zoomExtent;
+    const t = fitTransform(this.geom, x, y, box, minK, maxK);
+    const target = zoomIdentity.translate(t.tx, t.ty).scale(t.k);
+    const d = animated ? this.duration('normal') : 0;
+    if (d > 0) this.zoomBehavior.transform(this.plot.transition().duration(d), target);
+    else this.zoomBehavior.transform(this.plot, target);
+  }
+
+  /** Cadre les électorats affichés : ils se serrent au centre, et c'est eux qui se déplacent. */
+  fitElectorates(animated = true): void {
+    const shown = (this.model?.candidates ?? []).filter(
+      (c) => !this.view.hiddenCandidates.has(c.id),
+    );
+    if (shown.length === 0) {
+      this.resetZoom(animated);
+      return;
+    }
+    const pad = CHART_STYLE.fitPadding;
+    this.fitTo(
+      {
+        x0: Math.min(...shown.map((c) => c.x)) - pad,
+        x1: Math.max(...shown.map((c) => c.x)) + pad,
+        y0: Math.min(...shown.map((c) => c.y)) - pad,
+        y1: Math.max(...shown.map((c) => c.y)) + pad,
+      },
+      animated,
+    );
+  }
+
+  /** Recentre la carte sur un point de données, sans changer le zoom. */
+  panTo(point: Point): void {
+    const { x, y } = this.base();
+    const { plot } = this.geom;
+    const k = this.transform.k;
+    const target = zoomIdentity
+      .translate(plot.x + plot.w / 2 - k * x(point.x), plot.y + plot.h / 2 - k * y(point.y))
+      .scale(k);
+    const d = this.duration('fast');
+    if (d > 0) this.zoomBehavior.transform(this.plot.transition().duration(d * 1.5), target);
+    else this.zoomBehavior.transform(this.plot, target);
   }
 
   /** Coordonnées de données d'un point écran ; null hors de la zone de tracé. */
@@ -386,8 +408,8 @@ export class SaintChart {
     if (!ctm) return null;
     const px = (clientX - ctm.e) / ctm.a;
     const py = (clientY - ctm.f) / ctm.d;
-    const { side } = this.geom;
-    if (px < 0 || py < 0 || px > side || py > side) return null;
+    const { plot } = this.geom;
+    if (px < plot.x || py < plot.y || px > plot.x + plot.w || py > plot.y + plot.h) return null;
     const { x, y } = this.scales();
     return { x: x.invert(px), y: y.invert(py) };
   }
@@ -395,42 +417,45 @@ export class SaintChart {
   destroy(): void {
     this.resizeObserver?.disconnect();
     this.listeners.clear();
+    this.selectListeners.clear();
     this.element.remove();
   }
 
   // --- Géométrie --------------------------------------------------------------------------
 
-  private computeGeometry(): void {
+  private measureGeometry(): ChartGeometry {
     const width = Math.max(260, Math.round(this.element.clientWidth || 640));
-    const small = width < CHART_STYLE.smallWidth;
-    const m = small ? CHART_STYLE.marginSmall : CHART_STYLE.margin;
-    const side = Math.max(180, Math.min(CHART_STYLE.maxPlot, width - m.left - m.right));
-    const left = m.left + Math.max(0, (width - m.left - m.right - side) / 2);
-    const height = side + m.top + m.bottom;
-    this.geom = { width, height, side, left, top: m.top, small };
+    const height = Math.max(260, Math.round(this.element.clientHeight || 480));
+    return computeGeometry(width, height, this.insets, this.view.square, CHART_STYLE);
+  }
+
+  private applyGeometry(): void {
+    const { width, height } = this.geom;
     this.svgSel
       .attr('width', width)
       .attr('height', height)
       .attr('viewBox', `0 0 ${width} ${height}`);
-    this.plot.attr('transform', `translate(${left},${m.top})`);
-    this.clipRect.attr('width', side).attr('height', side);
     this.zoomBehavior
       .extent([
         [0, 0],
-        [side, side],
+        [width, height],
       ])
       .translateExtent([
         [0, 0],
-        [side, side],
+        [width, height],
       ]);
   }
 
   private onResize(): void {
     const width = Math.round(this.element.clientWidth);
-    if (width === 0 || Math.abs(width - this.geom.width) < 1) return;
-    this.computeGeometry();
+    const height = Math.round(this.element.clientHeight);
+    if (width === 0 || height === 0) return;
+    if (Math.abs(width - this.geom.width) < 1 && Math.abs(height - this.geom.height) < 1) return;
+    this.geom = this.measureGeometry();
+    this.applyGeometry();
     this.clearHover();
     this.resetZoom(false);
+    this.draw('none');
   }
 
   private duration(animation: Animation): number {
@@ -439,25 +464,19 @@ export class SaintChart {
   }
 
   private zoomFilter(event: Event): boolean {
-    if (event.type === 'wheel') {
-      const w = event as WheelEvent;
-      return w.ctrlKey || w.metaKey;
-    }
-    if (event.type === 'touchstart') {
-      return (event as TouchEvent).touches.length > 1 || this.transform.k > 1;
-    }
+    if (event.type === 'wheel' || event.type === 'touchstart') return true;
     return !(event as MouseEvent).button;
   }
 
   private pcsRadius(d: ChartPcs): number {
-    const r = CHART_STYLE.pcsRadiusPerSqrtPct * this.geom.side * Math.sqrt(Math.max(0, d.weight));
+    const r = CHART_STYLE.pcsRadiusPerSqrtPct * this.geom.unit * Math.sqrt(Math.max(0, d.weight));
     return Math.max(CHART_STYLE.pcsMinRadius, r);
   }
 
   private candHalf(d: ChartCandidate): number {
-    const share = d.share ?? CHART_STYLE.candidateDefaultShare;
+    const share = d.sizeShare ?? d.share ?? CHART_STYLE.candidateDefaultShare;
     const h =
-      CHART_STYLE.candidateHalfDiagonalPerSqrtPct * this.geom.side * Math.sqrt(Math.max(0, share));
+      CHART_STYLE.candidateHalfDiagonalPerSqrtPct * this.geom.unit * Math.sqrt(Math.max(0, share));
     return Math.max(CHART_STYLE.candidateMinHalfDiagonal, h);
   }
 
@@ -479,7 +498,15 @@ export class SaintChart {
       .filter((c) => !this.view.hiddenCandidates.has(c.id))
       .sort((a, b) => (b.share ?? 0) - (a.share ?? 0));
 
-    this.drawFrame(x, y, model);
+    drawFrame(this.frameLayers, this.geom, x, y, model, this.view.showTerritories);
+    drawTerritories(
+      this.territoryLayer,
+      this.view.showTerritories ? pcs : [],
+      x,
+      y,
+      (p) => this.pcsRadius(p),
+      this.geom.unit,
+    );
     this.drawEllipses(this.view.showEllipses ? cands.filter((c) => c.ellipse) : [], x, y, duration);
     this.drawPcs(pcs, x, y, duration);
     this.drawBarycenter(model.barycenter, x, y, duration);
@@ -492,173 +519,17 @@ export class SaintChart {
       duration,
     );
     this.updateFocusOrder(pcs, cands);
+    this.applyEmphasis();
     for (const cb of this.listeners) cb();
   }
 
-  private drawFrame(x: Scale, y: Scale, model: ChartModel): void {
-    const { side, small } = this.geom;
-    this.bg.attr('width', side).attr('height', side);
-    this.frame.attr('width', side).attr('height', side);
-
-    const cx = clamp(x(0), 0, side);
-    const cy = clamp(y(0), 0, side);
-    const quads: Quadrant[] = [
-      { k: 'tl', x: 0, y: 0, w: cx, h: cy },
-      { k: 'tr', x: cx, y: 0, w: side - cx, h: cy },
-      { k: 'bl', x: 0, y: cy, w: cx, h: side - cy },
-      { k: 'br', x: cx, y: cy, w: side - cx, h: side - cy },
-    ];
-    this.quads
-      .selectAll<SVGRectElement, Quadrant>('rect')
-      .data(quads, (d) => d.k)
-      .join('rect')
-      .attr('class', (d) => `sg-quadrant sg-quadrant--${d.k}`)
-      .attr('x', (d) => d.x)
-      .attr('y', (d) => d.y)
-      .attr('width', (d) => Math.max(0, d.w))
-      .attr('height', (d) => Math.max(0, d.h));
-
-    const count = small ? 4 : CHART_STYLE.ticks;
-    const xv = x.ticks(count);
-    const yv = y.ticks(count);
-    const xd = tickDigits(xv);
-    const yd = tickDigits(yv);
-    const xt: Tick[] = xv.map((v) => ({
-      key: String(v),
-      value: v,
-      pos: x(v),
-      text: formatNumber(v, xd),
-    }));
-    const yt: Tick[] = yv.map((v) => ({
-      key: String(v),
-      value: v,
-      pos: y(v),
-      text: formatNumber(v, yd),
-    }));
-
-    this.grid
-      .selectAll<SVGLineElement, Tick>('line.sg-grid-x')
-      .data(xt, (d) => d.key)
-      .join('line')
-      .attr('class', (d) => (d.value === 0 ? 'sg-grid-x sg-zero' : 'sg-grid-x'))
-      .attr('x1', (d) => d.pos)
-      .attr('x2', (d) => d.pos)
-      .attr('y1', 0)
-      .attr('y2', side);
-    this.grid
-      .selectAll<SVGLineElement, Tick>('line.sg-grid-y')
-      .data(yt, (d) => d.key)
-      .join('line')
-      .attr('class', (d) => (d.value === 0 ? 'sg-grid-y sg-zero' : 'sg-grid-y'))
-      .attr('x1', 0)
-      .attr('x2', side)
-      .attr('y1', (d) => d.pos)
-      .attr('y2', (d) => d.pos);
-
-    const [lo, hi] = model.range;
-    this.diagonal.attr('x1', x(lo)).attr('y1', y(lo)).attr('x2', x(hi)).attr('y2', y(hi));
-
-    // Graduations et titres des axes
-    const inside = (p: number): boolean => p >= -0.5 && p <= side + 0.5;
-    this.axes
-      .selectAll<SVGTextElement, Tick>('text.sg-tick-x')
-      .data(
-        xt.filter((t) => inside(t.pos)),
-        (d) => d.key,
-      )
-      .join('text')
-      .attr('class', 'sg-tick sg-tick-x')
-      .attr('x', (d) => d.pos)
-      .attr('y', side + 16)
-      .attr('text-anchor', 'middle')
-      .text((d) => d.text);
-    this.axes
-      .selectAll<SVGTextElement, Tick>('text.sg-tick-y')
-      .data(
-        yt.filter((t) => inside(t.pos)),
-        (d) => d.key,
-      )
-      .join('text')
-      .attr('class', 'sg-tick sg-tick-y')
-      .attr('x', -8)
-      .attr('y', (d) => d.pos)
-      .attr('dy', '0.35em')
-      .attr('text-anchor', 'end')
-      .text((d) => d.text);
-
-    const titleY = side + (small ? 38 : 44);
-    const yTitleX = small ? -34 : -46;
-    const titles = [
-      {
-        key: 'x',
-        cls: 'sg-axis-title',
-        x: side / 2,
-        y: titleY,
-        rotate: 0,
-        anchor: 'middle',
-        text: model.xLabel,
-      },
-      {
-        key: 'x-lo',
-        cls: 'sg-axis-end',
-        x: 0,
-        y: titleY,
-        rotate: 0,
-        anchor: 'start',
-        text: `← ${CHART_TEXT.xLow}`,
-      },
-      {
-        key: 'x-hi',
-        cls: 'sg-axis-end',
-        x: side,
-        y: titleY,
-        rotate: 0,
-        anchor: 'end',
-        text: `${CHART_TEXT.xHigh} →`,
-      },
-      {
-        key: 'y',
-        cls: 'sg-axis-title',
-        x: yTitleX,
-        y: side / 2,
-        rotate: -90,
-        anchor: 'middle',
-        text: model.yLabel,
-      },
-      {
-        key: 'y-lo',
-        cls: 'sg-axis-end',
-        x: yTitleX,
-        y: side,
-        rotate: -90,
-        anchor: 'start',
-        text: `← ${CHART_TEXT.yLow}`,
-      },
-      {
-        key: 'y-hi',
-        cls: 'sg-axis-end',
-        x: yTitleX,
-        y: 0,
-        rotate: -90,
-        anchor: 'end',
-        text: `${CHART_TEXT.yHigh} →`,
-      },
-    ];
-    this.axes
-      .selectAll<SVGTextElement, (typeof titles)[number]>('text.sg-axis-label')
-      .data(titles, (d) => d.key)
-      .join('text')
-      .attr('class', (d) => `sg-axis-label ${d.cls}`)
-      .attr('text-anchor', (d) => d.anchor)
-      .attr('transform', (d) => `translate(${d.x},${d.y}) rotate(${d.rotate})`)
-      .attr('dy', (d) => (d.rotate === 0 ? '0' : '0.35em'))
-      .text((d) => d.text);
-  }
-
   private drawEllipses(data: ChartCandidate[], x: Scale, y: Scale, duration: number): void {
-    const k = Math.abs(x(1) - x(0));
+    // Rotation dans le repère des données, puis mise à l'échelle : l'ellipse reste juste quand la
+    // carte est étirée. L'axe Y de l'écran descend, d'où le facteur négatif.
+    const kx = Math.abs(x(1) - x(0));
+    const ky = Math.abs(y(1) - y(0));
     const transform = (d: ChartCandidate): string =>
-      `translate(${x(d.x)},${y(d.y)}) rotate(${-(d.ellipse?.angle_deg ?? 0)})`;
+      `translate(${x(d.x)},${y(d.y)}) scale(${kx},${-ky}) rotate(${d.ellipse?.angle_deg ?? 0})`;
     const sel = this.ellipseLayer
       .selectAll<SVGEllipseElement, ChartCandidate>('ellipse.sg-ellipse')
       .data(data, (d) => d.id);
@@ -671,11 +542,14 @@ export class SaintChart {
       .attr('rx', 0)
       .attr('ry', 0);
     const all = entered.merge(sel);
-    all.style('stroke', (d) => this.candidateFill(d)).style('fill', (d) => this.candidateFill(d));
+    all
+      .attr('data-key', (d) => `c:${d.id}`)
+      .style('stroke', (d) => this.candidateFill(d))
+      .style('fill', (d) => this.candidateFill(d));
     setAttrs(all, duration, {
       transform,
-      rx: (d) => (d.ellipse?.rx ?? 0) * k,
-      ry: (d) => (d.ellipse?.ry ?? 0) * k,
+      rx: (d) => d.ellipse?.rx ?? 0,
+      ry: (d) => d.ellipse?.ry ?? 0,
     });
   }
 
@@ -739,7 +613,7 @@ export class SaintChart {
     );
     all
       .select('circle.sg-bary__ring')
-      .attr('r', Math.max(8, this.geom.side * CHART_STYLE.barycenterRadius));
+      .attr('r', Math.max(8, this.geom.unit * CHART_STYLE.barycenterRadius));
     setAttrs(all, duration, { transform });
   }
 
@@ -802,6 +676,28 @@ export class SaintChart {
     return ctx.measureText(text).width;
   }
 
+  /** Une catégorie est nommée si elle est grande, mise en avant, ou si elle a de la place. */
+  private pcsLabelled(
+    p: ChartPcs,
+    cx: number,
+    cy: number,
+    r: number,
+    obstacles: readonly Obstacle[],
+  ): boolean {
+    const key = `p:${p.code}`;
+    const { focus, selected } = this.view;
+    if (selected.has(key)) return true;
+    if (focus) return focus.has(key);
+    const small = this.geom.small;
+    if (p.weight >= (small ? CHART_STYLE.pcsLabelMinWeightSmall : CHART_STYLE.pcsLabelMinWeight)) {
+      return true;
+    }
+    const minGap = small ? CHART_STYLE.pcsLabelMinGapSmall : CHART_STYLE.pcsLabelMinGap;
+    return obstacles.every(
+      (o) => o.key === key || Math.hypot(o.cx - cx, o.cy - cy) - o.r - r >= minGap,
+    );
+  }
+
   private drawLabels(
     pcs: ChartPcs[],
     cands: ChartCandidate[],
@@ -809,9 +705,9 @@ export class SaintChart {
     y: Scale,
     duration: number,
   ): void {
-    const { side, small } = this.geom;
+    const { plot, small } = this.geom;
     const inPlot = (px: number, py: number): boolean =>
-      px >= 0 && px <= side && py >= 0 && py <= side;
+      px >= plot.x && px <= plot.x + plot.w && py >= plot.y && py <= plot.y + plot.h;
     const candFont = small ? CHART_STYLE.candidateLabelFontSmall : CHART_STYLE.candidateLabelFont;
     const pcsFont = small ? CHART_STYLE.labelFontSmall : CHART_STYLE.labelFont;
 
@@ -850,20 +746,21 @@ export class SaintChart {
     for (const p of pcs) {
       const cx = x(p.x);
       const cy = y(p.y);
-      if (!inPlot(cx, cy)) continue;
+      const r = this.pcsRadius(p);
+      if (!inPlot(cx, cy) || !this.pcsLabelled(p, cx, cy, r, obstacles)) continue;
       items.push({
         key: `p:${p.code}`,
         text: p.short,
         cx,
         cy,
-        r: this.pcsRadius(p),
+        r,
         priority: p.weight,
         font: pcsFont,
         weight: 400,
         reach: small ? CHART_STYLE.pcsLabelReachSmall : CHART_STYLE.pcsLabelReach,
       });
     }
-    const placed = placeLabels(items, obstacles, { x: 0, y: 0, w: side, h: side }, this.measure, {
+    const placed = placeLabels(items, obstacles, plot, this.measure, {
       passes: this.zooming ? 0 : CHART_STYLE.labelPasses,
     });
     const data: LabelDatum[] = items.map((it) => {
@@ -894,7 +791,9 @@ export class SaintChart {
       .attr('y1', (d) => d.leader?.y1 ?? 0)
       .attr('x2', (d) => d.leader?.x1 ?? 0)
       .attr('y2', (d) => d.leader?.y1 ?? 0);
-    setAttrs(enteredLeaders.merge(leaders), duration, {
+    const allLeaders = enteredLeaders.merge(leaders);
+    allLeaders.attr('data-key', (d) => d.key);
+    setAttrs(allLeaders, duration, {
       x1: (d) => d.leader?.x1 ?? 0,
       y1: (d) => d.leader?.y1 ?? 0,
       x2: (d) => d.leader?.x2 ?? 0,
@@ -915,6 +814,7 @@ export class SaintChart {
       .attr('opacity', 0);
     const all = entered.merge(sel);
     all
+      .attr('data-key', (d) => d.key)
       .classed('sg-label--cand', (d) => d.candidate)
       .attr('text-anchor', (d) => d.anchor)
       .style('font-size', (d) => `${d.font}px`)
@@ -926,11 +826,27 @@ export class SaintChart {
     });
   }
 
+  /** Estompe ce qui n'est pas mis en avant et marque les repères sélectionnés. */
+  private applyEmphasis(): void {
+    const { focus, selected } = this.view;
+    const dim = (key: string | null): boolean => focus !== null && !focus.has(key ?? '');
+    for (const [key, el] of this.pointEls) {
+      el.classList.toggle('sg-dim', key !== 'bary' && dim(key));
+      el.classList.toggle('sg-point--selected', selected.has(key));
+    }
+    const follow = this.plot.selectAll<SVGElement, unknown>(
+      '.sg-label:not(.sg-exiting), .sg-leader:not(.sg-exiting), .sg-ellipse:not(.sg-exiting)',
+    );
+    follow.classed('sg-dim', function () {
+      return dim(this.getAttribute('data-key'));
+    });
+  }
+
   // --- Interaction ------------------------------------------------------------------------
 
   /**
-   * Écouteurs natifs délégués sur la zone de tracé : le survol vise le repère le plus proche
-   * (zone utile bien plus grande que les petits disques), le clavier passe par le focus natif.
+   * Écouteurs natifs délégués sur la carte : le survol vise le repère le plus proche (zone utile
+   * bien plus grande que les petits disques), le clavier passe par le focus natif.
    */
   private bindInteractions(): void {
     const root = this.plot.node();
@@ -946,6 +862,7 @@ export class SaintChart {
       const key = this.keyNearPointer(e);
       if (key) this.showKey(key);
       else this.clearHover();
+      this.emitSelect(key, e.shiftKey);
     });
     root.addEventListener('focusin', (e) => {
       const el = e.target instanceof Element ? e.target.closest<SVGElement>('[data-key]') : null;
@@ -959,9 +876,21 @@ export class SaintChart {
     root.addEventListener('keydown', (e) => {
       const el = e.target instanceof Element ? e.target.closest<SVGElement>('[data-key]') : null;
       const key = el?.getAttribute('data-key');
-      if (e.key === 'Escape') this.clearHover();
-      else if (key) this.onPointKey(e, key);
+      if (e.key === 'Escape') {
+        this.clearHover();
+        this.emitSelect(null, false);
+      } else if (key && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        this.emitSelect(key, e.shiftKey);
+      } else if (key) {
+        this.onPointKey(e, key);
+      }
     });
+  }
+
+  private emitSelect(key: string | null, additive: boolean): void {
+    const selectable = key !== null && key !== 'bary' ? key : null;
+    for (const cb of this.selectListeners) cb(selectable, additive);
   }
 
   /** Repère visé par le pointeur : à moins de hoverRadius px, le plus proche, puis le plus petit. */
@@ -971,8 +900,6 @@ export class SaintChart {
     if (!model || !ctm) return null;
     const px = (e.clientX - ctm.e) / ctm.a;
     const py = (e.clientY - ctm.f) / ctm.d;
-    const { side } = this.geom;
-    if (px < 0 || py < 0 || px > side || py > side) return null;
     const { x, y } = this.scales();
     let best: string | null = null;
     let bestGap = Number.POSITIVE_INFINITY;
@@ -997,7 +924,7 @@ export class SaintChart {
       }
     }
     if (best === null && model.barycenter) {
-      const ring = Math.max(8, side * CHART_STYLE.barycenterRadius);
+      const ring = Math.max(8, this.geom.unit * CHART_STYLE.barycenterRadius);
       const d = Math.hypot(px - x(model.barycenter.x), py - y(model.barycenter.y));
       if (Math.abs(d - ring) <= 4) best = 'bary';
     }
@@ -1007,13 +934,13 @@ export class SaintChart {
   private tipFor(key: string): TooltipContent | null {
     const model = this.model;
     if (!model) return null;
-    if (key === 'bary') return model.barycenter ? this.baryTip(model.barycenter) : null;
+    if (key === 'bary') return model.barycenter ? baryTip(model.barycenter, model) : null;
     if (key.startsWith('p:')) {
       const d = model.pcs.find((p) => `p:${p.code}` === key);
-      return d ? this.pcsTip(d) : null;
+      return d ? pcsTip(d, model) : null;
     }
     const d = model.candidates.find((c) => `c:${c.id}` === key);
-    return d ? this.candTip(d) : null;
+    return d ? candTip(d, model, this.view.showEllipses) : null;
   }
 
   private showKey(key: string): void {
@@ -1095,68 +1022,5 @@ export class SaintChart {
         this.pointEls.get(key)?.setAttribute('tabindex', key === current ? '0' : '-1');
       }
     }
-  }
-
-  private pcsTip(d: ChartPcs): TooltipContent {
-    const m = this.model;
-    return {
-      title: d.label,
-      subtitle: `${d.groupLabel} · code ${d.code}`,
-      rows: [
-        ['Part de la population', formatPct(d.weight)],
-        [m?.xLabel ?? 'x', formatNumber(d.x)],
-        [m?.yLabel ?? 'y', formatNumber(d.y)],
-        ...(d.status
-          ? ([
-              ['Patrimoine', formatStatus(d.status.patrimoine)],
-              ['Niveau de vie', formatStatus(d.status.niveauVie)],
-            ] as [string, string][])
-          : []),
-      ],
-      notes: d.notes,
-    };
-  }
-
-  private candTip(d: ChartCandidate): TooltipContent {
-    const m = this.model;
-    const content: TooltipContent = {
-      title: d.label,
-      rows: [
-        ...(d.share !== null
-          ? [
-              [d.isAbstention ? 'Part des inscrits' : 'Score', formatPct(d.share)] as [
-                string,
-                string,
-              ],
-            ]
-          : []),
-        [m?.xLabel ?? 'x', formatNumber(d.x)],
-        [m?.yLabel ?? 'y', formatNumber(d.y)],
-      ],
-    };
-    if (d.ellipse && this.view.showEllipses) {
-      content.subtitle = 'Ellipse : intervalle de confiance à 95 %';
-    }
-    if (d.composition && d.composition.length > 0) {
-      content.barsTitle = 'Composition de l’électorat';
-      content.bars = d.composition.map((c) => ({
-        label: c.label,
-        value: c.share,
-        display: formatPct(c.share, 0),
-      }));
-    }
-    return content;
-  }
-
-  private baryTip(d: Point): TooltipContent {
-    const m = this.model;
-    return {
-      title: 'Barycentre de la population',
-      subtitle: 'Moyenne des PCS pondérée par leurs effectifs',
-      rows: [
-        [m?.xLabel ?? 'x', formatNumber(d.x)],
-        [m?.yLabel ?? 'y', formatNumber(d.y)],
-      ],
-    };
   }
 }

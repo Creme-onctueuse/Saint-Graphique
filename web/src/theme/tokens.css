@@ -6,8 +6,6 @@
  * [data-theme="dark"]. Le bloc sombre est volontairement répété : une fois pour la préférence du
  * système, une fois pour le choix explicite.
  *
- * Thème par défaut sobre, provisoire : le style cible sera calé sur les vidéos de Chris.
- *
  * Groupes PCS (--sg-group-N) : ils priment sur les couleurs de config/pcs.yaml, qui ne servent que
  * de repli pour un groupe sans token. Teintes 1 à 6 : palette Okabe-Ito ; avec le gris des retraités,
  * « toutes paires » : CVD ΔE 7,6 et vision normale ΔE ≥ 15. Ce niveau impose un encodage secondaire, assuré
@@ -23,6 +21,7 @@
   --sg-font-display: var(--sg-font-ui);
   --sg-font-display-weight: 750;
   --sg-radius: 8px;
+  --sg-radius-lg: 14px;
 
   /* Surfaces et texte */
   --sg-page: #f3f3ef;
@@ -37,26 +36,40 @@
   --sg-focus: #0b62c4;
   --sg-shadow: rgb(20 20 18 / 0.16);
 
-  /* Bandeau d'avertissement (données fictives) */
+  /* Interface flottante au-dessus de la carte */
+  --sg-chrome: rgb(252 252 251 / 0.88);
+  --sg-chrome-solid: #fcfcfb;
+  --sg-chrome-border: rgb(28 28 26 / 0.12);
+  --sg-chrome-shadow: 0 6px 24px rgb(20 20 18 / 0.14);
+  --sg-hover: rgb(28 28 26 / 0.07);
+  --sg-active: rgb(36 82 122 / 0.13);
+
+  /* Logo */
+  --sg-logo-bg: #24527a;
+  --sg-logo-ink: #ffffff;
+  --sg-logo-halo: #f0b429;
+
+  /* Avertissements (réserves, données fictives) */
   --sg-warning-bg: #fbf0d0;
   --sg-warning-text: #4f3b00;
   --sg-warning-border: #b38f1d;
 
-  /* Graphique : fond, quadrants, grille */
-  --sg-plot-bg: #fcfcfb;
-  --sg-plot-frame: #b9b8b1;
-  --sg-quadrant-tl: #f7f7f3;
-  --sg-quadrant-tr: #fcfcfb;
-  --sg-quadrant-bl: #fcfcfb;
-  --sg-quadrant-br: #f7f7f3;
+  /* Carte : fond, quadrants, grille */
+  --sg-plot-bg: #f7f7f3;
+  --sg-quadrant-tl: #f4f4ef;
+  --sg-quadrant-tr: #f8f8f5;
+  --sg-quadrant-bl: #f8f8f5;
+  --sg-quadrant-br: #f4f4ef;
   --sg-grid: #e6e5df;
   --sg-zero: #c4c3bc;
   --sg-diagonal: #85847d;
   --sg-axis-text: #56554f;
+  --sg-region: rgb(28 28 26 / 0.34);
+  --sg-territory-opacity: 0.2;
 
-  /* Graphique : repères et libellés */
+  /* Carte : repères et libellés */
   --sg-label: #2a2a27;
-  --sg-label-halo: #fcfcfb;
+  --sg-label-halo: #f7f7f3;
   --sg-ring: #fcfcfb;
   --sg-leader: #85847d;
   --sg-cand-ring: #fcfcfb; /* contour clair en sombre : les couleurs de candidats sont imposées */
@@ -64,6 +77,7 @@
   --sg-abstention: #2f2f2c;
   --sg-barycenter: #1c1c1a;
   --sg-ellipse-fill-opacity: 0.1;
+  --sg-dim-opacity: 0.2;
 
   /* Infobulle */
   --sg-tooltip-bg: #1f1f1d;
@@ -97,27 +111,38 @@
     --sg-accent-text: #10202e;
     --sg-focus: #8ab8ff;
     --sg-shadow: rgb(0 0 0 / 0.5);
+    --sg-chrome: rgb(30 30 28 / 0.86);
+    --sg-chrome-solid: #1e1e1c;
+    --sg-chrome-border: rgb(240 239 236 / 0.13);
+    --sg-chrome-shadow: 0 8px 28px rgb(0 0 0 / 0.45);
+    --sg-hover: rgb(240 239 236 / 0.08);
+    --sg-active: rgb(140 184 227 / 0.2);
+    --sg-logo-bg: #2b5f8e;
+    --sg-logo-ink: #ffffff;
+    --sg-logo-halo: #f6c453;
     --sg-warning-bg: #3a2e0c;
     --sg-warning-text: #f4e3ac;
     --sg-warning-border: #8a6f16;
-    --sg-plot-bg: #1a1a19;
-    --sg-plot-frame: #55544f;
-    --sg-quadrant-tl: #1e1e1c;
-    --sg-quadrant-tr: #1a1a19;
-    --sg-quadrant-bl: #1a1a19;
-    --sg-quadrant-br: #1e1e1c;
-    --sg-grid: #2c2c2a;
-    --sg-zero: #4a4a46;
+    --sg-plot-bg: #161615;
+    --sg-quadrant-tl: #191918;
+    --sg-quadrant-tr: #161615;
+    --sg-quadrant-bl: #161615;
+    --sg-quadrant-br: #191918;
+    --sg-grid: #262624;
+    --sg-zero: #454541;
     --sg-diagonal: #85847d;
     --sg-axis-text: #b8b7ad;
+    --sg-region: rgb(240 239 236 / 0.3);
+    --sg-territory-opacity: 0.2;
     --sg-label: #e8e7e2;
-    --sg-label-halo: #1a1a19;
-    --sg-ring: #1a1a19;
+    --sg-label-halo: #161615;
+    --sg-ring: #161615;
     --sg-leader: #8f8e87;
     --sg-cand-ring: #d8d7d0;
     --sg-abstention: #d8d7d0;
     --sg-barycenter: #f0efec;
     --sg-ellipse-fill-opacity: 0.14;
+    --sg-dim-opacity: 0.18;
     --sg-tooltip-bg: #2b2b28;
     --sg-tooltip-text: #f5f5f2;
     --sg-tooltip-muted: #c9c8c0;
@@ -141,27 +166,38 @@
   --sg-accent-text: #10202e;
   --sg-focus: #8ab8ff;
   --sg-shadow: rgb(0 0 0 / 0.5);
+  --sg-chrome: rgb(30 30 28 / 0.86);
+  --sg-chrome-solid: #1e1e1c;
+  --sg-chrome-border: rgb(240 239 236 / 0.13);
+  --sg-chrome-shadow: 0 8px 28px rgb(0 0 0 / 0.45);
+  --sg-hover: rgb(240 239 236 / 0.08);
+  --sg-active: rgb(140 184 227 / 0.2);
+  --sg-logo-bg: #2b5f8e;
+  --sg-logo-ink: #ffffff;
+  --sg-logo-halo: #f6c453;
   --sg-warning-bg: #3a2e0c;
   --sg-warning-text: #f4e3ac;
   --sg-warning-border: #8a6f16;
-  --sg-plot-bg: #1a1a19;
-  --sg-plot-frame: #55544f;
-  --sg-quadrant-tl: #1e1e1c;
-  --sg-quadrant-tr: #1a1a19;
-  --sg-quadrant-bl: #1a1a19;
-  --sg-quadrant-br: #1e1e1c;
-  --sg-grid: #2c2c2a;
-  --sg-zero: #4a4a46;
+  --sg-plot-bg: #161615;
+  --sg-quadrant-tl: #191918;
+  --sg-quadrant-tr: #161615;
+  --sg-quadrant-bl: #161615;
+  --sg-quadrant-br: #191918;
+  --sg-grid: #262624;
+  --sg-zero: #454541;
   --sg-diagonal: #85847d;
   --sg-axis-text: #b8b7ad;
+  --sg-region: rgb(240 239 236 / 0.3);
+  --sg-territory-opacity: 0.2;
   --sg-label: #e8e7e2;
-  --sg-label-halo: #1a1a19;
-  --sg-ring: #1a1a19;
+  --sg-label-halo: #161615;
+  --sg-ring: #161615;
   --sg-leader: #8f8e87;
   --sg-cand-ring: #d8d7d0;
   --sg-abstention: #d8d7d0;
   --sg-barycenter: #f0efec;
   --sg-ellipse-fill-opacity: 0.14;
+  --sg-dim-opacity: 0.18;
   --sg-tooltip-bg: #2b2b28;
   --sg-tooltip-text: #f5f5f2;
   --sg-tooltip-muted: #c9c8c0;

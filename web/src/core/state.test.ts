@@ -17,9 +17,34 @@ const custom: AppState = {
   theme: 'dark',
   showLabels: false,
   showEllipses: false,
+  showTerritories: false,
+  selected: 'c:macron',
+  compared: 'p:31',
+  panel: 'cross',
+  square: true,
+  showTrails: false,
+  showRings: true,
+  typeFilter: 'presidentielle',
+  scenario: 'trend',
+  axisX: 'niveau_vie',
+  axisY: 'bac5',
+  colorBy: 'patrimoine',
+  layout: 'proximity',
 };
 
 describe('aller-retour dans l’URL', () => {
+  it('ignore un panneau ou un filtre inconnu', () => {
+    const s = parseState('#p=rien&ty=municipales&sc=autre&vue=autre');
+    expect(s.panel).toBeNull();
+    expect(s.typeFilter).toBe('all');
+    expect(s.scenario).toBe('still');
+    expect(s.layout).toBe('map');
+  });
+
+  it('ne garde pas un repère comparé sans repère sélectionné', () => {
+    expect(parseState('#c2=c%3Amacron').compared).toBeNull();
+  });
+
   it('conserve un état complet', () => {
     expect(parseState(`#${serializeState(custom)}`)).toEqual(normalizeState(custom));
   });

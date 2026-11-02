@@ -24,7 +24,9 @@ import {
   findTies,
   parseStatus,
   READ_POSITIONS_METHOD,
+  COMPUTED_RESERVE_SUMMARY,
   READ_POSITIONS_RESERVE,
+  READ_POSITIONS_RESERVE_SUMMARY,
   X_DEFINITION_RESERVE,
   xAxisReserve,
   type Tie,
@@ -63,8 +65,10 @@ export interface ResolvedView {
   rawElection: RawElection | null;
   /** Informations à montrer à l'utilisateur. */
   notes: string[];
-  /** Réserves visibles en permanence à côté du graphique. */
+  /** Réserves complètes, à une ouverture de clic. */
   reserves: string[];
+  /** Réserve résumée en une ligne, visible en permanence. */
+  reserveSummary: string;
   /** Sources lues dans les données brutes : sondage de l'élection, données sur les PCS. */
   sources: { poll: SourceRef[]; pcs: SourceRef[]; positions: SourceRef[] };
 }
@@ -400,6 +404,7 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
     rawElection,
     notes,
     reserves,
+    reserveSummary: isRead ? READ_POSITIONS_RESERVE_SUMMARY : COMPUTED_RESERVE_SUMMARY,
     sources: {
       poll: rawElection?.sources ?? [],
       pcs: ds.rawPcs?.sources ?? [],

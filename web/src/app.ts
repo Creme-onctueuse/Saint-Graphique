@@ -1,20 +1,28 @@
 /**
  * Orchestration de l'application : l'état (src/core/state.ts) est la seule source de vérité, il est
- * reflété dans l'URL ; chaque action le modifie puis redessine le graphique et l'interface.
+ * reflété dans l'URL ; chaque action le modifie puis redessine la carte et l'interface.
+ *
+ * Ajouter une fonction : écrire une classe `Feature` (ui/actions.ts) et l'ajouter à `features`.
+ * Elle reçoit la vue et l'état à chaque rendu, et modifie l'état par `actions.patch`.
  */
 import { SaintChart, type Animation, type ChartView } from './chart/chart.ts';
+import { Minimap } from './chart/layers/minimap.ts';
 import { sameWeights } from './core/scores.ts';
 import { parseState, serializeState, type AppState } from './core/state.ts';
 import { loadDataset } from './data/load.ts';
 import { initAbout } from './ui/about.ts';
-import type { AppActions } from './ui/actions.ts';
+import type { AppActions, Feature } from './ui/actions.ts';
 import { Controls } from './ui/controls.ts';
 import { byId, el } from './ui/dom.ts';
 import { buildExportSvg, downloadBlob, pngBlob, svgBlob, type ExportMeta } from './ui/export.ts';
 import { Filters } from './ui/filters.ts';
+import { mountIcons } from './ui/icons.ts';
 import { Legend } from './ui/legend.ts';
 import { MethodPanel } from './ui/methodPanel.ts';
-import { renderSources, sourceText } from './ui/sources.ts';
+import { Keybar } from './ui/shell/keybar.ts';
+import { Shell } from './ui/shell/shell.ts';
+import { Timeline } from './ui/shell/timeline.ts';
+import { sourceText } from './ui/sources.ts';
 import { renderTables } from './ui/table.ts';
 import { applyTheme, storedTheme, ThemeSwitch } from './ui/theme.ts';
 import { buildView, type ResolvedView } from './view.ts';
@@ -27,6 +35,7 @@ const CREDIT =
 
 /** Délai d'écriture de l'URL : les navigateurs limitent la fréquence de history.replaceState. */
 const URL_WRITE_DELAY_MS = 200;
+const HINT_STORAGE_KEY = 'sg-hint-seen';
 
 function readState(): AppState {
   const state = parseState(window.location.hash);
@@ -38,7 +47,29 @@ function toggled(list: readonly string[], id: string, visible: boolean): string[
   return visible ? list.filter((v) => v !== id) : [...list, id];
 }
 
+/** Petite aide affichée à la première visite, jusqu'au premier geste sur la carte. */
+function installHint(chart: SaintChart): void {
+  const hint = byId('sg-hint');
+  try {
+    if (window.localStorage.getItem(HINT_STORAGE_KEY)) return;
+  } catch {
+    // Stockage indisponible (navigation privée, file://) : l'aide reste affichée à chaque visite.
+  }
+  hint.hidden = false;
+  const dismiss = (): void => {
+    hint.hidden = true;
+    try {
+      window.localStorage.setItem(HINT_STORAGE_KEY, '1');
+    } catch {
+      // Sans stockage, l'aide réapparaîtra à la prochaine visite.
+    }
+  };
+  chart.svg.addEventListener('pointerdown', dismiss, { once: true });
+  chart.svg.addEventListener('wheel', dismiss, { once: true, passive: true });
+}
+
 export function startApp(): void {
+  mountIcons();
   const ds = loadDataset();
   for (const w of ds.warnings) console.warn(`[données] ${w}`);
 
@@ -49,17 +80,15 @@ export function startApp(): void {
 
   const chartHost = byId('sg-chart-host');
   const banner = byId('sg-banner');
-  const heading = byId('sg-chart-heading');
   const status = byId('sg-status');
   const live = byId('sg-live');
   const tables = byId('sg-data-tables');
-  const reserves = byId('sg-reserves');
-  const sources = byId('sg-sources');
 
   banner.textContent = SAMPLE_WARNING;
   banner.hidden = !ds.isSample;
 
   const chart = new SaintChart(chartHost);
+  new Minimap(chart, byId('sg-minimap-host'));
 
   const writeUrl = (): void => {
     window.clearTimeout(urlTimer);
@@ -77,9 +106,16 @@ export function startApp(): void {
     hiddenCandidates: new Set(state.hiddenCandidates),
     showLabels: state.showLabels,
     showEllipses: state.showEllipses,
+    showTerritories: state.showTerritories,
+    focus: null,
+    selected: new Set([state.selected, state.compared].filter((k): k is string => k !== null)),
+    square: state.square,
   });
 
   const actions: AppActions = {
+    patch(patch, animation = 'fast') {
+      update(patch, animation);
+    },
     setElection(id) {
       update({ election: id }, 'normal');
     },
@@ -122,11 +158,29 @@ export function startApp(): void {
   };
 
   const controls = new Controls(ds, actions);
-  const filters = new Filters(byId('sg-filters'), actions);
-  const legend = new Legend(byId('sg-legend'), actions);
   const methodPanel = new MethodPanel(byId('sg-method-panel'), actions);
   const themeSwitch = new ThemeSwitch(actions);
   initAbout(ds);
+
+  const features: Feature[] = [
+    new Timeline(byId('sg-timeline'), ds, actions),
+    new Keybar(byId('sg-keybar'), actions),
+    new Legend(
+      byId('sg-legend-groups'),
+      byId('sg-legend-candidates'),
+      byId('sg-legend-keys'),
+      actions,
+    ),
+    new Filters(
+      {
+        electorates: byId('sg-options-electorates'),
+        categories: byId('sg-options-categories'),
+        method: byId('sg-options-method'),
+      },
+      actions,
+    ),
+    new Shell(actions, (insets) => chart.setInsets(insets)),
+  ];
 
   function render(animation: Animation): void {
     applyTheme(state.theme);
@@ -146,15 +200,9 @@ export function startApp(): void {
     view = next;
     chart.update(next.model, chartView(), animation);
     controls.sync(next);
-    filters.sync(next, state);
-    legend.sync(next, state);
     methodPanel.sync(next, state);
     renderTables(tables, next);
-    heading.textContent = next.electionLabel;
-    status.textContent = next.notes.join(' ');
-    reserves.replaceChildren(...next.reserves.map((text) => el('p', { text })));
-    reserves.hidden = next.reserves.length === 0;
-    renderSources(sources, next);
+    for (const feature of features) feature.sync(next, state);
     if (selectionChanged) live.textContent = `Affichage : ${next.model.title}.`;
     writeUrl();
   }
@@ -163,6 +211,16 @@ export function startApp(): void {
     state = { ...state, ...patch };
     render(animation);
   }
+
+  chart.onSelect((key, additive) => {
+    if (key === null) {
+      if (state.selected) update({ selected: null, compared: null }, 'fast');
+    } else if (additive && state.selected && state.selected !== key) {
+      update({ compared: key }, 'fast');
+    } else {
+      update({ selected: state.selected === key ? null : key, compared: null }, 'fast');
+    }
+  });
 
   window.addEventListener('hashchange', () => {
     const hash = window.location.hash.replace(/^#/, '');
@@ -175,6 +233,26 @@ export function startApp(): void {
   byId('sg-zoom-in').addEventListener('click', () => chart.zoomBy(1.6));
   byId('sg-zoom-out').addEventListener('click', () => chart.zoomBy(1 / 1.6));
   byId('sg-zoom-reset').addEventListener('click', () => chart.resetZoom());
+  byId('sg-zoom-electorates').addEventListener('click', () => chart.fitElectorates());
+
+  const shareButton = byId<HTMLButtonElement>('sg-share');
+  shareButton.addEventListener('click', () => {
+    const url = window.location.href;
+    const done = (message: string): void => {
+      status.textContent = message;
+      window.setTimeout(() => {
+        if (status.textContent === message) status.textContent = '';
+      }, 2500);
+    };
+    if (navigator.clipboard) {
+      navigator.clipboard
+        .writeText(url)
+        .then(() => done('Lien de cette vue copié.'))
+        .catch(() => done('Copie impossible : copiez l’adresse de la page.'));
+    } else {
+      done('Copie impossible : copiez l’adresse de la page.');
+    }
+  });
 
   const exportMeta = (current: ResolvedView): ExportMeta => {
     const hiddenGroups = new Set(state.hiddenGroups);
@@ -236,6 +314,7 @@ export function startApp(): void {
   });
 
   render('none');
+  installHint(chart);
 
   // Mode calque : réservé au développement, absent du build de production.
   if (import.meta.env.DEV) {

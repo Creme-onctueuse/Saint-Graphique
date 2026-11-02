@@ -27,6 +27,8 @@ interface SliderRow {
 export class MethodPanel {
   private readonly sliders = new Map<DiplomaKey, SliderRow>();
   private readonly note = el('p', { class: 'sg-note' });
+  /** Réglages masqués quand la méthode ne se recalcule pas : ils n'auraient aucun effet. */
+  private readonly tuning: HTMLDivElement;
   private readonly retiredOn = el('input', { attrs: { type: 'checkbox' } });
   private readonly retiredScore = el('input', {
     class: 'sg-number',
@@ -80,8 +82,11 @@ export class MethodPanel {
     });
     this.reset.addEventListener('click', () => actions.resetParams());
 
-    host.append(
+    this.tuning = el(
+      'div',
+      { class: 'sg-panel__group' },
       el('p', {
+        class: 'sg-note',
         text:
           'Score X : patrimoine / niveau de vie. Score Y : somme des parts de diplômes, ' +
           'multipliées par les poids ci-dessous. Les méthodes placent ensuite ces scores sur [−10, 10].',
@@ -94,12 +99,13 @@ export class MethodPanel {
         this.retiredScore,
       ),
       el('div', { class: 'sg-row' }, this.reset),
-      this.note,
     );
+    host.append(this.tuning, this.note);
   }
 
   sync(view: ResolvedView, state: AppState): void {
     const enabled = view.canRecompute;
+    this.tuning.hidden = !enabled;
     for (const key of DIPLOMA_KEYS) {
       const row = this.sliders.get(key);
       if (!row) continue;

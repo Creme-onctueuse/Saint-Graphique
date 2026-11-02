@@ -67,6 +67,30 @@ export interface AxesInfo {
   range: [number, number];
 }
 
+/** Familles politiques et blocs (config/families.yaml) : ce qui relie les élections entre elles. */
+export interface FamilyInfo {
+  id: string;
+  label: string;
+  /** La famille entre dans le test sur le passé et la projection 2027. */
+  projection: boolean;
+  /** Électorat de la famille à chaque élection. Élection absente : un trou dans la trajectoire. */
+  candidates: Map<string, string>;
+}
+
+export interface BlocInfo {
+  id: string;
+  label: string;
+  candidates: Set<string>;
+}
+
+export interface FamilyConfig {
+  /** Date de chaque scrutin, en années décimales. */
+  dates: Map<string, number>;
+  families: FamilyInfo[];
+  blocs: BlocInfo[];
+  unclassified: Set<string>;
+}
+
 export interface Dataset {
   isSample: boolean;
   generatedAt: string | null;
@@ -83,6 +107,8 @@ export interface Dataset {
   computed: Map<string, ComputedFile>;
   rawPcs: RawPcsData | null;
   rawElections: Map<string, RawElection>;
+  /** Null si config/families.yaml manque (données d'exemple). */
+  families: FamilyConfig | null;
   sources: SourceRef[];
   warnings: string[];
 }
@@ -251,6 +277,46 @@ export function asComputedFile(v: unknown, warnings: string[] = []): ComputedFil
   const sources = asSources(v['sources']);
   if (sources.length > 0) file.sources = sources;
   return file;
+}
+
+/** Lit la section « families » de _config.json. */
+export function asFamilyConfig(v: unknown): FamilyConfig | null {
+  if (!isRec(v) || !isRec(v['families']) || !isRec(v['blocs'])) return null;
+  const dates = new Map<string, number>();
+  for (const [id, value] of Object.entries(rec(v['dates']))) {
+    const date = num(value);
+    if (date !== null) dates.set(id, date);
+  }
+  const families: FamilyInfo[] = Object.entries(v['families']).flatMap(([id, value]) => {
+    if (!isRec(value)) return [];
+    const candidates = new Map<string, string>();
+    for (const [election, candidate] of Object.entries(rec(value['candidates']))) {
+      const cid = str(candidate);
+      if (cid) candidates.set(election, cid);
+    }
+    return [
+      {
+        id,
+        label: str(value['label']) ?? id,
+        projection: value['projection'] === true,
+        candidates,
+      },
+    ];
+  });
+  const stringsOf = (list: unknown): string[] =>
+    Array.isArray(list) ? list.map(str).filter((s): s is string => s !== null) : [];
+  const blocs: BlocInfo[] = Object.entries(v['blocs']).flatMap(([id, value]) =>
+    isRec(value)
+      ? [
+          {
+            id,
+            label: str(value['label']) ?? id,
+            candidates: new Set(stringsOf(value['candidates'])),
+          },
+        ]
+      : [],
+  );
+  return { dates, families, blocs, unclassified: new Set(stringsOf(v['unclassified'])) };
 }
 
 function asSources(v: unknown): SourceRef[] {
@@ -651,6 +717,7 @@ export function buildDataset(files: Readonly<Record<string, unknown>>): Dataset 
     computed,
     rawPcs,
     rawElections,
+    families: asFamilyConfig(config['families']),
     sources,
     warnings,
   };

@@ -1,8 +1,12 @@
 /** Actions que l'interface peut demander à l'application. */
-import type { RetiredSetting, ThemeChoice } from '../core/state.ts';
+import type { Animation } from '../chart/types.ts';
+import type { AppState, RetiredSetting, ThemeChoice } from '../core/state.ts';
 import type { DiplomaKey } from '../core/types.ts';
+import type { ResolvedView } from '../view.ts';
 
 export interface AppActions {
+  /** Modifie l'état et redessine : la voie générale pour toute nouvelle fonction. */
+  patch(patch: Partial<AppState>, animation?: Animation): void;
   setElection(id: string): void;
   setMethod(id: string): void;
   setCandidateVisible(id: string, visible: boolean): void;
@@ -14,4 +18,9 @@ export interface AppActions {
   setRetired(value: RetiredSetting): void;
   resetParams(): void;
   setTheme(theme: ThemeChoice): void;
+}
+
+/** Une fonction de l'interface : elle se met à jour à chaque rendu. */
+export interface Feature {
+  sync(view: ResolvedView, state: AppState): void;
 }
