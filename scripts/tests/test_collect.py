@@ -105,8 +105,10 @@ def test_json3_to_lines_skips_newline_events():
             {"tStartMs": 2840, "segs": [{"utf8": "suite"}]},
         ]
     }
-    assert json3_to_lines(data) == [(pytest.approx(0.199), "le graphique"),
-                                    (pytest.approx(2.84), "suite")]
+    assert json3_to_lines(data) == [
+        (pytest.approx(0.199), "le graphique"),
+        (pytest.approx(2.84), "suite"),
+    ]
 
 
 def test_transcript_round_trip_beyond_one_hour():
@@ -176,7 +178,9 @@ def test_sampling_plan():
     segs = [{"start_s": 20.0, "end_s": 40.0}, {"start_s": 35.0, "end_s": 50.0}]
     assert sampling_plan(segs, 100.0) == [(20.0, 50.0, 2.0)]
     assert sampling_plan(segs, 100.0, full_scan=True) == [
-        (0.0, 20.0, 10.0), (20.0, 50.0, 2.0), (50.0, 100.0, 10.0),
+        (0.0, 20.0, 10.0),
+        (20.0, 50.0, 2.0),
+        (50.0, 100.0, 10.0),
     ]
 
 
@@ -191,8 +195,12 @@ def test_sampling_plan():
         ("Analyse GRAPHOMARXISME", "", "PaduTeam", "core"),
         ("Une vidéo", "on parle du saint graphique ici", "PaduTeam", "core"),
         ("Une vidéo", "on parle du saint graphique ici", "Une autre chaîne", "mention"),
-        ("Définition du design de communication graphique", "", "Central Saint Martins",
-         "unrelated"),
+        (
+            "Définition du design de communication graphique",
+            "",
+            "Central Saint Martins",
+            "unrelated",
+        ),
         ("Saints Row 2 Graphics Mod", "", "KTMX", "unrelated"),
         ("Une vidéo", "l'électorat de gauche", "PaduTeam", "mention"),
         ("Les Voix de l'Exploitation", "", "Revue Positions", "unrelated"),
@@ -242,7 +250,8 @@ def test_spoken_signal_and_screening():
 def test_text_helpers():
     assert normalize("  Électorat’S  DE  ") == "electorat's de"
     assert extract_links("voir https://a.b/c, puis https://a.b/c et http://d.e.") == [
-        "https://a.b/c", "http://d.e",
+        "https://a.b/c",
+        "http://d.e",
     ]
 
 
@@ -329,8 +338,18 @@ def test_chart_features_separates_synthetic_chart_from_plain_frame():
     cv2.rectangle(frame, (30, 100), (545, 380), (255, 255, 255), -1)
     cv2.line(frame, (30, 240), (545, 240), (90, 90, 90), 1)
     cv2.line(frame, (287, 100), (287, 380), (90, 90, 90), 1)
-    for x, y, r in [(100, 150, 8), (170, 310, 14), (230, 170, 10), (350, 150, 12), (430, 320, 9),
-                    (480, 170, 16), (340, 320, 11), (120, 300, 7), (400, 200, 8), (200, 280, 9)]:
+    for x, y, r in [
+        (100, 150, 8),
+        (170, 310, 14),
+        (230, 170, 10),
+        (350, 150, 12),
+        (430, 320, 9),
+        (480, 170, 16),
+        (340, 320, 11),
+        (120, 300, 7),
+        (400, 200, 8),
+        (200, 280, 9),
+    ]:
         cv2.circle(frame, (x, y), r, (20, 20, 20), 2, cv2.LINE_AA)
     chart = chart_features(frame)
     assert chart.axes == "cross"
@@ -339,3 +358,38 @@ def test_chart_features_separates_synthetic_chart_from_plain_frame():
 
     plain = np.full((480, 854, 3), (60, 200, 250), dtype=np.uint8)
     assert chart_features(plain).score < DEFAULT_THRESHOLD
+
+
+def test_chart_features_detects_dark_theme_chart():
+    cv2 = pytest.importorskip("cv2")
+    pytest.importorskip("imagehash")
+    pytest.importorskip("PIL")
+    np = pytest.importorskip("numpy")
+    from scripts.collect.extract_frames import DEFAULT_THRESHOLD, chart_features
+
+    frame = np.full((480, 854, 3), (60, 200, 250), dtype=np.uint8)  # fond jaune (BGR)
+    cv2.rectangle(frame, (20, 80), (585, 410), (5, 5, 5), -1)
+    cv2.line(frame, (20, 230), (585, 230), (180, 180, 180), 1)
+    cv2.line(frame, (300, 80), (300, 410), (180, 180, 180), 1)
+    for x, y, r in [
+        (100, 150, 8),
+        (170, 310, 14),
+        (230, 170, 10),
+        (350, 150, 12),
+        (430, 320, 9),
+        (480, 170, 16),
+        (340, 320, 11),
+        (120, 300, 7),
+        (400, 200, 8),
+        (200, 280, 9),
+    ]:
+        cv2.circle(frame, (x, y), r, (170, 170, 170), -1, cv2.LINE_AA)
+    chart = chart_features(frame)
+    assert chart.dark
+    assert chart.n_discs >= 8
+    assert chart.score >= DEFAULT_THRESHOLD
+
+    # Interface sombre sans bulles : le thème sombre ne doit pas se déclencher.
+    ui = np.full((480, 854, 3), (5, 5, 5), dtype=np.uint8)
+    cv2.line(ui, (0, 240), (853, 240), (60, 60, 60), 1)
+    assert chart_features(ui).score < DEFAULT_THRESHOLD

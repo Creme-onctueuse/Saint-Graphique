@@ -11,6 +11,7 @@ Pour chaque vidéo ``core`` de l'index :
      une transformée de Hough circulaire puis vérifiés (anneau sombre, extérieur
      clair) ; les petits, que le texte imite, ne comptent que pour un poids plafonné ;
    - disques pleins colorés (style web de 2026, bulles) ;
+   - en thème sombre (janvier 2025) : panneau noir et bulles claires et rondes ;
    - axes orthogonaux : longs traits fins horizontaux et verticaux (ouverture
      morphologique du « black-hat »), qui se croisent loin de leurs extrémités ;
    - panneau clair et rectangulaire (le fond du graphique) ;
@@ -114,6 +115,12 @@ DISC_DIAMETER = (6, 60)  # diamètres cherchés, en pixels
 PANEL_MIN_FRAC = 0.05  # surface minimale du panneau clair pour chercher des cercles
 WEIGHTS = {"circles": 0.45, "axes": 0.35, "panel": 0.20}
 
+DARK_PANEL_MAX = 50  # niveau de gris maximal du fond d'un graphique sombre
+DARK_BUBBLE_MIN = 110  # niveau de gris minimal de ses bulles
+DARK_MIN_BUBBLES = 4  # en deçà, ce n'est pas un graphique (interface sombre, avatars)
+DARK_MIN_FILL = 0.55  # une interface sombre est morcelée par le texte et les vidéos (≈ 0,43)
+DARK_CHECK_BELOW = 0.75  # le thème sombre n'est testé que si le thème clair n'a pas convaincu
+
 _ANGLES = np.linspace(0.0, 2.0 * np.pi, 32, endpoint=False)
 _COS, _SIN = np.cos(_ANGLES), np.sin(_ANGLES)
 
@@ -132,6 +139,7 @@ class ChartFeatures:
     panel_frac: float
     panel_fill: float
     bbox: tuple[int, int, int, int]  # zone du graphique (x, y, l, h) en pixels de la frame
+    dark: bool = False  # graphique en thème sombre (bulles claires sur fond noir)
 
 
 def _segments(mask: np.ndarray, horizontal: bool) -> list[tuple[float, float, float]]:
@@ -233,6 +241,11 @@ def _colored_discs(
     x0, y0, w, h = roi
     crop = hsv[y0 : y0 + h, x0 : x0 + w]
     mask = ((crop[:, :, 1] >= DISC_SAT_MIN) & (crop[:, :, 2] >= 40)).astype(np.uint8)
+    return _round_components(mask, x0, y0)
+
+
+def _round_components(mask: np.ndarray, x0: int, y0: int) -> list[tuple[float, float, float]]:
+    """Composantes d'un masque à peu près aussi hautes que larges, de surface d'un disque."""
     _, _, stats, centroids = cv2.connectedComponentsWithStats(mask, connectivity=8)
     discs: list[tuple[float, float, float]] = []
     for (_, _, cw, ch, area), (cx, cy) in zip(stats[1:], centroids[1:], strict=True):
@@ -247,12 +260,67 @@ def _colored_discs(
     return discs
 
 
+def _dark_features(gray: np.ndarray, sat: np.ndarray, inv: float) -> ChartFeatures | None:
+    """Graphique en thème sombre (janvier 2025) : panneau noir, bulles claires et rondes,
+    axes clairs. ``None`` sans panneau noir ou sans assez de bulles, ce qui écarte les
+    interfaces sombres (X, Discord)."""
+    height, width = gray.shape
+    mask = ((gray <= DARK_PANEL_MAX) & (sat <= PANEL_SAT_MAX)).astype(np.uint8)
+    # L'ouverture coupe les ponts vers les zones sombres voisines (webcams, logo) ; la
+    # fermeture rebouche ensuite les bulles et le quadrillage.
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((21, 21), np.uint8))
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((41, 41), np.uint8))
+    n, _, stats, _ = cv2.connectedComponentsWithStats(mask, connectivity=8)
+    if n <= 1:
+        return None
+    i = 1 + int(np.argmax(stats[1:, cv2.CC_STAT_AREA]))
+    x, y, w, h, area = (int(v) for v in stats[i])
+    frac, fill = area / (width * height), area / max(1, w * h)
+    if frac < 0.12 or fill < DARK_MIN_FILL:
+        return None
+    # L'ouverture ronge les bords du panneau : on les rend à la zone analysée.
+    x1, y1 = max(0, x - 24), max(0, y - 24)
+    x, y, w, h = x1, y1, min(width, x + w + 24) - x1, min(height, y + h + 24) - y1
+    crop = gray[y : y + h, x : x + w]
+    # L'ouverture retire les axes, qui soudent sinon les bulles qu'ils traversent.
+    bright = (crop >= DARK_BUBBLE_MIN).astype(np.uint8)
+    bright = cv2.morphologyEx(bright, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+    bubbles = _round_components(bright, x, y)
+    if len(bubbles) < DARK_MIN_BUBBLES:
+        return None
+    tophat = cv2.morphologyEx(
+        crop, cv2.MORPH_TOPHAT, cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15))
+    )
+    lines = np.where(tophat >= STRONG_LINE_MIN, 255, 0).astype(np.uint8)
+    hmask = cv2.morphologyEx(
+        lines, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (max(40, w // 2), 1))
+    )
+    vmask = cv2.morphologyEx(
+        lines, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (1, max(30, h // 2)))
+    )
+    axes = axes_kind(_segments(hmask, True), _segments(vmask, False))
+    score = (
+        WEIGHTS["circles"] * min(1.0, len(bubbles) / CIRCLES_FULL)
+        + WEIGHTS["axes"] * {"cross": 1.0, "corner": 0.3}.get(axes or "", 0.0)
+        + WEIGHTS["panel"]
+    )
+    bbox = (int(x * inv), int(y * inv), max(1, int(w * inv)), max(1, int(h * inv)))
+    return ChartFeatures(
+        round(score, 3), 0, len(bubbles), axes, round(frac, 3), round(fill, 3), bbox, dark=True
+    )
+
+
 def chart_features(frame: np.ndarray) -> ChartFeatures:
     """Calcule les indices et le ``chart_score`` (0..1) d'une frame BGR."""
     h0, w0 = frame.shape[:2]
     scale = ANALYSIS_WIDTH / w0
-    img = frame if abs(scale - 1.0) < 1e-3 else cv2.resize(
-        frame, (ANALYSIS_WIDTH, max(1, round(h0 * scale))), interpolation=cv2.INTER_AREA)
+    img = (
+        frame
+        if abs(scale - 1.0) < 1e-3
+        else cv2.resize(
+            frame, (ANALYSIS_WIDTH, max(1, round(h0 * scale))), interpolation=cv2.INTER_AREA
+        )
+    )
     H, W = img.shape[:2]
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -272,22 +340,27 @@ def chart_features(frame: np.ndarray) -> ChartFeatures:
 
     # Axes : longs traits fins et sombres, horizontaux et verticaux.
     blackhat = cv2.morphologyEx(
-        gray, cv2.MORPH_BLACKHAT, cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15)))
+        gray, cv2.MORPH_BLACKHAT, cv2.getStructuringElement(cv2.MORPH_RECT, (15, 15))
+    )
     thin = np.where(blackhat >= THIN_MIN, 255, 0).astype(np.uint8)
     hlen, vlen = max(40, int(AXIS_MIN_FRAC * W)), max(30, int(AXIS_MIN_FRAC * H))
-    hmask = cv2.morphologyEx(thin, cv2.MORPH_OPEN,
-                             cv2.getStructuringElement(cv2.MORPH_RECT, (hlen, 1)))
-    vmask = cv2.morphologyEx(thin, cv2.MORPH_OPEN,
-                             cv2.getStructuringElement(cv2.MORPH_RECT, (1, vlen)))
+    hmask = cv2.morphologyEx(
+        thin, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (hlen, 1))
+    )
+    vmask = cv2.morphologyEx(
+        thin, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (1, vlen))
+    )
     hsegs, vsegs = _segments(hmask, True), _segments(vmask, False)
     axes = axes_kind(hsegs, vsegs)
     # Beaucoup de filets francs : un tableau, pas des axes (les filets pâles d'une
     # interface web, eux, n'empêchent pas de reconnaître les axes du graphique).
     strong = np.where(blackhat >= STRONG_LINE_MIN, 255, 0).astype(np.uint8)
-    strong_h = cv2.morphologyEx(strong, cv2.MORPH_OPEN,
-                                cv2.getStructuringElement(cv2.MORPH_RECT, (hlen, 1)))
-    strong_v = cv2.morphologyEx(strong, cv2.MORPH_OPEN,
-                                cv2.getStructuringElement(cv2.MORPH_RECT, (1, vlen)))
+    strong_h = cv2.morphologyEx(
+        strong, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (hlen, 1))
+    )
+    strong_v = cv2.morphologyEx(
+        strong, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_RECT, (1, vlen))
+    )
     if is_grid(_segments(strong_h, True), _segments(strong_v, False)):
         axes = "grid"
 
@@ -312,17 +385,26 @@ def chart_features(frame: np.ndarray) -> ChartFeatures:
         p_term = 0.5
     else:
         p_term = 0.0
-    score = (WEIGHTS["circles"] * c_term + WEIGHTS["axes"] * a_term
-             + WEIGHTS["panel"] * p_term)
+    score = WEIGHTS["circles"] * c_term + WEIGHTS["axes"] * a_term + WEIGHTS["panel"] * p_term
 
     # Zone du graphique : le panneau clair, sinon l'enveloppe des cercles et des axes.
     if panel is not None and p_term > 0:
         bx, by, bw, bh = panel
     else:
-        xs = [c[0] for c in circles] + [s[0] for s in hsegs] + [s[1] for s in hsegs] \
-            + [s[2] for s in vsegs] + [d[0] for d in discs]
-        ys = [c[1] for c in circles] + [s[2] for s in hsegs] + [s[0] for s in vsegs] \
-            + [s[1] for s in vsegs] + [d[1] for d in discs]
+        xs = (
+            [c[0] for c in circles]
+            + [s[0] for s in hsegs]
+            + [s[1] for s in hsegs]
+            + [s[2] for s in vsegs]
+            + [d[0] for d in discs]
+        )
+        ys = (
+            [c[1] for c in circles]
+            + [s[2] for s in hsegs]
+            + [s[0] for s in vsegs]
+            + [s[1] for s in vsegs]
+            + [d[1] for d in discs]
+        )
         if xs and ys and score > 0:
             x1, x2 = max(0, int(min(xs)) - 20), min(W, int(max(xs)) + 20)
             y1, y2 = max(0, int(min(ys)) - 20), min(H, int(max(ys)) + 20)
@@ -331,14 +413,26 @@ def chart_features(frame: np.ndarray) -> ChartFeatures:
             bx, by, bw, bh = 0, 0, W, H
     inv = 1.0 / scale
     bbox = (int(bx * inv), int(by * inv), max(1, int(bw * inv)), max(1, int(bh * inv)))
-    return ChartFeatures(round(score, 3), len(circles), len(discs), axes, round(panel_frac, 3),
-                         round(panel_fill, 3), bbox)
+    result = ChartFeatures(
+        round(score, 3),
+        len(circles),
+        len(discs),
+        axes,
+        round(panel_frac, 3),
+        round(panel_fill, 3),
+        bbox,
+    )
+    if result.score < DARK_CHECK_BELOW:
+        dark = _dark_features(gray, sat, inv)
+        if dark is not None and dark.score > result.score:
+            return dark
+    return result
 
 
 def region_phash(frame: np.ndarray, bbox: tuple[int, int, int, int]) -> str:
     """pHash (16 caractères hexadécimaux) de la zone du graphique."""
     x, y, w, h = bbox
-    crop = frame[y:y + h, x:x + w]
+    crop = frame[y : y + h, x : x + w]
     if crop.size == 0:
         crop = frame
     return str(imagehash.phash(Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))))
@@ -350,9 +444,20 @@ def region_phash(frame: np.ndarray, bbox: tuple[int, int, int, int]) -> str:
 def probe(path: Path) -> tuple[int, int, float]:
     """Largeur, hauteur et durée (s) du flux vidéo."""
     out = subprocess.run(
-        ["ffprobe", "-v", "error", "-select_streams", "v:0",
-         "-show_entries", "stream=width,height:format=duration", "-of", "json", str(path)],
-        capture_output=True, check=True,
+        [
+            "ffprobe",
+            "-v",
+            "error",
+            "-select_streams",
+            "v:0",
+            "-show_entries",
+            "stream=width,height:format=duration",
+            "-of",
+            "json",
+            str(path),
+        ],
+        capture_output=True,
+        check=True,
     )
     data = json.loads(out.stdout.decode("utf-8"))
     stream = data["streams"][0]
@@ -364,10 +469,24 @@ def iter_frames(
 ) -> Iterator[tuple[float, np.ndarray]]:
     """Frames BGR toutes les ``step`` secondes entre ``start`` et ``end`` (ffmpeg)."""
     cmd = [
-        "ffmpeg", "-hide_banner", "-loglevel", "error", "-nostdin",
-        "-ss", f"{start:.3f}", "-t", f"{max(0.0, end - start):.3f}", "-i", str(path),
-        "-vf", f"fps=1/{step:g},scale={width}:{height}",
-        "-f", "rawvideo", "-pix_fmt", "bgr24", "pipe:1",
+        "ffmpeg",
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-nostdin",
+        "-ss",
+        f"{start:.3f}",
+        "-t",
+        f"{max(0.0, end - start):.3f}",
+        "-i",
+        str(path),
+        "-vf",
+        f"fps=1/{step:g},scale={width}:{height}",
+        "-f",
+        "rawvideo",
+        "-pix_fmt",
+        "bgr24",
+        "pipe:1",
     ]
     size = width * height * 3
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
@@ -387,17 +506,40 @@ def iter_frames(
         proc.wait()
 
 
-def download_video(video_id: str, dest: Path) -> Path:
-    """Télécharge la vidéo seule (≤ 480p) dans ``dest``."""
-    proc = ytdlp(
-        ["-f", VIDEO_FORMAT, "--no-part", "--no-playlist",
-         "-o", str(dest / "%(id)s.%(ext)s"), video_url(video_id)],
-        timeout=7200, max_wait=1800,
-    )
-    files = [p for p in dest.glob(f"{video_id}.*") if p.suffix not in (".part", ".ytdl")]
-    if proc.returncode != 0 or not files:
-        raise RuntimeError(f"téléchargement impossible : {stderr_tail(proc)}")
-    return files[0]
+def download_video(video_id: str, dest: Path, attempts: int = 3) -> Path:
+    """Télécharge la vidéo seule (≤ 480p) dans ``dest``.
+
+    Un HTTP 403 sur le flux est souvent passager : on réessaie quelques fois, en
+    gardant le morceau déjà reçu (``--continue``).
+    """
+    error = ""
+    for attempt in range(1, attempts + 1):
+        proc = ytdlp(
+            [
+                "-f",
+                VIDEO_FORMAT,
+                "--no-playlist",
+                "--continue",
+                "-o",
+                str(dest / "%(id)s.%(ext)s"),
+                video_url(video_id),
+            ],
+            timeout=7200,
+            max_wait=1800,
+        )
+        files = [p for p in dest.glob(f"{video_id}.*") if p.suffix not in (".part", ".ytdl")]
+        if proc.returncode == 0 and files:
+            return files[0]
+        error = stderr_tail(proc)
+        log.warning(
+            "%s : téléchargement interrompu (essai %d/%d) : %s",
+            video_id,
+            attempt,
+            attempts,
+            error[-160:],
+        )
+        time.sleep(20 * attempt)
+    raise RuntimeError(f"téléchargement impossible : {error}")
 
 
 # --------------------------------------------------------------------------- traitement
@@ -426,6 +568,7 @@ def _thumb(frame: np.ndarray, t: float, feats: ChartFeatures) -> np.ndarray:
     label = (
         f"{int(t) // 60:03d}:{int(t) % 60:02d} s={feats.score:.2f} c={feats.n_circles} "
         f"d={feats.n_discs} {feats.axes or '-'} p={feats.panel_frac:.2f}"
+        f"{' SOMBRE' if feats.dark else ''}"
     )
     cv2.putText(th, label, (2, 11), cv2.FONT_HERSHEY_SIMPLEX, 0.36, (0, 0, 160), 1, cv2.LINE_AA)
     return th
@@ -517,8 +660,14 @@ def process_video(
         path = download_video(vid, Path(tmp))
         width, height, duration = probe(path)
         plan = sampling_plan(segments, duration, segment_step, full_step, full_scan)
-        log.info("%s : %dx%d, %.0f s, %d fenêtre(s) d'échantillonnage", vid, width, height,
-                 duration, len(plan))
+        log.info(
+            "%s : %dx%d, %.0f s, %d fenêtre(s) d'échantillonnage",
+            vid,
+            width,
+            height,
+            duration,
+            len(plan),
+        )
         near_miss: list[np.ndarray] | None = [] if review_dir else None
         kept, scores = analyse_video(path, plan, width, height, threshold, max_dist, near_miss)
     # Le dossier temporaire (et la vidéo) est supprimé à la sortie du bloc.
@@ -527,8 +676,9 @@ def process_video(
         write_sheet(
             Path(review_dir) / f"{vid}_kept.png",
             [
-                _thumb(cv2.imdecode(np.frombuffer(k.png, np.uint8), cv2.IMREAD_COLOR), k.t,
-                       k.features)
+                _thumb(
+                    cv2.imdecode(np.frombuffer(k.png, np.uint8), cv2.IMREAD_COLOR), k.t, k.features
+                )
                 for k in kept
             ],
         )
@@ -539,19 +689,22 @@ def process_video(
         png_path = capture_path(vid, k.t)
         write_bytes_atomic(png_path, k.png)
         x, y, w, h = k.features.bbox
-        rows.append({
-            "video_id": vid,
-            "timestamp_s": round(k.t, 1),
-            "file": rel(png_path),
-            "phash": k.phash,
-            "chart_score": k.score,
-            "version_id": None,
-            "upload_date": video.get("upload_date"),
-            "chart_bbox": [x, y, w, h],
-            "n_circles": k.features.n_circles,
-            "n_discs": k.features.n_discs,
-            "axes": k.features.axes,
-        })
+        rows.append(
+            {
+                "video_id": vid,
+                "timestamp_s": round(k.t, 1),
+                "file": rel(png_path),
+                "phash": k.phash,
+                "chart_score": k.score,
+                "version_id": None,
+                "upload_date": video.get("upload_date"),
+                "chart_bbox": [x, y, w, h],
+                "n_circles": k.features.n_circles,
+                "n_discs": k.features.n_discs,
+                "theme": "dark" if k.features.dark else "light",
+                "axes": k.features.axes,
+            }
+        )
     # Un retraitement n'enlève rien : les captures d'un passage antérieur restent.
     files = {r["file"] for r in rows}
     carried = [r for r in previous if r["file"] not in files and (ROOT / r["file"]).exists()]
@@ -559,9 +712,14 @@ def process_video(
     state = {
         "video_id": vid,
         "processed_at": datetime.now(UTC).isoformat(timespec="seconds"),
-        "params": {"threshold": threshold, "phash_max_dist": max_dist,
-                   "segment_step": segment_step, "full_step": full_step,
-                   "full_scan": full_scan, "video_format": VIDEO_FORMAT},
+        "params": {
+            "threshold": threshold,
+            "phash_max_dist": max_dist,
+            "segment_step": segment_step,
+            "full_step": full_step,
+            "full_scan": full_scan,
+            "video_format": VIDEO_FORMAT,
+        },
         "frame_size": [width, height],
         "duration_s": duration,
         "plan": [[round(s, 1), round(e, 1), st] for s, e, st in plan],
@@ -573,13 +731,18 @@ def process_video(
         "scores": scores,
     }
     write_json_atomic(state_path, state)
-    log.info("%s : %d frames notées, %d au-dessus du seuil, %d captures gardées (%.0f s)",
-             vid, state["n_sampled"], state["n_above_threshold"], len(rows), state["elapsed_s"])
+    log.info(
+        "%s : %d frames notées, %d au-dessus du seuil, %d captures gardées (%.0f s)",
+        vid,
+        state["n_sampled"],
+        state["n_above_threshold"],
+        len(rows),
+        state["elapsed_s"],
+    )
     return state
 
 
-def run_batch(videos: Sequence[Video], workers: int, verbose: bool = False,
-              **kwargs: Any) -> int:
+def run_batch(videos: Sequence[Video], workers: int, verbose: bool = False, **kwargs: Any) -> int:
     """Traite des vidéos dans un pool de processus ; renvoie le nombre traité."""
     n_ok = 0
     with process_pool(workers, verbose) as pool:
@@ -606,28 +769,55 @@ def score_images(paths: Sequence[str]) -> None:
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("--ids", nargs="*", help="restreint à ces identifiants de vidéo")
-    ap.add_argument("--limit", type=int, default=None,
-                    help="au plus N vidéos (« graphique » dans le titre d'abord)")
-    ap.add_argument("--relevance", nargs="+", default=["core"], choices=["core", "mention"],
-                    help="pertinences traitées (core)")
+    ap.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="au plus N vidéos (« graphique » dans le titre d'abord)",
+    )
+    ap.add_argument(
+        "--relevance",
+        nargs="+",
+        default=["core"],
+        choices=["core", "mention"],
+        help="pertinences traitées (core)",
+    )
     ap.add_argument("--workers", type=int, default=2, help="processus parallèles (2)")
-    ap.add_argument("--threshold", type=float, default=DEFAULT_THRESHOLD,
-                    help=f"chart_score minimal ({DEFAULT_THRESHOLD})")
-    ap.add_argument("--phash-dist", type=int, default=PHASH_MAX_DIST,
-                    help=f"distance pHash en deçà de laquelle deux frames sont des doublons "
-                         f"({PHASH_MAX_DIST})")
+    ap.add_argument(
+        "--threshold",
+        type=float,
+        default=DEFAULT_THRESHOLD,
+        help=f"chart_score minimal ({DEFAULT_THRESHOLD})",
+    )
+    ap.add_argument(
+        "--phash-dist",
+        type=int,
+        default=PHASH_MAX_DIST,
+        help=f"distance pHash en deçà de laquelle deux frames sont des doublons ({PHASH_MAX_DIST})",
+    )
     ap.add_argument("--segment-step", type=float, default=SEGMENT_STEP)
     ap.add_argument("--full-step", type=float, default=FULL_STEP)
-    ap.add_argument("--full-scan", action="store_true",
-                    help="balaye aussi toute la vidéo (pas --full-step) en plus des segments")
+    ap.add_argument(
+        "--full-scan",
+        action="store_true",
+        help="balaye aussi toute la vidéo (pas --full-step) en plus des segments",
+    )
     ap.add_argument("--force", action="store_true", help="retraite les vidéos déjà traitées")
-    ap.add_argument("--review-dir", default=None,
-                    help="écrit des planches de contrôle (gardées, rejetées de peu) ici")
-    ap.add_argument("--score-images", nargs="+", metavar="PNG",
-                    help="affiche seulement les indices de ces images")
+    ap.add_argument(
+        "--review-dir",
+        default=None,
+        help="écrit des planches de contrôle (gardées, rejetées de peu) ici",
+    )
+    ap.add_argument(
+        "--score-images",
+        nargs="+",
+        metavar="PNG",
+        help="affiche seulement les indices de ces images",
+    )
     ap.add_argument("-v", "--verbose", action="store_true")
     return ap.parse_args(argv)
 
@@ -643,10 +833,18 @@ def main(argv: list[str] | None = None) -> int:
         videos = [v for v in videos if v["relevance"] == "core" or v.get("chart_segments")]
     todo = [v for v in videos if args.force or not (CAPTURE_STATE_DIR / f"{v['id']}.json").exists()]
     log.info("captures : %d vidéos retenues, %d à traiter", len(videos), len(todo))
-    n_ok = run_batch(todo, args.workers, args.verbose, threshold=args.threshold,
-                     max_dist=args.phash_dist, segment_step=args.segment_step,
-                     full_step=args.full_step, full_scan=args.full_scan, force=args.force,
-                     review_dir=args.review_dir)
+    n_ok = run_batch(
+        todo,
+        args.workers,
+        args.verbose,
+        threshold=args.threshold,
+        max_dist=args.phash_dist,
+        segment_step=args.segment_step,
+        full_step=args.full_step,
+        full_scan=args.full_scan,
+        force=args.force,
+        review_dir=args.review_dir,
+    )
     log.info("captures : %d vidéo(s) traitée(s)", n_ok)
     return 0
 

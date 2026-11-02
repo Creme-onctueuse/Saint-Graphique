@@ -63,7 +63,10 @@ def process_one(video: Video, options: dict[str, Any]) -> dict[str, Any]:
         from scripts.collect import extract_frames
 
         state = extract_frames.process_video(
-            video, threshold=options["threshold"], full_scan=options["full_scan"]
+            video,
+            threshold=options["threshold"],
+            full_scan=options["full_scan"],
+            force=options["force_frames"],
         )
         if state:
             report["captures"] = state["n_kept"]
@@ -96,25 +99,49 @@ def run_pool(videos: list[Video], workers: int, options: dict[str, Any], verbose
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    ap = argparse.ArgumentParser(description=__doc__,
-                                 formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--limit", type=int, default=None,
-                    help="au plus N vidéos pour les étapes 2 à 4 (core avec « graphique » d'abord)")
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
+    ap.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="au plus N vidéos pour les étapes 2 à 4 (core avec « graphique » d'abord)",
+    )
     ap.add_argument("--workers", type=int, default=4, help="processus du pool (4)")
-    ap.add_argument("--refresh-listings", action="store_true",
-                    help="relance les listages à plat des chaînes et des recherches")
-    ap.add_argument("--skip-listing", action="store_true",
-                    help="saute l'étape 1 et utilise l'index existant")
-    ap.add_argument("--screen", action="store_true",
-                    help="dépiste aussi par transcription les vidéos écartées depuis 2025")
+    ap.add_argument(
+        "--refresh-listings",
+        action="store_true",
+        help="relance les listages à plat des chaînes et des recherches",
+    )
+    ap.add_argument(
+        "--skip-listing", action="store_true", help="saute l'étape 1 et utilise l'index existant"
+    )
+    ap.add_argument(
+        "--screen",
+        action="store_true",
+        help="dépiste aussi par transcription les vidéos écartées depuis 2025",
+    )
     ap.add_argument("--skip-web", action="store_true", help="saute l'archive web")
     ap.add_argument("--skip-frames", action="store_true", help="saute l'extraction des captures")
+    ap.add_argument(
+        "--force-frames",
+        action="store_true",
+        help="réanalyse les vidéos déjà capturées (aucune capture n'est retirée)",
+    )
     ap.add_argument("--no-whisper", action="store_true", help="n'utilise jamais faster-whisper")
     ap.add_argument("--whisper-threads", type=int, default=4, help="threads de faster-whisper")
-    ap.add_argument("--threshold", type=float, default=None,
-                    help="chart_score minimal (défaut : valeur étalonnée d'extract_frames)")
-    ap.add_argument("--no-full-scan", action="store_true",
-                    help="n'échantillonne que les segments (pas de balayage à 10 s entre eux)")
+    ap.add_argument(
+        "--threshold",
+        type=float,
+        default=None,
+        help="chart_score minimal (défaut : valeur étalonnée d'extract_frames)",
+    )
+    ap.add_argument(
+        "--no-full-scan",
+        action="store_true",
+        help="n'échantillonne que les segments (pas de balayage à 10 s entre eux)",
+    )
     ap.add_argument("-v", "--verbose", action="store_true")
     return ap.parse_args(argv)
 
@@ -141,8 +168,12 @@ def main(argv: list[str] | None = None) -> int:
 
         threshold = DEFAULT_THRESHOLD
     options = {
-        "threshold": threshold, "skip_frames": args.skip_frames, "no_whisper": args.no_whisper,
-        "whisper_threads": args.whisper_threads, "full_scan": not args.no_full_scan,
+        "threshold": threshold,
+        "skip_frames": args.skip_frames,
+        "no_whisper": args.no_whisper,
+        "whisper_threads": args.whisper_threads,
+        "full_scan": not args.no_full_scan,
+        "force_frames": args.force_frames,
     }
     index = load_index()
     videos = select_videos(index, ("core", "mention"), limit=args.limit)
@@ -153,8 +184,12 @@ def main(argv: list[str] | None = None) -> int:
     by_relevance = Counter(v.get("relevance") for v in index.values())
     n_transcripts = sum(1 for v in index.values() if v.get("transcript_path"))
     log.info("bilan de cette exécution : %s", dict(counts))
-    log.info("état : %s, %d transcriptions, %d captures dans le manifeste", dict(by_relevance),
-             n_transcripts, len(read_jsonl(MANIFEST_JSONL)))
+    log.info(
+        "état : %s, %d transcriptions, %d captures dans le manifeste",
+        dict(by_relevance),
+        n_transcripts,
+        len(read_jsonl(MANIFEST_JSONL)),
+    )
     return 1 if counts["echecs"] else 0
 
 
