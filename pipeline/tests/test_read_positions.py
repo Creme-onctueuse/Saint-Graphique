@@ -118,6 +118,7 @@ def test_candidates_match_the_chart_within_the_documented_gap(
     if not read_file.exists() or not computed_file.exists():
         pytest.skip("relevés locaux absents")
     from scripts.analyze.compare import match_candidates, metrics
+    from scripts.analyze.threshold_report import THRESHOLD
 
     document = json.loads(read_file.read_text(encoding="utf-8"))
     computed = json.loads(computed_file.read_text(encoding="utf-8"))
@@ -125,5 +126,5 @@ def test_candidates_match_the_chart_within_the_documented_gap(
     pairs, _ = match_candidates(read, computed["candidates"])
     measured = metrics(pairs)
     assert measured["n"] >= 3
-    assert measured["rmse_x"] < 0.3
-    assert measured["rmse_y"] < 0.3
+    assert measured["rmse_x"] < THRESHOLD
+    assert measured["rmse_y"] < THRESHOLD

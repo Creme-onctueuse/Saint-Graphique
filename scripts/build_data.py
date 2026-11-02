@@ -157,6 +157,19 @@ def _status_counts(items: list[dict[str, Any]], field: str) -> str:
     return ", ".join(f"{counts[s]} {s}" for s in statuses if counts[s])
 
 
+def positions_source_lines() -> list[str]:
+    """Vidéos dont viennent les positions lues, sous forme de liste Markdown."""
+    path = DATA / "positions_chris.json"
+    if not path.exists():
+        return ["Fichier absent de ce dépôt."]
+    document = json.loads(path.read_text(encoding="utf-8"))
+    return [
+        f"- [{source['title']}]({source['url']})"
+        for source in document["sources"]
+        if source.get("publisher") == "PaduTeam"
+    ]
+
+
 def render_sources(
     pcs: dict[str, Any],
     retired: RetiredWealth,
@@ -183,8 +196,9 @@ def render_sources(
         "",
         "Fichier généré par `scripts/build_data.py`, à ne pas modifier à la main.",
         "",
-        "`data/` ne contient que des chiffres issus de publications primaires (Insee, "
-        "nomenclature-pcs.fr, Ifop), ou calculés à partir d'elles par une méthode décrite ici. "
+        "`data/` contient des chiffres issus de publications primaires (Insee, "
+        "nomenclature-pcs.fr, Ifop) ou calculés à partir d'elles par une méthode décrite ici, et "
+        "les positions lues sur les vidéos de la PaduTeam (`data/positions_chris.json`). "
         "Aucune donnée de la reproduction JnthnBS n'y figure : son dépôt, sans licence, n'a servi "
         "que de contrôle local.",
         "",
@@ -439,6 +453,15 @@ def render_sources(
         "- **Scores nationaux officiels.** Remplacer la ligne ensemble des sondages par les "
         "résultats du ministère de l'Intérieur, en tenant compte des agrégats propres à l'Ifop "
         "aux législatives.",
+        "",
+        "## Positions lues sur le graphique de Chris",
+        "",
+        "`data/positions_chris.json` reprend les positions et une partie des poids affichés par "
+        "le tableau de Chris, lus sur ces vidéos de la PaduTeam. Chaque poste y cite sa vidéo et "
+        "son horodatage. Ces chiffres ne sont pas placés sous licence libre. Le fichier est écrit "
+        "par `scripts/analyze/build_positions.py` à partir de relevés locaux.",
+        "",
+        *positions_source_lines(),
         "",
         "## Reproduire",
         "",

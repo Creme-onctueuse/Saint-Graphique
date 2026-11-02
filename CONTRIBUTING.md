@@ -24,6 +24,7 @@ Les étapes communiquent **uniquement par des fichiers dont le format est fixé 
 
 ```
 pipeline/sources/*  ──►  data/pcs.json, data/elections/*.json   (données ouvertes, sourcées)
+scripts/analyze/build_positions.py ──► data/positions_chris.json (positions lues, citées ; relevés locaux requis)
 pipeline/methods/*  ──►  data/computed/<méthode>/<élection>.json (coordonnées)
 web/                ──►  dist/index.html                         (application autonome)
 ```

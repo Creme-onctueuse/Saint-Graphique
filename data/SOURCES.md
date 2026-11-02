@@ -2,7 +2,7 @@
 
 Fichier généré par `scripts/build_data.py`, à ne pas modifier à la main.
 
-`data/` ne contient que des chiffres issus de publications primaires (Insee, nomenclature-pcs.fr, Ifop), ou calculés à partir d'elles par une méthode décrite ici. Aucune donnée de la reproduction JnthnBS n'y figure : son dépôt, sans licence, n'a servi que de contrôle local.
+`data/` contient des chiffres issus de publications primaires (Insee, nomenclature-pcs.fr, Ifop) ou calculés à partir d'elles par une méthode décrite ici, et les positions lues sur les vidéos de la PaduTeam (`data/positions_chris.json`). Aucune donnée de la reproduction JnthnBS n'y figure : son dépôt, sans licence, n'a servi que de contrôle local.
 
 ## Données Ifop : usage personnel et non commercial
 
@@ -121,6 +121,15 @@ La conversion (`sondages.bayes_composition`) est contrôlée sur la présidentie
 - **Patrimoine et niveau de vie des retraités en 2020-2021.** Aucun ensemble publié ; le patrimoine reste un calcul.
 - **Vote des agriculteurs (groupe 1).** Non isolé dans les rapports Ifop et Ipsos consultés. Elabe, Harris Interactive et OpinionWay n'ont pas été consultés.
 - **Scores nationaux officiels.** Remplacer la ligne ensemble des sondages par les résultats du ministère de l'Intérieur, en tenant compte des agrégats propres à l'Ifop aux législatives.
+
+## Positions lues sur le graphique de Chris
+
+`data/positions_chris.json` reprend les positions et une partie des poids affichés par le tableau de Chris, lus sur ces vidéos de la PaduTeam. Chaque poste y cite sa vidéo et son horodatage. Ces chiffres ne sont pas placés sous licence libre. Le fichier est écrit par `scripts/analyze/build_positions.py` à partir de relevés locaux.
+
+- [PaduTeam, Première présentation du graphique (diapositive), 2025-01-07](https://youtu.be/MJsGgEA_Slw?t=421)
+- [PaduTeam, Tableau interactif, infobulles lues, 2025-03-27](https://youtu.be/GTN2rUgOdFo?t=345)
+- [PaduTeam, Tableau en plein écran, 2026-02-14](https://youtu.be/iXImwyHjrwM?t=656)
+- [PaduTeam, Tableau révisé : deux catégories d'employés déplacées, 2026-02-28](https://youtu.be/81kznHfk78k?t=700)
 
 ## Reproduire
 

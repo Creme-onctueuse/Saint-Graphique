@@ -30,3 +30,6 @@ soumises aux conditions de leur source (voir data/SOURCES.md) :
   partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été
   demandé ni obtenu : ces fichiers ne sont pas placés sous licence libre. Ils servent à
   un usage personnel et non commercial et ne sont pas publiés.
+- Chris / PaduTeam : data/positions_chris.json et data/computed/read_positions/ reprennent
+  des valeurs lues sur leurs vidéos, citées par vidéo et horodatage. Ces fichiers ne sont pas
+  placés sous licence libre et ne sont pas publiés.

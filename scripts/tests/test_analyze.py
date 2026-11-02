@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from scripts.analyze import build_positions
+from scripts.analyze import build_positions, overlay, threshold_report
 from scripts.analyze.check_barycenter import (
     collect_group_positions,
     composition_vector,
@@ -582,3 +582,37 @@ def test_choose_weights_refuses_an_unknown_weight() -> None:
         build_positions.choose_weights(
             ["z"], tooltips={"a": 1.0}, census_shares={"a": 1.0}, radii={"a": 1.0}
         )
+
+
+# --- threshold_report et overlay -------------------------------------------------------
+
+
+def test_pooled_gaps_meets_the_threshold_on_both_axes_only() -> None:
+    near = ({"x": 1.0, "y": 1.0}, {"x": 1.1, "y": 0.9})
+    far_on_y = ({"x": 1.0, "y": 1.0}, {"x": 1.1, "y": 2.0})
+    assert threshold_report.pooled_gaps([near])["meets"] is True
+    assert threshold_report.pooled_gaps([far_on_y])["meets"] is False
+
+
+def test_pooled_gaps_without_pairs_does_not_pass() -> None:
+    assert threshold_report.pooled_gaps([]) == {
+        "n": 0,
+        "rmse_x": None,
+        "rmse_y": None,
+        "meets": False,
+    }
+
+
+def test_threshold_is_half_a_grid_step() -> None:
+    assert threshold_report.THRESHOLD == build_positions.GRID / 2
+
+
+def test_overlay_converts_values_to_pixels() -> None:
+    to_pixel = overlay.value_to_pixel([{"pixel": 100, "value": -10}, {"pixel": 300, "value": 10}])
+    assert to_pixel(0) == pytest.approx(200)
+
+
+def test_overlay_radius_grows_with_the_square_root_of_the_weight() -> None:
+    assert overlay.disc_radius(4.0, area_factor=1.0) == 2 * overlay.disc_radius(
+        1.0, area_factor=1.0
+    )
