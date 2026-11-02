@@ -381,6 +381,16 @@ export function asRawPcs(v: unknown): RawPcsData | null {
     if (nvStatus) item.niveau_vie_status = nvStatus;
     const patStatus = str(it['patrimoine_status']);
     if (patStatus) item.patrimoine_status = patStatus;
+    if (isRec(it['patrimoine_composition'])) {
+      const composition: Record<string, number> = {};
+      for (const [key, value] of Object.entries(it['patrimoine_composition'])) {
+        const share = num(value);
+        if (share !== null) composition[key] = share;
+      }
+      item.patrimoine_composition = composition;
+    }
+    const compositionStatus = str(it['patrimoine_composition_status']);
+    if (compositionStatus) item.patrimoine_composition_status = compositionStatus;
     items.push(item);
   }
   return {

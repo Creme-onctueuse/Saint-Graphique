@@ -51,6 +51,9 @@ export interface RawPcsItem {
   /** Statut de la valeur : published, imputed ou calculated (schemas/pcs.schema.json). */
   niveau_vie_status?: string;
   patrimoine_status?: string;
+  /** Composition du patrimoine (%), en grande partie imputée : voir patrimoine_composition_status. */
+  patrimoine_composition?: Record<string, number>;
+  patrimoine_composition_status?: string;
   source_refs?: string[];
   notes?: string;
 }
