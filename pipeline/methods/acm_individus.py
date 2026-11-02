@@ -114,8 +114,9 @@ def run_analysis(table: pd.DataFrame, variables: Mapping[str, Sequence[str]]) ->
     profiles = active.groupby(names, as_index=False, sort=False)[_POIDS].sum()
     indicator = indicator_table(profiles, variables)
     weights = profiles[_POIDS].to_numpy(dtype=float)
-    if np.any((indicator.mul(weights, axis=0)).sum(axis=0) <= 0):
-        empty = indicator.columns[(indicator.mul(weights, axis=0)).sum(axis=0) <= 0].tolist()
+    masses = indicator.mul(weights, axis=0).sum(axis=0)
+    empty = masses.index[masses <= 0].tolist()
+    if empty:
         raise ValueError(f"ACM : modalités sans effectif actif : {empty}")
     j = indicator.shape[1]
     model = fit_weighted_mca(indicator, weights, j - q)
