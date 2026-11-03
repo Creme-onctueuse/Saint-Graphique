@@ -9,8 +9,8 @@ Construction, à partir de ``data/pcs.json`` seul :
    niveau de vie comptent à parts égales. Le logarithme répond à l'asymétrie des montants : le
    patrimoine médian va de 32 à 1 532 k€, et une seule catégorie, celle des chefs d'entreprise,
    tirerait sinon toute l'échelle (asymétrie pondérée sur les PCS actives : de 2,69 à -0,71 pour le
-   patrimoine, de 1,07 à 0,67 pour le niveau de vie). Il compare aussi des rapports plutôt que des écarts : 100 k€ de
-   plus ne pèsent pas pareil à 30 k€ et à 1 500 k€.
+   patrimoine, de 1,07 à 0,67 pour le niveau de vie). Il compare aussi des rapports plutôt que des
+   écarts : 100 k€ de plus ne pèsent pas pareil à 30 k€ et à 1 500 k€.
 2. Capital culturel : ``C = z(Σ poids[k] · part[k])``, les poids ``y_weights`` étant la durée
    théorique des études, en années par rapport au bac (bac+5 : 5 ; bac+3 ou +4 : 3,5 ; bac+2 : 2 ;
    bac : 0 ; CAP, BEP : -1 ; brevet : -3 ; certificat ou aucun diplôme : -4). Cette échelle est
