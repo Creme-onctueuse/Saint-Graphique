@@ -1344,6 +1344,111 @@ async function main() {
       after2027.hash,
     );
 
+    // --- Quitter un croisement ---------------------------------------------------------------------
+    const crossExit = () =>
+      evaluate(`(() => {
+        const chip = document.getElementById('sg-cross-chip');
+        const box = chip.getBoundingClientRect();
+        const panelOpen = !document.getElementById('sg-panel').hidden;
+        const reset = document.getElementById('sg-cross-reset');
+        const presets = document.getElementById('sg-cross-presets');
+        return {
+          chip: !chip.hidden && box.width > 0 && box.left >= 0 && box.right <= innerWidth,
+          chipLabel: chip.textContent,
+          panelOpen,
+          resetAbovePresets: !!(reset.compareDocumentPosition(presets) & Node.DOCUMENT_POSITION_FOLLOWING),
+          resetShown: !reset.hidden,
+          axis: document.querySelector('.sg-axis-title')?.textContent ?? '',
+          hash: location.hash,
+          pcs: document.querySelectorAll('.sg-pcs').length,
+        };
+      })()`);
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1&p=cross&ax=patrimoine&ay=bac5'`);
+    await settle();
+    const crossOpen = await crossExit();
+    check(
+      'croiser : quitter se voit sur la carte et en haut du panneau',
+      crossOpen.chip &&
+        crossOpen.resetShown &&
+        crossOpen.resetAbovePresets &&
+        /Axes libres/.test(crossOpen.chipLabel),
+      JSON.stringify(crossOpen),
+    );
+    await evaluate(`document.getElementById('sg-panel-close').click()`);
+    await settle();
+    const crossClosed = await crossExit();
+    check(
+      'croiser : la croix ferme le panneau, le croisement reste, et la sortie aussi',
+      !crossClosed.panelOpen && /Patrimoine/.test(crossClosed.axis) && crossClosed.chip,
+      JSON.stringify(crossClosed),
+    );
+    await evaluate(`document.getElementById('sg-cross-home').click()`);
+    await settle();
+    await sleep(300);
+    const crossLeft = await crossExit();
+    check(
+      'croiser : la carte par défaut, panneau fermé',
+      !crossLeft.chip &&
+        crossLeft.axis === 'Exploitation' &&
+        crossLeft.pcs === 41 &&
+        !/ax=|ay=/.test(crossLeft.hash),
+      JSON.stringify(crossLeft),
+    );
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1&bs=score'`);
+    await settle();
+    const crossSize = await crossExit();
+    check('croiser : une aire modifiée se quitte aussi', crossSize.chip, JSON.stringify(crossSize));
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1&ax=niveau_vie&ay=bac5&ac=patrimoine'`);
+    await settle();
+    await sleep(800);
+    const legendRoom = await evaluate(`(() => {
+      const a = document.getElementById('sg-color-legend').getBoundingClientRect();
+      const b = document.getElementById('sg-fact').getBoundingClientRect();
+      return { legend: [a.left, a.top, a.right, a.bottom], fact: [b.left, b.top, b.right, b.bottom] };
+    })()`);
+    const [lx0, ly0, lx1, ly1] = legendRoom.legend;
+    const [fx0, fy0, fx1, fy1] = legendRoom.fact;
+    check(
+      'croiser : la légende de couleur ne couvre pas le bouton des constats',
+      fx1 <= lx0 || lx1 <= fx0 || fy1 <= ly0 || ly1 <= fy0,
+      JSON.stringify(legendRoom),
+    );
+    await evaluate(`location.hash = 'e=2017_presidentielle_t1&p=cross&vue=prox&s=c%3Afn'`);
+    await settle();
+    const crossProx = await crossExit();
+    check(
+      'croiser : la proximité se quitte aussi',
+      crossProx.chip && /proximité/.test(crossProx.chipLabel),
+      JSON.stringify(crossProx),
+    );
+    await evaluate(`document.getElementById('sg-zoom-in').click()`);
+    await settle();
+    await evaluate(`document.getElementById('sg-home').click()`);
+    await settle();
+    await sleep(300);
+    const home = await evaluate(`({
+      hash: location.hash,
+      panel: !document.getElementById('sg-panel').hidden,
+      axis: document.querySelector('.sg-axis-title')?.textContent ?? '',
+      pcs: document.querySelectorAll('.sg-pcs').length,
+      chip: !document.getElementById('sg-cross-chip').hidden,
+      inspector: !document.getElementById('sg-inspector').hidden,
+      zoom: document.querySelector('.sg-plot').__zoom?.k ?? null,
+    })`);
+    check(
+      'logo : retour à la vue d’accueil',
+      home.hash === '' &&
+        !home.panel &&
+        home.axis === 'Exploitation' &&
+        home.pcs === 41 &&
+        !home.chip &&
+        !home.inspector,
+      JSON.stringify(home),
+    );
+    check('logo : le zoom revient aussi', home.zoom === 1, String(home.zoom));
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1'`);
+    await settle();
+
     // --- Recherche « Où suis-je ? » ---------------------------------------------------------------------
     const searched = await evaluate(`(async () => {
       const input = document.getElementById('sg-search-input');

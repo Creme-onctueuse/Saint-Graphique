@@ -28,8 +28,14 @@
 
 /* L'aide de première visite cède la place à ce qui s'affiche au même endroit */
 body:has(#sg-lens-banner:not([hidden])) .sg-hint,
-body:has(#sg-color-legend:not([hidden])) .sg-hint {
+body:has(#sg-color-legend:not([hidden])) .sg-hint,
+body:has(#sg-cross-chip:not([hidden])) .sg-hint {
   display: none;
+}
+
+/* La légende de couleur tient sur deux lignes : le bouton des constats passe dessous */
+body:has(#sg-color-legend:not([hidden])) .sg-fact--tl {
+  top: calc(var(--sg-inset-top, 70px) + 62px);
 }
 
 /* Les disques colorés par une variable ne suivent plus la légende des groupes */
@@ -60,6 +66,35 @@ body:has(#sg-color-legend:not([hidden])) .sg-hint {
   padding: 1px 10px;
   border-radius: 999px;
   font-size: 0.78rem;
+}
+
+/* Quitter un croisement : sur la carte, et en haut du panneau Croiser */
+.sg-cross-chip {
+  position: fixed;
+  top: calc(var(--sg-inset-top, 70px) + 6px);
+  right: calc(var(--sg-inset-right, 8px) + 12px);
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px 4px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  transition: right 170ms ease;
+}
+
+.sg-cross-chip .sg-cross-home {
+  flex: none;
+  min-height: 28px;
+  padding: 1px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+.sg-cross-home {
+  border-color: var(--sg-accent);
+  color: var(--sg-text);
+  font-weight: 650;
 }
 
 /* Inspecteur */
@@ -592,6 +627,25 @@ body:has(#sg-color-legend:not([hidden])) .sg-hint {
 
   .sg-lens-banner__more {
     display: none;
+  }
+
+  /* En face du bouton « Le saviez-vous ? », sous la légende et le bandeau d'un groupe. */
+  .sg-cross-chip {
+    top: calc(var(--sg-inset-top, 70px) + 38px);
+    right: 8px;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .sg-cross-chip__label {
+    display: none;
+  }
+
+  .sg-cross-chip .sg-cross-home {
+    background: var(--sg-chrome);
   }
 
   .sg-scale {

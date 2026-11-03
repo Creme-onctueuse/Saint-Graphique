@@ -64,7 +64,7 @@ export class Inspector implements Feature {
     this.actions = actions;
     const reset = el('button', {
       class: 'sg-btn sg-lens-banner__reset',
-      text: 'Revenir à la carte',
+      text: 'Quitter ce groupe',
       attrs: { type: 'button', id: 'sg-lens-reset' },
     });
     reset.addEventListener('click', () => this.clear());

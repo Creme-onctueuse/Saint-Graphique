@@ -5,7 +5,7 @@
 import './crossing.css';
 import { GROUP_SHORT_NAMES } from '../../core/groups.ts';
 import { COLOR_CLASSES } from '../../core/freeAxes.ts';
-import type { AppState, MapLayout } from '../../core/state.ts';
+import { hasCustomLayout, type AppState, type MapLayout } from '../../core/state.ts';
 import type { Variable } from '../../core/variables.ts';
 import type { Dataset } from '../../data/dataset.ts';
 import type { ResolvedView } from '../../view.ts';
@@ -101,10 +101,13 @@ export class CrossPanel implements Feature {
     attrs: { id: 'sg-cross-imputed' },
   });
   private readonly reset = el('button', {
-    class: 'sg-btn',
-    text: 'Revenir à la carte',
+    class: 'sg-btn sg-cross-home',
+    text: '← Carte par défaut',
     attrs: { type: 'button', id: 'sg-cross-reset' },
   });
+  /** Sur la carte : on doit pouvoir quitter un croisement panneau fermé. */
+  private readonly chip: HTMLElement;
+  private readonly chipLabel = el('span', { class: 'sg-cross-chip__label' });
   private readonly scale: HTMLElement;
   private readonly scaleLabel = el('span', { class: 'sg-scale__label' });
   private readonly scaleMin = el('span', { class: 'sg-scale__end' });
@@ -219,6 +222,7 @@ export class CrossPanel implements Feature {
     );
     host.append(
       segmented,
+      this.reset,
       this.note,
       this.freeBox,
       el('label', { class: 'sg-field' }, 'Aire des bulles', this.bubbleSize),
@@ -229,9 +233,26 @@ export class CrossPanel implements Feature {
         el('h3', { text: 'Croisements à essayer' }),
         el('div', { class: 'sg-presets', attrs: { id: 'sg-cross-presets' } }, ...presets),
       ),
-      this.reset,
     );
-    this.reset.addEventListener('click', () => this.chooseMode('map'));
+    this.reset.addEventListener('click', () => this.leave());
+
+    const chipHome = el('button', {
+      class: 'sg-btn sg-cross-home',
+      text: '← Carte par défaut',
+      attrs: { type: 'button', id: 'sg-cross-home' },
+    });
+    chipHome.addEventListener('click', () => this.leave());
+    this.chip = el(
+      'div',
+      {
+        class: 'sg-cross-chip sg-float',
+        attrs: { id: 'sg-cross-chip', role: 'group', 'aria-label': 'Vue croisée' },
+      },
+      this.chipLabel,
+      chipHome,
+    );
+    this.chip.hidden = true;
+    document.body.append(this.chip);
 
     const steps = el('span', { class: 'sg-scale__steps', attrs: { 'aria-hidden': 'true' } });
     for (let i = 1; i <= COLOR_CLASSES; i++) {
@@ -271,6 +292,12 @@ export class CrossPanel implements Feature {
     this.actions.patch({ ...patch, compared: null }, 'normal');
   }
 
+  /** Quitte le croisement : ce qu'il avait réglé, et le cadre qu'il avait fait choisir. */
+  private leave(): void {
+    this.chooseMode('map');
+    this.onLayoutChange();
+  }
+
   sync(view: ResolvedView, state: AppState): void {
     const crossing = view.crossing;
     const mode: CrossMode = crossing?.mode ?? 'map';
@@ -278,7 +305,16 @@ export class CrossPanel implements Feature {
       state.layout === 'proximity' ? 'proximity' : state.axisX || state.axisY ? 'free' : 'map';
     for (const [id, input] of this.modes) input.checked = id === asked;
     this.freeBox.hidden = asked !== 'free';
-    this.reset.hidden = asked === 'map' && !state.bubbleSize;
+    const active = hasCustomLayout(state) || state.colorBy !== null || state.bubbleSize !== null;
+    this.reset.hidden = !active;
+    // À 2027, la carte est déjà celle de la méthode, et la carte de la projection dit ce qui attend.
+    this.chip.hidden = !active || crossing?.suspended === true;
+    this.chipLabel.textContent =
+      asked === 'free'
+        ? 'Axes libres'
+        : asked === 'proximity'
+          ? 'Carte de proximité'
+          : `Aire : ${crossing?.sizeLabel ?? ''}`;
 
     const free = crossing?.free ?? null;
     if (free) {
@@ -298,7 +334,7 @@ export class CrossPanel implements Feature {
         'À 2027, l’aire reprend la part des inscrits de chaque parti à son dernier scrutin : aucun score n’est projeté par parti.';
     } else if (lensActive) {
       this.sizeNote.textContent =
-        'Une catégorie est choisie : l’aire montre le vote de son groupe. « Revenir à la carte » rend la main à ce menu.';
+        'Une catégorie est choisie : l’aire montre le vote de son groupe. « Quitter ce groupe » rend la main à ce menu.';
     } else {
       this.sizeNote.textContent = state.bubbleSize?.startsWith('var:')
         ? 'Ordre de grandeur : part des inscrits de l’électorat × moyenne de la variable selon sa composition, à partir des médianes par catégorie.'

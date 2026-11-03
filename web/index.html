@@ -53,15 +53,33 @@
 
     <header class="sg-top sg-float" id="sg-top">
       <div class="sg-brand">
-        <svg class="sg-logo" viewBox="0 0 32 32" aria-hidden="true">
-          <rect class="sg-logo__bg" width="32" height="32" rx="8" />
-          <ellipse class="sg-logo__halo" cx="16" cy="6.6" rx="6.6" ry="2.5" />
-          <path class="sg-logo__axis" d="M16 11.5v15M8 19h16" />
-          <circle class="sg-logo__dot" cx="21" cy="14.4" r="2.5" />
-          <path class="sg-logo__dot" d="M11 20.6l3 3-3 3-3-3z" />
-        </svg>
+        <button
+          class="sg-home"
+          id="sg-home"
+          type="button"
+          aria-label="Revenir à la carte par défaut"
+          title="Revenir à la carte par défaut"
+        >
+          <svg class="sg-logo" viewBox="0 0 32 32" aria-hidden="true">
+            <rect class="sg-logo__bg" width="32" height="32" rx="8" />
+            <ellipse class="sg-logo__halo" cx="16" cy="6.6" rx="6.6" ry="2.5" />
+            <path class="sg-logo__axis" d="M16 11.5v15M8 19h16" />
+            <circle class="sg-logo__dot" cx="21" cy="14.4" r="2.5" />
+            <path class="sg-logo__dot" d="M11 20.6l3 3-3 3-3-3z" />
+          </svg>
+        </button>
         <div class="sg-brand__text">
-          <h1 class="sg-title">Le Saint-Graphique</h1>
+          <h1 class="sg-title">
+            <button
+              class="sg-home sg-home--title"
+              id="sg-home-title"
+              type="button"
+              tabindex="-1"
+              title="Revenir à la carte par défaut"
+            >
+              Le Saint-Graphique
+            </button>
+          </h1>
           <p class="sg-subtitle">
             <span class="sg-chart-heading" id="sg-chart-heading"></span>
             <span class="sg-subtitle__sep" aria-hidden="true">·</span>

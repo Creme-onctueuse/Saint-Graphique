@@ -13,7 +13,7 @@ import { TrailsLayer } from './chart/layers/trails.ts';
 import { Spokes } from './chart/layers/spokes.ts';
 import { sameWeights } from './core/scores.ts';
 import { selectionPatch } from './core/selection.ts';
-import { parseState, serializeState, type AppState } from './core/state.ts';
+import { defaultState, parseState, serializeState, type AppState } from './core/state.ts';
 import { carrySelection } from './core/timeline.ts';
 import { loadDataset } from './data/load.ts';
 import { initAbout } from './ui/about.ts';
@@ -262,6 +262,15 @@ export function startApp(): void {
     state = readState();
     render('normal');
   });
+
+  // La vue d'accueil : tout revient à son réglage de départ, sauf le thème, qui est une préférence.
+  const goHome = (): void => {
+    timeline.stopPlaying();
+    update({ ...defaultState(), theme: state.theme }, 'normal');
+    chart.resetZoom();
+  };
+  byId('sg-home').addEventListener('click', goHome);
+  byId('sg-home-title').addEventListener('click', goHome);
 
   byId('sg-zoom-in').addEventListener('click', () => chart.zoomBy(1.6));
   byId('sg-zoom-out').addEventListener('click', () => chart.zoomBy(1 / 1.6));

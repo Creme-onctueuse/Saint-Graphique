@@ -377,7 +377,7 @@ export class Timeline implements Feature {
     this.frame = requestAnimationFrame((t) => this.step(t));
   }
 
-  private stopPlaying(): void {
+  stopPlaying(): void {
     if (this.timer !== undefined) {
       window.clearInterval(this.timer);
       this.timer = undefined;
