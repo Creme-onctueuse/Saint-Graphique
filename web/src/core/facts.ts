@@ -336,9 +336,27 @@ function mostAlike(ds: Dataset, method: string): Fact | null {
   };
 }
 
-/** Le même électorat de candidat est le plus proche du centre de la population à chaque présidentielle. */
+/** L'électorat de candidat le plus proche du centre de la population, à une présidentielle. */
+function closestAt(election: RawElection, file: ComputedFile): { id: string; map: number } | null {
+  let closest: { id: string; map: number } | null = null;
+  for (const c of comparable(election)) {
+    const point = pointOf(file, c.id);
+    if (!point) continue;
+    const map = distance(point, file.population_barycenter);
+    if (!closest || map < closest.map) closest = { id: c.id, map };
+  }
+  return closest;
+}
+
+/**
+ * Le même électorat de candidat est le plus proche du centre de la population aux deux dernières
+ * présidentielles. La règle porte sur ces deux-là, fixées d'avance : si elles divergent, le constat
+ * disparaît. Le rang change avant elles : la réserve donne le précédent, pour ne pas laisser croire
+ * à une constante.
+ */
 function closestToCentre(ds: Dataset, method: string): Fact | null {
-  const list = presidentials(ds);
+  const all = presidentials(ds);
+  const list = all.slice(-2);
   if (list.length < 2) return null;
   const groupOf = groupOfCode(ds);
   const rows: { year: number; id: string; label: string; map: number; gap: number }[] = [];
@@ -348,13 +366,7 @@ function closestToCentre(ds: Dataset, method: string): Fact | null {
     if (!election || !file) return null;
     const { weights } = voteByGroup(election, groupOf);
     const everyone = Object.fromEntries(weights);
-    let closest: { id: string; map: number } | null = null;
-    for (const c of comparable(election)) {
-      const point = pointOf(file, c.id);
-      if (!point) continue;
-      const map = distance(point, file.population_barycenter);
-      if (!closest || map < closest.map) closest = { id: c.id, map };
-    }
+    const closest = closestAt(election, file);
     if (!closest) return null;
     const gap = compositionGap(compositionByGroup(election, closest.id, groupOf), everyone);
     if (!closenessConfirmed(closest.map, gap)) return null;
@@ -380,6 +392,14 @@ function closestToCentre(ds: Dataset, method: string): Fact | null {
     numbers[`map${r.year}`] = r.map;
     numbers[`gap${r.year}`] = r.gap;
   }
+  const before = all.at(-3);
+  const beforeElection = before && ds.rawElections.get(before.id);
+  const beforeFile = before ? fileOf(ds, method, before.id) : null;
+  const beforeClosest = beforeElection && beforeFile ? closestAt(beforeElection, beforeFile) : null;
+  const previously =
+    before && beforeElection && beforeClosest && beforeClosest.id !== last.id
+      ? ` En ${before.year}, c'était celui ${ofName(labelOf(beforeElection, beforeClosest.id))} : ce rang change d'une époque à l'autre.`
+      : '';
   return {
     id: 'centre-population',
     text:
@@ -387,7 +407,7 @@ function closestToCentre(ds: Dataset, method: string): Fact | null {
       `${years}, est celui ${ofName(last.label)} : ${maps} unité sur la carte.`,
     numbers,
     scope: { n: rows.length, unit: 'présidentielles', elections: list.map((e) => e.id) },
-    caveat: `Être au centre, c'est ressembler à la moyenne, pas être centriste. Composition confirmée : ${gaps} points d'écart avec l'ensemble des inscrits.`,
+    caveat: `Être au centre, c'est ressembler à la moyenne, pas être centriste. Composition confirmée : ${gaps} points d'écart avec l'ensemble des inscrits.${previously}`,
     usesPositions: true,
     target: {
       election: lastInfo.id,
@@ -411,7 +431,8 @@ function rnFollowsCap(ds: Dataset, method: string): Fact | null {
   const rNoDiploma = mean(noDiploma.map((c) => c.r));
   const rIncome = mean(income.map((c) => c.r));
   if (Math.abs(rCap) <= Math.abs(rNoDiploma) || Math.abs(rCap) <= Math.abs(rIncome)) return null;
-  const n = cap[0]?.n ?? 0;
+  // Certains sondages détaillent sept groupes : le chiffre annoncé est celui du tableau le plus court.
+  const n = Math.min(...cap.map((c) => c.n));
   const last = lastElectionOf(ds, rn);
   const candidate = last ? rn.candidates.get(last.id) : undefined;
   if (!last || !candidate) return null;
@@ -443,7 +464,12 @@ interface RetiredShift {
   legislativesLast: number;
 }
 
-function retiredShift(ds: Dataset, f: FamilyInfo): RetiredShift | null {
+function retiredShift(
+  ds: Dataset,
+  f: FamilyInfo,
+  start: ElectionInfo,
+  end: ElectionInfo,
+): RetiredShift | null {
   const groupOf = groupOfCode(ds);
   const shareAt = (id: string): number | null => {
     const election = ds.rawElections.get(id);
@@ -451,16 +477,19 @@ function retiredShift(ds: Dataset, f: FamilyInfo): RetiredShift | null {
     if (!election || !candidate) return null;
     return compositionByGroup(election, candidate, groupOf)[RETIRED_GROUP] ?? null;
   };
-  const start = firstElectionOf(ds, f);
-  const end = lastElectionOf(ds, f);
-  const legislatives = ds.elections.filter(
-    (e) => e.type === 'legislatives' && f.candidates.has(e.id),
-  );
   const dates = ds.families?.dates;
-  legislatives.sort((a, b) => (dates?.get(a.id) ?? 0) - (dates?.get(b.id) ?? 0));
+  const dateOf = (e: ElectionInfo): number => dates?.get(e.id) ?? 0;
+  const legislatives = ds.elections.filter(
+    (e) =>
+      e.type === 'legislatives' &&
+      f.candidates.has(e.id) &&
+      dateOf(e) >= dateOf(start) &&
+      dateOf(e) <= dateOf(end),
+  );
+  legislatives.sort((a, b) => dateOf(a) - dateOf(b));
   const legFirst = legislatives[0];
   const legLast = legislatives.at(-1);
-  if (!start || !end || !legFirst || !legLast || legFirst === legLast) return null;
+  if (!legFirst || !legLast || legFirst === legLast) return null;
   const first = shareAt(start.id);
   const last = shareAt(end.id);
   const legislativesFirst = shareAt(legFirst.id);
@@ -472,21 +501,24 @@ function retiredShift(ds: Dataset, f: FamilyInfo): RetiredShift | null {
 }
 
 /**
- * Deux électorats dont la part de retraités évolue en sens inverse. Le premier et le dernier scrutin
+ * Deux électorats dont la part de retraités évolue en sens inverse, sur les scrutins où les deux
+ * familles existent : la période ne dépend que de la plus récente. Le premier et le dernier scrutin
  * ne sont pas du même type : le sens doit donc se retrouver sur les seules législatives.
  */
 function retiredSwap(ds: Dataset, method: string): Fact | null {
   const up = family(ds, 'macron');
   const down = family(ds, 'lr');
   if (!up || !down) return null;
-  const a = retiredShift(ds, up);
-  const b = retiredShift(ds, down);
-  const start = firstElectionOf(ds, up);
-  const end = lastElectionOf(ds, up);
-  if (!a || !b || !start || !end) return null;
-  if (firstElectionOf(ds, down)?.id !== start.id || lastElectionOf(ds, down)?.id !== end.id) {
-    return null;
-  }
+  const shared: FamilyInfo = {
+    ...up,
+    candidates: new Map([...up.candidates].filter(([id]) => down.candidates.has(id))),
+  };
+  const start = firstElectionOf(ds, shared);
+  const end = lastElectionOf(ds, shared);
+  if (!start || !end) return null;
+  const a = retiredShift(ds, up, start, end);
+  const b = retiredShift(ds, down, start, end);
+  if (!a || !b) return null;
   const rises = a.last > a.first && a.legislativesLast > a.legislativesFirst;
   const falls = b.last < b.first && b.legislativesLast < b.legislativesFirst;
   if (!rises || !falls) return null;
