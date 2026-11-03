@@ -17,10 +17,15 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnage [
 - Recherche d'un métier, d'une catégorie ou d'un électorat (touche `/`), et visite guidée en cinq étapes.
 - Panneau Croiser : l'aire des bulles peut montrer le score, le poids d'un groupe, son vote ou la part d'un total.
 - Balises de partage et image d'aperçu pour le site, avec l'adresse fixée au build.
+- Axes libres : échelle linéaire, logarithmique ou de rang sur chaque axe, avec des graduations en valeurs réelles. Le patrimoine, la part du professionnel et la détention d'entreprise s'ouvrent en logarithme.
+- « ← Carte par défaut » sur la carte tant qu'un croisement est actif, et en haut du panneau Croiser. Le logo et le titre ramènent à la vue d'accueil.
+- Jeu : « Placez-le » et la série du jour, en plus de « Qui est-ce ? ». Chaque réponse cite son sondage.
 - `saint-graphique.html` à la racine du dépôt : la page s'ouvre d'un double-clic après un clone, sans rien installer. La CI vérifie qu'elle correspond au build.
 
 ### Modifié
 
+- À 2027, chaque parti a sa bulle, dont l'aire reprend son dernier scrutin, et non un score prévu. Les cercles d'erreur s'affichent à la demande, ou pour le parti sélectionné.
+- Le bandeau d'un groupe sélectionné devient « Quitter ce groupe » : il ne fait que retirer la sélection.
 - Un électorat est une seule bulle, dont l'aire donne la part des inscrits, à la même échelle que les disques des catégories. Les halos des groupes disparaissent, et les ellipses de confiance deviennent une option.
 - La lecture de la frise est continue, image par image : chaque famille glisse d'une élection à l'autre, sans pause ni fondu.
 - La page passe de 815 à 570 Kio à données égales, car les valeurs répétées d'un fichier à l'autre ne sont embarquées qu'une fois. `data/computed/` reste complet.
@@ -33,6 +38,10 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnage [
 
 ### Corrigé
 
+- 2027 ne casse plus la carte après un croisement : la projection se dessinait à l'échelle des axes libres, les électorats disparaissaient, et le zoom laissait la carte vide au retour. Le croisement attend maintenant le scrutin suivant, et quitter 2027 rend la carte entière.
+- Un cadre demandé pendant que la carte glisse se calcule à son arrivée : il pouvait tomber hors de la carte, y compris à 2027 depuis la carte par défaut.
+- La lecture de la frise sur des axes libres ne cadre plus sur des positions à la mauvaise échelle, et s'arrête avant 2027.
+- La légende de couleur ne couvre plus le bouton « Le saviez-vous ? ».
 - Les axes restent au bord de la carte, panneau ouvert, en zoomant et en se déplaçant : la carte est découpée à sa zone de tracé et ses axes glissent avec elle.
 - Un clic vise le point le plus proche, puis la plus petite bulle : il ne tombe plus sur un électorat voisin qui recouvre le premier.
 - Chronologie : la vue stylisée sur fond noir apparaît dès le 12 janvier 2025. Ajout des limites du relevé, une fois la collecte terminée.

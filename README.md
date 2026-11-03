@@ -51,10 +51,11 @@ Chaque électorat est une bulle. Son aire donne sa part des inscrits, à la mêm
 - **Électorat :** les lignes vers chaque groupe social, ceux qui y sont surreprésentés, les électorats les plus ressemblants, et son historique de scrutin en scrutin.
 - **Catégorie :** comment vote son groupe. Les bulles se redimensionnent pour le montrer. Les sondages ne détaillent que six ou sept groupes : c'est le vote du groupe entier, ce que la page précise.
 - **Duel :** Maj + clic compare deux électorats, en composition et en distance sur la carte.
-- **Croiser :** des axes libres parmi une dizaine de variables de l'Insee, et une carte de proximité où la distance dit la ressemblance des compositions.
+- **Croiser :** des axes libres parmi une dizaine de variables de l'Insee, et une carte de proximité où la distance dit la ressemblance des compositions. Chaque axe libre peut être linéaire, logarithmique ou en rang, et ses graduations restent des valeurs réelles. Le logarithme est refusé si une catégorie vaut zéro. « ← Carte par défaut » reste visible sur la carte tant qu'un croisement est actif, et le logo ramène à la vue d'accueil.
 - **Frise :** une lecture de 1995 à 2024 avec les trajectoires des familles politiques et le vote de chaque groupe en anneaux. Seuls les électorats bougent : les catégories gardent la même position à toutes les élections.
-- **Projection 2027 :** deux scénarios, « rien ne bouge » et « la tendance continue ». Testée sur le passé, la tendance prédit moins bien : la page affiche ce résultat à côté de la projection, qui n'est pas une prévision (voir la [méthodologie](docs/methodologie.md)).
-- **Le saviez-vous ? et Qui est-ce ? :** des constats calculés sur les données, et un petit jeu.
+- **Projection 2027 :** deux scénarios, « rien ne bouge » et « la tendance continue ». Testée sur le passé, la tendance prédit moins bien : la page affiche ce résultat à côté de la projection, qui n'est pas une prévision (voir la [méthodologie](docs/methodologie.md)). L'aire des bulles y reprend le dernier scrutin de chaque parti, et non un score prévu. La projection n'existe que sur les axes de la carte : un croisement attend le scrutin suivant.
+- **Le saviez-vous ? :** des constats calculés sur les données.
+- **Jeu :** « Qui est-ce ? » retrouve un électorat d'après sa composition, « Placez-le » le pose sur la carte, et la série du jour mêle les deux en cinq manches, les mêmes pour tous ce jour-là. Chaque réponse cite son sondage.
 - **Recherche :** un métier, une catégorie ou un électorat, avec la touche `/`. Elle reste dans la page : rien n'est conservé ni envoyé.
 - **Visite guidée :** cinq étapes pour découvrir la carte, depuis la boussole.
 
