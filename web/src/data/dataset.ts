@@ -9,6 +9,7 @@
  * - _raw/pcs.json, _raw/elections/<id>.json : données brutes (facultatives), copiées depuis data/
  *   ou référencées/incluses dans index.json (clé `raw`) ; elles permettent le recalcul client ;
  * - _config.json : config/*.yaml converti par sync-data (libellés courts, couleurs, paramètres).
+ * - _pool.json : valeurs que les fichiers calculés ont en commun (voir unpack.ts).
  */
 import {
   DIPLOMA_KEYS,
@@ -25,6 +26,7 @@ import {
   type SourceRef,
 } from '../core/types.ts';
 import { asProjectionFile, type ProjectionFile } from '../core/projection.ts';
+import { unpackComputed } from './unpack.ts';
 
 /** Axes propres à une méthode (config/methods.yaml, methods.<id>.axes). */
 export interface MethodAxes {
@@ -524,7 +526,8 @@ function humanize(id: string): string {
 }
 
 /** Construit le jeu de données à partir des fichiers embarqués (clé = chemin relatif). */
-export function buildDataset(files: Readonly<Record<string, unknown>>): Dataset {
+export function buildDataset(embedded: Readonly<Record<string, unknown>>): Dataset {
+  const files = unpackComputed(embedded);
   const warnings: string[] = [];
   const index = rec(files['index.json']);
   const config = rec(files['_config.json']);
