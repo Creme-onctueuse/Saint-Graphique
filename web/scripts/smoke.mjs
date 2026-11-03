@@ -146,6 +146,9 @@ async function main() {
   await Promise.all(
     ['Runtime.enable', 'Log.enable', 'Network.enable', 'Page.enable'].map((m) => cdp.send(m)),
   );
+  // Sans fenêtre active, element.focus() ne déclenche aucun événement : les vérifications au clavier
+  // ne passeraient que dans les navigateurs qui ont pris le focus par hasard.
+  await cdp.send('Emulation.setFocusEmulationEnabled', { enabled: true });
   const emulateScheme = (value) =>
     cdp.send('Emulation.setEmulatedMedia', {
       features: [{ name: 'prefers-color-scheme', value }],
