@@ -17,6 +17,7 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnage [
 - Recherche d'un métier, d'une catégorie ou d'un électorat (touche `/`), et visite guidée en cinq étapes.
 - Panneau Croiser : l'aire des bulles peut montrer le score, le poids d'un groupe, son vote ou la part d'un total.
 - Balises de partage et image d'aperçu pour le site, avec l'adresse fixée au build.
+- `saint-graphique.html` à la racine du dépôt : la page s'ouvre d'un double-clic après un clone, sans rien installer. La CI vérifie qu'elle correspond au build.
 
 ### Modifié
 

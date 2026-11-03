@@ -10,6 +10,15 @@ Le Saint-Graphique a été créé par **Chris et la PaduTeam**. Voir [Crédits e
 
 **Statut :** v1.2 en cours, une carte interactive construite sur la réplique du tableau de Chris de février 2026 ([fidélité mesurée](#fidélité-de-la-réplique), [feuille de route](#feuille-de-route)). **Projet libre et non commercial :** les chiffres tirés des rapports Ifop sont cités et retirés sur demande ([détails](#données-ifop--projet-libre-et-non-commercial)).
 
+## Ouvrir la carte
+
+Rien à installer : la carte tient dans un seul fichier et fonctionne sans connexion.
+
+1. Récupérez le dépôt avec `git clone https://github.com/Creme-onctueuse/Saint-Graphique.git`, ou par **Code > Download ZIP** sur GitHub, puis décompressez l'archive.
+2. Double-cliquez sur **`saint-graphique.html`**, à la racine du dossier. La page s'ouvre dans votre navigateur.
+
+Pour modifier le projet, voir [Développer](#développer).
+
 ## Le principe
 
 Chaque **catégorie socioprofessionnelle** (PCS de l'Insee) est placée sur deux axes, de −10 à +10 :
@@ -51,7 +60,7 @@ Chaque électorat est une bulle. Son aire donne sa part des inscrits, à la mêm
 
 La carte s'étire pour remplir l'écran, si bien que les deux axes n'ont pas la même échelle. L'option « Proportions d'origine » rétablit le format carré. Les distances citées sont toujours mesurées en unités de la carte, jamais à l'écran.
 
-## Démarrage rapide
+## Développer
 
 ```powershell
 # Windows : installe Git, Node, Python 3.12, uv, FFmpeg, VS Code et les dépendances
@@ -61,6 +70,7 @@ uv run python scripts/build_data.py     # données ouvertes -> data/pcs.json, da
 uv run python -m pipeline.build         # méthodes -> data/computed/**
 cd web; pnpm dev                        # application en développement
 pnpm build                              # -> web/dist/index.html (fichier unique, autonome)
+pnpm page                               # build, puis copie vers saint-graphique.html, à commiter
 ```
 
 Sous Linux ou macOS : `uv sync --all-extras`, puis `cd web && pnpm install`.
@@ -70,6 +80,7 @@ Pour la vérification complète (identique à la CI) : `scripts/check.ps1`.
 ## Organisation du dépôt
 
 ```
+saint-graphique.html   la page prête à ouvrir : copie du build, comparée par la CI
 config/      configuration déclarative (PCS, élections, paramètres des méthodes)
 schemas/     JSON Schemas des fichiers échangés entre étapes (contrats)
 pipeline/    Python : sources/ (collecte des données ouvertes), methods/ (placement), build.py

@@ -6,7 +6,7 @@ powershell -ExecutionPolicy Bypass -File scripts/setup.ps1   # Windows
 ```
 Sous Linux ou macOS : installer `uv`, Node 22+ et `pnpm`, puis lancer `uv sync --all-extras` et `cd web && pnpm install`.
 
-Pour vérifier l'ensemble : `scripts/check.ps1`, qui enchaîne ruff, pytest, la validation des schémas, eslint, vitest et le build.
+Pour vérifier l'ensemble : `scripts/check.ps1`, qui enchaîne ruff, pytest, la validation des schémas, eslint, vitest et le build, puis compare `saint-graphique.html` au build.
 
 ### Cache des téléchargements
 Les fichiers sources bruts (INSEE, sondages) sont mis en cache **hors du dépôt** :
@@ -41,5 +41,6 @@ web/                ──►  dist/index.html                         (applicat
 
 ## Règles
 - **Aucun chiffre sans source.** Toute donnée doit être référencée dans `data/SOURCES.md`.
+- `saint-graphique.html`, à la racine, est la page que l'on ouvre sans rien installer. C'est une copie exacte du build, à ne pas modifier à la main : après un changement dans `web/`, `config/` ou `data/`, lancez `pnpm page` dans `web/` et commitez le fichier. `scripts/check.ps1` et la CI échouent s'il ne correspond plus.
 - `research/` (vidéos, transcriptions, captures) est local et ne doit **jamais** être commité, pour des raisons de droit d'auteur.
 - Le code est documenté en français, les messages de commit suivent la convention Conventional Commits.
