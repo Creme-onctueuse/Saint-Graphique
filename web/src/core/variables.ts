@@ -4,6 +4,7 @@
  *
  * Module pur, testé dans freeAxes.test.ts.
  */
+import type { AxisScale } from './axisScale.ts';
 import { formatNumber, formatPct, NBSP } from './format.ts';
 import type { RawPcsItem } from './types.ts';
 
@@ -13,6 +14,8 @@ export interface Variable {
   label: string;
   /** Vrai si la plupart des valeurs sont imputées : à signaler partout où la variable apparaît. */
   imputed: boolean;
+  /** Échelle proposée d'abord. Sans précision : linéaire. */
+  defaultScale?: AxisScale;
   read(item: RawPcsItem): number | null;
   format(value: number): string;
 }
@@ -25,11 +28,12 @@ const euros = (v: number): string => `${formatNumber(v, 0)}${NBSP}€`;
 const thousandEuros = (v: number): string => `${formatNumber(v, 0)}${NBSP}k€`;
 const percent = (v: number): string => formatPct(v, 0);
 
-function composition(id: string, label: string, key: string): Variable {
+function composition(id: string, label: string, key: string, defaultScale?: AxisScale): Variable {
   return {
     id,
     label,
     imputed: true,
+    ...(defaultScale ? { defaultScale } : {}),
     read: (item) => finite(item.patrimoine_composition?.[key]),
     format: percent,
   };
@@ -47,6 +51,8 @@ export const VARIABLES: readonly Variable[] = [
     id: 'patrimoine',
     label: 'Patrimoine médian',
     imputed: false,
+    // 1 532 k€ pour les chefs d'entreprise, 255 k€ pour la catégorie médiane.
+    defaultScale: 'log',
     read: (item) => finite(item.patrimoine_keur),
     format: thousandEuros,
   },
@@ -80,9 +86,14 @@ export const VARIABLES: readonly Variable[] = [
   },
   composition('immobilier', 'Part de l’immobilier dans le patrimoine', 'immobilier_pct'),
   composition('financier', 'Part du financier dans le patrimoine', 'financier_pct'),
-  composition('professionnel', 'Part du professionnel dans le patrimoine', 'professionnel_pct'),
+  composition(
+    'professionnel',
+    'Part du professionnel dans le patrimoine',
+    'professionnel_pct',
+    'log',
+  ),
   composition('proprietaire', 'Ménages propriétaires', 'proprietaire_pct'),
-  composition('entreprise', 'Ménages détenant une entreprise', 'detention_entreprise_pct'),
+  composition('entreprise', 'Ménages détenant une entreprise', 'detention_entreprise_pct', 'log'),
 ];
 
 export function variableById(id: string | null): Variable | null {

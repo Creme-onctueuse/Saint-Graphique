@@ -28,6 +28,8 @@ const custom: AppState = {
   scenario: 'trend',
   axisX: 'niveau_vie',
   axisY: 'bac5',
+  scaleX: 'rank',
+  scaleY: 'log',
   colorBy: 'patrimoine',
   layout: 'proximity',
 };
@@ -42,7 +44,8 @@ describe('scénario de la projection', () => {
 
 describe('aller-retour dans l’URL', () => {
   it('ignore un panneau ou un filtre inconnu', () => {
-    const s = parseState('#p=rien&ty=municipales&sc=autre&vue=autre');
+    const s = parseState('#p=rien&ty=municipales&sc=autre&vue=autre&xs=carre');
+    expect(s.scaleX).toBeNull();
     expect(s.panel).toBeNull();
     expect(s.typeFilter).toBe('all');
     expect(s.scenario).toBe('still');

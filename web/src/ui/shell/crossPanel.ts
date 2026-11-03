@@ -3,8 +3,9 @@
  * variables Insee, ou la carte de proximité. La légende de la couleur flotte sur la carte.
  */
 import './crossing.css';
+import { AXIS_SCALES, type AxisScale } from '../../core/axisScale.ts';
 import { GROUP_SHORT_NAMES } from '../../core/groups.ts';
-import { COLOR_CLASSES } from '../../core/freeAxes.ts';
+import { COLOR_CLASSES, type FreeAxis } from '../../core/freeAxes.ts';
 import { hasCustomLayout, type AppState, type MapLayout } from '../../core/state.ts';
 import type { Variable } from '../../core/variables.ts';
 import type { Dataset } from '../../data/dataset.ts';
@@ -75,6 +76,18 @@ const MODES: readonly { id: CrossMode; label: string }[] = [
   { id: 'proximity', label: 'Proximité' },
 ];
 
+const SCALE_CHOICES: Record<AxisScale, { label: string; title: string }> = {
+  linear: {
+    label: 'Linéaire',
+    title: 'Des écarts égaux à l’écran sont des écarts de valeur égaux.',
+  },
+  log: { label: 'Log', title: 'Des écarts égaux à l’écran sont des rapports égaux.' },
+  rank: {
+    label: 'Rang',
+    title: 'Les catégories se suivent à intervalles égaux : seul l’ordre compte.',
+  },
+};
+
 const DEFAULT_X = 'patrimoine';
 const DEFAULT_Y = 'bac5';
 
@@ -95,6 +108,9 @@ export class CrossPanel implements Feature {
   private readonly axisX = el('select', { attrs: { id: 'sg-axis-x' } });
   private readonly axisY = el('select', { attrs: { id: 'sg-axis-y' } });
   private readonly colorBy = el('select', { attrs: { id: 'sg-color-by' } });
+  private readonly scaleX = new Map<AxisScale, HTMLInputElement>();
+  private readonly scaleY = new Map<AxisScale, HTMLInputElement>();
+  private readonly scaleNote = el('p', { class: 'sg-note', attrs: { id: 'sg-scale-note' } });
   private readonly bubbleSize = el('select', { attrs: { id: 'sg-bubble-size' } });
   private readonly imputedNote = el('p', {
     class: 'sg-ins__alert',
@@ -152,11 +168,12 @@ export class CrossPanel implements Feature {
       el('option', { text: 'Couleur des groupes sociaux', attrs: { value: '' } }),
       ...options.map((o) => el('option', { text: o.label, attrs: { value: o.id } })),
     );
+    // Une autre variable reprend l'échelle qui lui convient.
     this.axisX.addEventListener('change', () =>
-      this.actions.patch({ axisX: this.axisX.value, layout: 'map' }, 'normal'),
+      this.actions.patch({ axisX: this.axisX.value, scaleX: null, layout: 'map' }, 'normal'),
     );
     this.axisY.addEventListener('change', () =>
-      this.actions.patch({ axisY: this.axisY.value, layout: 'map' }, 'normal'),
+      this.actions.patch({ axisY: this.axisY.value, scaleY: null, layout: 'map' }, 'normal'),
     );
     this.colorBy.addEventListener('change', () =>
       this.actions.patch({ colorBy: this.colorBy.value || null }, 'fast'),
@@ -203,6 +220,8 @@ export class CrossPanel implements Feature {
           {
             axisX: p.x,
             axisY: p.y,
+            scaleX: null,
+            scaleY: null,
             colorBy: p.color,
             bubbleSize: p.size ?? null,
             layout: 'map',
@@ -216,7 +235,10 @@ export class CrossPanel implements Feature {
 
     this.freeBox.append(
       el('label', { class: 'sg-field' }, 'Axe horizontal', this.axisX),
+      this.scaleSwitch('x', 'Échelle de l’axe horizontal', this.scaleX),
       el('label', { class: 'sg-field' }, 'Axe vertical', this.axisY),
+      this.scaleSwitch('y', 'Échelle de l’axe vertical', this.scaleY),
+      this.scaleNote,
       el('label', { class: 'sg-field' }, 'Couleur des disques', this.colorBy),
       this.imputedNote,
     );
@@ -287,9 +309,59 @@ export class CrossPanel implements Feature {
       mode === 'free'
         ? { axisX: this.axisX.value || DEFAULT_X, axisY: this.axisY.value || DEFAULT_Y, layout }
         : mode === 'map'
-          ? { axisX: null, axisY: null, colorBy: null, bubbleSize: null, layout }
+          ? {
+              axisX: null,
+              axisY: null,
+              scaleX: null,
+              scaleY: null,
+              colorBy: null,
+              bubbleSize: null,
+              layout,
+            }
           : { layout };
     this.actions.patch({ ...patch, compared: null }, 'normal');
+  }
+
+  private scaleSwitch(
+    axis: 'x' | 'y',
+    label: string,
+    inputs: Map<AxisScale, HTMLInputElement>,
+  ): HTMLElement {
+    const root = el('div', {
+      class: 'sg-segmented sg-segmented--small',
+      attrs: { role: 'radiogroup', 'aria-label': label, id: `sg-scale-${axis}` },
+    });
+    for (const scale of AXIS_SCALES) {
+      const choice = SCALE_CHOICES[scale];
+      const input = el('input', {
+        class: 'sg-sr-only',
+        attrs: { type: 'radio', name: `sg-scale-${axis}`, value: scale },
+      });
+      input.addEventListener('change', () => {
+        if (!input.checked) return;
+        this.actions.patch(axis === 'x' ? { scaleX: scale } : { scaleY: scale }, 'normal');
+      });
+      inputs.set(scale, input);
+      root.append(
+        el('label', { attrs: { title: choice.title } }, input, el('span', { text: choice.label })),
+      );
+    }
+    return root;
+  }
+
+  private syncScale(axis: FreeAxis, inputs: Map<AxisScale, HTMLInputElement>): void {
+    for (const [scale, input] of inputs) input.checked = scale === axis.scale;
+    const log = inputs.get('log');
+    if (!log) return;
+    log.disabled = !axis.logPossible;
+    log
+      .closest('label')
+      ?.setAttribute(
+        'title',
+        axis.logPossible
+          ? SCALE_CHOICES.log.title
+          : 'Impossible : cette variable compte des valeurs nulles, qu’un logarithme ne peut pas montrer.',
+      );
   }
 
   /** Quitte le croisement : ce qu'il avait réglé, et le cadre qu'il avait fait choisir. */
@@ -320,6 +392,9 @@ export class CrossPanel implements Feature {
     if (free) {
       this.axisX.value = free.x.variable.id;
       this.axisY.value = free.y.variable.id;
+      this.syncScale(free.x, this.scaleX);
+      this.syncScale(free.y, this.scaleY);
+      this.scaleNote.textContent = this.scaleNoteFor(free.x, free.y);
     } else if (!this.initialized) {
       this.axisX.value = DEFAULT_X;
       this.axisY.value = DEFAULT_Y;
@@ -363,11 +438,29 @@ export class CrossPanel implements Feature {
       this.scaleMin.textContent = color.variable.format(color.min);
       this.scaleMax.textContent = color.variable.format(color.max);
     }
-    const layout = free ? `free:${free.x.variable.id}:${free.y.variable.id}` : mode;
+    const layout = free
+      ? `free:${free.x.variable.id}:${free.x.scale}:${free.y.variable.id}:${free.y.scale}`
+      : mode;
     if (layout !== this.lastLayout) {
       this.lastLayout = layout;
       this.onLayoutChange();
     }
+  }
+
+  private scaleNoteFor(x: FreeAxis, y: FreeAxis): string {
+    const refused = [x, y].filter((axis) => !axis.logPossible);
+    const parts: string[] = [];
+    if (x.scale === 'log' || y.scale === 'log') {
+      parts.push('Log : des écarts égaux à l’écran sont des rapports égaux.');
+    }
+    if (x.scale === 'rank' || y.scale === 'rank') {
+      parts.push('Rang : seul l’ordre compte, pas l’écart entre deux valeurs.');
+    }
+    if (refused.length > 0) {
+      const names = refused.map((axis) => axis.variable.label.toLowerCase()).join(' et ');
+      parts.push(`Log impossible pour ${names} : des catégories y valent zéro.`);
+    }
+    return parts.join(' ');
   }
 
   private noteFor(asked: CrossMode, mode: CrossMode, view: ResolvedView): string {

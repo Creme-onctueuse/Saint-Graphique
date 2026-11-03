@@ -60,7 +60,58 @@ const base = {
   yVariable: patrimoine,
   colorVariable: null,
   range: [-10, 10] as const,
+  xScale: 'linear' as const,
+  yScale: 'linear' as const,
 };
+
+describe('échelle des axes libres', () => {
+  const positive = [
+    item('10', '1', 100, 2000, 100, 10),
+    item('21', '2', 100, 1000, 10, 20),
+    item('31', '3', 100, 3000, 1000, 50),
+  ];
+  const input = { ...base, items: positive, xScale: null, yScale: null };
+
+  it('ouvre le patrimoine en logarithme, et le reste en linéaire', () => {
+    const layout = computeFreeLayout(input);
+    expect(layout?.x.scale).toBe('linear');
+    expect(layout?.y.scale).toBe('log');
+    expect(layout?.pcs.find((p) => p.code === '10')?.y).toBeCloseTo(0);
+  });
+
+  it('respecte le choix de l’axe', () => {
+    expect(computeFreeLayout({ ...input, yScale: 'linear' })?.y.scale).toBe('linear');
+    expect(computeFreeLayout({ ...input, xScale: 'rank' })?.x.scale).toBe('rank');
+  });
+
+  it('refuse le logarithme devant un zéro, et le signale', () => {
+    const bac5 = variableById('bac5');
+    if (!bac5) throw new Error('variable absente');
+    const layout = computeFreeLayout({ ...base, xVariable: bac5, xScale: 'log' });
+    expect(layout?.x.scale).toBe('linear');
+    expect(layout?.x.logPossible).toBe(false);
+  });
+
+  it('gradue le logarithme sur des valeurs rondes, à leur vraie place', () => {
+    const y = computeFreeLayout(input)?.y;
+    const ticks = y?.tickPositions([-10, 10], 5) ?? [];
+    const values = ticks.map((t) => y?.valueAt(t) ?? 0);
+    expect(values.map((v) => Math.round(v))).toEqual([10, 100, 1000]);
+  });
+
+  it('laisse les autres échelles graduer à intervalles réguliers', () => {
+    expect(computeFreeLayout(input)?.x.tickPositions([-10, 10], 5)).toBeNull();
+  });
+
+  it('calcule les électorats sur les positions : le logarithme les écarte du maximum', () => {
+    const log = computeFreeLayout({ ...input, yScale: 'log' })?.candidates.get('b')?.y ?? 0;
+    const linear = computeFreeLayout({ ...input, yScale: 'linear' })?.candidates.get('b')?.y ?? 0;
+    // Pour moitié le groupe 3 (+10), pour moitié le groupe 2, qui réunit ici agriculteurs (0) et
+    // indépendants (-10) : (10 - 5) / 2. En linéaire, les deux derniers restent tout en bas.
+    expect(log).toBeCloseTo(2.5);
+    expect(linear).toBeLessThan(log);
+  });
+});
 
 describe('computeFreeLayout', () => {
   it('ramène chaque variable de son minimum à son maximum', () => {

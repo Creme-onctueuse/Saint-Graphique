@@ -8,7 +8,7 @@ import { formatNumber, formatPct, MINUS, NBSP } from '../../core/format.ts';
 import { GROUP_SHORT_NAMES } from '../../core/groups.ts';
 import type { RawElection } from '../../core/types.ts';
 import type { ResolvedView } from '../../view.ts';
-import type { CrossingInfo, LensInfo } from '../../viewCrossing.ts';
+import { isNonLinearMap, type CrossingInfo, type LensInfo } from '../../viewCrossing.ts';
 import { el } from '../dom.ts';
 
 export function points(value: number): string {
@@ -85,7 +85,8 @@ export function neighborTable(
   rows: { id: string; gap: number; distance: number }[],
   pick: (key: string) => void,
 ): HTMLElement {
-  const map = crossing.mode === 'proximity' ? 'Plan' : 'Carte';
+  const map =
+    crossing.mode === 'proximity' ? 'Plan' : isNonLinearMap(crossing) ? 'Échelle' : 'Carte';
   const table = el(
     'div',
     { class: 'sg-neighbors', attrs: { id: 'sg-inspector-neighbors' } },

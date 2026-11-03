@@ -545,6 +545,16 @@ body:has(#sg-color-legend:not([hidden])) .sg-fact--tl {
   border-radius: var(--sg-radius);
 }
 
+.sg-segmented--small span {
+  padding: 2px 4px;
+  font-size: 0.74rem;
+}
+
+.sg-segmented input:disabled + span {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .sg-segmented label {
   position: relative;
   cursor: pointer;

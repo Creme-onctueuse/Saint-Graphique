@@ -9,8 +9,10 @@
  * s = repère sélectionné (p:… ou c:…), c2 = repère comparé, p = panneau ouvert, sq=1 = proportions
  * d'origine, tr=0 = trajectoires masquées, rg=1 = anneaux de vote, ty = type d'élection du filtre,
  * sc=trend = scénario de la projection (à cette étape seulement), ax, ay, ac = variables libres des axes et de la couleur,
+ * xs, ys = échelle de chaque axe libre (linear|log|rank ; sans précision : celle de la variable),
  * vue=prox = carte de proximité.
  */
+import { AXIS_SCALES, type AxisScale } from './axisScale.ts';
 import { DIPLOMA_KEYS, PROJECTION_ID, type DiplomaWeights } from './types.ts';
 
 export type ThemeChoice = 'system' | 'light' | 'dark';
@@ -56,6 +58,9 @@ export interface AppState {
   /** Variables libres : null = axes du Saint-Graphique. */
   axisX: string | null;
   axisY: string | null;
+  /** Échelles des axes libres : null = celle que propose la variable. */
+  scaleX: AxisScale | null;
+  scaleY: AxisScale | null;
   colorBy: string | null;
   layout: MapLayout;
 }
@@ -82,6 +87,8 @@ export function defaultState(): AppState {
     scenario: 'still',
     axisX: null,
     axisY: null,
+    scaleX: null,
+    scaleY: null,
     colorBy: null,
     layout: 'map',
   };
@@ -137,6 +144,8 @@ export function normalizeState(s: AppState): AppState {
     scenario: s.scenario,
     axisX: s.axisX || null,
     axisY: s.axisY || null,
+    scaleX: s.scaleX,
+    scaleY: s.scaleY,
     colorBy: s.colorBy || null,
     layout: s.layout,
   };
@@ -170,6 +179,8 @@ export function serializeState(state: AppState): string {
   if (s.scenario !== 'still' && s.election === PROJECTION_ID) add('sc', s.scenario);
   if (s.axisX) add('ax', s.axisX);
   if (s.axisY) add('ay', s.axisY);
+  if (s.scaleX) add('xs', s.scaleX);
+  if (s.scaleY) add('ys', s.scaleY);
   if (s.colorBy) add('ac', s.colorBy);
   if (s.layout === 'proximity') add('vue', 'prox');
   return parts.join('&');
@@ -226,6 +237,8 @@ export function parseState(input: string): AppState {
   s.scenario = params.get('sc') === 'trend' ? 'trend' : 'still';
   s.axisX = params.get('ax') || null;
   s.axisY = params.get('ay') || null;
+  s.scaleX = oneOf(params.get('xs'), AXIS_SCALES);
+  s.scaleY = oneOf(params.get('ys'), AXIS_SCALES);
   s.colorBy = params.get('ac') || null;
   s.layout = params.get('vue') === 'prox' ? 'proximity' : 'map';
   return normalizeState(s);

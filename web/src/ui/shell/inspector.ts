@@ -18,7 +18,12 @@ import { familyOfCandidate } from '../../core/timeline.ts';
 import type { Point } from '../../core/types.ts';
 import type { Dataset } from '../../data/dataset.ts';
 import type { ResolvedView } from '../../view.ts';
-import { lensForPcs, type CrossingInfo, type LensInfo } from '../../viewCrossing.ts';
+import {
+  isNonLinearMap,
+  lensForPcs,
+  type CrossingInfo,
+  type LensInfo,
+} from '../../viewCrossing.ts';
 import type { AppActions, Feature } from '../actions.ts';
 import { el } from '../dom.ts';
 import { icon } from '../icons.ts';
@@ -309,7 +314,11 @@ export class Inspector implements Feature {
           stat('sg-duel-gap', 'Écart de composition', `${formatNumber(gap, 1)}${NBSP}pts`),
           stat(
             'sg-duel-distance',
-            crossing.mode === 'proximity' ? 'Distance sur le plan' : 'Distance sur la carte',
+            crossing.mode === 'proximity'
+              ? 'Distance sur le plan'
+              : isNonLinearMap(crossing)
+                ? 'Distance sur cette échelle'
+                : 'Distance sur la carte',
             formatNumber(distance),
           ),
         ),
@@ -361,7 +370,9 @@ export class Inspector implements Feature {
         .slice(0, NEAREST_ON_MAP_COUNT);
       body.append(
         section(
-          'Électorats les plus proches sur la carte',
+          isNonLinearMap(crossing)
+            ? 'Électorats les plus proches sur cette échelle'
+            : 'Électorats les plus proches sur la carte',
           el(
             'ul',
             { class: 'sg-plainlist', attrs: { id: 'sg-inspector-nearest' } },
@@ -439,7 +450,7 @@ export class Inspector implements Feature {
         stat('sg-duel-gap', 'Écart entre leurs votes', `${formatNumber(gap, 1)}${NBSP}pts`),
         stat(
           'sg-duel-distance',
-          'Distance sur la carte',
+          isNonLinearMap(crossing) ? 'Distance sur cette échelle' : 'Distance sur la carte',
           formatNumber(Math.hypot(a.x - b.x, a.y - b.y)),
         ),
       ),

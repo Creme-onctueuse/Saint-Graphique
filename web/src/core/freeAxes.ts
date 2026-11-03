@@ -1,10 +1,18 @@
 /**
  * Axes libres : place les catégories Insee selon deux variables au choix, et les électorats au
- * barycentre de leurs groupes. Chaque variable est ramenée linéairement de son minimum à son maximum
- * sur l'intervalle de la carte, sans rang : les écarts réels restent visibles.
+ * barycentre de leurs groupes. Chaque variable va de son minimum à son maximum sur l'intervalle de la
+ * carte, selon l'échelle de l'axe (core/axisScale.ts). Les électorats se calculent sur les positions :
+ * sur une échelle non linéaire, leur coordonnée n'est donc pas une moyenne de la variable.
  *
  * Module pur, testé dans freeAxes.test.ts.
  */
+import {
+  logIsPossible,
+  logTickValues,
+  scaleMapping,
+  type AxisScale,
+  type ScaleMapping,
+} from './axisScale.ts';
 import { compositionBarycenter, weightedBarycenter, type WeightedPoint } from './barycenter.ts';
 import { compositionByGroup } from './crossing.ts';
 import type { Point, Range, RawElection, RawPcsItem } from './types.ts';
@@ -17,8 +25,13 @@ export interface FreeAxis {
   variable: Variable;
   min: number;
   max: number;
+  /** Échelle retenue : le logarithme demandé retombe sur le linéaire s'il n'est pas possible. */
+  scale: AxisScale;
+  logPossible: boolean;
   /** Position sur la carte → valeur réelle de la variable. */
   valueAt(position: number): number;
+  /** Graduations sur valeurs rondes pour ce domaine ; null : à intervalles réguliers. */
+  tickPositions(domain: readonly number[], count: number): number[] | null;
 }
 
 export interface FreePcs extends Point {
@@ -43,22 +56,34 @@ export interface FreeLayout {
   omitted: number;
 }
 
-function axisOf(variable: Variable, values: readonly number[], range: Range): FreeAxis {
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const [lo, hi] = range;
-  return {
-    variable,
-    min,
-    max,
-    valueAt: (position) => min + ((position - lo) / (hi - lo)) * (max - min),
+function axisOf(
+  variable: Variable,
+  values: readonly number[],
+  range: Range,
+  asked: AxisScale | null | undefined,
+): { axis: FreeAxis; mapping: ScaleMapping } {
+  const logPossible = logIsPossible(values);
+  const wanted = asked ?? variable.defaultScale ?? 'linear';
+  const scale = wanted === 'log' && !logPossible ? 'linear' : wanted;
+  const mapping = scaleMapping(scale, values, range);
+  const tickPositions = (domain: readonly number[], count: number): number[] | null => {
+    if (scale !== 'log') return null;
+    const low = mapping.toValue(Math.min(...domain));
+    const high = mapping.toValue(Math.max(...domain));
+    return logTickValues(low, high, count)?.map((v) => mapping.toPosition(v)) ?? null;
   };
-}
-
-function place(value: number, axis: FreeAxis, range: Range): number {
-  const [lo, hi] = range;
-  if (axis.max === axis.min) return (lo + hi) / 2;
-  return lo + ((value - axis.min) / (axis.max - axis.min)) * (hi - lo);
+  return {
+    mapping,
+    axis: {
+      variable,
+      min: Math.min(...values),
+      max: Math.max(...values),
+      scale,
+      logPossible,
+      valueAt: (position) => mapping.toValue(position),
+      tickPositions,
+    },
+  };
 }
 
 /** Classe de 1 à COLOR_CLASSES, sur des intervalles égaux entre le minimum et le maximum. */
@@ -104,6 +129,9 @@ export interface FreeInput {
   yVariable: Variable;
   colorVariable: Variable | null;
   range: Range;
+  /** Échelles demandées ; null : celle que propose la variable. */
+  xScale?: AxisScale | null;
+  yScale?: AxisScale | null;
   groupOf?: (code: string) => string;
 }
 
@@ -120,15 +148,17 @@ export function computeFreeLayout(input: FreeInput): FreeLayout | null {
   });
   if (rows.length < 2) return null;
 
-  const x = axisOf(
+  const { axis: x, mapping: xMapping } = axisOf(
     xVariable,
     rows.map((r) => r.vx),
     range,
+    input.xScale,
   );
-  const y = axisOf(
+  const { axis: y, mapping: yMapping } = axisOf(
     yVariable,
     rows.map((r) => r.vy),
     range,
+    input.yScale,
   );
   const colorValues = rows.flatMap((r) => (r.vc === null ? [] : [r.vc]));
   const color =
@@ -145,8 +175,8 @@ export function computeFreeLayout(input: FreeInput): FreeLayout | null {
   const pcs: FreePcs[] = rows.map((r) => ({
     code: r.item.code,
     group: r.item.group,
-    x: place(r.vx, x, range),
-    y: place(r.vy, y, range),
+    x: xMapping.toPosition(r.vx),
+    y: yMapping.toPosition(r.vy),
     weight: total > 0 ? (100 * r.item.population) / total : 0,
     colorClass: color && r.vc !== null ? colorClassOf(r.vc, color.min, color.max) : null,
     imputed: shown.some((v) => v.imputed) && r.item.patrimoine_composition_status === 'imputed',

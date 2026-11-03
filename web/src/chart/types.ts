@@ -60,6 +60,11 @@ export interface ChartAxes {
   ends?: { xLow: string; xHigh: string; yLow: string; yHigh: string };
   /** Position sur la carte → valeur réelle à afficher. */
   text?: { x: (position: number) => string; y: (position: number) => string };
+  /** Graduations imposées pour un domaine ; null : à intervalles réguliers. */
+  ticks?: {
+    x: (domain: readonly number[], count: number) => number[] | null;
+    y: (domain: readonly number[], count: number) => number[] | null;
+  };
 }
 
 export interface ChartModel {

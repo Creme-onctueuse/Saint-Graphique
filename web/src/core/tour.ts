@@ -61,6 +61,8 @@ const NEUTRAL: Partial<AppState> = {
   bubbleSize: null,
   axisX: null,
   axisY: null,
+  scaleX: null,
+  scaleY: null,
   colorBy: null,
   layout: 'map',
   showRings: false,

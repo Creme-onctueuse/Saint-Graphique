@@ -1344,6 +1344,87 @@ async function main() {
       after2027.hash,
     );
 
+    // --- Échelle des axes libres ---------------------------------------------------------------------
+    const freeScale = () =>
+      evaluate(`(() => {
+        const text = (s) => [...document.querySelectorAll(s)].map((t) => t.textContent);
+        return {
+          title: text('.sg-axis-title'),
+          x: text('.sg-tick-x'),
+          y: text('.sg-tick-y'),
+          checkedX: document.querySelector('#sg-scale-x input:checked')?.value,
+          checkedY: document.querySelector('#sg-scale-y input:checked')?.value,
+          hash: location.hash,
+          reserve: document.getElementById('sg-reserves').textContent,
+          note: document.getElementById('sg-scale-note').textContent,
+          spread: (() => {
+            const xs = [...document.querySelectorAll('.sg-pcs')].map((p) => p.getBoundingClientRect().left).sort((a, b) => a - b);
+            return xs[Math.floor(xs.length * 0.75)] - xs[Math.floor(xs.length * 0.25)];
+          })(),
+        };
+      })()`);
+    await evaluate(
+      `location.hash = 'e=2022_presidentielle_t1&p=cross&ax=patrimoine&ay=bac5&xs=linear'`,
+    );
+    await settle();
+    const linearScale = await freeScale();
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1&p=cross&ax=patrimoine&ay=bac5'`);
+    await settle();
+    const logScale = await freeScale();
+    check(
+      'échelles : le patrimoine s’ouvre en log, dit sur l’axe et dans la réserve',
+      logScale.checkedX === 'log' &&
+        /échelle log/.test(logScale.title.join()) &&
+        /logarithmique/.test(logScale.reserve),
+      JSON.stringify(logScale),
+    );
+    check(
+      'échelles : le log desserre le patrimoine',
+      logScale.spread > linearScale.spread * 1.3,
+      `${linearScale.spread} puis ${logScale.spread}`,
+    );
+    check(
+      'échelles : graduations rondes en valeurs réelles',
+      logScale.x.some((t) => /^100\D*k€$/.test(t)) &&
+        logScale.x.some((t) => /^1.?000\D*k€$/.test(t)),
+      JSON.stringify(logScale.x),
+    );
+    await evaluate(`document.querySelector('#sg-scale-y input[value="rank"]').click()`);
+    await settle();
+    await sleep(300);
+    const rankScale = await freeScale();
+    check(
+      'échelles : le rang se choisit par axe, et part dans le lien',
+      rankScale.checkedY === 'rank' &&
+        /ys=rank/.test(rankScale.hash) &&
+        /· rang/.test(rankScale.title.join()) &&
+        /seul l.ordre compte/.test(rankScale.note),
+      JSON.stringify(rankScale),
+    );
+    await evaluate(
+      `document.getElementById('sg-axis-y').value = 'cap'; document.getElementById('sg-axis-y').dispatchEvent(new Event('change'))`,
+    );
+    await settle();
+    await sleep(300);
+    const changedVariable = await freeScale();
+    check(
+      'échelles : une autre variable reprend son échelle',
+      changedVariable.checkedY === 'linear' && !/ys=/.test(changedVariable.hash),
+      JSON.stringify(changedVariable),
+    );
+    await evaluate(
+      `location.hash = 'e=2022_presidentielle_t1&ax=patrimoine&ay=bac5&ys=log&s=c%3Amacron&c2=c%3Ale-pen'`,
+    );
+    await settle();
+    const nonLinearDuel = await evaluate(
+      `document.getElementById('sg-duel-distance')?.textContent ?? ''`,
+    );
+    check(
+      'échelles : une distance ne se lit pas comme des valeurs',
+      /sur cette échelle/.test(nonLinearDuel),
+      nonLinearDuel,
+    );
+
     // --- Quitter un croisement ---------------------------------------------------------------------
     const crossExit = () =>
       evaluate(`(() => {
@@ -1398,7 +1479,9 @@ async function main() {
     await settle();
     const crossSize = await crossExit();
     check('croiser : une aire modifiée se quitte aussi', crossSize.chip, JSON.stringify(crossSize));
-    await evaluate(`location.hash = 'e=2022_presidentielle_t1&ax=niveau_vie&ay=bac5&ac=patrimoine'`);
+    await evaluate(
+      `location.hash = 'e=2022_presidentielle_t1&ax=niveau_vie&ay=bac5&ac=patrimoine'`,
+    );
     await settle();
     await sleep(800);
     const legendRoom = await evaluate(`(() => {

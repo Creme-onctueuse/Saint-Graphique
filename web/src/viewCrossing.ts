@@ -5,9 +5,10 @@
  * Module pur (sans DOM), testé dans viewCrossing.test.ts.
  */
 import type { ChartCandidate, ChartModel, ChartPcs } from './chart/types.ts';
+import type { AxisScale } from './core/axisScale.ts';
 import { bubbleSizeLabel, bubbleSizes, parseBubbleSize } from './core/bubbleSize.ts';
 import { compositionByGroup, compositionGap, pollGroupOf, voteByGroup } from './core/crossing.ts';
-import { computeFreeLayout, type FreeLayout } from './core/freeAxes.ts';
+import { computeFreeLayout, type FreeAxis, type FreeLayout } from './core/freeAxes.ts';
 import { classicalMds, distanceMatrix, fitToRange, orient } from './core/mds.ts';
 import { hasCustomLayout, type AppState } from './core/state.ts';
 import { availableVariables, type Variable } from './core/variables.ts';
@@ -69,11 +70,46 @@ const ORIENT_Y_GROUP = '3';
 const PROXIMITY_RESERVE_SUMMARY =
   'Carte de proximité : distance = écart de composition, sans axes, sur six groupes de sondage';
 
-function freeReserve(items: number, imputed: number, shown: readonly Variable[]): string {
+const SCALE_SUFFIX: Record<AxisScale, string> = {
+  linear: '',
+  log: ' · échelle log',
+  rank: ' · rang',
+};
+
+function scaleReserve(axes: readonly FreeAxis[]): string {
+  const parts = axes.flatMap((axis) => {
+    const name = axis.variable.label.toLowerCase();
+    if (axis.scale === 'log') {
+      return [
+        `${name} est en échelle logarithmique : des écarts égaux à l'écran sont des rapports égaux`,
+      ];
+    }
+    if (axis.scale === 'rank') {
+      return [
+        `${name} est en rang parmi les catégories : seul l'ordre compte, pas l'écart entre deux valeurs`,
+      ];
+    }
+    return [];
+  });
+  if (parts.length === 0)
+    return 'Chaque axe va linéairement du minimum au maximum de sa variable. ';
+  return (
+    `Chaque axe va du minimum au maximum de sa variable ; ${parts.join(' ; ')}. ` +
+    "Sur ces échelles, un électorat est le centre de gravité des positions à l'écran : sa coordonnée " +
+    "n'est pas la moyenne de la variable, et une distance sur la carte ne se convertit pas en valeurs. "
+  );
+}
+
+function freeReserve(
+  items: number,
+  imputed: number,
+  shown: readonly Variable[],
+  axes: readonly FreeAxis[],
+): string {
   const flagged = shown.filter((v) => v.imputed);
   return (
     `Axes libres : ces ${items} catégories et leurs valeurs viennent de l'Insee, sans les positions ` +
-    'lues sur les vidéos de Chris. Chaque axe va linéairement du minimum au maximum de sa variable. ' +
+    `lues sur les vidéos de Chris. ${scaleReserve(axes)}` +
     'Les électorats sont des barycentres de groupes : une proximité entre groupes ne dit rien des ' +
     'personnes.' +
     (flagged.length > 0
@@ -129,6 +165,8 @@ function applyFree(
     yVariable,
     colorVariable: color,
     range: view.model.range,
+    xScale: state.scaleX,
+    yScale: state.scaleY,
     groupOf,
   });
   if (!layout) return null;
@@ -156,7 +194,8 @@ function applyFree(
     const at = layout.candidates.get(c.id);
     return at ? [{ ...c, x: at.x, y: at.y, ellipse: null }] : [];
   });
-  const axisLabel = (v: Variable): string => (v.imputed ? `${v.label} (≈ imputé)` : v.label);
+  const axisLabel = ({ variable: v, scale }: FreeAxis): string =>
+    `${v.imputed ? `${v.label} (≈ imputé)` : v.label}${SCALE_SUFFIX[scale]}`;
   const model: ChartModel = {
     ...view.model,
     title: `${view.electionLabel}, axes libres`,
@@ -164,8 +203,8 @@ function applyFree(
       `Nuage de ${pcs.length} catégories socioprofessionnelles` +
       (candidates.length > 0 ? ` et de ${candidates.length} électorats` : '') +
       ` : ${xVariable.label} en abscisse, ${yVariable.label} en ordonnée.`,
-    xLabel: axisLabel(xVariable),
-    yLabel: axisLabel(yVariable),
+    xLabel: axisLabel(layout.x),
+    yLabel: axisLabel(layout.y),
     pcs,
     candidates,
     barycenter: layout.barycenter,
@@ -180,6 +219,10 @@ function applyFree(
       text: {
         x: (position) => xVariable.format(layout.x.valueAt(position)),
         y: (position) => yVariable.format(layout.y.valueAt(position)),
+      },
+      ticks: {
+        x: (domain, count) => layout.x.tickPositions(domain, count),
+        y: (domain, count) => layout.y.tickPositions(domain, count),
       },
     },
   };
@@ -199,7 +242,7 @@ function applyFree(
       recomputeBlock: 'Ces réglages ne s’appliquent pas aux axes libres.',
       customized: false,
       hasEllipses: false,
-      reserves: [freeReserve(items.length, imputed, shown)],
+      reserves: [freeReserve(items.length, imputed, shown, [layout.x, layout.y])],
       reserveSummary: `Axes libres : ${pcs.length} catégories Insee, à lire à l’échelle des groupes`,
       sources: { ...view.sources, positions: [] },
     },
@@ -441,6 +484,12 @@ export function applyCrossing(ds: Dataset, state: AppState, base: ResolvedView):
     sizeLabel,
   };
   return { ...view, crossing };
+}
+
+/** Vrai si une distance sur cette carte ne correspond à aucun écart de valeurs. */
+export function isNonLinearMap(crossing: CrossingInfo): boolean {
+  const free = crossing.free;
+  return free !== null && (free.x.scale !== 'linear' || free.y.scale !== 'linear');
 }
 
 /** Sélection telle qu'elle s'affiche : la famille suit le changement d'élection. */

@@ -88,8 +88,10 @@ export function drawFrame(
     .attr('height', (d) => Math.max(0, d.h));
 
   const count = small ? 4 : CHART_STYLE.ticks;
-  const xt = none ? [] : toTicks(x.ticks(count), x, axes?.text?.x);
-  const yt = none ? [] : toTicks(y.ticks(count), y, axes?.text?.y);
+  const xValues = axes?.ticks?.x(x.domain(), count) ?? x.ticks(count);
+  const yValues = axes?.ticks?.y(y.domain(), count) ?? y.ticks(count);
+  const xt = none ? [] : toTicks(xValues, x, axes?.text?.x);
+  const yt = none ? [] : toTicks(yValues, y, axes?.text?.y);
 
   layers.grid
     .selectAll<SVGLineElement, Tick>('line.sg-grid-x')
