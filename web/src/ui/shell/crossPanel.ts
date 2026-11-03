@@ -290,9 +290,17 @@ export class CrossPanel implements Feature {
     }
     this.colorBy.value = free?.color?.variable.id ?? '';
     this.bubbleSize.value = state.bubbleSize ?? '';
-    this.sizeNote.textContent = state.bubbleSize?.startsWith('var:')
-      ? 'Ordre de grandeur : part des inscrits de l’électorat × moyenne de la variable selon sa composition, à partir des médianes par catégorie.'
-      : '';
+    // Un groupe choisi prend la main sur l'aire : le menu ne doit pas prétendre le contraire.
+    const lensActive = (crossing?.lens?.pollGroup ?? null) !== null;
+    this.bubbleSize.disabled = lensActive;
+    if (lensActive) {
+      this.sizeNote.textContent =
+        'Une catégorie est choisie : l’aire montre le vote de son groupe. « Revenir à la carte » rend la main à ce menu.';
+    } else {
+      this.sizeNote.textContent = state.bubbleSize?.startsWith('var:')
+        ? 'Ordre de grandeur : part des inscrits de l’électorat × moyenne de la variable selon sa composition, à partir des médianes par catégorie.'
+        : '';
+    }
     this.sizeNote.hidden = this.sizeNote.textContent === '';
     this.initialized = true;
 

@@ -985,6 +985,20 @@ async function main() {
     );
     check('croiser : la légende dit ce que mesure l’aire', /Ouvriers/.test(sizeKey), sizeKey);
     await shot('13b-aire-croisee', false);
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1&s=p%3A63&p=cross'`);
+    await settle();
+    const lensSize = await evaluate(`({
+      disabled: document.getElementById('sg-bubble-size').disabled,
+      note: document.getElementById('sg-size-note').textContent,
+      key: document.getElementById('sg-size-key').textContent,
+    })`);
+    check(
+      'croiser : une catégorie choisie prend la main sur l’aire, et le menu le dit',
+      lensSize.disabled &&
+        /vote de son groupe/.test(lensSize.note) &&
+        /vote du groupe/.test(lensSize.key),
+      JSON.stringify(lensSize),
+    );
     await evaluate(
       `location.hash = 'e=2022_presidentielle_t1&ax=patrimoine&ay=bac5&bs=var%3Apatrimoine&p=cross'`,
     );
