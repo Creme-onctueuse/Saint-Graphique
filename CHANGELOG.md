@@ -8,8 +8,9 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnage [
 
 - Carte plein écran, sans défilement : échelles X et Y indépendantes, option « Proportions d'origine », navigation à la molette et au glisser, cadrage des électorats, mini-carte, halos des groupes, légende toujours visible.
 - Croisements : détail d'un électorat ou d'une catégorie, vue depuis un groupe, duel, axes libres sur les variables de l'Insee, carte de proximité par écart de composition.
-- Frise : lecture de 2017 à 2024, filtre par type de scrutin, trajectoires des familles politiques (`config/families.yaml`), anneaux de vote par groupe, historique d'une famille.
-- Projection 2027 à deux scénarios (`scripts/analyze/projection.py`), avec le résultat du test sur le passé : la tendance prédit moins bien que « rien ne bouge ».
+- Présidentielles de 1995, 2002, 2007 et 2012 et européennes de 2014 (CSA, Ipsos, Ifop), avec une conversion du vote par groupe contrôlée sur les scores nationaux. Avant 2017, la page rappelle que les catégories gardent leurs positions de 2026.
+- Frise : lecture de 1995 à 2024, filtre par type de scrutin, trajectoires des familles politiques (`config/families.yaml`), anneaux de vote par groupe, historique d'une famille.
+- Projection 2027 à deux scénarios (`scripts/analyze/projection.py`), avec le résultat du test sur le passé : la tendance place moins bien les électorats que « rien ne bouge », avec un écart faible.
 - « Le saviez-vous ? » : des constats calculés sur les données, soumis à des règles testées. Jeu « Qui est-ce ? ».
 - Nouveau logo et jeu d'icônes dessinés pour le projet.
 

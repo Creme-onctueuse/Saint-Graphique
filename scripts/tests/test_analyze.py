@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
-from scripts.analyze import build_positions, overlay, threshold_report
+from scripts.analyze import build_positions, communes_vs_sondages, overlay, threshold_report
 from scripts.analyze.check_barycenter import (
     collect_group_positions,
     composition_vector,
@@ -616,3 +617,56 @@ def test_overlay_radius_grows_with_the_square_root_of_the_weight() -> None:
     assert overlay.disc_radius(4.0, area_factor=1.0) == 2 * overlay.disc_radius(
         1.0, area_factor=1.0
     )
+
+
+# --- Estimation par les communes ------------------------------------------------------------------
+
+
+def _communes() -> tuple[np.ndarray, np.ndarray]:
+    """Trois groupes sur 40 communes, dont les parts varient bien : un cas sans bruit."""
+    rng = np.random.default_rng(0)
+    groups = rng.dirichlet(np.ones(3), size=40)
+    return groups, rng.integers(100, 2000, size=40).astype(float)
+
+
+def test_regression_recovers_votes_without_noise() -> None:
+    groups, voters = _communes()
+    truth = np.array([0.1, 0.5, 0.3])
+    estimate = communes_vs_sondages.regress_votes(groups @ truth, groups, voters)
+    assert estimate == pytest.approx(truth, abs=1e-6)
+
+
+def test_regression_within_departments_recovers_the_gaps_between_groups() -> None:
+    groups, voters = _communes()
+    truth = np.array([0.1, 0.5, 0.3])
+    departments = ["01" if i % 2 else "02" for i in range(40)]
+    totals = (groups * voters[:, None]).sum(axis=0)
+    estimate = communes_vs_sondages.regress_votes_within_departments(
+        groups @ truth, groups, voters, departments, totals
+    )
+    assert estimate - estimate[0] == pytest.approx(truth - truth[0], abs=1e-6)
+    assert (estimate * totals).sum() / totals.sum() == pytest.approx(
+        ((groups @ truth) * voters).sum() / voters.sum(), abs=1e-6
+    )
+
+
+def test_composition_of_an_electorate_leaves_out_the_inactive() -> None:
+    votes = np.array([0.5, 0.5, 0, 0, 0, 0, 0, 0.9])
+    totals = np.array([10.0, 30.0, 1, 1, 1, 1, 1, 100.0])
+    composition = communes_vs_sondages.composition_from_votes(votes, totals)
+    assert composition[:2] == pytest.approx([0.25, 0.75])
+    assert len(composition) == 7
+
+
+def test_position_is_the_barycentre_of_the_groups() -> None:
+    anchors = {key: (float(i), -float(i)) for i, key in enumerate(communes_vs_sondages.KEYS)}
+    composition = np.array([0.5, 0, 0, 0, 0, 0, 0.5])
+    assert communes_vs_sondages.position(composition, anchors) == pytest.approx([3.0, -3.0])
+
+
+def test_commune_columns_map_to_project_ids() -> None:
+    assert communes_vs_sondages.candidate_id("voixMLEPEN") == "le-pen"
+    assert communes_vs_sondages.candidate_id("voixLEPEN") == "le-pen"
+    assert communes_vs_sondages.candidate_id("voixJOSPIN") == "jospin"
+    assert communes_vs_sondages.candidate_id("voixVILLIERS") == "de-villiers"
+
