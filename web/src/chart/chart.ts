@@ -1,18 +1,19 @@
 /**
- * Carte plein écran du Saint-Graphique, en SVG avec D3 : décor (frame.ts), territoires, ellipses de
- * confiance, disques PCS, barycentre de la population, losanges des électorats et libellés.
+ * Carte plein écran du Saint-Graphique, en SVG avec D3. Ce fichier tient la carte : zoom, géométrie,
+ * lecture de la frise et interactions. Le dessin est ailleurs : décor (frame.ts), repères (marks.ts),
+ * libellés (labelLayer.ts, playLabels.ts).
  *
  * - Les échelles X et Y sont indépendantes : la carte remplit l'écran (geometry.ts).
  * - Navigation de carte : molette, glisser, pincement, double-clic, boutons et cadrage.
  * - Zoom « sémantique » : les positions sont recalculées, la taille des repères est conservée.
  * - Transitions animées, désactivées si l'utilisateur préfère réduire les animations.
- * - Infobulle au survol, au toucher et au focus ; flèches du clavier entre les repères (tabindex
- *   itinérant) ; un clic ou Entrée sélectionne un repère (onSelect).
+ * - Infobulle au survol, au toucher et au focus ; flèches du clavier entre les repères
+ *   (pointFocus.ts) ; un clic ou Entrée sélectionne un repère (onSelect).
  *
  * Les fonctions de l'application dessinent leurs propres calques dans `layerUnder` et `layerOver`,
  * à l'aide de `scales()` et `onRender()` : ce fichier n'a pas à les connaître.
  */
-import { select, type BaseType, type Selection } from 'd3-selection';
+import { select, type Selection } from 'd3-selection';
 import 'd3-transition';
 import {
   zoom,
@@ -21,8 +22,6 @@ import {
   type ZoomBehavior,
   type ZoomTransform,
 } from 'd3-zoom';
-import { formatPct } from '../core/format.ts';
-import { formatStatus } from '../core/reserves.ts';
 import type { Point } from '../core/types.ts';
 import { drawFrame, type FrameLayers } from './frame.ts';
 import {
@@ -33,27 +32,26 @@ import {
   type Insets,
   type Scale,
 } from './geometry.ts';
-import { placeLabels, type Anchor, type LabelItem, type Obstacle, type Segment } from './labels.ts';
-import { clamp } from './shapes.ts';
+import { drawMapLabels, TextMeasurer } from './labelLayer.ts';
+import {
+  bubbleRadius,
+  drawBarycenter,
+  drawCandidates,
+  drawEllipses,
+  drawPcs,
+  type MarkContext,
+} from './marks.ts';
+import type { G } from './motion.ts';
+import { pickKey } from './pick.ts';
+import { PlayLabels } from './playLabels.ts';
+import { PointFocus } from './pointFocus.ts';
 import { CHART_STYLE } from './style.ts';
-import { baryTip, candTip, coordinatesText, pcsTip } from './tips.ts';
+import { baryTip, candTip, pcsTip } from './tips.ts';
 import { Tooltip, type TooltipContent } from './tooltip.ts';
-import type { Animation, ChartCandidate, ChartModel, ChartPcs, ChartView } from './types.ts';
+import type { Animation, ChartCandidate, ChartModel, ChartView } from './types.ts';
 
 export type { Animation, ChartCandidate, ChartModel, ChartPcs, ChartView } from './types.ts';
 export type { ChartGeometry, Insets, Scale } from './geometry.ts';
-
-interface LabelDatum {
-  key: string;
-  text: string;
-  x: number;
-  y: number;
-  anchor: Anchor;
-  visible: boolean;
-  font: number;
-  candidate: boolean;
-  leader: Segment | null;
-}
 
 /** Zone en coordonnées de données. */
 export interface DataBox {
@@ -63,49 +61,7 @@ export interface DataBox {
   y1: number;
 }
 
-type G = Selection<SVGGElement, unknown, null, undefined>;
-
-/** Position d'un libellé par rapport à son repère, pendant la lecture (px, texte aligné à gauche). */
-interface LabelOffset {
-  dx: number;
-  dy: number;
-  visible: boolean;
-}
 type SelectListener = (key: string | null, additive: boolean) => void;
-
-/** Applique des attributs, en transition si `duration` > 0, immédiatement sinon. */
-function setAttrs<E extends BaseType, D, P extends BaseType, PD>(
-  sel: Selection<E, D, P, PD>,
-  duration: number,
-  attrs: Record<string, (d: D) => string | number>,
-): void {
-  if (duration > 0) {
-    const t = sel.transition('sg-move').duration(duration);
-    for (const [name, value] of Object.entries(attrs)) t.attr(name, value);
-  } else {
-    sel.interrupt('sg-move');
-    for (const [name, value] of Object.entries(attrs)) sel.attr(name, value);
-  }
-}
-
-/** Fait disparaître des éléments sortants (ils ne sont plus sélectionnés pendant le fondu). */
-function exitSel<E extends Element, D, P extends BaseType, PD>(
-  sel: Selection<E, D, P, PD>,
-  cls: string,
-  duration: number,
-): void {
-  sel.classed(cls, false).classed('sg-exiting', true).attr('tabindex', null);
-  if (duration > 0) {
-    sel
-      .interrupt('sg-move')
-      .transition('sg-exit')
-      .duration(duration * 0.6)
-      .attr('opacity', 0)
-      .remove();
-  } else {
-    sel.remove();
-  }
-}
 
 let instances = 0;
 
@@ -132,7 +88,7 @@ export class SaintChart {
   private readonly zoomBehavior: ZoomBehavior<SVGGElement, unknown>;
   private readonly listeners = new Set<() => void>();
   private readonly selectListeners = new Set<SelectListener>();
-  private readonly pointEls = new Map<string, SVGElement>();
+  private readonly points: PointFocus;
   private readonly resizeObserver: ResizeObserver | null = null;
   private readonly reducedMotion: MediaQueryList | null;
   private transform: ZoomTransform = zoomIdentity;
@@ -148,12 +104,8 @@ export class SaintChart {
   };
   private insets: Insets = { top: 0, right: 0, bottom: 0, left: 0 };
   private geom: ChartGeometry;
-  private pcsOrder: string[] = [];
-  private candOrder: string[] = [];
-  private focusedKey: string | null = null;
   private hoverKey: string | null = null;
-  private measureCtx: CanvasRenderingContext2D | null | undefined;
-  private readonly textWidths = new Map<string, number>();
+  private readonly measurer = new TextMeasurer();
   private zooming = false;
   /** Glissement de la carte en cours (panneau qui s'ouvre) : les tailles poursuivent leur transition. */
   private sliding = false;
@@ -161,13 +113,9 @@ export class SaintChart {
   /** Lecture de la frise en cours : les électorats suivent `frameCandidates`. */
   private frameCandidates: ChartCandidate[] | null = null;
   private frameProgress = 0;
-  private labelFrom = new Map<string, LabelOffset>();
-  private labelTo = new Map<string, LabelOffset>();
-  private labelNow = new Map<string, LabelOffset>();
-  private playLayer!: G;
+  private readonly playLabels: PlayLabels;
   /** Scrutin de départ pendant la lecture : les trajectoires s'y arrêtent, puis suivent le repère. */
   playhead: { election: string; date: number } | null = null;
-  private fontFamily = 'sans-serif';
 
   constructor(host: HTMLElement) {
     const id = ++instances;
@@ -225,14 +173,14 @@ export class SaintChart {
     this.over = marks.append('g').attr('class', 'sg-over').attr('aria-hidden', 'true');
     this.leaderLayer = clipped.append('g').attr('class', 'sg-leaders').attr('aria-hidden', 'true');
     this.labelLayer = clipped.append('g').attr('class', 'sg-labels').attr('aria-hidden', 'true');
-    this.playLayer = clipped
-      .append('g')
-      .attr('class', 'sg-play-labels')
-      .attr('aria-hidden', 'true');
+    this.playLabels = new PlayLabels(
+      clipped.append('g').attr('class', 'sg-play-labels').attr('aria-hidden', 'true'),
+    );
     const axes = this.plot.append('g').attr('class', 'sg-axes').attr('aria-hidden', 'true');
     this.above = this.plot.append('g').attr('class', 'sg-layer-above');
     this.frameLayers = { bg, quads, grid, diagonal, axes, regions };
 
+    this.points = new PointFocus(this.plot);
     this.tooltip = new Tooltip(this.element);
     this.bindInteractions();
 
@@ -377,46 +325,15 @@ export class SaintChart {
   startPlayback(candidates: readonly ChartCandidate[]): void {
     this.frameCandidates = [...candidates];
     this.frameProgress = 0;
-    this.labelNow = new Map();
+    this.playLabels.reset();
     this.svg.classList.add('sg-playing');
   }
 
   /** Nouveau segment : les libellés glisseront vers leur place à l'arrivée, sans se chevaucher. */
   beginPlaySegment(target: readonly ChartCandidate[]): void {
-    this.labelFrom = this.labelNow;
     const { x, y } = this.scales();
-    const { plot, small } = this.geom;
-    const font = small ? CHART_STYLE.candidateLabelFontSmall : CHART_STYLE.candidateLabelFont;
-    const reach = small ? CHART_STYLE.candidateLabelReachSmall : CHART_STYLE.candidateLabelReach;
     const shown = target.filter((c) => !this.view.hiddenCandidates.has(c.id));
-    const items: LabelItem[] = shown.map((c) => ({
-      key: c.trackKey ?? c.id,
-      text: c.label,
-      cx: x(c.x),
-      cy: y(c.y),
-      r: this.dotRadius(c),
-      priority: 1000 + (c.share ?? 0),
-      font,
-      weight: 650,
-      reach: Math.min(reach, 40),
-    }));
-    const obstacles: Obstacle[] = items.map((it) => ({
-      key: it.key,
-      cx: it.cx,
-      cy: it.cy,
-      r: it.r,
-      strong: true,
-    }));
-    const placed = placeLabels(items, obstacles, plot, this.measure, { passes: 0 });
-    const next = new Map<string, LabelOffset>();
-    for (const it of items) {
-      const p = placed.get(it.key);
-      if (!p) continue;
-      const width = this.measure(it.text, font, 650);
-      const left = p.anchor === 'start' ? p.x : p.anchor === 'end' ? p.x - width : p.x - width / 2;
-      next.set(it.key, { dx: left - it.cx, dy: p.y - it.cy, visible: p.visible });
-    }
-    this.labelTo = next;
+    this.playLabels.beginSegment(shown, x, y, this.geom, this.measurer.measure);
   }
 
   /** Une image de la lecture. `progress` : avancement du segment, de 0 à 1. */
@@ -431,42 +348,8 @@ export class SaintChart {
     this.frameCandidates = null;
     this.playhead = null;
     this.svg.classList.remove('sg-playing');
-    this.playLayer.selectAll('text').remove();
+    this.playLabels.clear();
     this.draw('fast');
-  }
-
-  private drawPlayLabels(cands: readonly ChartCandidate[], x: Scale, y: Scale): void {
-    const u = this.frameProgress;
-    const fallback: LabelOffset = { dx: 8, dy: 0, visible: true };
-    const now = new Map<string, LabelOffset>();
-    const data = cands.map((c) => {
-      const key = c.trackKey ?? c.id;
-      const a = this.labelFrom.get(key);
-      const b = this.labelTo.get(key) ?? a ?? fallback;
-      const from = a ?? b;
-      const offset: LabelOffset = {
-        dx: from.dx + (b.dx - from.dx) * u,
-        dy: from.dy + (b.dy - from.dy) * u,
-        visible: from.visible || b.visible,
-      };
-      now.set(key, offset);
-      return { key, c, offset };
-    });
-    this.labelNow = now;
-    const font = this.geom.small
-      ? CHART_STYLE.candidateLabelFontSmall
-      : CHART_STYLE.candidateLabelFont;
-    this.playLayer
-      .selectAll<SVGTextElement, (typeof data)[number]>('text')
-      .data(data, (d) => d.key)
-      .join('text')
-      .attr('class', 'sg-label sg-play-label')
-      .attr('dy', '0.35em')
-      .attr('x', (d) => x(d.c.x) + d.offset.dx)
-      .attr('y', (d) => y(d.c.y) + d.offset.dy)
-      .attr('opacity', (d) => (d.offset.visible ? (d.c.alpha ?? 1) : 0))
-      .style('font-size', `${font}px`)
-      .text((d) => d.c.label);
   }
 
   /** Échelles courantes (zoom compris), données → px dans le SVG. */
@@ -652,24 +535,6 @@ export class SaintChart {
     return !(event as MouseEvent).button;
   }
 
-  private pcsRadius(d: ChartPcs): number {
-    const r = CHART_STYLE.pcsRadiusPerSqrtPct * this.geom.unit * Math.sqrt(Math.max(0, d.weight));
-    return Math.max(CHART_STYLE.pcsMinRadius, r);
-  }
-
-  /** Rayon de la bulle : même échelle que les disques, pour que les aires se comparent. */
-  private bubbleRadius(d: ChartCandidate): number {
-    const share = d.sizeShare ?? d.registeredShare ?? d.share;
-    if (share === null || share === undefined) return 0;
-    return CHART_STYLE.pcsRadiusPerSqrtPct * this.geom.unit * Math.sqrt(Math.max(0, share));
-  }
-
-  private dotRadius(d: ChartCandidate): number {
-    return this.bubbleRadius(d) > 0
-      ? CHART_STYLE.candidateDotRadius
-      : CHART_STYLE.candidateDotRadiusAlone;
-  }
-
   // --- Rendu --------------------------------------------------------------------------------
 
   private draw(animation: Animation): void {
@@ -679,347 +544,52 @@ export class SaintChart {
     const duration = this.duration(animation);
     this.titleEl.textContent = model.title;
     this.descEl.textContent = model.description;
-    this.fontFamily = getComputedStyle(this.svg).fontFamily || 'sans-serif';
+    // Lire le style force un recalcul : pas à chaque image.
+    if (!this.zooming && !this.frameCandidates) {
+      this.measurer.family = getComputedStyle(this.svg).fontFamily || 'sans-serif';
+    }
 
     const pcs = model.pcs
       .filter((p) => !this.view.hiddenGroups.has(p.group))
       .sort((a, b) => b.weight - a.weight);
     const cands = (this.frameCandidates ?? model.candidates)
       .filter((c) => !this.view.hiddenCandidates.has(c.id))
-      .sort((a, b) => this.bubbleRadius(b) - this.bubbleRadius(a));
+      .sort((a, b) => bubbleRadius(b, this.geom.unit) - bubbleRadius(a, this.geom.unit));
 
     drawFrame(this.frameLayers, this.geom, x, y, model);
-    this.drawEllipses(this.view.showEllipses ? cands.filter((c) => c.ellipse) : [], x, y, duration);
-    this.drawPcs(pcs, x, y, duration);
-    this.drawBarycenter(model.barycenter, x, y, duration);
-    this.drawCandidates(cands, x, y, duration);
+    const ctx: MarkContext = { x, y, duration, geom: this.geom, model };
+    const { showEllipses, showLabels } = this.view;
+    drawEllipses(this.ellipseLayer, showEllipses ? cands.filter((c) => c.ellipse) : [], ctx);
+    drawPcs(this.pcsLayer, pcs, ctx);
+    drawBarycenter(this.baryLayer, model.barycenter, ctx);
+    drawCandidates(this.candLayer, cands, ctx, !this.sliding);
     // Pendant la lecture, seuls les noms des électorats suivent : les catégories ne bougent pas.
     if (this.frameCandidates) {
-      if (this.view.showLabels) this.drawPlayLabels(cands, x, y);
+      if (showLabels) this.playLabels.draw(cands, this.frameProgress, x, y, this.geom.small);
     } else {
-      this.drawLabels(
-        this.view.showLabels ? pcs : [],
-        this.view.showLabels ? cands : [],
-        x,
-        y,
-        duration,
+      drawMapLabels(
+        this.leaderLayer,
+        this.labelLayer,
+        showLabels ? pcs : [],
+        showLabels ? cands : [],
+        {
+          ...ctx,
+          view: this.view,
+          measure: this.measurer.measure,
+          quick: this.zooming,
+        },
       );
     }
-    this.updateFocusOrder(pcs, cands);
+    this.points.refresh(pcs, cands);
     this.applyEmphasis();
     for (const cb of this.listeners) cb();
-  }
-
-  private drawEllipses(data: ChartCandidate[], x: Scale, y: Scale, duration: number): void {
-    // Rotation dans le repère des données, puis mise à l'échelle : l'ellipse reste juste quand la
-    // carte est étirée. L'axe Y de l'écran descend, d'où le facteur négatif.
-    const kx = Math.abs(x(1) - x(0));
-    const ky = Math.abs(y(1) - y(0));
-    const transform = (d: ChartCandidate): string =>
-      `translate(${x(d.x)},${y(d.y)}) scale(${kx},${-ky}) rotate(${d.ellipse?.angle_deg ?? 0})`;
-    const sel = this.ellipseLayer
-      .selectAll<SVGEllipseElement, ChartCandidate>('ellipse.sg-ellipse')
-      .data(data, (d) => d.id);
-    exitSel(sel.exit<ChartCandidate>(), 'sg-ellipse', duration);
-    const entered = sel
-      .enter()
-      .append('ellipse')
-      .attr('class', 'sg-ellipse')
-      .attr('transform', transform)
-      .attr('rx', 0)
-      .attr('ry', 0);
-    const all = entered.merge(sel);
-    all
-      .attr('data-key', (d) => `c:${d.id}`)
-      .style('stroke', (d) => this.candidateFill(d))
-      .style('fill', (d) => this.candidateFill(d));
-    setAttrs(all, duration, {
-      transform,
-      rx: (d) => d.ellipse?.rx ?? 0,
-      ry: (d) => d.ellipse?.ry ?? 0,
-    });
-  }
-
-  private drawPcs(data: ChartPcs[], x: Scale, y: Scale, duration: number): void {
-    const sel = this.pcsLayer
-      .selectAll<SVGCircleElement, ChartPcs>('circle.sg-pcs')
-      .data(data, (d) => d.code);
-    exitSel(sel.exit<ChartPcs>(), 'sg-pcs', duration);
-    const entered = sel
-      .enter()
-      .append('circle')
-      .attr('class', 'sg-pcs sg-point')
-      .attr('role', 'img')
-      .attr('tabindex', -1)
-      .attr('cx', (d) => x(d.x))
-      .attr('cy', (d) => y(d.y))
-      .attr('r', 0);
-    const all = entered.merge(sel).order();
-    const model = this.model;
-    all
-      .attr('data-key', (d) => `p:${d.code}`)
-      .attr(
-        'aria-label',
-        (d) =>
-          `${d.label} (${d.groupLabel}) : ${formatPct(d.weight)} de la population, ` +
-          coordinatesText(model, d) +
-          (d.status
-            ? `, patrimoine : ${formatStatus(d.status.patrimoine)}` +
-              `, niveau de vie : ${formatStatus(d.status.niveauVie)}`
-            : ''),
-      )
-      .style('fill', (d) => d.fill ?? `var(--sg-group-${d.group}, ${d.color})`);
-    setAttrs(all, duration, {
-      cx: (d) => x(d.x),
-      cy: (d) => y(d.y),
-      r: (d) => this.pcsRadius(d),
-    });
-  }
-
-  private drawBarycenter(b: Point | null, x: Scale, y: Scale, duration: number): void {
-    const sel = this.baryLayer.selectAll<SVGGElement, Point>('g.sg-bary').data(b ? [b] : []);
-    exitSel(sel.exit<Point>(), 'sg-bary', duration);
-    const transform = (d: Point): string => `translate(${x(d.x)},${y(d.y)})`;
-    const entered = sel
-      .enter()
-      .append('g')
-      .attr('class', 'sg-bary sg-point')
-      .attr('role', 'img')
-      .attr('tabindex', 0)
-      .attr('data-key', 'bary')
-      .attr('transform', transform);
-    entered.append('circle').attr('class', 'sg-bary__ring');
-    entered.append('circle').attr('class', 'sg-bary__dot').attr('r', 2.5);
-    const all = entered.merge(sel);
-    const model = this.model;
-    all.attr('aria-label', (d) => `Barycentre de la population : ${coordinatesText(model, d)}`);
-    all
-      .select('circle.sg-bary__ring')
-      .attr('r', Math.max(8, this.geom.unit * CHART_STYLE.barycenterRadius));
-    setAttrs(all, duration, { transform });
-  }
-
-  private candidateFill(d: ChartCandidate): string {
-    return d.isAbstention ? `var(--sg-abstention, ${d.color})` : d.color;
-  }
-
-  private drawCandidates(data: ChartCandidate[], x: Scale, y: Scale, duration: number): void {
-    const transform = (d: ChartCandidate): string => `translate(${x(d.x)},${y(d.y)})`;
-    const sel = this.candLayer
-      .selectAll<SVGGElement, ChartCandidate>('g.sg-cand')
-      .data(data, (d) => d.trackKey ?? d.id);
-    exitSel(sel.exit<ChartCandidate>(), 'sg-cand', duration);
-    const entered = sel
-      .enter()
-      .append('g')
-      .attr('class', 'sg-cand sg-point')
-      .attr('role', 'img')
-      .attr('tabindex', -1)
-      .attr('transform', transform);
-    entered.append('circle').attr('class', 'sg-cand__area').attr('r', 0);
-    entered.append('circle').attr('class', 'sg-cand__dot').attr('r', 0);
-    const all = entered.merge(sel).order();
-    const model = this.model;
-    all
-      .attr('data-key', (d) => `c:${d.id}`)
-      .attr(
-        'aria-label',
-        (d) =>
-          `${d.label}${d.share !== null ? ` : ${formatPct(d.share)}` : ''}, ` +
-          coordinatesText(model, d),
-      )
-      .classed('sg-cand--abstention', (d) => d.isAbstention);
-    const area = all.select<SVGCircleElement>('circle.sg-cand__area');
-    const dot = all.select<SVGCircleElement>('circle.sg-cand__dot');
-    all
-      .style('--sg-cand-color', (d) => this.candidateFill(d))
-      .style('opacity', (d) => (d.alpha === undefined || d.alpha === 1 ? null : String(d.alpha)));
-    setAttrs(all, duration, { transform });
-    // Pendant un glissement, seule la position suit : la taille finit sa propre transition.
-    if (!this.sliding) {
-      setAttrs(area, duration, { r: (d) => this.bubbleRadius(d) });
-      setAttrs(dot, duration, { r: (d) => this.dotRadius(d) });
-    }
-  }
-
-  private measure = (text: string, font: number, weight: number): number => {
-    const key = `${weight}|${font}|${this.fontFamily}|${text}`;
-    const known = this.textWidths.get(key);
-    if (known !== undefined) return known;
-    const width = this.measureText(text, font, weight);
-    this.textWidths.set(key, width);
-    return width;
-  };
-
-  private measureText(text: string, font: number, weight: number): number {
-    if (this.measureCtx === undefined) {
-      try {
-        this.measureCtx = document.createElement('canvas').getContext('2d');
-      } catch {
-        this.measureCtx = null;
-      }
-    }
-    const ctx = this.measureCtx;
-    if (!ctx) return text.length * font * (weight >= 600 ? 0.6 : 0.55);
-    ctx.font = `${weight} ${font}px ${this.fontFamily}`;
-    return ctx.measureText(text).width;
-  }
-
-  /** Une catégorie est nommée si elle est grande, mise en avant, ou si elle a de la place. */
-  private pcsLabelled(
-    p: ChartPcs,
-    cx: number,
-    cy: number,
-    r: number,
-    obstacles: readonly Obstacle[],
-  ): boolean {
-    const key = `p:${p.code}`;
-    const { focus, selected } = this.view;
-    if (selected.has(key)) return true;
-    if (focus) return focus.has(key);
-    const small = this.geom.small;
-    if (p.weight >= (small ? CHART_STYLE.pcsLabelMinWeightSmall : CHART_STYLE.pcsLabelMinWeight)) {
-      return true;
-    }
-    const minGap = small ? CHART_STYLE.pcsLabelMinGapSmall : CHART_STYLE.pcsLabelMinGap;
-    return obstacles.every(
-      (o) => o.key === key || Math.hypot(o.cx - cx, o.cy - cy) - o.r - r >= minGap,
-    );
-  }
-
-  private drawLabels(
-    pcs: ChartPcs[],
-    cands: ChartCandidate[],
-    x: Scale,
-    y: Scale,
-    duration: number,
-  ): void {
-    const { plot, small } = this.geom;
-    const inPlot = (px: number, py: number): boolean =>
-      px >= plot.x && px <= plot.x + plot.w && py >= plot.y && py <= plot.y + plot.h;
-    const candFont = small ? CHART_STYLE.candidateLabelFontSmall : CHART_STYLE.candidateLabelFont;
-    const pcsFont = small ? CHART_STYLE.labelFontSmall : CHART_STYLE.labelFont;
-
-    const obstacles: Obstacle[] = [
-      ...this.model!.pcs.filter((p) => !this.view.hiddenGroups.has(p.group)).map((p) => ({
-        key: `p:${p.code}`,
-        cx: x(p.x),
-        cy: y(p.y),
-        r: this.pcsRadius(p),
-      })),
-      ...this.model!.candidates.filter((c) => !this.view.hiddenCandidates.has(c.id)).map((c) => ({
-        key: `c:${c.id}`,
-        cx: x(c.x),
-        cy: y(c.y),
-        r: this.dotRadius(c),
-        strong: true,
-      })),
-    ];
-    const items: LabelItem[] = [];
-    for (const c of cands) {
-      const cx = x(c.x);
-      const cy = y(c.y);
-      if (!inPlot(cx, cy)) continue;
-      items.push({
-        key: `c:${c.id}`,
-        text: c.label,
-        cx,
-        cy,
-        r: this.dotRadius(c),
-        priority: 1000 + (c.share ?? 0),
-        font: candFont,
-        weight: 650,
-        reach: small ? CHART_STYLE.candidateLabelReachSmall : CHART_STYLE.candidateLabelReach,
-      });
-    }
-    for (const p of pcs) {
-      const cx = x(p.x);
-      const cy = y(p.y);
-      const r = this.pcsRadius(p);
-      if (!inPlot(cx, cy) || !this.pcsLabelled(p, cx, cy, r, obstacles)) continue;
-      items.push({
-        key: `p:${p.code}`,
-        text: p.short,
-        cx,
-        cy,
-        r,
-        priority: p.weight,
-        font: pcsFont,
-        weight: 400,
-        reach: small ? CHART_STYLE.pcsLabelReachSmall : CHART_STYLE.pcsLabelReach,
-      });
-    }
-    const placed = placeLabels(items, obstacles, plot, this.measure, {
-      passes: this.zooming ? 0 : CHART_STYLE.labelPasses,
-    });
-    const data: LabelDatum[] = items.map((it) => {
-      const p = placed.get(it.key);
-      return {
-        key: it.key,
-        text: it.text,
-        x: p?.x ?? it.cx,
-        y: p?.y ?? it.cy,
-        anchor: p?.anchor ?? 'middle',
-        visible: p?.visible ?? false,
-        font: it.font,
-        candidate: it.key.startsWith('c:'),
-        leader: p?.visible ? p.leader : null,
-      };
-    });
-
-    const leaders = this.leaderLayer.selectAll<SVGLineElement, LabelDatum>('line.sg-leader').data(
-      data.filter((d) => d.leader !== null),
-      (d) => d.key,
-    );
-    exitSel(leaders.exit<LabelDatum>(), 'sg-leader', duration);
-    const enteredLeaders = leaders
-      .enter()
-      .append('line')
-      .attr('class', 'sg-leader')
-      .attr('x1', (d) => d.leader?.x1 ?? 0)
-      .attr('y1', (d) => d.leader?.y1 ?? 0)
-      .attr('x2', (d) => d.leader?.x1 ?? 0)
-      .attr('y2', (d) => d.leader?.y1 ?? 0);
-    const allLeaders = enteredLeaders.merge(leaders);
-    allLeaders.attr('data-key', (d) => d.key);
-    setAttrs(allLeaders, duration, {
-      x1: (d) => d.leader?.x1 ?? 0,
-      y1: (d) => d.leader?.y1 ?? 0,
-      x2: (d) => d.leader?.x2 ?? 0,
-      y2: (d) => d.leader?.y2 ?? 0,
-    });
-
-    const sel = this.labelLayer
-      .selectAll<SVGTextElement, LabelDatum>('text.sg-label')
-      .data(data, (d) => d.key);
-    exitSel(sel.exit<LabelDatum>(), 'sg-label', duration);
-    const entered = sel
-      .enter()
-      .append('text')
-      .attr('class', 'sg-label')
-      .attr('x', (d) => d.x)
-      .attr('y', (d) => d.y)
-      .attr('dy', '0.35em')
-      .attr('opacity', 0);
-    const all = entered.merge(sel);
-    all
-      .attr('data-key', (d) => d.key)
-      .classed('sg-label--cand', (d) => d.candidate)
-      .attr('text-anchor', (d) => d.anchor)
-      .style('font-size', (d) => `${d.font}px`)
-      .text((d) => d.text);
-    setAttrs(all, duration, {
-      x: (d) => d.x,
-      y: (d) => d.y,
-      opacity: (d) => (d.visible ? 1 : 0),
-    });
   }
 
   /** Estompe ce qui n'est pas mis en avant et marque les repères sélectionnés. */
   private applyEmphasis(): void {
     const { focus, selected } = this.view;
     const dim = (key: string | null): boolean => focus !== null && !focus.has(key ?? '');
-    for (const [key, el] of this.pointEls) {
+    for (const [key, el] of this.points.elements) {
       el.classList.toggle('sg-dim', key !== 'bary' && dim(key));
       el.classList.toggle('sg-point--selected', selected.has(key));
     }
@@ -1057,8 +627,7 @@ export class SaintChart {
       const el = e.target instanceof Element ? e.target.closest<SVGElement>('[data-key]') : null;
       const key = el?.getAttribute('data-key');
       if (!key) return;
-      this.focusedKey = key;
-      this.applyRoving();
+      this.points.setFocused(key);
       this.showKey(key);
     });
     root.addEventListener('focusout', () => this.clearHover());
@@ -1072,7 +641,7 @@ export class SaintChart {
         e.preventDefault();
         this.emitSelect(key, e.shiftKey);
       } else if (key) {
-        this.onPointKey(e, key);
+        this.points.onKey(e, key);
       }
     });
   }
@@ -1082,53 +651,18 @@ export class SaintChart {
     for (const cb of this.selectListeners) cb(selectable, additive);
   }
 
-  /** Repère visé par le pointeur : à moins de hoverRadius px, le plus proche, puis le plus petit. */
   private keyNearPointer(e: MouseEvent): string | null {
     const model = this.model;
     const ctm = this.plot.node()?.getScreenCTM();
     if (!model || !ctm) return null;
-    const px = (e.clientX - ctm.e) / ctm.a;
-    const py = (e.clientY - ctm.f) / ctm.d;
-    const { plot } = this.geom;
-    // Dans la bande des axes, la carte ne réagit pas : ses repères y sont masqués.
-    if (px < plot.x || py < plot.y || px > plot.x + plot.w || py > plot.y + plot.h) return null;
     const { x, y } = this.scales();
-    let best: string | null = null;
-    let bestGap = Number.POSITIVE_INFINITY;
-    let bestSize = Number.POSITIVE_INFINITY;
-    const consider = (key: string, cx: number, cy: number, r: number): void => {
-      const gap = Math.max(0, Math.hypot(px - cx, py - cy) - r);
-      if (gap > CHART_STYLE.hoverRadius) return;
-      if (gap < bestGap || (gap === bestGap && r < bestSize)) {
-        best = key;
-        bestGap = gap;
-        bestSize = r;
-      }
-    };
-    for (const p of model.pcs) {
-      if (!this.view.hiddenGroups.has(p.group)) {
-        consider(`p:${p.code}`, x(p.x), y(p.y), this.pcsRadius(p));
-      }
-    }
-    const shown = model.candidates.filter((c) => !this.view.hiddenCandidates.has(c.id));
-    for (const c of shown) consider(`c:${c.id}`, x(c.x), y(c.y), this.dotRadius(c));
-    // Hors de tout point, c'est la plus petite bulle sous le pointeur : les bulles se chevauchent.
-    if (best === null) {
-      let smallest = Number.POSITIVE_INFINITY;
-      for (const c of shown) {
-        const radius = this.bubbleRadius(c);
-        if (radius < smallest && Math.hypot(px - x(c.x), py - y(c.y)) <= radius) {
-          best = `c:${c.id}`;
-          smallest = radius;
-        }
-      }
-    }
-    if (best === null && model.barycenter) {
-      const ring = Math.max(8, this.geom.unit * CHART_STYLE.barycenterRadius);
-      const d = Math.hypot(px - x(model.barycenter.x), py - y(model.barycenter.y));
-      if (Math.abs(d - ring) <= 4) best = 'bary';
-    }
-    return best;
+    return pickKey((e.clientX - ctm.e) / ctm.a, (e.clientY - ctm.f) / ctm.d, {
+      model,
+      view: this.view,
+      geom: this.geom,
+      x,
+      y,
+    });
   }
 
   private tipFor(key: string): TooltipContent | null {
@@ -1145,10 +679,10 @@ export class SaintChart {
 
   private showKey(key: string): void {
     if (key === this.hoverKey && this.tooltip.visible) return;
-    const el = this.pointEls.get(key);
+    const el = this.points.elements.get(key);
     const content = this.tipFor(key);
     if (!el || !content) return;
-    this.pointEls.get(this.hoverKey ?? '')?.classList.remove('sg-point--active');
+    this.points.elements.get(this.hoverKey ?? '')?.classList.remove('sg-point--active');
     el.classList.add('sg-point--active');
     this.hoverKey = key;
     const host = this.element.getBoundingClientRect();
@@ -1167,60 +701,8 @@ export class SaintChart {
 
   /** Masque l'infobulle et la surbrillance. */
   clearHover(): void {
-    this.pointEls.get(this.hoverKey ?? '')?.classList.remove('sg-point--active');
+    this.points.elements.get(this.hoverKey ?? '')?.classList.remove('sg-point--active');
     this.hoverKey = null;
     this.tooltip.hide();
-  }
-
-  private onPointKey(event: KeyboardEvent, key: string): void {
-    const order = key.startsWith('p:') ? this.pcsOrder : key.startsWith('c:') ? this.candOrder : [];
-    const i = order.indexOf(key);
-    let next: number;
-    switch (event.key) {
-      case 'ArrowRight':
-      case 'ArrowDown':
-        next = i + 1;
-        break;
-      case 'ArrowLeft':
-      case 'ArrowUp':
-        next = i - 1;
-        break;
-      case 'Home':
-        next = 0;
-        break;
-      case 'End':
-        next = order.length - 1;
-        break;
-      default:
-        return;
-    }
-    if (order.length === 0) return;
-    event.preventDefault();
-    const target = order[clamp(next, 0, order.length - 1)];
-    if (target) this.pointEls.get(target)?.focus();
-  }
-
-  private updateFocusOrder(pcs: ChartPcs[], cands: ChartCandidate[]): void {
-    this.pointEls.clear();
-    this.plot.selectAll<SVGElement, unknown>('.sg-point').each((_d, i, nodes) => {
-      const el = nodes[i];
-      const key = el?.getAttribute('data-key');
-      if (el && key && !el.classList.contains('sg-exiting')) this.pointEls.set(key, el);
-    });
-    const byXY = (a: Point, b: Point): number => a.x - b.x || b.y - a.y;
-    this.pcsOrder = [...pcs].sort(byXY).map((p) => `p:${p.code}`);
-    this.candOrder = [...cands].sort(byXY).map((c) => `c:${c.id}`);
-    this.applyRoving();
-  }
-
-  /** Un seul repère par groupe est atteignable par Tab ; les flèches parcourent le groupe. */
-  private applyRoving(): void {
-    for (const order of [this.pcsOrder, this.candOrder]) {
-      const current =
-        this.focusedKey && order.includes(this.focusedKey) ? this.focusedKey : order[0];
-      for (const key of order) {
-        this.pointEls.get(key)?.setAttribute('tabindex', key === current ? '0' : '-1');
-      }
-    }
   }
 }
