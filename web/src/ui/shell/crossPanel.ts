@@ -292,8 +292,11 @@ export class CrossPanel implements Feature {
     this.bubbleSize.value = state.bubbleSize ?? '';
     // Un groupe choisi prend la main sur l'aire : le menu ne doit pas prétendre le contraire.
     const lensActive = (crossing?.lens?.pollGroup ?? null) !== null;
-    this.bubbleSize.disabled = lensActive;
-    if (lensActive) {
+    this.bubbleSize.disabled = lensActive || view.projection !== null;
+    if (view.projection) {
+      this.sizeNote.textContent =
+        'À 2027, l’aire reprend la part des inscrits de chaque parti à son dernier scrutin : aucun score n’est projeté par parti.';
+    } else if (lensActive) {
       this.sizeNote.textContent =
         'Une catégorie est choisie : l’aire montre le vote de son groupe. « Revenir à la carte » rend la main à ce menu.';
     } else {

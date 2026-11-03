@@ -168,8 +168,9 @@ export function projectionMarks(file: Pick<ProjectionFile, 'families'>): string 
   const max = Math.max(...counts);
   const span = min === max ? `${min}` : `${min} à ${max}`;
   return (
-    'Flèche : de « rien ne bouge » à « la tendance continue ». Cercle en pointillés : erreur moyenne ' +
-    `de ce parti sur le passé, sur ${span} prédictions.`
+    'Flèche : de « rien ne bouge » à « la tendance continue ». Aire : part des inscrits à son dernier ' +
+    'scrutin, pas un score prévu. Cercle en pointillés, s’il est affiché : erreur moyenne de ce parti ' +
+    `sur le passé, sur ${span} prédictions.`
   );
 }
 

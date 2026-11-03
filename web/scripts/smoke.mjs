@@ -1182,6 +1182,25 @@ async function main() {
       project.arrows > 0 && project.errors > 0,
       JSON.stringify(project),
     );
+    const bubbles = await evaluate(`(() => {
+      const shown = [...document.querySelectorAll('.sg-projection-error')].filter((e) => e.style.display !== 'none');
+      const areas = [...document.querySelectorAll('.sg-cand .sg-cand__area')].map((c) => Number(c.getAttribute('r')));
+      return { errorsShown: shown.length, bubbles: areas.filter((r) => r > 0).length, key: document.getElementById('sg-size-key').textContent };
+    })()`);
+    check(
+      '2027 : une bulle par parti, au dernier scrutin, sans zone par défaut',
+      bubbles.errorsShown === 0 && bubbles.bubbles >= 5 && /dernier scrutin/.test(bubbles.key),
+      JSON.stringify(bubbles),
+    );
+    const askedErrors = await evaluate(`(async () => {
+      document.getElementById('sg-projection-errors').click();
+      await new Promise((r) => setTimeout(r, 200));
+      const shown = [...document.querySelectorAll('.sg-projection-error')].filter((e) => e.style.display !== 'none').length;
+      document.getElementById('sg-projection-errors').click();
+      await new Promise((r) => setTimeout(r, 200));
+      return shown;
+    })()`);
+    check('2027 : marges d’erreur à la demande', askedErrors > 0, String(askedErrors));
     check(
       '2027 : présentée comme une projection',
       /Projection 2027/.test(project.heading),

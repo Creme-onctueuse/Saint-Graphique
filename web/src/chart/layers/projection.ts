@@ -1,8 +1,9 @@
 /**
  * Projection 2027 sur la carte : pour chaque famille, une flèche de « rien ne bouge » à « la tendance
- * continue », un petit losange vide sur le scénario non affiché et un cercle en pointillés de rayon
- * égal à son erreur moyenne dans le test sur le passé. L'étirement de la carte en fait une ellipse :
- * son rayon reste exact sur chaque axe.
+ * continue » et un petit losange vide sur le scénario non affiché. Le cercle en pointillés, de rayon
+ * égal à son erreur moyenne dans le test sur le passé, n'apparaît qu'à la demande ou pour le parti
+ * sélectionné : à côté d'une bulle, une zone se lirait comme une taille. L'étirement de la carte en
+ * fait une ellipse : son rayon reste exact sur chaque axe.
  */
 import { select, type Selection } from 'd3-selection';
 import 'd3-transition';
@@ -46,6 +47,8 @@ export class ProjectionLayer implements Feature {
   private file: ProjectionFile | null = null;
   private scenario: Scenario = 'still';
   private hidden: ReadonlySet<string> = new Set();
+  private showErrors = false;
+  private selected: ReadonlySet<string> = new Set();
 
   constructor(chart: SaintChart) {
     this.chart = chart;
@@ -62,6 +65,8 @@ export class ProjectionLayer implements Feature {
     this.file = view.projection;
     this.scenario = state.scenario;
     this.hidden = new Set(state.hiddenCandidates);
+    this.showErrors = state.showEllipses;
+    this.selected = new Set(view.crossing?.keys ?? []);
     const animate = changed && !this.reducedMotion?.matches;
     this.render(animate ? CHART_STYLE.durations.normal : 0);
   }
@@ -102,7 +107,9 @@ export class ProjectionLayer implements Feature {
         return `translate(${x(p.x)},${y(p.y)})`;
       });
 
-    const ellipses = items.select<SVGEllipseElement>('ellipse.sg-projection-error');
+    const ellipses = items
+      .select<SVGEllipseElement>('ellipse.sg-projection-error')
+      .style('display', (d) => (this.showErrors || this.selected.has(`c:${d.id}`) ? null : 'none'));
     const cx = (d: ProjectedFamily): number => x(scenarioPoint(d, scenario).x);
     const cy = (d: ProjectedFamily): number => y(scenarioPoint(d, scenario).y);
     const rx = (d: ProjectedFamily): number => kx * scenarioError(d, scenario).position_mean;

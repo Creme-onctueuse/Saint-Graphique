@@ -51,12 +51,18 @@ export class ProjectionCard implements Feature {
   private readonly dataEnd = el('p', { class: 'sg-note' });
   private readonly marks = el('p', { class: 'sg-note sg-projection-card__marks' });
   private readonly ranges = el('ul', { class: 'sg-ranges' });
+  private readonly showErrors = el('input', {
+    attrs: { type: 'checkbox', id: 'sg-projection-errors' },
+  });
   private readonly suspended = el('p', {
     class: 'sg-note',
     attrs: { id: 'sg-projection-suspended' },
   });
 
   constructor(actions: AppActions) {
+    this.showErrors.addEventListener('change', () =>
+      actions.setShowEllipses(this.showErrors.checked),
+    );
     const scenarios = el(
       'fieldset',
       { class: 'sg-scenario', attrs: { id: 'sg-scenario' } },
@@ -122,6 +128,7 @@ export class ProjectionCard implements Feature {
         this.dataEnd,
       ),
       this.marks,
+      el('label', { class: 'sg-check' }, this.showErrors, 'Marges d’erreur sur la carte'),
       details,
     );
     this.root.hidden = true;
@@ -142,6 +149,7 @@ export class ProjectionCard implements Feature {
       } au prochain scrutin.`;
     }
     for (const input of this.inputs) input.checked = input.value === state.scenario;
+    this.showErrors.checked = state.showEllipses;
     const text = verdictText(file);
     this.headline.textContent = text.headline;
     this.comparison.textContent = text.comparison;

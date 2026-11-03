@@ -424,6 +424,8 @@ export function applyCrossing(ds: Dataset, state: AppState, base: ResolvedView):
     }
   }
 
+  if (base.projection) sizeLabel = 'part des inscrits à son dernier scrutin';
+
   const crossing: CrossingInfo = {
     mode,
     selected,

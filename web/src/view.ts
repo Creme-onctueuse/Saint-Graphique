@@ -47,6 +47,7 @@ import {
   scenarioError,
   scenarioPoint,
   verdictSentence,
+  type ProjectedFamily,
   type ProjectionFile,
 } from './core/projection.ts';
 import { sameWeights } from './core/scores.ts';
@@ -298,11 +299,29 @@ function candidateFromRaw(
   };
 }
 
-/** Une famille sur la carte de 2027 : une position, pas de score. */
-function projectedCandidates(file: ProjectionFile, scenario: Scenario): ChartCandidate[] {
+/** Part des inscrits d'une famille à son dernier scrutin ; null si ce scrutin manque aux données. */
+function lastRegisteredShare(ds: Dataset, f: ProjectedFamily): number | null {
+  const election = ds.rawElections.get(f.last_election);
+  const family = ds.families?.families.find((candidate) => candidate.id === f.id);
+  const id = family?.candidates.get(f.last_election);
+  if (!election || !id) return null;
+  return registeredShares(election).get(id) ?? null;
+}
+
+/**
+ * Une famille sur la carte de 2027 : une position projetée, sans score. L'aire reprend son dernier
+ * scrutin pour que la bulle se lise comme ailleurs : elle ne prévoit rien, et l'infobulle le dit.
+ */
+function projectedCandidates(
+  ds: Dataset,
+  file: ProjectionFile,
+  scenario: Scenario,
+): ChartCandidate[] {
   return file.families.map((f) => {
     const point = scenarioPoint(f, scenario);
     const error = scenarioError(f, scenario);
+    const lastShare = lastRegisteredShare(ds, f);
+    const lastLabel = ds.elections.find((e) => e.id === f.last_election)?.label ?? f.last_election;
     return {
       id: f.id,
       label: f.label,
@@ -313,8 +332,9 @@ function projectedCandidates(file: ProjectionFile, scenario: Scenario): ChartCan
       isAbstention: false,
       ellipse: null,
       composition: null,
+      ...(lastShare === null ? {} : { sizeShare: lastShare, sizeLabel: `Inscrits, ${lastLabel}` }),
       notes: [
-        'Position projetée, sans score.',
+        'Position projetée, sans score : l’aire reprend son dernier scrutin.',
         `Erreur moyenne de ce parti sur le passé : ${formatNumber(error.position_mean)} ` +
           `(${error.n} prédiction${error.n > 1 ? 's' : ''}).`,
       ],
@@ -457,7 +477,7 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
         composition: compositionOf(ds, rawElection, c.id),
       }));
     } else if (projection) {
-      candidates = projectedCandidates(projection, state.scenario);
+      candidates = projectedCandidates(ds, projection, state.scenario);
     } else if (!isPopulation) {
       notes.push('Cette méthode ne couvre pas cette élection : seules les PCS sont affichées.');
     }
@@ -502,7 +522,8 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
     customized,
     canRecompute,
     recomputeBlock,
-    hasEllipses: candidates.some((c) => c.ellipse !== null),
+    // À 2027, la case commande les marges d'erreur de la projection.
+    hasEllipses: projection !== null || candidates.some((c) => c.ellipse !== null),
     rawElection,
     notes,
     // Une image circule sans la page : elle doit dire son scénario et le résultat du test.
