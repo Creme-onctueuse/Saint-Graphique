@@ -175,6 +175,7 @@ p {
   white-space: nowrap;
 }
 
+/* L'élection et son institut d'abord : c'est le nom de la méthode qui se coupe. */
 .sg-chart-heading {
   flex: none;
   font-size: inherit;
@@ -913,6 +914,21 @@ p {
   white-space: nowrap;
   transform: translateX(-50%);
   pointer-events: none;
+}
+
+@media (max-width: 719px) {
+  .sg-hint {
+    width: max-content;
+    max-width: calc(100vw - 24px);
+    border-radius: var(--sg-radius);
+    text-align: center;
+    white-space: normal;
+  }
+
+  /* L'institut reste dans les sources : sur téléphone, la ligne ne passe pas sous les boutons. */
+  .sg-chart-heading__source {
+    display: none;
+  }
 }
 
 .sg-status {

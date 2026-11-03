@@ -19,18 +19,6 @@
   }
 }
 
-/* L'élection et son institut d'abord : c'est le nom de la méthode qui se coupe. */
-.sg-chart-heading {
-  flex: none;
-}
-
-.sg-method-chip {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 /* Commandes de la frise */
 .sg-timeline {
   --sg-stop: 20px;
@@ -474,9 +462,14 @@
 }
 
 /* Fenêtres moyennes : la frise passe sur sa propre ligne, plus tôt que le reste de l'en-tête. */
-@media (max-width: 1560px) {
+@media (max-width: 1860px) {
   .sg-top {
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  /* Sur sa propre ligne, la frise ne dépend plus de la longueur du nom. */
+  .sg-brand {
+    width: auto;
   }
 
   .sg-timeline {

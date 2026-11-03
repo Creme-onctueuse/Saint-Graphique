@@ -70,6 +70,9 @@ function installHint(): void {
   } catch {
     // Stockage indisponible (navigation privée, file://) : l'aide reste affichée à chaque visite.
   }
+  if (window.matchMedia('(pointer: coarse)').matches) {
+    hint.textContent = 'Pincer : zoomer · Toucher : croiser les données';
+  }
   hint.hidden = false;
   const dismiss = (): void => {
     hint.hidden = true;
