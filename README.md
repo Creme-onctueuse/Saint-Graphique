@@ -85,9 +85,8 @@ research/    matériel local NON publié (vidéos, transcriptions, captures) : g
 Toutes les données proviennent de **sources citées**, recensées dans [`data/SOURCES.md`](data/SOURCES.md) :
 
 - INSEE / data.gouv.fr (Licence Ouverte Etalab 2.0) : effectifs, diplômes, revenus et patrimoine ;
-- rapports de sondage Ifop du jour du vote : composition sociale des électorats.
-
-- `data/positions_chris.json` : positions et poids lus sur les vidéos de la PaduTeam, chaque poste étant cité par vidéo et horodatage. Le graphique étant l'œuvre de Chris, ce fichier n'est ni placé sous licence libre, ni publié.
+- sondages du jour du vote de l'Ifop, d'Ipsos et de CSA : composition sociale des électorats ;
+- `data/positions_chris.json` : positions et poids lus sur les vidéos de la PaduTeam, chaque poste étant cité par vidéo et horodatage. Le graphique étant l'œuvre de Chris, ce fichier n'est pas placé sous licence libre : il est publié avec ce crédit, et retiré sur demande.
 
 Les vidéos, transcriptions et captures servent uniquement à l'analyse locale. Elles ne sont **pas redistribuées**. Seuls des chiffres dérivés figurent dans la documentation, chacun cité avec l'identifiant de la vidéo et l'horodatage.
 
