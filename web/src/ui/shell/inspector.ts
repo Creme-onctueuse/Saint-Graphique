@@ -10,14 +10,12 @@ import {
   compositionByGroup,
   compositionGap,
   groupBase,
-  hasAbstentionBreakdown,
   representation,
 } from '../../core/crossing.ts';
-import { formatNumber, formatPct, MINUS, NBSP } from '../../core/format.ts';
-import { GROUP_SHORT_NAMES } from '../../core/groups.ts';
+import { formatNumber, formatPct, NBSP } from '../../core/format.ts';
 import type { AppState } from '../../core/state.ts';
 import { familyOfCandidate } from '../../core/timeline.ts';
-import type { Point, RawElection } from '../../core/types.ts';
+import type { Point } from '../../core/types.ts';
 import type { Dataset } from '../../data/dataset.ts';
 import type { ResolvedView } from '../../view.ts';
 import { lensForPcs, type CrossingInfo, type LensInfo } from '../../viewCrossing.ts';
@@ -25,74 +23,25 @@ import type { AppActions, Feature } from '../actions.ts';
 import { el } from '../dom.ts';
 import { icon } from '../icons.ts';
 import { familyHistorySection, projectionSection } from './familySection.ts';
+import {
+  butterfly,
+  candidateColor,
+  compareList,
+  divergingBar,
+  groupCompareList,
+  groupName,
+  neighborTable,
+  partsNote,
+  points,
+  section,
+  stat,
+  swatch,
+  voteSection,
+} from './inspectorParts.ts';
 
 /** Voisins affichés. */
 const NEIGHBOR_COUNT = 5;
 const NEAREST_ON_MAP_COUNT = 3;
-
-function points(value: number): string {
-  const sign = value > 0 ? '+' : value < 0 ? MINUS : '';
-  return `${sign}${formatNumber(Math.abs(value), 1)}${NBSP}pts`;
-}
-
-function candidateColor(c: { color: string; isAbstention: boolean }): string {
-  return c.isAbstention ? `var(--sg-abstention, ${c.color})` : c.color;
-}
-
-function swatch(color: string, shape: 'disc' | 'bubble'): HTMLSpanElement {
-  const node = el('span', {
-    class: `sg-swatch sg-swatch--${shape}`,
-    attrs: { 'aria-hidden': 'true' },
-  });
-  node.style.setProperty('--sg-swatch', color);
-  return node;
-}
-
-function groupName(key: string, election: RawElection, groupOf: (code: string) => string): string {
-  const name = GROUP_SHORT_NAMES[key] ?? `Groupe ${key}`;
-  if (key !== '2') return name;
-  const separate = election.candidates.some(
-    (c) => (compositionByGroup(election, c.id, groupOf)['1'] ?? 0) > 0,
-  );
-  return separate ? name : 'Indépendants, agriculteurs';
-}
-
-function section(title: string, ...children: (Node | null)[]): HTMLElement {
-  return el('section', { class: 'sg-ins__section' }, el('h3', { text: title }), ...children);
-}
-
-function stat(id: string, label: string, value: string): HTMLDivElement {
-  return el(
-    'div',
-    { class: 'sg-stat', attrs: { id } },
-    el('span', { class: 'sg-stat__value', text: value }),
-    el('span', { class: 'sg-stat__label', text: label }),
-  );
-}
-
-/** Barre centrée : la longueur dit l'écart, le sens dit s'il est positif ou négatif. */
-function divergingBar(delta: number, scale: number, color: string): HTMLSpanElement {
-  const fill = el('span', {
-    class: `sg-div__fill sg-div__fill--${delta >= 0 ? 'pos' : 'neg'}`,
-  });
-  fill.style.width = `${scale > 0 ? (50 * Math.abs(delta)) / scale : 0}%`;
-  fill.style.background = color;
-  return el('span', { class: 'sg-div__track' }, fill);
-}
-
-function rankedBar(share: number, max: number, color: string): HTMLSpanElement {
-  const fill = el('span', { class: 'sg-bar__fill' });
-  fill.style.width = `${max > 0 ? (100 * share) / max : 0}%`;
-  fill.style.background = color;
-  return el('span', { class: 'sg-bar__track' }, fill);
-}
-
-/** Sur quoi se lisent les parts d'un groupe : sans détail de l'abstention, sur ses seuls votants. */
-function partsNote(election: RawElection, scope: string): string {
-  return hasAbstentionBreakdown(election)
-    ? `Parts calculées parmi les inscrits ${scope}, abstention comprise.`
-    : `Parts calculées parmi les votants ${scope} : ce sondage ne détaille pas l’abstention.`;
-}
 
 export class Inspector implements Feature {
   private readonly host: HTMLElement;
@@ -139,10 +88,10 @@ export class Inspector implements Feature {
     this.actions.patch({ selected: null, compared: null }, 'fast');
   }
 
-  private compareWith(key: string): void {
+  private readonly compareWith = (key: string): void => {
     this.compareOpen = false;
     this.actions.patch({ compared: key }, 'fast');
-  }
+  };
 
   sync(view: ResolvedView, state: AppState): void {
     this.view = view;
@@ -284,7 +233,7 @@ export class Inspector implements Feature {
     const body = el('div', { class: 'sg-ins__body' });
     const election = view.rawElection;
     if (projected) body.append(projectionSection(projected, this.state?.scenario ?? 'still'));
-    if (this.compareOpen) body.append(this.compareList(view, c.id));
+    if (this.compareOpen) body.append(compareList(view, c.id, this.compareWith));
     if (election) {
       const rows = representation(election, c.id, crossing.groupOf);
       const scale = Math.max(...rows.map((r) => Math.abs(r.delta)), 1e-9);
@@ -321,7 +270,7 @@ export class Inspector implements Feature {
       body.append(
         section(
           'Électorats les plus ressemblants',
-          this.neighborTable(view, crossing, nearest),
+          neighborTable(view, crossing, nearest, this.compareWith),
           el('p', { class: 'sg-note', text: 'Cliquez sur une ligne pour lancer le duel.' }),
         ),
       );
@@ -338,62 +287,6 @@ export class Inspector implements Feature {
       this.head(c.label, subtitle, swatch(candidateColor(c), 'bubble'), election !== null),
       body,
     ];
-  }
-
-  private neighborTable(
-    view: ResolvedView,
-    crossing: CrossingInfo,
-    rows: { id: string; gap: number; distance: number }[],
-  ): HTMLElement {
-    const map = crossing.mode === 'proximity' ? 'Plan' : 'Carte';
-    const table = el(
-      'div',
-      { class: 'sg-neighbors', attrs: { id: 'sg-inspector-neighbors' } },
-      el(
-        'div',
-        { class: 'sg-neighbors__head' },
-        el('span', { text: 'Électorat' }),
-        el('span', { text: 'Composition' }),
-        el('span', { text: map }),
-      ),
-    );
-    for (const row of rows) {
-      const other = view.model.candidates.find((o) => o.id === row.id);
-      if (!other) continue;
-      const button = el(
-        'button',
-        { class: 'sg-neighbors__row', attrs: { type: 'button', 'data-compare': `c:${row.id}` } },
-        el(
-          'span',
-          { class: 'sg-neighbors__name' },
-          swatch(candidateColor(other), 'bubble'),
-          other.label,
-        ),
-        el('span', { class: 'sg-num', text: `${formatNumber(row.gap, 1)}${NBSP}pts` }),
-        el('span', { class: 'sg-num', text: formatNumber(row.distance) }),
-      );
-      button.addEventListener('click', () => this.compareWith(`c:${row.id}`));
-      table.append(button);
-    }
-    return table;
-  }
-
-  private compareList(view: ResolvedView, exclude: string): HTMLElement {
-    const list = el('div', { class: 'sg-compare', attrs: { id: 'sg-compare-list' } });
-    const others = view.model.candidates
-      .filter((o) => o.id !== exclude)
-      .sort((a, b) => (b.share ?? 0) - (a.share ?? 0));
-    for (const other of others) {
-      const button = el(
-        'button',
-        { class: 'sg-compare__item', attrs: { type: 'button', 'data-compare': `c:${other.id}` } },
-        swatch(candidateColor(other), 'bubble'),
-        other.label,
-      );
-      button.addEventListener('click', () => this.compareWith(`c:${other.id}`));
-      list.append(button);
-    }
-    return section('Comparer avec', list);
   }
 
   private candidateDuel(
@@ -437,7 +330,7 @@ export class Inspector implements Feature {
       body.append(
         section(
           'Composition, groupe par groupe',
-          this.butterfly(
+          butterfly(
             a.label,
             candidateColor(a),
             b.label,
@@ -455,52 +348,12 @@ export class Inspector implements Feature {
     return [this.head(title, 'Duel', null, false), body];
   }
 
-  private butterfly(
-    nameA: string,
-    colorA: string,
-    nameB: string,
-    colorB: string,
-    rows: { label: string; a: number; b: number }[],
-  ): HTMLElement {
-    const max = Math.max(...rows.flatMap((r) => [r.a, r.b]), 1e-9);
-    const side = (value: number, color: string, cls: string): HTMLElement => {
-      const fill = el('span', { class: 'sg-duel__fill' });
-      fill.style.width = `${(100 * value) / max}%`;
-      fill.style.background = color;
-      return el(
-        'span',
-        { class: `sg-duel__side ${cls}` },
-        el('span', { class: 'sg-duel__value', text: formatPct(value, 0) }),
-        el('span', { class: 'sg-duel__track' }, fill),
-      );
-    };
-    return el(
-      'div',
-      { class: 'sg-duel', attrs: { id: 'sg-inspector-duel' } },
-      el(
-        'div',
-        { class: 'sg-duel__legend' },
-        el('span', {}, swatch(colorA, 'bubble'), nameA),
-        el('span', {}, swatch(colorB, 'bubble'), nameB),
-      ),
-      ...rows.flatMap((r) => [
-        el('span', { class: 'sg-duel__label', text: r.label }),
-        el(
-          'div',
-          { class: 'sg-duel__row' },
-          side(r.a, colorA, 'sg-duel__side--a'),
-          side(r.b, colorB, 'sg-duel__side--b'),
-        ),
-      ]),
-    );
-  }
-
   // --- Catégorie ------------------------------------------------------------------------------
 
   private categoryDetail(view: ResolvedView, crossing: CrossingInfo, p: ChartPcs): Node[] {
     const body = el('div', { class: 'sg-ins__body' });
-    if (this.compareOpen) body.append(this.groupCompareList(view, p));
-    body.append(this.voteSection(view, crossing, p, crossing.lens));
+    if (this.compareOpen) body.append(groupCompareList(view, p, this.compareWith));
+    body.append(voteSection(view, crossing, p, crossing.lens));
     if (view.model.candidates.length > 0) {
       const rows = view.model.candidates
         .map((c) => ({ c, distance: Math.hypot(c.x - p.x, c.y - p.y) }))
@@ -536,95 +389,6 @@ export class Inspector implements Feature {
       ),
       body,
     ];
-  }
-
-  private voteSection(
-    view: ResolvedView,
-    crossing: CrossingInfo,
-    p: ChartPcs,
-    lens: LensInfo | null,
-  ): HTMLElement {
-    const election = view.rawElection;
-    if (!election || !lens) {
-      return section(
-        'Comment vote ce groupe ?',
-        el('p', {
-          class: 'sg-note',
-          text: 'Aucune élection affichée : choisissez un scrutin sur la frise pour voir ce vote.',
-        }),
-      );
-    }
-    if (lens.pollGroup === null) {
-      return section(
-        'Comment vote ce groupe ?',
-        el('p', {
-          class: 'sg-ins__alert',
-          attrs: { id: 'sg-inspector-novote' },
-          text: 'Pas de donnée de vote : les sondages n’isolent pas ce groupe.',
-        }),
-      );
-    }
-    const max = Math.max(...lens.rows.map((r) => r.share), 1e-9);
-    const name = groupName(lens.pollGroup, election, crossing.groupOf);
-    return section(
-      `Comment vote le groupe : ${name}`,
-      el('p', {
-        class: 'sg-note',
-        attrs: { id: 'sg-inspector-vote-note' },
-        text: lens.merged
-          ? `Vote de tout le groupe, et non de « ${p.short} » seule : les sondages réunissent les agriculteurs avec les artisans, commerçants et chefs d’entreprise.`
-          : `Vote de tout le groupe, et non de « ${p.short} » seule : les sondages ne détaillent pas les catégories.`,
-      }),
-      el(
-        'ul',
-        { class: 'sg-bars', attrs: { id: 'sg-inspector-votes' } },
-        ...lens.rows.map((r) =>
-          el(
-            'li',
-            { class: 'sg-bars__row' },
-            el('span', { class: 'sg-bars__label', text: r.label }),
-            rankedBar(r.share, max, candidateColor(r)),
-            el('span', { class: 'sg-bars__value', text: formatPct(r.share, 0) }),
-          ),
-        ),
-      ),
-      el('p', {
-        class: 'sg-note',
-        text: partsNote(election, 'du groupe'),
-      }),
-    );
-  }
-
-  /** Comparer deux catégories revient à comparer leurs groupes : un bouton par groupe. */
-  private groupCompareList(view: ResolvedView, p: ChartPcs): HTMLElement {
-    const election = view.rawElection;
-    const crossing = view.crossing;
-    const list = el('div', { class: 'sg-compare', attrs: { id: 'sg-compare-list' } });
-    if (!election || !crossing) return section('Comparer avec', list);
-    const seen = new Set<string>([crossing.lens?.pollGroup ?? p.group]);
-    const available = new Set(
-      election.candidates.flatMap((c) =>
-        Object.keys(compositionByGroup(election, c.id, crossing.groupOf)),
-      ),
-    );
-    const byWeight = [...view.model.pcs].sort((a, b) => b.weight - a.weight);
-    for (const other of byWeight) {
-      const key = other.group === '1' && !available.has('1') ? '2' : other.group;
-      if (seen.has(key) || !available.has(key)) continue;
-      seen.add(key);
-      const button = el(
-        'button',
-        {
-          class: 'sg-compare__item',
-          attrs: { type: 'button', 'data-compare': `p:${other.code}` },
-        },
-        swatch(`var(--sg-group-${key}, ${other.color})`, 'disc'),
-        groupName(key, election, crossing.groupOf),
-      );
-      button.addEventListener('click', () => this.compareWith(`p:${other.code}`));
-      list.append(button);
-    }
-    return section('Comparer avec le groupe', list);
   }
 
   private categoryDuel(
@@ -681,7 +445,7 @@ export class Inspector implements Feature {
       ),
       section(
         'Vote, électorat par électorat',
-        this.butterfly(
+        butterfly(
           nameOf(lensA, a),
           `var(--sg-group-${a.group}, ${a.color})`,
           nameOf(lensB, b),

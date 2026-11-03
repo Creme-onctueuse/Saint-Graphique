@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { defaultState, type AppState } from './core/state.ts';
-import { asComputedFile, asRawElection, asRawPcs, buildDataset } from './data/dataset.ts';
+import { buildDataset } from './data/dataset.ts';
+import { asComputedFile, asRawElection, asRawPcs } from './data/parse.ts';
 import { availableMethods, buildView, defaultElection, effectiveParams } from './view.ts';
 import { defaultParamsFor, STUDY_YEARS } from './core/methods.ts';
 import { METHOD_RESERVES } from './core/reserves.ts';
