@@ -1,4 +1,4 @@
-# Vérifications : lint, tests, validation des contrats, build web.
+# Vérifications : lint, tests, validation des contrats, build web, page du dépôt à jour.
 # Les actions sont épinglées par SHA (versions publiées depuis plus de 2 semaines) ; Dependabot les met à jour.
 name: CI
 
@@ -65,3 +65,7 @@ jobs:
       - if: steps.detect.outputs.present == 'true'
         working-directory: web
         run: pnpm build
+      - if: steps.detect.outputs.present == 'true'
+        name: saint-graphique.html correspond au build
+        working-directory: web
+        run: pnpm check:page

@@ -29,6 +29,7 @@ if (Test-Path (Join-Path $web 'package.json')) {
     Step 'eslint' $web { pnpm lint }
     Step 'vitest' $web { pnpm test }
     Step 'build'  $web { pnpm build }
+    Step 'page'   $web { pnpm check:page }
 } else {
     Write-Host "`n[skip] web/package.json absent : etapes web ignorees" -ForegroundColor Yellow
 }

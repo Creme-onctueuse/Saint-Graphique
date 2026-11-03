@@ -13,6 +13,8 @@
     "sync-data": "node scripts/sync-data.mjs",
     "dev": "node scripts/sync-data.mjs && vite",
     "build": "node scripts/sync-data.mjs && pnpm run typecheck && vite build && node scripts/check-dist.mjs",
+    "page": "pnpm run build && node scripts/page.mjs",
+    "check:page": "node scripts/page.mjs --check",
     "preview": "vite preview",
     "smoke": "node scripts/smoke.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",

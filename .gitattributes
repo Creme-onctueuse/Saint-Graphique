@@ -1,6 +1,8 @@
 # Fins de ligne normalisées (LF dans le dépôt), CRLF pour les scripts Windows.
 * text=auto eol=lf
 *.ps1 text eol=crlf
+# La page prête à ouvrir : copie exacte du build, comparée octet par octet (web/scripts/page.mjs).
+/saint-graphique.html -text -diff linguist-generated=true
 *.png binary
 *.jpg binary
 *.ico binary
