@@ -1,0 +1,27 @@
+# source_id: csa_2007_presidentielle_t1_vote
+# title: CSA-Cisco pour France 3, France Inter, France Info, Le Parisien et Aujourd'hui en France, L'élection présidentielle : explication du vote et perspectives politiques, sondage sortie des urnes, avril 2007
+# publisher: CSA-Cisco
+# url: https://www.cisco.com/web/FR/csa/sondage_sortie_urnes.pdf
+# accessed: 2026-11-02
+# cache_file: csa_2007_pres_t1.pdf
+# sha256: c985bddf33489931d57e831ced79072e380dcdbba2277ef681319da1b5199f51
+# kind: vote
+# weights_census: 2006
+# tables: colonnes de groupes, structure en pénétration p. 9 ; national_share_pct, ligne Ensemble des exprimés
+# sample: 5 009 personnes venant de voter au premier tour
+# fieldwork: sortie des bureaux de vote, le 22 avril 2007
+# group_labels: 2=Patron de l'industrie et du commerce; 3=Cadre et profession libérale; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif
+# notes: Contrôle de la conversion seulement : ce sondage publie à la fois le vote de chaque groupe et la composition des électorats. La composition de data/ reste celle qu'il publie. La colonne chomeur, publiée, n'est pas utilisée.
+candidate_id,label,famille,national_share_pct,is_abstention,2,3,4,5,6,7,8,chomeur
+schivardi,Gérard Schivardi,exg,0.34,,1,1,0,0,1,0,0,0
+laguiller,Arlette Laguiller,exg,1.33,,3,1,1,2,2,1,1,1
+besancenot,Olivier Besancenot,npa,4.08,,2,2,5,5,6,2,6,8
+bove,José Bové,dvg,1.32,,0,1,1,1,2,1,3,2
+buffet,Marie-George Buffet,pcf,1.93,,2,1,1,2,3,2,2,3
+voynet,Dominique Voynet,ecologie,1.57,,5,1,1,1,3,2,1,2
+royal,Ségolène Royal,ps,25.87,,7,24,30,29,25,23,28,34
+nihous,Frédéric Nihous,divers,1.15,,0,1,0,2,1,1,1,0
+bayrou,François Bayrou,centre,18.57,,24,24,20,16,15,20,20,9
+sarkozy,Nicolas Sarkozy,lr,31.17,,48,35,31,27,20,40,25,21
+de-villiers,Philippe de Villiers,mpf,2.23,,4,1,1,3,3,2,2,5
+le-pen,Jean-Marie Le Pen,rn,10.44,,4,8,9,12,19,6,11,15

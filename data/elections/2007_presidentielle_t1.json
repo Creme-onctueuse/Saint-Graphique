@@ -1,0 +1,197 @@
+{
+  "id": "2007_presidentielle_t1",
+  "type": "presidentielle",
+  "year": 2007,
+  "round": 1,
+  "label": "Présidentielle 2007 (1er tour)",
+  "pcs_level": 1,
+  "sources": [
+    {
+      "id": "csa_2007_presidentielle_t1",
+      "title": "CSA-Cisco pour France 3, France Inter, France Info, Le Parisien et Aujourd'hui en France, L'élection présidentielle : explication du vote et perspectives politiques, sondage sortie des urnes, avril 2007",
+      "url": "https://www.cisco.com/web/FR/csa/sondage_sortie_urnes.pdf",
+      "accessed": "2026-11-02",
+      "publisher": "CSA-Cisco",
+      "license": "Rapport publié sur cisco.com, sans mention de réutilisation. Chiffres cités, projet libre et non commercial, retirés sur demande.",
+      "notes": "Échantillon : 5 009 personnes venant de voter au premier tour. Terrain : sortie des bureaux de vote, le 22 avril 2007. Tableaux : colonnes de groupes, structure en composition p. 6 ; national_share_pct, ligne Ensemble des exprimés de la structure en pénétration p. 9. Groupes : 2=Patron de l'industrie et du commerce; 3=Cadre et profession libérale; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif. Le rapport n'isole pas les agriculteurs : la clé « 1 » est absente, et on ignore s'ils sont comptés dans le groupe 2. « Autre inactif » (groupe 8) est retiré et les parts ramenées à 100 sur les groupes restants ; les parts publiées sont dans pipeline/sources/manual. national_share_pct : ligne ensemble du sondage, en % des exprimés ; abstention : résultat officiel, Conseil constitutionnel, décision n° 2007-139 PDR du 25 avril 2007 (1 - 37 254 242 votants / 44 472 834 inscrits), car un sondage de sortie des urnes n'interroge que des votants. Transcription manuelle. La colonne chomeur, publiée, n'est pas utilisée : les chômeurs sont retirés comme les autres inactifs. Le tableau n'a pas de ligne agriculteurs : l'ensemble somme à 97, sans explication, et ils ne sont peut-être pas comptés dans la ligne des patrons. Les candidats sous 1 % restent listés, sans composition ; la part la plus faible, G. Schivardi, ne somme qu'à 67."
+    },
+    {
+      "id": "conseil_constitutionnel_2007_t1",
+      "title": "Conseil constitutionnel, décision n° 2007-139 PDR du 25 avril 2007, résultats du premier tour",
+      "url": "https://www.conseil-constitutionnel.fr/decision/2007/2007139PDR.htm",
+      "accessed": "2026-11-02",
+      "publisher": "Conseil constitutionnel"
+    }
+  ],
+  "candidates": [
+    {
+      "id": "schivardi",
+      "label": "Gérard Schivardi",
+      "color": "#7b1113",
+      "national_share_pct": 0.34
+    },
+    {
+      "id": "laguiller",
+      "label": "Arlette Laguiller",
+      "color": "#7b1113",
+      "national_share_pct": 1.33
+    },
+    {
+      "id": "besancenot",
+      "label": "Olivier Besancenot",
+      "color": "#b3261e",
+      "national_share_pct": 4.08
+    },
+    {
+      "id": "bove",
+      "label": "José Bové",
+      "color": "#ef9a9a",
+      "national_share_pct": 1.32
+    },
+    {
+      "id": "buffet",
+      "label": "Marie-George Buffet",
+      "color": "#c8102e",
+      "national_share_pct": 1.93
+    },
+    {
+      "id": "voynet",
+      "label": "Dominique Voynet",
+      "color": "#2e9e4f",
+      "national_share_pct": 1.57
+    },
+    {
+      "id": "royal",
+      "label": "Ségolène Royal",
+      "color": "#f06292",
+      "national_share_pct": 25.87
+    },
+    {
+      "id": "nihous",
+      "label": "Frédéric Nihous",
+      "color": "#8e8e8e",
+      "national_share_pct": 1.15
+    },
+    {
+      "id": "bayrou",
+      "label": "François Bayrou",
+      "color": "#ffcc80",
+      "national_share_pct": 18.57
+    },
+    {
+      "id": "sarkozy",
+      "label": "Nicolas Sarkozy",
+      "color": "#1565c0",
+      "national_share_pct": 31.17
+    },
+    {
+      "id": "de-villiers",
+      "label": "Philippe de Villiers",
+      "color": "#3949ab",
+      "national_share_pct": 2.23
+    },
+    {
+      "id": "le-pen",
+      "label": "Jean-Marie Le Pen",
+      "color": "#0d1b4c",
+      "national_share_pct": 10.44
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "national_share_pct": 16.23,
+      "is_abstention": true
+    }
+  ],
+  "composition": {
+    "laguiller": {
+      "2": 6.82,
+      "3": 3.41,
+      "4": 9.09,
+      "5": 27.27,
+      "6": 20.45,
+      "7": 32.95
+    },
+    "besancenot": {
+      "2": 1.32,
+      "3": 6.58,
+      "4": 22.37,
+      "5": 30.26,
+      "6": 25.0,
+      "7": 14.47
+    },
+    "bove": {
+      "2": 1.64,
+      "3": 11.48,
+      "4": 14.75,
+      "5": 14.75,
+      "6": 22.95,
+      "7": 34.43
+    },
+    "buffet": {
+      "2": 5.06,
+      "3": 2.53,
+      "4": 6.33,
+      "5": 16.46,
+      "6": 29.11,
+      "7": 40.51
+    },
+    "voynet": {
+      "2": 11.63,
+      "3": 6.98,
+      "4": 12.79,
+      "5": 13.95,
+      "6": 25.58,
+      "7": 29.07
+    },
+    "royal": {
+      "2": 1.27,
+      "3": 8.86,
+      "4": 20.25,
+      "5": 24.05,
+      "6": 15.19,
+      "7": 30.38
+    },
+    "nihous": {
+      "2": 0.0,
+      "3": 5.68,
+      "4": 3.41,
+      "5": 34.09,
+      "6": 18.18,
+      "7": 38.64
+    },
+    "bayrou": {
+      "2": 4.82,
+      "3": 13.25,
+      "4": 18.07,
+      "5": 16.87,
+      "6": 13.25,
+      "7": 33.73
+    },
+    "sarkozy": {
+      "2": 5.95,
+      "3": 10.71,
+      "4": 16.67,
+      "5": 17.86,
+      "6": 9.52,
+      "7": 39.29
+    },
+    "de-villiers": {
+      "2": 7.89,
+      "3": 5.26,
+      "4": 9.21,
+      "5": 25.0,
+      "6": 26.32,
+      "7": 26.32
+    },
+    "le-pen": {
+      "2": 1.3,
+      "3": 7.79,
+      "4": 15.58,
+      "5": 25.97,
+      "6": 31.17,
+      "7": 18.18
+    }
+  }
+}

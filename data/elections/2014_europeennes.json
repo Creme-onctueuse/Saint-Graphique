@@ -1,0 +1,217 @@
+{
+  "id": "2014_europeennes",
+  "type": "europeennes",
+  "year": 2014,
+  "round": 1,
+  "label": "Européennes 2014",
+  "pcs_level": 1,
+  "sources": [
+    {
+      "id": "ifop_2014_europeennes",
+      "title": "Ifop-Fiducial pour i>TELE, Paris Match et Sud Radio, Sondage Jour du Vote : profil des électeurs et clefs du scrutin européen, 25 mai 2014",
+      "url": "https://www.ifop.com/wp-content/uploads/2018/03/2670-1-study_file.pdf",
+      "accessed": "2026-11-02",
+      "publisher": "Ifop-Fiducial",
+      "license": "Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu : projet libre et non commercial, chiffres cités et retirés sur demande, voir data/SOURCES.md.",
+      "notes": "Échantillon : 3 373 inscrits, extraits d'un échantillon de 3 546 personnes, représentatif des 18 ans ou plus. Terrain : en ligne, le 25 mai 2014, de 10 h à 18 h. Tableaux : colonnes de groupes, vote selon la profession p. 24 et 25 (PDF 26 et 27) et participation p. 16 (PDF 18) ; national_share_pct, ligne ENSEMBLE des mêmes pages. Groupes : 2=Artisan ou commerçant; 3=Prof. libérale, cadre supérieur; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif. Le rapport n'isole pas les agriculteurs : la clé « 1 » est absente, et on ignore s'ils sont comptés dans le groupe 2. « Autre inactif » (groupe 8) est retiré et les parts ramenées à 100 sur les groupes restants ; les parts publiées sont dans pipeline/sources/manual. Tableau du vote de chaque groupe, converti en composition avec les effectifs du recensement de 2016 (Français de 18 ans ou plus), multipliés par la participation de chaque groupe publiée par le sondage. national_share_pct : ligne ensemble du sondage (abstention en % des inscrits), pas le résultat officiel. Transcription manuelle ; « - » reproduit le tiret du rapport. Ce rapport publie le vote de chaque groupe en entiers, pas la composition des électorats comme ceux de 2017 à 2024. Le recensement le plus proche est celui de 2016. Abstention du sondage : 58 % en France métropolitaine ; résultat officiel : 57,57 %. Le rapport signale les effectifs inférieurs à 40 individus. Les listes sous 1 % restent citées, sans composition : leurs parts arrondies à l'entier ne disent rien."
+    },
+    {
+      "id": "insee_rp_harmonises_1968_2022",
+      "title": "Données harmonisées des recensements de la population 1968-2022, fichier détail",
+      "url": "https://www.insee.fr/fr/statistiques/8672621?sommaire=2414232",
+      "accessed": "2026-11-02",
+      "publisher": "Insee",
+      "license": "Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation",
+      "notes": "Fichier https://www.insee.fr/fr/statistiques/fichier/8672621/RP1968-2022.parquet, empreinte SHA-256 e4f2967a54c39fb3a32ca6ebae6d3e8d0f728651d5b54ebac6af29ca38be75ce. Champ : Français de 18 ans ou plus (NATIO 000 ou 001, AGE_REV d'au moins 18), somme de POND. France métropolitaine, et DOM à partir de 1990. Groupes : 1 à 6 = CSP 1 à 6, personnes en emploi ou au chômage ayant déjà travaillé ; 7 = CSP 8, anciens actifs ; 8 = CSP 9, inactifs et chômeurs n'ayant jamais travaillé."
+    }
+  ],
+  "candidates": [
+    {
+      "id": "lo",
+      "label": "Lutte ouvrière",
+      "color": "#7b1113",
+      "national_share_pct": 0.9
+    },
+    {
+      "id": "npa",
+      "label": "Nouveau Parti anticapitaliste",
+      "color": "#b3261e",
+      "national_share_pct": 0.9
+    },
+    {
+      "id": "front-de-gauche",
+      "label": "Front de gauche",
+      "color": "#c8102e",
+      "national_share_pct": 6.0
+    },
+    {
+      "id": "ps-prg",
+      "label": "Parti socialiste et Parti radical de gauche",
+      "color": "#f06292",
+      "national_share_pct": 14.2
+    },
+    {
+      "id": "eelv",
+      "label": "Europe Écologie Les Verts",
+      "color": "#2e9e4f",
+      "national_share_pct": 9.3
+    },
+    {
+      "id": "nouvelle-donne",
+      "label": "Nouvelle Donne",
+      "color": "#ef9a9a",
+      "national_share_pct": 2.9
+    },
+    {
+      "id": "rassemblement-citoyen",
+      "label": "Rassemblement citoyen",
+      "color": "#ffcc80",
+      "national_share_pct": 0.9
+    },
+    {
+      "id": "aei",
+      "label": "Alliance écologiste indépendante",
+      "color": "#2e9e4f",
+      "national_share_pct": 0.8
+    },
+    {
+      "id": "modem-udi",
+      "label": "MoDem et UDI",
+      "color": "#ffcc80",
+      "national_share_pct": 10.4
+    },
+    {
+      "id": "ump",
+      "label": "UMP",
+      "color": "#1565c0",
+      "national_share_pct": 20.6
+    },
+    {
+      "id": "force-vie",
+      "label": "Force Vie",
+      "color": "#6f9fd8",
+      "national_share_pct": 0.8
+    },
+    {
+      "id": "dlf",
+      "label": "Debout la République",
+      "color": "#303f9f",
+      "national_share_pct": 3.6
+    },
+    {
+      "id": "divers-droite",
+      "label": "Divers droite",
+      "color": "#6f9fd8",
+      "national_share_pct": 1.1
+    },
+    {
+      "id": "fn",
+      "label": "Front national",
+      "color": "#0d1b4c",
+      "national_share_pct": 25.0
+    },
+    {
+      "id": "autres-listes",
+      "label": "Autres listes",
+      "color": "#8e8e8e",
+      "national_share_pct": 2.6
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "national_share_pct": 58.0,
+      "is_abstention": true
+    }
+  ],
+  "composition": {
+    "front-de-gauche": {
+      "2": 0.58,
+      "3": 4.72,
+      "4": 19.11,
+      "5": 24.71,
+      "6": 16.81,
+      "7": 34.08
+    },
+    "ps-prg": {
+      "2": 2.6,
+      "3": 9.16,
+      "4": 14.26,
+      "5": 12.07,
+      "6": 10.03,
+      "7": 51.88
+    },
+    "eelv": {
+      "2": 2.15,
+      "3": 17.51,
+      "4": 15.76,
+      "5": 16.68,
+      "6": 12.48,
+      "7": 35.42
+    },
+    "nouvelle-donne": {
+      "2": 3.83,
+      "3": 13.84,
+      "4": 23.36,
+      "5": 9.89,
+      "6": 4.11,
+      "7": 44.98
+    },
+    "modem-udi": {
+      "2": 1.09,
+      "3": 16.8,
+      "4": 14.68,
+      "5": 7.06,
+      "6": 4.69,
+      "7": 55.68
+    },
+    "ump": {
+      "2": 5.61,
+      "3": 9.82,
+      "4": 8.62,
+      "5": 8.42,
+      "6": 5.83,
+      "7": 61.71
+    },
+    "dlf": {
+      "2": 8.1,
+      "3": 9.43,
+      "4": 16.97,
+      "5": 13.47,
+      "6": 11.19,
+      "7": 40.85
+    },
+    "divers-droite": {
+      "2": 11.99,
+      "3": 10.85,
+      "4": 14.65,
+      "5": 15.5,
+      "6": 0.0,
+      "7": 47.01
+    },
+    "fn": {
+      "2": 4.26,
+      "3": 4.54,
+      "4": 13.38,
+      "5": 21.24,
+      "6": 22.56,
+      "7": 34.01
+    },
+    "autres-listes": {
+      "2": 4.8,
+      "3": 17.38,
+      "4": 35.2,
+      "5": 18.62,
+      "6": 5.16,
+      "7": 18.83
+    },
+    "abstention": {
+      "2": 4.45,
+      "3": 12.09,
+      "4": 20.2,
+      "5": 23.37,
+      "6": 15.61,
+      "7": 24.27
+    }
+  }
+}

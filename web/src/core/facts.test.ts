@@ -111,9 +111,9 @@ describe('pearson', () => {
 describe.skipIf(!hasRealData)('constats sur les données réelles, positions lues', () => {
   const facts = computeFacts(ds, READ);
 
-  it('tous présents', () => {
+  it('quatre constats tiennent sur les données de 1995 à 2024', () => {
     expect(facts.map((f) => f.id).sort()).toEqual(
-      ['centre-population', 'plus-semblables', 'retraites', 'rn-cap', 'zemmour-macron'].sort(),
+      ['centre-population', 'plus-semblables', 'retraites', 'zemmour-macron'].sort(),
     );
   });
 
@@ -151,20 +151,30 @@ describe.skipIf(!hasRealData)('constats sur les données réelles, positions lue
     expect(f.numbers['gap2017']).toBeCloseTo(10.2, 1);
     expect(f.text).toContain('Nicolas Dupont-Aignan');
     expect(f.scope.n).toBe(2);
+    // Le rang change avant eux : la réserve le dit, pour ne pas suggérer une constante.
+    expect(f.caveat).toContain("En 2012, c'était celui de François Hollande");
   });
 
-  it('le vote RN suit le CAP plus que l’absence de diplôme et le niveau de vie', () => {
-    const f = fact(facts, 'rn-cap');
+  it('le lien entre vote RN et CAP ne se répète plus : le constat disparaît', () => {
+    const rn = ds.families?.families.find((f) => f.id === 'rn');
+    if (!rn) throw new Error('famille absente');
+    const cap = familyCorrelations(ds, rn, (p) => p.diplomes.cap);
+    expect(cap).toHaveLength(12);
+    expect(cap.find((c) => c.election === '2007_presidentielle_t1')?.r).toBeCloseTo(0.45, 2);
+    expect(cap.find((c) => c.election === '2012_presidentielle_t1')?.r).toBeCloseTo(0.62, 2);
+    expect(correlationRepeats(cap.map((c) => c.r))).toBe(false);
+    expect(facts.map((f) => f.id)).not.toContain('rn-cap');
+  });
+
+  it('le même constat tient encore sur les seuls scrutins depuis 2017, sans être affiché', () => {
+    const recent = ds.elections.filter((e) => (e.year ?? 0) >= 2017);
+    const f = fact(computeFacts({ ...ds, elections: recent }, READ), 'rn-cap');
     expect(f.numbers['rCap']).toBeCloseTo(0.86, 2);
     // La moyenne exacte vaut 0,44 : le 0,45 du plan faisait la moyenne de valeurs déjà arrondies.
     expect(f.numbers['rNoDiploma']).toBeCloseTo(0.44, 2);
     expect(f.numbers['rIncome']).toBeCloseTo(-0.79, 2);
     expect(f.scope.elections).toHaveLength(7);
     expect(f.text).toContain('sur 7 scrutins');
-  });
-
-  it('une corrélation affiche n = 6 et le rappel sur la causalité', () => {
-    const f = fact(facts, 'rn-cap');
     expect(f.scope).toMatchObject({ n: 6, unit: 'groupes' });
     expect(f.caveat).toContain('n = 6');
     expect(f.caveat).toContain("corrélation n'est pas causalité");

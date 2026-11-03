@@ -161,10 +161,17 @@ export const SCENARIO_LABELS: Readonly<Record<Scenario, string>> = {
   trend: 'La tendance continue',
 };
 
-/** Ce que disent la flèche et le cercle sur la carte. */
-export const PROJECTION_MARKS =
-  'Flèche : de « rien ne bouge » à « la tendance continue ». Cercle en pointillés : erreur moyenne ' +
-  'de ce parti sur le passé, sur 1 à 4 prédictions.';
+/** Ce que disent la flèche et le cercle sur la carte : le nombre de prédictions vient du fichier. */
+export function projectionMarks(file: Pick<ProjectionFile, 'families'>): string {
+  const counts = file.families.map((f) => f.error.still.n);
+  const min = Math.min(...counts);
+  const max = Math.max(...counts);
+  const span = min === max ? `${min}` : `${min} à ${max}`;
+  return (
+    'Flèche : de « rien ne bouge » à « la tendance continue ». Cercle en pointillés : erreur moyenne ' +
+    `de ce parti sur le passé, sur ${span} prédictions.`
+  );
+}
 
 export interface VerdictText {
   headline: string;

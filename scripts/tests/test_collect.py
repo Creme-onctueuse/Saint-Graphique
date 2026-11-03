@@ -6,8 +6,11 @@ Seul le dernier test dépend de l'extra « research » (OpenCV, imagehash, Pillo
 
 from __future__ import annotations
 
+from collections import Counter
+
 import pytest
 
+from scripts.collect import poids_recensements
 from scripts.collect.pure import (
     axes_kind,
     boilerplate_lines,
@@ -393,3 +396,43 @@ def test_chart_features_detects_dark_theme_chart():
     ui = np.full((480, 854, 3), (5, 5, 5), dtype=np.uint8)
     cv2.line(ui, (0, 240), (853, 240), (60, 60, 60), 1)
     assert chart_features(ui).score < DEFAULT_THRESHOLD
+
+
+# --- Poids des recensements -----------------------------------------------------------------------
+
+
+def test_census_categories_map_to_project_groups() -> None:
+    assert [poids_recensements.group_of_csp(c) for c in "123456"] == list("123456")
+    assert poids_recensements.group_of_csp("8") == "7"
+    assert poids_recensements.group_of_csp("9") == "8"
+    with pytest.raises(ValueError, match="CSP inconnue"):
+        poids_recensements.group_of_csp("7")
+
+
+def test_census_keeps_french_adults_only() -> None:
+    assert poids_recensements.is_elector_proxy(18, "000")
+    assert poids_recensements.is_elector_proxy(40, "001")
+    assert not poids_recensements.is_elector_proxy(17, "000")
+    assert not poids_recensements.is_elector_proxy(40, "1PT")
+
+
+def test_census_rows_add_up_by_year_and_group() -> None:
+    totals: Counter[tuple[str, str]] = Counter()
+    poids_recensements.add_rows(
+        totals,
+        [1999, 1999, 1999, 2011],
+        ["040", "020", "017", "065"],
+        ["000", "001", "000", "3MA"],
+        ["3", "3", "6", "8"],
+        [4.0, 1.5, 9.0, 2.0],
+    )
+    assert totals == {("1999", "3"): 5.5}
+
+
+def test_census_file_lists_a_line_per_year() -> None:
+    totals = Counter({("1999", "1"): 10.4, ("1999", "8"): 2.0, ("2011", "7"): 3.0})
+    text = poids_recensements.render(totals, "2026-11-02", "abc")
+    lines = text.splitlines()
+    assert "# accessed: 2026-11-02" in lines
+    assert "# sha256: abc" in lines
+    assert lines[-3:] == ["annee,1,2,3,4,5,6,7,8", "1999,10,0,0,0,0,0,0,2", "2011,0,0,0,0,0,0,3,0"]

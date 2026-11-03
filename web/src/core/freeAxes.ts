@@ -69,8 +69,8 @@ export function colorClassOf(value: number, min: number, max: number): number {
 }
 
 /**
- * Coordonnées de chaque clé des tableaux de sondage. Les sondages n'isolent pas les agriculteurs : si
- * le groupe 1 manque au tableau, la clé « 2 » réunit les groupes 1 et 2.
+ * Coordonnées de chaque clé des tableaux de sondage. La plupart des sondages n'isolent pas les
+ * agriculteurs : si le groupe 1 manque au tableau, la clé « 2 » réunit les groupes 1 et 2.
  */
 export function pollCoordinates(
   points: readonly (WeightedPoint & { group: string })[],

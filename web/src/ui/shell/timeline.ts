@@ -1,7 +1,9 @@
 /**
- * Frise des élections, sur une vraie échelle de temps : une étape par année, un bouton par scrutin,
- * et la projection 2027 en dernier. Boutons radio natifs : Tab et les flèches du clavier fonctionnent
- * sans code. Sur la carte, ←, → et Espace parcourent la frise ; Échap arrête la lecture.
+ * Frise des élections : un groupe par année, un bouton par scrutin, et la projection 2027 en dernier.
+ * Les groupes gardent leur largeur et les intervalles se partagent le reste, à proportion des années :
+ * les étapes ne se chevauchent jamais, et la frise défile quand elle dépasse (sur téléphone). Boutons
+ * radio natifs : Tab et les flèches du clavier fonctionnent sans code. Sur la carte, ←, → et Espace
+ * parcourent la frise ; Échap arrête la lecture.
  *
  * La lecture cadre les électorats, puisque ce sont eux qui bougent, et avance à vitesse constante, sans
  * pause : l'état passe au scrutin suivant au début de chaque segment, et une boucle d'animation amène
@@ -18,7 +20,9 @@ import {
   playStartId,
   previousStopId,
   stopsForFilter,
+  stopTitle,
   timelineStops,
+  yearGroups,
   type TimelineStop,
 } from '../../core/timeline.ts';
 import { POPULATION_ID, PROJECTION_ID, type Point } from '../../core/types.ts';
@@ -110,7 +114,10 @@ export class Timeline implements Feature {
     class: 'sg-timeline__head',
     attrs: { id: 'sg-timeline-head', 'aria-hidden': 'true' },
   });
-  private positionOf: (date: number) => number = () => 0;
+  /** Ce qui défile sur téléphone, et ce qu'il contient : les positions s'y mesurent. */
+  private readonly rail = el('div', { class: 'sg-timeline__rail' }, this.head);
+  private readonly track = el('div', { class: 'sg-timeline__track' }, this.rail);
+  private revealed: string | null = null;
   private view: ResolvedView | null = null;
   private state: AppState | null = null;
 
@@ -155,43 +162,47 @@ export class Timeline implements Feature {
   }
 
   private buildTrack(): HTMLElement {
-    const years = new Map<number, TimelineStop[]>();
-    for (const s of this.stops) {
-      const list = years.get(s.year);
-      if (list) list.push(s);
-      else years.set(s.year, [s]);
-    }
-    const sorted = [...years.keys()].sort((a, b) => a - b);
-    const first = sorted[0] ?? 0;
-    const span = Math.max(1, (sorted.at(-1) ?? 0) - first);
-    const position = (year: number): number => (100 * (year - first)) / span;
-    this.positionOf = position;
     this.head.hidden = true;
-
-    const track = el('div', { class: 'sg-timeline__track' }, this.head);
-    const lastReal = this.stops.filter((s) => !s.projection).at(-1);
-    const hasProjection = this.stops.some((s) => s.projection);
-    if (hasProjection && lastReal) {
-      track.classList.add('sg-timeline__track--future');
-      track.style.setProperty('--sg-future-start', `${position(lastReal.year)}%`);
-    }
-    for (const year of sorted) {
-      const stops = (years.get(year) ?? []).map((s) => {
+    for (const group of yearGroups(this.stops)) {
+      if (group.gap > 0) {
+        const gap = el('span', { class: 'sg-year__gap', attrs: { 'aria-hidden': 'true' } });
+        gap.style.flexGrow = String(group.gap);
+        // Après le dernier scrutin, la ligne devient pointillée : c'est l'avenir.
+        if (group.stops.every((s) => s.projection)) gap.classList.add('sg-year__gap--future');
+        this.rail.append(gap);
+      }
+      const stops = group.stops.map((s) => {
         const letter = s.projection ? '◇' : (TYPE_LETTER[s.type ?? ''] ?? '•');
-        const label = this.stop(s.id, letter, s.label);
+        const label = this.stop(s.id, letter, stopTitle(s));
         if (s.projection) label.classList.add('sg-stop--projection');
         return label;
       });
-      const group = el(
-        'div',
-        { class: 'sg-year' },
-        el('div', { class: 'sg-year__stops' }, ...stops),
-        el('span', { class: 'sg-year__label', text: String(year) }),
+      this.rail.append(
+        el(
+          'div',
+          { class: 'sg-year' },
+          el('div', { class: 'sg-year__stops' }, ...stops),
+          el('span', { class: 'sg-year__label', text: String(group.year) }),
+        ),
       );
-      group.style.left = `${position(year)}%`;
-      track.append(group);
     }
-    return track;
+    return this.track;
+  }
+
+  /** Abscisse du centre d'une étape, en pixels depuis le début de la frise. */
+  private stopCenter(id: string): number {
+    const stop = this.inputs.find((i) => i.value === id)?.closest('.sg-stop');
+    if (!stop) return 0;
+    const box = stop.getBoundingClientRect();
+    return box.left + box.width / 2 - this.rail.getBoundingClientRect().left;
+  }
+
+  /** Sur téléphone, garde l'étape affichée dans la partie visible de la frise. */
+  private reveal(id: string): void {
+    const room = this.track.scrollWidth - this.track.clientWidth;
+    if (room <= 0) return;
+    const left = this.stopCenter(id) - this.track.clientWidth / 2;
+    this.track.scrollLeft = Math.max(0, Math.min(room, left));
   }
 
   private stop(id: string, letter: string, label: string): HTMLLabelElement {
@@ -328,8 +339,8 @@ export class Timeline implements Feature {
       from,
       to,
       start,
-      fromPosition: this.positionOf(fromStop?.year ?? 0),
-      toPosition: this.positionOf(toStop?.year ?? 0),
+      fromPosition: fromStop ? this.stopCenter(fromStop.id) : 0,
+      toPosition: toStop ? this.stopCenter(toStop.id) : 0,
     };
     this.chart.beginPlaySegment(interpolateMarks(from, to, 1));
     return true;
@@ -344,7 +355,7 @@ export class Timeline implements Feature {
     const u = (now - segment.start) / CHART_STYLE.playSegmentMs;
     this.head.hidden = false;
     const t = Math.min(1, u);
-    this.head.style.left = `${segment.fromPosition + (segment.toPosition - segment.fromPosition) * t}%`;
+    this.head.style.left = `${segment.fromPosition + (segment.toPosition - segment.fromPosition) * t}px`;
     if (u < 1) {
       this.chart.playFrame(interpolateMarks(segment.from, segment.to, u), u);
     } else {
@@ -420,6 +431,10 @@ export class Timeline implements Feature {
       const off = input.value !== POPULATION_ID && !allowed.has(input.value);
       input.disabled = off;
       input.closest('.sg-stop')?.classList.toggle('sg-stop--off', off);
+    }
+    if (view.electionId !== this.revealed) {
+      this.revealed = view.electionId;
+      this.reveal(view.electionId);
     }
     this.filterTop.value = state.typeFilter;
     this.filterPanel.value = state.typeFilter;

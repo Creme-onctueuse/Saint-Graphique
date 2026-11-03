@@ -4,7 +4,7 @@
  */
 import { formatNumber } from '../../core/format.ts';
 import {
-  PROJECTION_MARKS,
+  projectionMarks,
   SCENARIO_LABELS,
   verdictText,
   type ProjectedBloc,
@@ -50,6 +50,7 @@ export class ProjectionCard implements Feature {
   private readonly position = el('dd');
   private readonly score = el('dd');
   private readonly dataEnd = el('p', { class: 'sg-note' });
+  private readonly marks = el('p', { class: 'sg-note sg-projection-card__marks' });
   private readonly ranges = el('ul', { class: 'sg-ranges' });
 
   constructor(actions: AppActions) {
@@ -116,7 +117,7 @@ export class ProjectionCard implements Feature {
         ),
         this.dataEnd,
       ),
-      el('p', { class: 'sg-note sg-projection-card__marks', text: PROJECTION_MARKS }),
+      this.marks,
       details,
     );
     this.root.hidden = true;
@@ -134,6 +135,7 @@ export class ProjectionCard implements Feature {
     this.position.textContent = text.position;
     this.score.textContent = text.score;
     this.dataEnd.textContent = text.dataEnd;
+    this.marks.textContent = projectionMarks(file);
     const max = Math.max(
       10,
       ...file.blocs.flatMap((b) => [b.score_range.still[1], b.score_range.trend[1]]),

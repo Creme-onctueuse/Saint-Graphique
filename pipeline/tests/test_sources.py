@@ -36,6 +36,12 @@ from pipeline.sources._tables import normalize_label, number, table_by_label
 
 DATA = ROOT / "data"
 ELECTION_IDS = [e["id"] for e in load_elections_config()]
+#: Les rapports Ifop « en composition », de 2017 à 2024.
+MODERN_IDS = [e for e in ELECTION_IDS if int(e[:4]) >= 2017]
+#: Les scrutins antérieurs, aux formes de tableaux variées.
+OLDER_IDS = [e for e in ELECTION_IDS if int(e[:4]) < 2017]
+#: Élections dont le rapport vient de l'Ifop et porte sa mention de réutilisation.
+IFOP_IDS = [*MODERN_IDS, "2012_presidentielle_t1", "2014_europeennes"]
 
 
 @pytest.fixture(autouse=True)
@@ -198,7 +204,7 @@ def test_unknown_family_is_rejected(tmp_path: Path) -> None:
         _table(HEADER.format(kind="composition") + "a,A,inconnue,10,,1,2,3\n", tmp_path)
 
 
-@pytest.mark.parametrize("election_id", ELECTION_IDS)
+@pytest.mark.parametrize("election_id", MODERN_IDS)
 def test_transcribed_table_is_complete(election_id: str) -> None:
     table = sondages.load_table(election_id)
     assert table.kind == "composition"
@@ -210,6 +216,209 @@ def test_transcribed_table_is_complete(election_id: str) -> None:
     # descendent à 96,5 : une part de « Catégorie supérieure » n'y est pas détaillée.
     totals = table.rows[list(table.groups)].astype(float).sum(axis=1)
     assert totals.between(96.0, 101.5).all(), totals.to_dict()
+
+
+@pytest.mark.parametrize("election_id", OLDER_IDS)
+def test_older_table_cites_its_source(election_id: str) -> None:
+    table = sondages.load_table(election_id)
+    assert table.meta["url"].startswith("https://")
+    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", table.meta["accessed"])
+    assert table.meta["publisher"]
+    assert table.meta["sample"]
+    assert table.meta.get("license") or table.meta["publisher"].startswith("Ifop")
+    if table.meta["url"].endswith(".pdf"):
+        assert re.fullmatch(r"[0-9a-f]{64}", table.meta["sha256"])
+    assert int(table.rows["is_abstention"].sum()) == 1
+    assert table.meta["min_placed_share"] == "1"
+
+
+@pytest.mark.parametrize("election_id", OLDER_IDS)
+def test_older_table_adds_up(election_id: str) -> None:
+    """Sommes du tableau : contrôle de la saisie, aux arrondis des entiers près."""
+    table = sondages.load_table(election_id)
+    candidates = table.rows[~table.rows["is_abstention"]]
+    assert candidates["national_share_pct"].sum() == pytest.approx(100.0, abs=0.6)
+    matrix = candidates[list(table.groups)].astype(float)
+    if table.kind == "vote":
+        totals = matrix.sum(axis=0)
+        assert totals.between(97.0, 103.0).all(), totals.to_dict()
+    else:
+        # 2007 : les colonnes publiées ne portent pas sur tous les votants d'un candidat.
+        big = candidates["national_share_pct"] >= 2
+        totals = matrix[big].sum(axis=1)
+        assert totals.between(88.0, 101.0).all(), totals.to_dict()
+
+
+@pytest.mark.parametrize(
+    ("election_id", "voters", "registered", "published"),
+    [
+        ("1995_presidentielle_t1", 31_345_794, 39_992_912, 21.62),
+        ("2007_presidentielle_t1", 37_254_242, 44_472_834, 16.23),
+        ("2012_presidentielle_t1", 36_584_399, 46_028_542, 20.52),
+    ],
+)
+def test_official_abstention_comes_from_the_declaration(
+    election_id: str, voters: int, registered: int, published: float
+) -> None:
+    table = sondages.load_table(election_id)
+    assert table.rows.loc["abstention", "national_share_pct"] == published
+    assert 100 * (1 - voters / registered) == pytest.approx(published, abs=0.005)
+    assert "conseil-constitutionnel.fr" in table.meta["official_source"]
+    # Sans chiffres par groupe : un score, pas de composition.
+    assert not sondages.has_breakdown(table)["abstention"]
+    assert "abstention" not in sondages.table_composition(table).index
+
+
+def test_row_without_figures_gets_no_composition(tmp_path: Path) -> None:
+    table = _table(
+        HEADER.format(kind="composition")
+        + "a,A,lr,100,,50,30,20\nabstention,Abstention,abstention,20,true,,,\n",
+        tmp_path,
+    )
+    document = sondages.election_document(
+        {"id": "t", "type": "presidentielle", "year": 2000, "label": "T"}, table
+    )
+    assert set(document["composition"]) == {"a"}
+    assert document["candidates"][1]["national_share_pct"] == 20
+    validate_instance(document, "election.schema.json", "fixture")
+
+
+def test_min_placed_share_keeps_the_score_but_not_the_composition(tmp_path: Path) -> None:
+    table = _table(
+        HEADER.format(kind="composition").replace(
+            "# kind: composition", "# kind: composition\n# min_placed_share: 1"
+        )
+        + "a,A,lr,99.5,,50,30,20\nb,B,lr,0.5,,1,0,0\n",
+        tmp_path,
+    )
+    assert list(sondages.table_composition(table).index) == ["a"]
+    assert table.rows.loc["b", "national_share_pct"] == 0.5
+
+
+def test_converted_vote_drops_the_inactive_and_sums_to_100(tmp_path: Path) -> None:
+    table = _table(
+        HEADER.format(kind="vote") + "a,A,lr,50,,40,60,50\nb,B,lr,50,,60,40,50\n", tmp_path
+    )
+    weights = pd.Series({"3": 100.0, "6": 100.0, "8": 50.0})
+    result = sondages.table_composition(table, weights)
+    assert list(result.columns) == ["3", "6"]
+    assert result.loc["a"].to_list() == pytest.approx([40.0, 60.0])
+    assert result.sum(axis=1).to_list() == pytest.approx([100.0, 100.0])
+
+
+def test_national_check_gives_a_merged_column_the_weight_of_its_groups(tmp_path: Path) -> None:
+    table = _table(
+        (HEADER.format(kind="vote") + "a,A,lr,20,,10,30,\n").replace(
+            "# kind: vote", "# kind: vote\n# merged_groups: 6=6+8"
+        ).replace("3,6,8", "3,6").replace("10,30,", "10,30"),
+        tmp_path,
+    )
+    weights = pd.Series({"3": 100.0, "6": 50.0, "8": 50.0})
+    check = sondages.national_check(table, weights)
+    assert check.loc["a", "recalcule"] == pytest.approx(20.0)
+    assert check.loc["a", "ecart"] == pytest.approx(0.0)
+    # Pour la composition, la colonne garde le seul poids de son groupe.
+    assert sondages.table_composition(table, weights).loc["a"].to_list() == pytest.approx(
+        [40.0, 60.0]
+    )
+
+
+def test_national_check_uses_the_turnout_of_each_group(tmp_path: Path) -> None:
+    table = _table(
+        HEADER.format(kind="vote").replace("3,6,8", "3,6")
+        + "a,A,lr,100,,100,0\nabstention,Abstention,abstention,25,true,50,0\n",
+        tmp_path,
+    )
+    check = sondages.national_check(table, pd.Series({"3": 100.0, "6": 100.0}))
+    # 50 votants cadres, 100 votants ouvriers : 100 % de 50 sur 150.
+    assert check.loc["a", "recalcule"] == pytest.approx(100 / 3)
+
+
+#: Tolérance de la conversion sur les scores nationaux (points de pourcentage).
+NATIONAL_MEAN_TOLERANCE = 0.6
+NATIONAL_MAX_TOLERANCE = 1.75
+
+
+@pytest.mark.parametrize(
+    "election_id",
+    [
+        "1995_presidentielle_t1",
+        "2002_presidentielle_t1",
+        "2012_presidentielle_t1",
+        "2014_europeennes",
+    ],
+)
+def test_conversion_reproduces_the_national_scores(election_id: str) -> None:
+    check = sondages.national_check(sondages.load_table(election_id))
+    assert check["ecart"].abs().mean() <= NATIONAL_MEAN_TOLERANCE, check.round(2).to_string()
+    assert check["ecart"].abs().max() <= NATIONAL_MAX_TOLERANCE, check.round(2).to_string()
+
+
+def test_conversion_finds_the_composition_published_in_2007() -> None:
+    """CSA publie les deux tableaux : la conversion retrouve la composition, à l'arrondi près."""
+    published = sondages.load_table("2007_presidentielle_t1")
+    gaps = sondages.compare_with_bayes(
+        sondages.control_table_2007(), published, sondages.census_weights(2006)
+    )
+    big = published.rows["national_share_pct"] >= 2
+    gaps = gaps[gaps.index.isin(published.rows.index[big])]
+    assert len(gaps) == 6
+    assert gaps["ecart_moyen_pts"].mean() <= 1.0, gaps.round(2).to_string()
+    assert gaps["ecart_max_pts"].max() <= 4.5, gaps.round(2).to_string()
+    # Chez les grands candidats, l'écart reste sous l'arrondi d'un tableau en entiers.
+    for candidate in ("royal", "bayrou", "sarkozy"):
+        assert gaps.loc[candidate, "ecart_moyen_pts"] <= 1.0
+
+
+def test_census_weights_of_2022_match_the_detail_file() -> None:
+    """Le fichier harmonisé retrouve les effectifs tirés du fichier détail de 2022."""
+    if not _rp2022_indreg.agg_path().exists():
+        pytest.skip("agrégat du recensement absent du cache")
+    detail = insee_population.load_electorate()
+    harmonised = sondages.census_weights(2022)
+    assert (harmonised / detail).to_list() == pytest.approx([1.0] * 8, abs=1e-3)
+
+
+@pytest.mark.parametrize(
+    ("election_id", "census"),
+    [
+        ("1995_presidentielle_t1", 1999),
+        ("2002_presidentielle_t1", 1999),
+        ("2012_presidentielle_t1", 2011),
+        ("2014_europeennes", 2016),
+    ],
+)
+def test_vote_tables_use_the_nearest_census(election_id: str, census: int) -> None:
+    table = sondages.load_table(election_id)
+    assert table.kind == "vote"
+    assert int(table.meta["weights_census"]) == census
+    _, weights = sondages.census_table()
+    year = int(election_id[:4])
+    assert census == min(weights.index, key=lambda y: (abs(y - year), y))
+
+
+def test_census_weights_reject_an_unknown_year() -> None:
+    with pytest.raises(ValueError, match="Recensement inconnu"):
+        sondages.census_weights(1983)
+
+
+def test_older_elections_cite_their_sources() -> None:
+    documents = _elections()
+    # Le premier source reste le sondage : c'est lui que la frise affiche.
+    assert documents["1995_presidentielle_t1"]["sources"][0]["publisher"] == "CSA"
+    assert documents["2002_presidentielle_t1"]["sources"][0]["publisher"] == "Ipsos"
+    assert documents["2007_presidentielle_t1"]["sources"][0]["publisher"] == "CSA-Cisco"
+    assert documents["2012_presidentielle_t1"]["sources"][0]["publisher"] == "Ifop-Fiducial"
+    assert documents["2014_europeennes"]["sources"][0]["publisher"] == "Ifop-Fiducial"
+    assert "domaine public" in documents["2002_presidentielle_t1"]["sources"][0]["license"]
+    assert "domaine public" in documents["1995_presidentielle_t1"]["sources"][0]["license"]
+    assert "sans mention" in documents["2007_presidentielle_t1"]["sources"][0]["license"]
+    publishers = {s.get("publisher") for s in documents["1995_presidentielle_t1"]["sources"]}
+    assert publishers == {"CSA", "Conseil constitutionnel", "Insee"}
+    assert {s.get("publisher") for s in documents["2007_presidentielle_t1"]["sources"]} == {
+        "CSA-Cisco",
+        "Conseil constitutionnel",
+    }
 
 
 def test_control_table_is_a_vote_table_excluded_from_data() -> None:
@@ -708,15 +917,20 @@ def test_election_compositions_sum_to_100(election_id: str) -> None:
     assert document["id"] == election_id
     assert document["pcs_level"] == 1
     candidates = {c["id"] for c in document["candidates"]}
-    assert candidates == set(document["composition"])
+    if election_id in MODERN_IDS:
+        assert candidates == set(document["composition"])
+    else:
+        # Avant 2017, une abstention ou un petit candidat peut n'avoir que son score.
+        assert set(document["composition"]) <= candidates
     assert sum(1 for c in document["candidates"] if c.get("is_abstention")) == 1
     for candidate_id, shares in document["composition"].items():
         assert set(shares) <= {"1", "2", "3", "4", "5", "6", "7"}, candidate_id
-        assert "1" not in shares, "aucun sondage consulté ne publie les agriculteurs"
+        if election_id not in ("1995_presidentielle_t1", "2002_presidentielle_t1"):
+            assert "1" not in shares, "ce sondage ne publie pas les agriculteurs"
         assert sum(shares.values()) == pytest.approx(100.0, abs=0.05), candidate_id
 
 
-@pytest.mark.parametrize("election_id", ELECTION_IDS)
+@pytest.mark.parametrize("election_id", IFOP_IDS)
 def test_ifop_licence_field_describes_the_use(election_id: str) -> None:
     licence = _elections()[election_id]["sources"][0]["license"]
     assert "Aucune publication totale ou partielle ne peut être faite" in licence
@@ -737,6 +951,8 @@ def test_sources_document_is_complete() -> None:
     assert "## Données manquantes / TODO" in text
     assert "Aucune publication totale ou partielle ne peut être faite sans l'accord exprès" in text
     assert "## Données Ifop : projet libre et non commercial" in text
+    assert "## Autres instituts" in text
+    assert "## Conversion du vote par groupe en composition" in text
     assert "Aucun accord n'a été demandé ni obtenu" in text
     assert "n'est pas un avis juridique" in text.replace("\n", " ")
     assert "à trancher" not in text

@@ -26,6 +26,17 @@ export function formatNumber(n: number, digits = 2): string {
   return formatter(digits).format(n).replace('-', MINUS);
 }
 
+/** Nom court d'un éditeur : « Insee-DGFiP-Cnaf… » et « Insee, Progedo… » donnent « Insee ». */
+export function shortPublisher(publisher: string): string {
+  const first = (publisher.split(',')[0] ?? publisher).trim();
+  return first.startsWith('Insee') ? 'Insee' : first;
+}
+
+/** L'institut, sans ses partenaires : « Ifop-Fiducial » et « Ifop » sont le même institut. */
+export function instituteOf(publisher: string): string {
+  return /^[\p{L}\p{N}]+/u.exec(publisher.trim())?.[0] ?? publisher.trim();
+}
+
 /** 4.187 → « 4,2 % » (espace insécable avant le signe %). */
 export function formatPct(n: number, digits = 1): string {
   return `${formatNumber(n, digits)}${NBSP}%`;

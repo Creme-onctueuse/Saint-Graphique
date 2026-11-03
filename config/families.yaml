@@ -2,16 +2,34 @@
 #
 # C'est une simplification, à lire comme telle :
 # - une famille réunit des candidats et des listes qui ne se confondent pas (Hamon 2017 était aussi
-#   soutenu par EELV, Mélenchon 2017 par le PCF) ;
-# - les coalitions NUPES (2022) et NFP (2024) ne sont attribuées à aucun parti : elles apparaissent
-#   comme des trous dans les trajectoires, et comptent dans le bloc de gauche ;
-# - le classement dans un bloc est un choix de ce projet, pas une donnée des sondages.
+#   soutenu par EELV, Mélenchon 2017 par le PCF, Mélenchon 2012 par le Front de gauche) ;
+# - une famille suit une lignée, malgré les changements de nom et de parti : le RPR, l'UMP et Les
+#   Républicains ; le FN et le RN ; l'UDF et le MoDem ; les Verts et EELV. Marine Le Pen succède à
+#   Jean-Marie Le Pen dans la même famille, Bayrou passe de l'UDF au MoDem ;
+# - une famille n'a qu'un électorat par élection : en 1995, Chirac porte la lignée du RPR, et Balladur,
+#   lui aussi du RPR et soutenu par l'UDF, n'appartient à aucune famille ; l'UDF n'a pas de candidat
+#   cette année-là et le centre n'y a donc pas de point ;
+# - les coalitions Front de gauche (européennes 2014), NUPES (2022) et NFP (2024) ne sont attribuées à
+#   aucun parti : elles apparaissent comme des trous dans les trajectoires, et comptent dans le bloc
+#   de gauche. La liste MoDem et UDI de 2014 est rattachée à la lignée du MoDem, sans l'UDI ;
+# - le classement dans un bloc est un choix de ce projet, pas une donnée des sondages. Il range les
+#   candidats d'une époque avec les catégories d'aujourd'hui : Chevènement à gauche, Bayrou au centre,
+#   de Villiers avec Dupont-Aignan à l'extrême droite, Saint-Josse et Nihous (CPNT) hors bloc.
+#
+# Une famille n'a de point que là où le sondage donne une composition : un candidat sous 1 % dans
+# un tableau en entiers, ou une abstention sans détail par groupe, n'en a pas (voir
+# pipeline/sources/sondages.py).
 #
 # projection: true : la famille entre dans le test sur le passé et la projection 2027
 # (scripts/analyze/projection.py). Les autres n'ont qu'une trajectoire.
 
 # Date approximative de chaque scrutin, en années décimales : l'échelle de temps des trajectoires.
 dates:
+  1995_presidentielle_t1: 1995.31
+  2002_presidentielle_t1: 2002.30
+  2007_presidentielle_t1: 2007.31
+  2012_presidentielle_t1: 2012.31
+  2014_europeennes: 2014.40
   2017_presidentielle_t1: 2017.31
   2017_legislatives_t1: 2017.44
   2019_europeennes: 2019.40
@@ -25,6 +43,7 @@ families:
     label: "France insoumise"
     projection: true
     candidates:
+      2012_presidentielle_t1: melenchon
       2017_presidentielle_t1: melenchon
       2017_legislatives_t1: lfi
       2019_europeennes: lfi
@@ -34,6 +53,11 @@ families:
     label: "Rassemblement national"
     projection: true
     candidates:
+      1995_presidentielle_t1: le-pen
+      2002_presidentielle_t1: le-pen
+      2007_presidentielle_t1: le-pen
+      2012_presidentielle_t1: le-pen
+      2014_europeennes: fn
       2017_presidentielle_t1: le-pen
       2017_legislatives_t1: fn
       2019_europeennes: rn
@@ -56,6 +80,11 @@ families:
     label: "Les Républicains"
     projection: true
     candidates:
+      1995_presidentielle_t1: chirac
+      2002_presidentielle_t1: chirac
+      2007_presidentielle_t1: sarkozy
+      2012_presidentielle_t1: sarkozy
+      2014_europeennes: ump
       2017_presidentielle_t1: fillon
       2017_legislatives_t1: lr-udi
       2019_europeennes: lr
@@ -67,6 +96,11 @@ families:
     label: "Parti socialiste"
     projection: true
     candidates:
+      1995_presidentielle_t1: jospin
+      2002_presidentielle_t1: jospin
+      2007_presidentielle_t1: royal
+      2012_presidentielle_t1: hollande
+      2014_europeennes: ps-prg
       2017_presidentielle_t1: hamon
       2017_legislatives_t1: ps
       2019_europeennes: ps-pp
@@ -76,14 +110,30 @@ families:
     label: "Écologistes"
     projection: true
     candidates:
+      1995_presidentielle_t1: voynet
+      2002_presidentielle_t1: mamere
+      2007_presidentielle_t1: voynet
+      2012_presidentielle_t1: joly
+      2014_europeennes: eelv
       2017_legislatives_t1: eelv
       2019_europeennes: eelv
       2022_presidentielle_t1: jadot
       2024_europeennes: ecologistes
+  modem:
+    label: "UDF puis MoDem"
+    projection: false
+    candidates:
+      2002_presidentielle_t1: bayrou
+      2007_presidentielle_t1: bayrou
+      2012_presidentielle_t1: bayrou
+      2014_europeennes: modem-udi
   pcf:
     label: "Parti communiste"
     projection: false
     candidates:
+      1995_presidentielle_t1: hue
+      2002_presidentielle_t1: hue
+      2007_presidentielle_t1: buffet
       2017_legislatives_t1: pcf
       2019_europeennes: pcf
       2022_presidentielle_t1: roussel
@@ -100,6 +150,8 @@ families:
     label: "Abstention"
     projection: false
     candidates:
+      2002_presidentielle_t1: abstention
+      2014_europeennes: abstention
       2017_presidentielle_t1: abstention
       2017_legislatives_t1: abstention
       2019_europeennes: abstention
@@ -111,19 +163,19 @@ families:
 blocs:
   gauche:
     label: "Gauche"
-    candidates: [arthaud, poutou, melenchon, hamon, roussel, hidalgo, jadot, extreme-gauche, lfi, pcf, ps, eelv, divers-gauche, lo, generation-s, ps-pp, nupes, ecologistes, nfp]
+    candidates: [arthaud, poutou, melenchon, hamon, roussel, hidalgo, jadot, extreme-gauche, lfi, pcf, ps, eelv, divers-gauche, lo, generation-s, ps-pp, nupes, ecologistes, nfp, laguiller, besancenot, gluckstein, schivardi, npa, hue, buffet, front-de-gauche, jospin, royal, hollande, ps-prg, taubira, voynet, mamere, joly, chevenement, bove, nouvelle-donne]
   centre:
     label: "Centre"
-    candidates: [macron, lrem, ensemble, renaissance, udi, divers-centre]
+    candidates: [macron, lrem, ensemble, renaissance, udi, divers-centre, bayrou, modem-udi, lepage, rassemblement-citoyen]
   droite:
     label: "Droite"
-    candidates: [fillon, pecresse, lr-udi, lr, lr-dvd, divers-droite]
+    candidates: [fillon, pecresse, lr-udi, lr, lr-dvd, divers-droite, chirac, balladur, sarkozy, ump, madelin, boutin, force-vie]
   extreme_droite:
     label: "Extrême droite"
-    candidates: [le-pen, fn, rn, zemmour, reconquete, dupont-aignan, dlf, droite-souverainiste, asselineau, patriotes, upr]
+    candidates: [le-pen, fn, rn, zemmour, reconquete, dupont-aignan, dlf, droite-souverainiste, asselineau, patriotes, upr, megret, de-villiers]
   abstention:
     label: "Abstention"
     candidates: [abstention]
 
 # Candidats et listes rangés dans aucun bloc : ils comptent seulement dans « autres ».
-unclassified: [lassalle, cheminade, divers, alliance-jaune, autres-listes, animaliste]
+unclassified: [lassalle, cheminade, divers, alliance-jaune, autres-listes, animaliste, saint-josse, nihous, aei]

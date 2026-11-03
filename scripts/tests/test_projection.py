@@ -10,6 +10,7 @@ import json
 from pathlib import Path
 
 import pytest
+import yaml
 from jsonschema import Draft202012Validator
 
 from scripts.analyze import projection as proj
@@ -103,6 +104,45 @@ def test_bloc_series_is_weighted_by_score() -> None:
     assert series[0].x == pytest.approx(1)
     assert series[0].y == pytest.approx(2)
     assert series[0].score == 40
+
+
+def test_family_series_leaves_out_elections_without_a_document() -> None:
+    family = {"candidates": {"e1": "a", "e2": "a"}}
+    docs = {"e1": {"candidates": [{"id": "a", "x": 1, "y": 2, "national_share_pct": 3}]}}
+    points = proj.family_series(family, docs, {"e1": 2000.0, "e2": 2005.0})
+    assert [p.election for p in points] == ["e1"]
+
+
+def test_bloc_score_counts_candidates_too_small_to_be_placed() -> None:
+    docs = {"e": {"candidates": [{"id": "a", "x": 2, "y": 4, "national_share_pct": 10}]}}
+    bloc = {"candidates": ["a", "petit"]}
+    point = proj.bloc_series(bloc, docs, {"e": 2000.0}, {"e": {"a": 10, "petit": 1, "autre": 5}})[0]
+    # La position vient du seul candidat placé, le score compte les deux.
+    assert (point.x, point.y, point.score) == (2, 4, 11)
+
+
+def test_bloc_without_placed_candidate_has_no_point() -> None:
+    docs = {"e": {"candidates": [{"id": "a", "x": 2, "y": 4, "national_share_pct": 10}]}}
+    bloc = {"candidates": ["abstention"]}
+    assert proj.bloc_series(bloc, docs, {"e": 2000.0}, {"e": {"abstention": 20}}) == []
+
+
+def test_estimated_stops_stay_out_of_the_test() -> None:
+    dates = {"sondage": 2000.0, "estime": 2005.0}
+    elections = {"sondage": {"candidates": []}, "estime": {"estimated": True, "candidates": []}}
+    assert proj.poll_based(dates, elections) == {"sondage": 2000.0}
+
+
+def test_build_document_uses_only_the_documents_it_receives() -> None:
+    config = {
+        "dates": {"e1": 2000.0, "e2": 2005.0},
+        "families": {"f": {"label": "F", "projection": True, "candidates": {"e1": "a", "e2": "a"}}},
+        "blocs": {},
+    }
+    candidate = {"id": "a", "x": 1, "y": 1, "national_share_pct": 5, "color": "#000000"}
+    doc = proj.build_document("m", config, {"e1": {"candidates": [candidate]}})
+    assert doc["families"][0]["last_election"] == "e1"
+    assert doc["families"][0]["points"] == 1
 
 
 def test_verdict_compares_full_trend_with_no_movement() -> None:
@@ -202,38 +242,40 @@ def test_parties_have_no_score_range() -> None:
 @needs_data
 def test_backtest_reproduces_the_published_table() -> None:
     config = proj.read_config()
-    docs = proj.read_documents("read_positions", config["dates"])
-    doc = proj.build_document("read_positions", config, docs)
+    elections = proj.read_elections(config["dates"])
+    docs = proj.read_documents("read_positions", proj.poll_based(config["dates"], elections))
+    doc = proj.build_document("read_positions", config, docs, proj.raw_scores(elections))
 
     def table(scope: str, key: str) -> dict[float, float]:
         return {r["phi"]: r[key] for r in doc["backtest"][scope]}
 
     parties = doc["backtest"]["parties"]
     blocs = doc["backtest"]["blocs"]
-    assert {r["n"] for r in parties} == {17}
-    assert {r["n"] for r in blocs} == {16}
+    assert {r["n"] for r in parties} == {38}
+    assert {r["n"] for r in blocs} == {35}
 
     position = table("parties", "position_mean")
-    assert round(position[0.0], 2) == 0.62
-    assert round(position[0.5], 2) == 0.71
-    assert round(position[1.0], 2) == 0.81
+    assert round(position[0.0], 2) == 0.74
+    assert round(position[0.5], 2) == 0.76
+    assert round(position[1.0], 2) == 0.78
     score = table("parties", "score_mean")
-    assert round(score[0.0], 1) == 6.2
-    assert round(score[0.5], 1) == 7.1
-    assert round(score[1.0], 1) == 8.4
-    assert round(table("parties", "score_worst")[1.0]) == 29
+    assert round(score[0.0], 1) == 6.0
+    assert round(score[0.5], 1) == 6.2
+    assert round(score[1.0], 1) == 6.5
+    assert round(table("parties", "score_worst")[1.0]) == 17
 
     position = table("blocs", "position_mean")
-    assert round(position[0.0], 2) == 0.42
-    assert round(position[0.5], 2) == 0.46
-    assert round(position[1.0], 2) == 0.51
+    assert round(position[0.0], 2) == 0.56
+    assert round(position[0.5], 2) == 0.57
+    assert round(position[1.0], 2) == 0.57
     score = table("blocs", "score_mean")
-    assert round(score[0.0], 1) == 4.8
-    assert round(score[0.25], 1) == 4.6
-    assert round(score[0.5], 1) == 5.0
-    assert round(score[1.0], 1) == 6.0
+    assert round(score[0.0], 1) == 5.9
+    assert round(score[0.25], 1) == 5.9
+    assert round(score[0.5], 1) == 5.9
+    assert round(score[1.0], 1) == 5.8
 
-    assert doc["backtest"]["verdict"] == {"trend_worse_position": True, "trend_worse_score": True}
+    # Depuis l'ajout de 1995 à 2014, la tendance ne fait plus pire sur le score des blocs.
+    assert doc["backtest"]["verdict"] == {"trend_worse_position": True, "trend_worse_score": False}
     assert doc["data_end"] == "2024-07"
 
 
@@ -264,9 +306,29 @@ def test_families_name_real_candidates() -> None:
 @needs_data
 def test_coalitions_belong_to_no_family() -> None:
     config = proj.read_config()
+    coalitions = {"front-de-gauche", "nupes", "nfp"}
     for family in config["families"].values():
-        assert not {"nupes", "nfp"} & set(family["candidates"].values())
-    assert {"nupes", "nfp"} <= set(config["blocs"]["gauche"]["candidates"])
+        assert not coalitions & set(family["candidates"].values())
+    assert coalitions <= set(config["blocs"]["gauche"]["candidates"])
+
+
+@needs_data
+def test_families_have_a_point_at_each_of_their_elections() -> None:
+    config = proj.read_config()
+    for family in config["families"].values():
+        for election, candidate in family["candidates"].items():
+            path = ROOT / "data" / "computed" / "read_positions" / f"{election}.json"
+            ids = {c["id"] for c in json.loads(path.read_text(encoding="utf-8"))["candidates"]}
+            assert candidate in ids, f"{election} : {candidate} sans composition"
+
+
+@needs_data
+def test_dates_cover_the_configured_elections_in_order() -> None:
+    config = proj.read_config()
+    elections = yaml.safe_load((ROOT / "config" / "elections.yaml").read_text(encoding="utf-8"))
+    ids = [e["id"] for e in elections["elections"]]
+    assert list(config["dates"]) == ids
+    assert list(config["dates"].values()) == sorted(config["dates"].values())
 
 
 @needs_data

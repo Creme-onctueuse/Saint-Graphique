@@ -258,7 +258,7 @@ export class Game implements Feature {
       this.bars(round),
       el('p', {
         class: 'sg-game__legend',
-        text: 'Trait : part du groupe parmi les inscrits. Les agriculteurs comptent avec les indépendants.',
+        text: round.legend,
       }),
       el('div', { class: 'sg-game__options' }, ...options),
       feedback,

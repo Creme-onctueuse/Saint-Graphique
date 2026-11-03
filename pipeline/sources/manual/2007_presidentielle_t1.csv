@@ -1,0 +1,31 @@
+# source_id: csa_2007_presidentielle_t1
+# title: CSA-Cisco pour France 3, France Inter, France Info, Le Parisien et Aujourd'hui en France, L'élection présidentielle : explication du vote et perspectives politiques, sondage sortie des urnes, avril 2007
+# publisher: CSA-Cisco
+# url: https://www.cisco.com/web/FR/csa/sondage_sortie_urnes.pdf
+# accessed: 2026-11-02
+# cache_file: csa_2007_pres_t1.pdf
+# sha256: c985bddf33489931d57e831ced79072e380dcdbba2277ef681319da1b5199f51
+# license: Rapport publié sur cisco.com, sans mention de réutilisation. Chiffres cités, projet libre et non commercial, retirés sur demande.
+# kind: composition
+# min_placed_share: 1
+# tables: colonnes de groupes, structure en composition p. 6 ; national_share_pct, ligne Ensemble des exprimés de la structure en pénétration p. 9
+# sample: 5 009 personnes venant de voter au premier tour
+# fieldwork: sortie des bureaux de vote, le 22 avril 2007
+# group_labels: 2=Patron de l'industrie et du commerce; 3=Cadre et profession libérale; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif
+# national_note: national_share_pct : ligne ensemble du sondage, en % des exprimés ; abstention : résultat officiel, Conseil constitutionnel, décision n° 2007-139 PDR du 25 avril 2007 (1 - 37 254 242 votants / 44 472 834 inscrits), car un sondage de sortie des urnes n'interroge que des votants.
+# official_source: conseil_constitutionnel_2007_t1 | Conseil constitutionnel, décision n° 2007-139 PDR du 25 avril 2007, résultats du premier tour | https://www.conseil-constitutionnel.fr/decision/2007/2007139PDR.htm | 2026-11-02
+# notes: Transcription manuelle. La colonne chomeur, publiée, n'est pas utilisée : les chômeurs sont retirés comme les autres inactifs. Le tableau n'a pas de ligne agriculteurs : l'ensemble somme à 97, sans explication, et ils ne sont peut-être pas comptés dans la ligne des patrons. Les candidats sous 1 % restent listés, sans composition ; la part la plus faible, G. Schivardi, ne somme qu'à 67.
+candidate_id,label,famille,national_share_pct,is_abstention,2,3,4,5,6,7,8,chomeur
+schivardi,Gérard Schivardi,exg,0.34,,10,18,0,18,17,3,1,0
+laguiller,Arlette Laguiller,exg,1.33,,6,3,8,24,18,29,9,4
+besancenot,Olivier Besancenot,npa,4.08,,1,5,17,23,19,11,19,6
+bove,José Bové,dvg,1.32,,1,7,9,9,14,21,28,5
+buffet,Marie-George Buffet,pcf,1.93,,4,2,5,13,23,32,13,5
+voynet,Dominique Voynet,ecologie,1.57,,10,6,11,12,22,25,7,4
+royal,Ségolène Royal,ps,25.87,,1,7,16,19,12,24,15,5
+nihous,Frédéric Nihous,divers,1.15,,0,5,3,30,16,34,11,0
+bayrou,François Bayrou,centre,18.57,,4,11,15,14,11,28,15,2
+sarkozy,Nicolas Sarkozy,lr,31.17,,5,9,14,15,8,33,11,2
+de-villiers,Philippe de Villiers,mpf,2.23,,6,4,7,19,20,20,15,7
+le-pen,Jean-Marie Le Pen,rn,10.44,,1,6,12,20,24,14,15,5
+abstention,Abstention,abstention,16.23,true,,,,,,,,

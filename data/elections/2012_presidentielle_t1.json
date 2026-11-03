@@ -1,0 +1,170 @@
+{
+  "id": "2012_presidentielle_t1",
+  "type": "presidentielle",
+  "year": 2012,
+  "round": 1,
+  "label": "Présidentielle 2012 (1er tour)",
+  "pcs_level": 1,
+  "sources": [
+    {
+      "id": "ifop_2012_presidentielle_t1",
+      "title": "Ifop-Fiducial pour Europe 1, Paris Match et Public Sénat, Premier tour de l'élection présidentielle 2012 : profil des électeurs et clés du scrutin, 22 avril 2012",
+      "url": "https://www.ifop.com/wp-content/uploads/2018/03/1848-1-study_file.pdf",
+      "accessed": "2026-11-02",
+      "publisher": "Ifop-Fiducial",
+      "license": "Rapport © Ifop. Il indique : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu : projet libre et non commercial, chiffres cités et retirés sur demande, voir data/SOURCES.md.",
+      "notes": "Échantillon : 3 509 personnes, représentatives des inscrits de 18 ans ou plus. Terrain : en ligne, le 22 avril 2012. Tableaux : colonnes de groupes, vote selon la profession p. 9 et 10 ; national_share_pct, ligne ENSEMBLE des mêmes pages. Groupes : 2=Artisan ou commerçant; 3=Profession libérale, cadre supérieur; 4=Profession intermédiaire; 5=Employé; 6=Ouvrier; 7=Retraité; 8=Autre inactif. Le rapport n'isole pas les agriculteurs : la clé « 1 » est absente, et on ignore s'ils sont comptés dans le groupe 2. « Autre inactif » (groupe 8) est retiré et les parts ramenées à 100 sur les groupes restants ; les parts publiées sont dans pipeline/sources/manual. Tableau du vote de chaque groupe, converti en composition avec les effectifs du recensement de 2011 (Français de 18 ans ou plus). national_share_pct : ligne ensemble du sondage, en % des exprimés, pas le résultat officiel ; abstention : résultat officiel, Conseil constitutionnel, décision n° 2012-152 PDR du 25 avril 2012 (1 - 36 584 399 votants / 46 028 542 inscrits), car le rapport ne publie pas l'abstention. Transcription manuelle ; « - » reproduit le tiret du rapport. Ce rapport publie le vote de chaque groupe en entiers, pas la composition des électorats comme ceux de 2017 à 2024 : sans abstention par groupe, le poids d'un groupe parmi les votants reste celui du recensement. Le rapport signale les effectifs inférieurs à 40 individus. Les candidats sous 1 % restent listés, sans composition : leurs parts arrondies à l'entier ne disent rien."
+    },
+    {
+      "id": "conseil_constitutionnel_2012_t1",
+      "title": "Conseil constitutionnel, décision n° 2012-152 PDR du 25 avril 2012, résultats du premier tour",
+      "url": "https://www.conseil-constitutionnel.fr/decision/2012/2012152PDR.htm",
+      "accessed": "2026-11-02",
+      "publisher": "Conseil constitutionnel"
+    },
+    {
+      "id": "insee_rp_harmonises_1968_2022",
+      "title": "Données harmonisées des recensements de la population 1968-2022, fichier détail",
+      "url": "https://www.insee.fr/fr/statistiques/8672621?sommaire=2414232",
+      "accessed": "2026-11-02",
+      "publisher": "Insee",
+      "license": "Licence Ouverte / Open Licence 2.0 (Etalab), citer « Source : Insee » et la date de mise à jour, sans altérer le sens des informations ni induire en erreur sur leur interprétation",
+      "notes": "Fichier https://www.insee.fr/fr/statistiques/fichier/8672621/RP1968-2022.parquet, empreinte SHA-256 e4f2967a54c39fb3a32ca6ebae6d3e8d0f728651d5b54ebac6af29ca38be75ce. Champ : Français de 18 ans ou plus (NATIO 000 ou 001, AGE_REV d'au moins 18), somme de POND. France métropolitaine, et DOM à partir de 1990. Groupes : 1 à 6 = CSP 1 à 6, personnes en emploi ou au chômage ayant déjà travaillé ; 7 = CSP 8, anciens actifs ; 8 = CSP 9, inactifs et chômeurs n'ayant jamais travaillé."
+    }
+  ],
+  "candidates": [
+    {
+      "id": "arthaud",
+      "label": "Nathalie Arthaud",
+      "color": "#7b1113",
+      "national_share_pct": 0.56
+    },
+    {
+      "id": "poutou",
+      "label": "Philippe Poutou",
+      "color": "#b3261e",
+      "national_share_pct": 1.16
+    },
+    {
+      "id": "melenchon",
+      "label": "Jean-Luc Mélenchon",
+      "color": "#e5383b",
+      "national_share_pct": 11.29
+    },
+    {
+      "id": "hollande",
+      "label": "François Hollande",
+      "color": "#f06292",
+      "national_share_pct": 28.13
+    },
+    {
+      "id": "joly",
+      "label": "Eva Joly",
+      "color": "#2e9e4f",
+      "national_share_pct": 2.28
+    },
+    {
+      "id": "bayrou",
+      "label": "François Bayrou",
+      "color": "#ffcc80",
+      "national_share_pct": 9.19
+    },
+    {
+      "id": "sarkozy",
+      "label": "Nicolas Sarkozy",
+      "color": "#1565c0",
+      "national_share_pct": 27.04
+    },
+    {
+      "id": "dupont-aignan",
+      "label": "Nicolas Dupont-Aignan",
+      "color": "#303f9f",
+      "national_share_pct": 1.82
+    },
+    {
+      "id": "le-pen",
+      "label": "Marine Le Pen",
+      "color": "#0d1b4c",
+      "national_share_pct": 18.3
+    },
+    {
+      "id": "cheminade",
+      "label": "Jacques Cheminade",
+      "color": "#8e8e8e",
+      "national_share_pct": 0.25
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "color": "#000000",
+      "national_share_pct": 20.52,
+      "is_abstention": true
+    }
+  ],
+  "composition": {
+    "poutou": {
+      "2": 7.53,
+      "3": 10.1,
+      "4": 16.21,
+      "5": 37.54,
+      "6": 28.61,
+      "7": 0.0
+    },
+    "melenchon": {
+      "2": 2.44,
+      "3": 8.41,
+      "4": 20.97,
+      "5": 19.09,
+      "6": 23.8,
+      "7": 25.3
+    },
+    "hollande": {
+      "2": 1.28,
+      "3": 11.83,
+      "4": 18.97,
+      "5": 19.84,
+      "6": 11.34,
+      "7": 36.74
+    },
+    "joly": {
+      "2": 5.87,
+      "3": 21.01,
+      "4": 16.85,
+      "5": 9.76,
+      "6": 14.88,
+      "7": 31.62
+    },
+    "bayrou": {
+      "2": 5.26,
+      "3": 16.48,
+      "4": 18.88,
+      "5": 17.49,
+      "6": 10.0,
+      "7": 31.88
+    },
+    "sarkozy": {
+      "2": 6.59,
+      "3": 11.1,
+      "4": 13.85,
+      "5": 14.52,
+      "6": 8.15,
+      "7": 45.79
+    },
+    "dupont-aignan": {
+      "2": 13.97,
+      "3": 6.25,
+      "4": 20.05,
+      "5": 23.22,
+      "6": 17.7,
+      "7": 18.81
+    },
+    "le-pen": {
+      "2": 3.55,
+      "3": 7.28,
+      "4": 17.06,
+      "5": 29.12,
+      "6": 26.15,
+      "7": 16.85
+    }
+  }
+}

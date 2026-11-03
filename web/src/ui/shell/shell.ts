@@ -9,7 +9,7 @@ import { shortMethodLabel } from '../../data/dataset.ts';
 import type { ResolvedView } from '../../view.ts';
 import type { AppActions, Feature } from '../actions.ts';
 import { byId, el } from '../dom.ts';
-import { compactSources, renderSources } from '../sources.ts';
+import { compactSources, renderSources, shortPublisher } from '../sources.ts';
 
 const PANEL_TITLES: Record<PanelId, string> = {
   electorates: 'Électorats',
@@ -113,7 +113,18 @@ export class Shell implements Feature {
     }
     if (state.panel) this.panelTitle.textContent = PANEL_TITLES[state.panel];
 
-    this.heading.textContent = view.electionLabel;
+    const pollster = view.rawElection?.sources[0]?.publisher;
+    this.heading.replaceChildren(
+      view.electionLabel,
+      ...(pollster
+        ? [
+            el('span', {
+              class: 'sg-chart-heading__source',
+              text: ` · ${shortPublisher(pollster)}`,
+            }),
+          ]
+        : []),
+    );
     this.methodChip.textContent = shortMethodLabel(view.method.label);
     this.methodChip.title = `${view.method.label} : changer de méthode`;
 

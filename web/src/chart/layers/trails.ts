@@ -1,19 +1,22 @@
 /**
  * Trajectoires : le chemin de chaque famille d'une élection à l'autre, jusqu'à l'élection affichée.
  * Discrètes par défaut, appuyées pour la famille sélectionnée, avec ses étapes nommées. Les années de
- * coalition les coupent. Les catégories, elles, ne bougent pas : voir docs/methodologie.md.
+ * coalition les coupent. Elles sont en pointillés là où le sondage change d'institut : un écart à cet
+ * endroit peut venir de la source. Les catégories, elles, ne bougent pas : voir docs/methodologie.md.
  */
 import { select, type Selection } from 'd3-selection';
 import type { AppState } from '../../core/state.ts';
 import {
   familyOfCandidate,
   familyTrails,
+  sourceRuns,
   stopsForFilter,
   timelineStops,
   usesMapAxes,
   type CandidatePosition,
   type Trail,
   type TrailPoint,
+  type TrailRun,
 } from '../../core/timeline.ts';
 import { computedKey, type Dataset } from '../../data/dataset.ts';
 import type { Feature } from '../../ui/actions.ts';
@@ -31,6 +34,8 @@ interface SegmentDatum {
   family: string;
   color: string;
   strong: boolean;
+  /** L'institut change à chaque pas de ce tronçon : il est en pointillés. */
+  dotted: boolean;
   points: TrailPoint[];
 }
 
@@ -65,6 +70,28 @@ export function thinTags<T extends { px: number; py: number }>(
   return kept;
 }
 
+/**
+ * Pendant la lecture, le dernier tronçon va jusqu'au repère : la trajectoire pousse avec lui, et ce
+ * pas compte comme les autres s'il mène à un autre institut.
+ */
+export function withTip(
+  points: readonly TrailPoint[],
+  tip: TrailPoint | null,
+  nextInstitute: string | null,
+): TrailRun[] {
+  const runs = sourceRuns(points);
+  const last = points.at(-1);
+  if (!tip || !last) return runs;
+  const sourceChange = last.institute !== nextInstitute;
+  const previous = runs.at(-1);
+  if (previous && previous.sourceChange === sourceChange) {
+    previous.points.push(tip);
+  } else {
+    runs.push({ points: [last, tip], sourceChange });
+  }
+  return runs;
+}
+
 export class TrailsLayer implements Feature {
   private readonly chart: SaintChart;
   private readonly ds: Dataset;
@@ -75,6 +102,8 @@ export class TrailsLayer implements Feature {
   private readonly tags: Selection<SVGGElement, unknown, null, undefined>;
   private trails: Trail[] = [];
   private strong = new Set<string>();
+  /** Institut de l'étape affichée : pendant la lecture, c'est celle vers laquelle on avance. */
+  private nextInstitute: string | null = null;
 
   constructor(chart: SaintChart, ds: Dataset) {
     this.chart = chart;
@@ -120,6 +149,7 @@ export class TrailsLayer implements Feature {
     }
     const all = timelineStops(this.ds);
     const current = all.find((s) => s.id === view.electionId);
+    this.nextInstitute = current?.institute ?? null;
     this.trails = familyTrails(
       families,
       stopsForFilter(all, state.typeFilter),
@@ -143,21 +173,19 @@ export class TrailsLayer implements Feature {
     const { x, y } = this.chart.scales();
     const start = this.chart.playhead?.election;
     const segments: SegmentDatum[] = this.trails.flatMap((t) =>
-      t.segments
-        .map((points) => {
-          // Pendant la lecture, le dernier tronçon va jusqu'au repère : la trajectoire pousse avec lui.
-          const last = points.at(-1);
-          const tip = start && last?.election === start ? this.chart.trackPosition(t.family) : null;
-          return tip && last ? [...points, { ...last, x: tip.x, y: tip.y }] : points;
-        })
-        .filter((points) => points.length > 1)
-        .map((points, i) => ({
-          key: `${t.family}:${i}`,
+      t.segments.flatMap((points, s) => {
+        const last = points.at(-1);
+        const tip = start && last?.election === start ? this.chart.trackPosition(t.family) : null;
+        const end = tip && last ? { ...last, x: tip.x, y: tip.y } : null;
+        return withTip(points, end, this.nextInstitute).map((run, i) => ({
+          key: `${t.family}:${s}:${i}`,
           family: t.family,
           color: this.colorOf(t),
           strong: this.strong.has(t.family),
-          points,
-        })),
+          dotted: run.sourceChange,
+          points: run.points,
+        }));
+      }),
     );
     const line = (d: SegmentDatum): string =>
       `M${d.points.map((p) => `${x(p.x)},${y(p.y)}`).join('L')}`;
@@ -171,6 +199,7 @@ export class TrailsLayer implements Feature {
       )
       .join('path')
       .attr('class', 'sg-trail-casing')
+      .classed('sg-trail-casing--dotted', (d) => d.dotted)
       .attr('d', line);
     this.lines
       .selectAll<SVGPathElement, SegmentDatum>('path.sg-trail')
@@ -179,6 +208,7 @@ export class TrailsLayer implements Feature {
       .attr('class', 'sg-trail')
       .attr('data-family', (d) => d.family)
       .classed('sg-trail--strong', (d) => d.strong)
+      .classed('sg-trail--dotted', (d) => d.dotted)
       .style('stroke', (d) => d.color)
       .attr('d', line);
     this.lines.selectAll<SVGPathElement, SegmentDatum>('path.sg-trail--strong').raise();

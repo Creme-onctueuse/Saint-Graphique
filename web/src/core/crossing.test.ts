@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   compositionByGroup,
   compositionGap,
+  groupBase,
+  hasAbstentionBreakdown,
   pollGroupOf,
   registeredShares,
   representation,
@@ -102,5 +104,35 @@ describe('pollGroupOf', () => {
 
   it('signale un groupe sans donnée de vote', () => {
     expect(pollGroupOf('8', available)).toBeNull();
+  });
+});
+
+describe('abstention connue par son seul taux', () => {
+  const rateOnly: RawElection = {
+    ...election,
+    composition: {
+      a: { '3': 50, '6': 50 },
+      b: { '3': 25, '6': 75 },
+    },
+  };
+
+  it('se repère à l’absence de composition', () => {
+    expect(hasAbstentionBreakdown(election)).toBe(true);
+    expect(hasAbstentionBreakdown(rateOnly)).toBe(false);
+    expect(groupBase(election)).toBe('inscrits');
+    expect(groupBase(rateOnly)).toBe('votants');
+  });
+
+  it('réduit quand même les scores aux inscrits', () => {
+    expect(registeredShares(rateOnly).get('a')).toBeCloseTo(30);
+    expect(registeredShares(rateOnly).get('abst')).toBe(50);
+  });
+
+  it('ramène le poids des groupes à 100, parmi les votants', () => {
+    const { weights, votes } = voteByGroup(rateOnly);
+    expect(weights.get('3')).toBeCloseTo(40);
+    expect(weights.get('6')).toBeCloseTo(60);
+    expect(votes.get('3')?.get('a')).toBeCloseTo(75);
+    expect(votes.get('3')?.has('abst')).toBe(false);
   });
 });

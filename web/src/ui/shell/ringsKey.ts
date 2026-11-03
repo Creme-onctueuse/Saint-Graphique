@@ -3,6 +3,7 @@
  * ni de la seule couleur.
  */
 import { ringName } from '../../chart/layers/rings.ts';
+import { groupBase } from '../../core/crossing.ts';
 import { formatPct } from '../../core/format.ts';
 import type { AppState } from '../../core/state.ts';
 import { blocVotes, usesMapAxes, type RingDatum } from '../../core/timeline.ts';
@@ -21,6 +22,7 @@ export class RingsKey implements Feature {
   private readonly title = el('p', { class: 'sg-rings-key__title' });
   private readonly swatches = el('ul', { class: 'sg-rings-key__list' });
   private readonly table = el('div', { class: 'sg-table-wrap' });
+  private readonly note = el('p', { class: 'sg-note' });
 
   constructor(ds: Dataset) {
     this.ds = ds;
@@ -33,10 +35,7 @@ export class RingsKey implements Feature {
       this.title,
       this.swatches,
       el('details', {}, el('summary', { text: 'Tableau' }), this.table),
-      el('p', {
-        class: 'sg-note',
-        text: 'Parmi les inscrits. Les sondages détaillent six groupes seulement.',
-      }),
+      this.note,
     );
     this.root.hidden = true;
     document.body.append(this.root);
@@ -93,5 +92,7 @@ export class RingsKey implements Feature {
       }),
     );
     this.table.replaceChildren(this.renderTable(rings, merged));
+    const base = groupBase(election) === 'inscrits' ? 'Parmi les inscrits' : 'Parmi les votants';
+    this.note.textContent = `${base}. Ce sondage détaille ${rings.length} groupes seulement.`;
   }
 }

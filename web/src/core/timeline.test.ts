@@ -11,11 +11,16 @@ import {
   playStartId,
   previousStopId,
   ringCenter,
+  sourceChangesUpTo,
+  sourceRuns,
   stopsForFilter,
+  stopTitle,
   timelineStops,
   usesMapAxes,
+  yearGroups,
   type CandidatePosition,
   type TimelineStop,
+  type TrailPoint,
 } from './timeline.ts';
 import { PROJECTION_ID, type RawElection } from './types.ts';
 
@@ -292,5 +297,107 @@ describe('usesMapAxes', () => {
     expect(usesMapAxes({ axisX: null, axisY: null, layout: 'map' })).toBe(true);
     expect(usesMapAxes({ axisX: 'bac5', axisY: null, layout: 'map' })).toBe(false);
     expect(usesMapAxes({ axisX: null, axisY: null, layout: 'proximity' })).toBe(false);
+  });
+});
+
+describe('source de chaque étape', () => {
+  const rawElections = new Map([
+    ['p17', { sources: [{ publisher: 'Ifop-Fiducial' }, { publisher: 'Insee' }] }],
+    ['l17', { sources: [{ publisher: 'Ifop' }] }],
+    ['p22', { sources: [{ publisher: 'CSA-Cisco' }] }],
+    ['l22', { sources: [] }],
+  ]);
+  const withSources = timelineStops({ elections, families, projections, rawElections });
+  const of = (id: string): TimelineStop | undefined => withSources.find((s) => s.id === id);
+
+  it('prend le premier éditeur : le sondage, pas les effectifs', () => {
+    expect(of('p17')?.source).toBe('Ifop-Fiducial');
+    expect(of('p17')?.institute).toBe('Ifop');
+    expect(of('p22')?.institute).toBe('CSA');
+  });
+
+  it('reste vide sans éditeur, et pour la projection', () => {
+    expect(of('l22')?.source).toBeNull();
+    expect(of('e24')?.source).toBeNull();
+    expect(of(PROJECTION_ID)?.source).toBeNull();
+  });
+
+  it('ajoute la source au nom de l’étape, quand elle est connue', () => {
+    expect(stopTitle({ label: 'Prés. 2002', source: 'Ipsos' })).toBe('Prés. 2002 · Ipsos');
+    expect(stopTitle({ label: 'Projection', source: null })).toBe('Projection');
+  });
+
+  it('voit un changement d’institut seulement jusqu’à la date demandée', () => {
+    expect(sourceChangesUpTo(withSources, 2017.4)).toBe(false);
+    expect(sourceChangesUpTo(withSources, 2022.3)).toBe(true);
+    expect(sourceChangesUpTo(stops, 3000)).toBe(false);
+  });
+});
+
+describe('sourceRuns', () => {
+  const point = (election: string, institute: string | null): TrailPoint => ({
+    election,
+    institute,
+    x: 0,
+    y: 0,
+    share: 1,
+  });
+  const shape = (points: TrailPoint[]): [string[], boolean][] =>
+    sourceRuns(points).map((r) => [r.points.map((p) => p.election), r.sourceChange]);
+
+  it('ne découpe pas une partie du même institut', () => {
+    expect(shape([point('a', 'Ifop'), point('b', 'Ifop'), point('c', 'Ifop')])).toEqual([
+      [['a', 'b', 'c'], false],
+    ]);
+  });
+
+  it('isole chaque pas qui change d’institut, en partageant ses extrémités', () => {
+    const points = [point('a', 'CSA'), point('b', 'Ipsos'), point('c', 'Ifop'), point('d', 'Ifop')];
+    expect(shape(points)).toEqual([
+      [['a', 'b', 'c'], true],
+      [['c', 'd'], false],
+    ]);
+  });
+
+  it('ne donne rien pour un point seul', () => {
+    expect(sourceRuns([point('a', 'Ifop')])).toEqual([]);
+    expect(sourceRuns([])).toEqual([]);
+  });
+
+  it('garde un trajet sans source comme un pas sans rupture', () => {
+    expect(shape([point('a', null), point('b', null)])).toEqual([[['a', 'b'], false]]);
+  });
+});
+
+describe('yearGroups', () => {
+  const stopAt = (id: string, year: number): TimelineStop => ({
+    id,
+    label: id,
+    type: 'presidentielle',
+    year,
+    date: year,
+    projection: false,
+    source: null,
+    institute: null,
+  });
+
+  it('réunit les scrutins d’une année et mesure l’écart avec la précédente', () => {
+    const groups = yearGroups([stopAt('a', 2017), stopAt('b', 2017), stopAt('c', 2022)]);
+    expect(groups.map((g) => [g.year, g.stops.length, g.gap])).toEqual([
+      [2017, 2, 0],
+      [2022, 1, 5],
+    ]);
+  });
+
+  it('tient soixante ans de présidentielles, sans perdre d’étape', () => {
+    const years = [1965, 1969, 1974, 1981, 1988, 1995, 2002, 2007, 2012, 2017, 2022, 2027];
+    const groups = yearGroups(years.map((y) => stopAt(`p${y}`, y)));
+    expect(groups).toHaveLength(12);
+    expect(groups.reduce((sum, g) => sum + g.gap, 0)).toBe(62);
+    expect(groups.every((g, i) => i === 0 || g.gap > 0)).toBe(true);
+  });
+
+  it('accepte une frise vide', () => {
+    expect(yearGroups([])).toEqual([]);
   });
 });

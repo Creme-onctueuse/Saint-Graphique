@@ -1,0 +1,489 @@
+{
+  "method": "ranks",
+  "params": {
+    "x_score": "patrimoine_over_niveau_vie",
+    "y_weights": {
+      "bac5": 5,
+      "bac3": 3,
+      "bac2": 2,
+      "bac": 1,
+      "cap": -1,
+      "brevet": -2,
+      "certif_aucun": -3
+    },
+    "retired_y_override": {
+      "code": "7",
+      "score": -180
+    },
+    "candidate_pcs_level": 1,
+    "range": [
+      -10,
+      10
+    ]
+  },
+  "election_id": "1995_presidentielle_t1",
+  "election_label": "Présidentielle 1995 (1er tour)",
+  "axes": {
+    "x_label": "Exploitation",
+    "y_label": "Domination",
+    "range": [
+      -10,
+      10
+    ]
+  },
+  "pcs": [
+    {
+      "code": "10",
+      "group": "1",
+      "label": "Exploitants de l'agriculture, sylviculture, pêche et aquaculture",
+      "short": "Agriculteurs",
+      "x": 9.310345,
+      "y": -1.034483,
+      "weight": 0.826051
+    },
+    {
+      "code": "21",
+      "group": "2",
+      "label": "Artisans",
+      "short": "Artisans",
+      "x": 7.931034,
+      "y": -3.793103,
+      "weight": 2.167918
+    },
+    {
+      "code": "22",
+      "group": "2",
+      "label": "Commerçants et assimilés",
+      "short": "Commerçants",
+      "x": 8.62069,
+      "y": 0.344828,
+      "weight": 1.639063
+    },
+    {
+      "code": "23",
+      "group": "2",
+      "label": "Chefs d'entreprise de plus de 10 personnes",
+      "short": "Chefs d'entreprise",
+      "x": 10.0,
+      "y": 4.482759,
+      "weight": 0.505419
+    },
+    {
+      "code": "31",
+      "group": "3",
+      "label": "Professions libérales",
+      "short": "Prof. libérales",
+      "x": 6.551724,
+      "y": 9.310345,
+      "weight": 1.531684
+    },
+    {
+      "code": "33",
+      "group": "3",
+      "label": "Cadres administratifs et techniques de la fonction publique",
+      "short": "Cadres FP",
+      "x": 5.862069,
+      "y": 7.241379,
+      "weight": 1.110753
+    },
+    {
+      "code": "34",
+      "group": "3",
+      "label": "Professeurs et professions scientifiques supérieures",
+      "short": "Professeurs",
+      "x": 4.482759,
+      "y": 10.0,
+      "weight": 1.928245
+    },
+    {
+      "code": "35",
+      "group": "3",
+      "label": "Professions de l'information, de l'art et des spectacles",
+      "short": "Info/arts",
+      "x": 2.413793,
+      "y": 5.862069,
+      "weight": 0.870509
+    },
+    {
+      "code": "37",
+      "group": "3",
+      "label": "Cadres des services administratifs et commerciaux d'entreprise",
+      "short": "Cadres admin.",
+      "x": 7.241379,
+      "y": 7.931034,
+      "weight": 3.583557
+    },
+    {
+      "code": "38",
+      "group": "3",
+      "label": "Ingénieurs et cadres techniques d'entreprise",
+      "short": "Ingénieurs",
+      "x": 3.793103,
+      "y": 8.62069,
+      "weight": 3.644912
+    },
+    {
+      "code": "42",
+      "group": "4",
+      "label": "Professions de l'enseignement primaire et professionnel, de la formation continue et du sport",
+      "short": "Prof. des écoles",
+      "x": 1.724138,
+      "y": 6.551724,
+      "weight": 2.271028
+    },
+    {
+      "code": "43",
+      "group": "4",
+      "label": "Professions intermédiaires de la santé et du travail social",
+      "short": "PI santé/social",
+      "x": -3.103448,
+      "y": 5.172414,
+      "weight": 3.871858
+    },
+    {
+      "code": "44",
+      "group": "4",
+      "label": "Ministres du culte et religieux consacrés",
+      "short": "Clergé",
+      "x": 5.172414,
+      "y": 2.413793,
+      "weight": 0.048663
+    },
+    {
+      "code": "45",
+      "group": "4",
+      "label": "Professions intermédiaires de la fonction publique (administration, sécurité)",
+      "short": "PI admin. FP",
+      "x": -0.344828,
+      "y": 3.103448,
+      "weight": 1.102198
+    },
+    {
+      "code": "46",
+      "group": "4",
+      "label": "Professions intermédiaires administratives et commerciales des entreprises",
+      "short": "PI admin. entr.",
+      "x": 0.344828,
+      "y": 3.793103,
+      "weight": 5.651483
+    },
+    {
+      "code": "47",
+      "group": "4",
+      "label": "Techniciens",
+      "short": "Techniciens",
+      "x": -1.034483,
+      "y": 1.724138,
+      "weight": 2.783793
+    },
+    {
+      "code": "48",
+      "group": "4",
+      "label": "Agents de maîtrise (hors maîtrise administrative)",
+      "short": "Contremaîtres",
+      "x": -1.724138,
+      "y": -0.344828,
+      "weight": 1.351864
+    },
+    {
+      "code": "52",
+      "group": "5",
+      "label": "Employés administratifs de la fonction publique, agents de service et auxiliaires de santé",
+      "short": "Employés FP",
+      "x": -5.862069,
+      "y": -3.103448,
+      "weight": 5.416223
+    },
+    {
+      "code": "53",
+      "group": "5",
+      "label": "Policiers, militaires, pompiers, agents de sécurité privée",
+      "short": "Policiers/militaires",
+      "x": -4.482759,
+      "y": -1.724138,
+      "weight": 1.338169
+    },
+    {
+      "code": "54",
+      "group": "5",
+      "label": "Employés administratifs d'entreprise",
+      "short": "Employés admin.",
+      "x": 3.103448,
+      "y": 1.034483,
+      "weight": 4.148457
+    },
+    {
+      "code": "55",
+      "group": "5",
+      "label": "Employés de commerce",
+      "short": "Employés commerce",
+      "x": -8.62069,
+      "y": -2.413793,
+      "weight": 3.024154
+    },
+    {
+      "code": "56",
+      "group": "5",
+      "label": "Personnels des services directs aux particuliers",
+      "short": "Services particuliers",
+      "x": -7.931034,
+      "y": -5.172414,
+      "weight": 4.279649
+    },
+    {
+      "code": "62",
+      "group": "6",
+      "label": "Ouvriers qualifiés de type industriel",
+      "short": "OQ industriels",
+      "x": -5.172414,
+      "y": -4.482759,
+      "weight": 2.02924
+    },
+    {
+      "code": "63",
+      "group": "6",
+      "label": "Ouvriers qualifiés de type artisanal",
+      "short": "OQ artisanaux",
+      "x": -3.793103,
+      "y": -7.241379,
+      "weight": 3.53641
+    },
+    {
+      "code": "64",
+      "group": "6",
+      "label": "Conducteurs de véhicules de transport, chauffeurs-livreurs, coursiers",
+      "short": "Chauffeurs",
+      "x": -2.413793,
+      "y": -7.931034,
+      "weight": 1.648288
+    },
+    {
+      "code": "65",
+      "group": "6",
+      "label": "Conducteurs d'engins, caristes, magasiniers et ouvriers du transport (non routier)",
+      "short": "OQ manutention",
+      "x": -9.310345,
+      "y": -6.551724,
+      "weight": 0.89279
+    },
+    {
+      "code": "67",
+      "group": "6",
+      "label": "Ouvriers peu qualifiés de type industriel",
+      "short": "ONQ industriels",
+      "x": -10.0,
+      "y": -8.62069,
+      "weight": 2.994029
+    },
+    {
+      "code": "68",
+      "group": "6",
+      "label": "Ouvriers peu qualifiés de type artisanal",
+      "short": "ONQ artisanaux",
+      "x": -6.551724,
+      "y": -9.310345,
+      "weight": 2.106354
+    },
+    {
+      "code": "69",
+      "group": "6",
+      "label": "Ouvriers agricoles, des travaux forestiers, de la pêche et de l'aquaculture",
+      "short": "Ouvriers agricoles",
+      "x": -7.241379,
+      "y": -5.862069,
+      "weight": 0.63147
+    },
+    {
+      "code": "7",
+      "group": "7",
+      "label": "Retraités",
+      "short": "Retraités",
+      "x": 1.034483,
+      "y": -10.0,
+      "weight": 33.065769
+    }
+  ],
+  "groups": [
+    {
+      "code": "1",
+      "label": "Agriculteurs exploitants",
+      "color": "#6b8e23",
+      "x": 9.310345,
+      "y": -1.034483,
+      "weight": 0.826051
+    },
+    {
+      "code": "2",
+      "label": "Artisans, commerçants et chefs d'entreprise",
+      "color": "#b8860b",
+      "x": 8.435645,
+      "y": -1.25041,
+      "weight": 4.312401
+    },
+    {
+      "code": "3",
+      "label": "Cadres et professions intellectuelles supérieures",
+      "color": "#4b0082",
+      "x": 5.293512,
+      "y": 8.408457,
+      "weight": 12.669661
+    },
+    {
+      "code": "4",
+      "label": "Professions intermédiaires",
+      "color": "#1f77b4",
+      "x": -0.672723,
+      "y": 3.759419,
+      "weight": 17.080887
+    },
+    {
+      "code": "5",
+      "label": "Employés",
+      "color": "#d62728",
+      "x": -4.662405,
+      "y": -2.431004,
+      "weight": 18.206652
+    },
+    {
+      "code": "6",
+      "label": "Ouvriers",
+      "color": "#8c2d04",
+      "x": -6.107136,
+      "y": -7.42491,
+      "weight": 13.83858
+    },
+    {
+      "code": "7",
+      "label": "Retraités",
+      "color": "#7f7f7f",
+      "x": 1.034483,
+      "y": -10.0,
+      "weight": 33.065769
+    }
+  ],
+  "candidates": [
+    {
+      "id": "laguiller",
+      "label": "Arlette Laguiller",
+      "color": "#7b1113",
+      "x": -1.95914,
+      "y": -2.818894,
+      "is_abstention": false,
+      "national_share_pct": 5.3,
+      "ellipse": {
+        "rx": 0.452717,
+        "ry": 0.279065,
+        "angle_deg": 66.529602
+      }
+    },
+    {
+      "id": "hue",
+      "label": "Robert Hue",
+      "color": "#c8102e",
+      "x": -2.234004,
+      "y": -4.254067,
+      "is_abstention": false,
+      "national_share_pct": 8.64,
+      "ellipse": {
+        "rx": 0.445321,
+        "ry": 0.263932,
+        "angle_deg": 78.725332
+      }
+    },
+    {
+      "id": "jospin",
+      "label": "Lionel Jospin",
+      "color": "#f06292",
+      "x": -1.071135,
+      "y": -2.805927,
+      "is_abstention": false,
+      "national_share_pct": 23.3,
+      "ellipse": {
+        "rx": 0.485009,
+        "ry": 0.279614,
+        "angle_deg": 70.145426
+      }
+    },
+    {
+      "id": "voynet",
+      "label": "Dominique Voynet",
+      "color": "#2e9e4f",
+      "x": -1.386564,
+      "y": -1.924269,
+      "is_abstention": false,
+      "national_share_pct": 3.32,
+      "ellipse": {
+        "rx": 0.458778,
+        "ry": 0.25926,
+        "angle_deg": 65.434306
+      }
+    },
+    {
+      "id": "balladur",
+      "label": "Édouard Balladur",
+      "color": "#6f9fd8",
+      "x": 0.349026,
+      "y": -4.355016,
+      "is_abstention": false,
+      "national_share_pct": 18.58,
+      "ellipse": {
+        "rx": 0.488042,
+        "ry": 0.278322,
+        "angle_deg": 78.026416
+      }
+    },
+    {
+      "id": "chirac",
+      "label": "Jacques Chirac",
+      "color": "#1565c0",
+      "x": -0.210391,
+      "y": -2.772167,
+      "is_abstention": false,
+      "national_share_pct": 20.84,
+      "ellipse": {
+        "rx": 0.490889,
+        "ry": 0.298216,
+        "angle_deg": 65.183941
+      }
+    },
+    {
+      "id": "de-villiers",
+      "label": "Philippe de Villiers",
+      "color": "#3949ab",
+      "x": -0.549862,
+      "y": -3.932204,
+      "is_abstention": false,
+      "national_share_pct": 4.74,
+      "ellipse": {
+        "rx": 0.476804,
+        "ry": 0.31864,
+        "angle_deg": 61.729597
+      }
+    },
+    {
+      "id": "le-pen",
+      "label": "Jean-Marie Le Pen",
+      "color": "#0d1b4c",
+      "x": -1.763937,
+      "y": -4.744016,
+      "is_abstention": false,
+      "national_share_pct": 15.0,
+      "ellipse": {
+        "rx": 0.413334,
+        "ry": 0.292835,
+        "angle_deg": 76.418721
+      }
+    }
+  ],
+  "population_barycenter": {
+    "x": -0.355499,
+    "y": -3.131686
+  },
+  "bootstrap": {
+    "n_boot": 500,
+    "margin_pts": 3.0,
+    "kind": "dirichlet",
+    "seed": 0,
+    "level": 0.95
+  }
+}

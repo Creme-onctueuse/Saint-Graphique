@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildDataset, type Dataset, type ElectionInfo } from '../data/dataset.ts';
 import {
   eligibleElectorates,
+  gameLegend,
   OPTION_COUNT,
   pickRound,
   playableElections,
@@ -161,5 +162,42 @@ describe('données réelles', () => {
       expect(total).toBeGreaterThan(95);
       expect(total).toBeLessThan(105);
     }
+  });
+});
+
+describe('gameLegend', () => {
+  const base: RawElection = {
+    id: 'e',
+    type: 'presidentielle',
+    year: 2002,
+    label: 'E',
+    pcs_level: 1,
+    sources: [],
+    candidates: [
+      { id: 'a', label: 'A', color: '#000', national_share_pct: 80 },
+      {
+        id: 'abst',
+        label: 'Abstention',
+        color: '#000',
+        national_share_pct: 20,
+        is_abstention: true,
+      },
+    ],
+    composition: { a: { '2': 50, '6': 50 } },
+  };
+
+  it('parle des votants sans détail de l’abstention', () => {
+    expect(gameLegend(base)).toContain('parmi les votants');
+  });
+
+  it('parle des inscrits quand l’abstention est détaillée', () => {
+    const election = { ...base, composition: { ...base.composition, abst: { '2': 100 } } };
+    expect(gameLegend(election)).toContain('parmi les inscrits');
+  });
+
+  it('ne réunit les agriculteurs aux indépendants que si le sondage ne les sépare pas', () => {
+    expect(gameLegend(base)).toContain('agriculteurs comptent avec les indépendants');
+    const apart = { ...base, composition: { a: { '1': 10, '2': 40, '6': 50 } } };
+    expect(gameLegend(apart)).not.toContain('agriculteurs');
   });
 });

@@ -38,10 +38,10 @@ Les deux dernières méthodes ont leurs propres axes et n'atteignent pas le seui
 La page est une carte plein écran. La molette zoome, le glisser déplace, un clic croise les données.
 
 - **Électorat :** les lignes vers chaque groupe social, ceux qui y sont surreprésentés, les électorats les plus ressemblants, et son historique de scrutin en scrutin.
-- **Catégorie :** comment vote son groupe. Les losanges se redimensionnent pour le montrer. Les sondages ne détaillent que six groupes : c'est le vote du groupe entier, ce que la page précise.
+- **Catégorie :** comment vote son groupe. Les losanges se redimensionnent pour le montrer. Les sondages ne détaillent que six ou sept groupes : c'est le vote du groupe entier, ce que la page précise.
 - **Duel :** Maj + clic compare deux électorats, en composition et en distance sur la carte.
 - **Croiser :** des axes libres parmi une dizaine de variables de l'Insee, et une carte de proximité où la distance dit la ressemblance des compositions.
-- **Frise :** une lecture de 2017 à 2024 avec les trajectoires des familles politiques et le vote de chaque groupe en anneaux. Seuls les électorats bougent : les catégories gardent la même position à toutes les élections.
+- **Frise :** une lecture de 1995 à 2024 avec les trajectoires des familles politiques et le vote de chaque groupe en anneaux. Seuls les électorats bougent : les catégories gardent la même position à toutes les élections.
 - **Projection 2027 :** deux scénarios, « rien ne bouge » et « la tendance continue ». Testée sur le passé, la tendance prédit moins bien : la page affiche ce résultat à côté de la projection, qui n'est pas une prévision (voir la [méthodologie](docs/methodologie.md)).
 - **Le saviez-vous ? et Qui est-ce ? :** des constats calculés sur les données, et un petit jeu.
 
@@ -89,7 +89,7 @@ Les vidéos, transcriptions et captures servent uniquement à l'analyse locale. 
 
 ### Données Ifop : projet libre et non commercial
 
-Les rapports Ifop dont sont tirées les 7 élections indiquent : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu.
+Les rapports Ifop dont sont tirées 9 des 12 élections indiquent : « Aucune publication totale ou partielle ne peut être faite sans l'accord exprès de l'Ifop. » Aucun accord n'a été demandé ni obtenu.
 
 Ce projet est **libre et non commercial**. Il publie les chiffres tirés de ces rapports en citant chacun d'eux, et les retire si l'Ifop le demande. Sont concernés `data/elections/`, `pipeline/sources/manual/`, les coordonnées d'électorats de `data/computed/`, la projection de `data/computed/_projection/` et les constats de la page. La source Ifop reste citée sur la page et dans `data/SOURCES.md`.
 
