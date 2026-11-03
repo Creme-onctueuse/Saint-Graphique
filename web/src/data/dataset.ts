@@ -147,6 +147,11 @@ const METHOD_LABELS: Record<string, string> = {
 const EXPLORATORY_METHODS: ReadonlySet<string> = new Set(['mca', 'acm_individus']);
 const EXPLORATORY_SUFFIX = ' (exploratoire)';
 
+/** Libellé pour l'en-tête, où la place manque : la réserve figure déjà dans le bandeau du bas. */
+export function shortMethodLabel(label: string): string {
+  return label.endsWith(EXPLORATORY_SUFFIX) ? label.slice(0, -EXPLORATORY_SUFFIX.length) : label;
+}
+
 const DEFAULT_GROUP_LABELS: Record<string, string> = {
   '1': 'Agriculteurs exploitants',
   '2': "Artisans, commerçants et chefs d'entreprise",

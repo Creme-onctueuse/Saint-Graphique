@@ -176,12 +176,17 @@ p {
 }
 
 .sg-chart-heading {
+  flex: none;
   font-size: inherit;
   font-weight: 600;
   color: var(--sg-text);
 }
 
 .sg-method-chip {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   padding: 0;
   border: 0;
   background: none;

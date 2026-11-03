@@ -5,6 +5,7 @@
  */
 import type { Insets } from '../../chart/geometry.ts';
 import { PANELS, type AppState, type PanelId } from '../../core/state.ts';
+import { shortMethodLabel } from '../../data/dataset.ts';
 import type { ResolvedView } from '../../view.ts';
 import type { AppActions, Feature } from '../actions.ts';
 import { byId, el } from '../dom.ts';
@@ -113,7 +114,8 @@ export class Shell implements Feature {
     if (state.panel) this.panelTitle.textContent = PANEL_TITLES[state.panel];
 
     this.heading.textContent = view.electionLabel;
-    this.methodChip.textContent = view.method.label;
+    this.methodChip.textContent = shortMethodLabel(view.method.label);
+    this.methodChip.title = `${view.method.label} : changer de méthode`;
 
     byId('sg-caveat-text').textContent = view.reserveSummary;
     byId('sg-sources-text').textContent = compactSources(view);

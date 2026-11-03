@@ -75,9 +75,9 @@
   font-size: 0.82rem;
 }
 
-@media (max-width: 1500px) {
+@media (max-width: 1000px) {
   .sg-search {
-    width: 170px;
+    width: 178px;
   }
 }
 

@@ -24,7 +24,7 @@ export class Search implements Feature {
     attrs: {
       id: 'sg-search-input',
       type: 'search',
-      placeholder: 'Où suis-je ? Un métier, un candidat…',
+      placeholder: 'Un métier, un candidat…',
       'aria-label': 'Chercher un métier, une catégorie ou un électorat',
       autocomplete: 'off',
       role: 'combobox',
