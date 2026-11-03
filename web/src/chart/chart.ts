@@ -88,6 +88,8 @@ export class SaintChart {
   private readonly zoomBehavior: ZoomBehavior<SVGGElement, unknown>;
   private readonly listeners = new Set<() => void>();
   private readonly selectListeners = new Set<SelectListener>();
+  /** Un clic désigne alors un point de la carte, sans rien sélectionner. */
+  private pointPicker: ((point: Point) => void) | null = null;
   private readonly points: PointFocus;
   private readonly resizeObserver: ResizeObserver | null = null;
   private readonly reducedMotion: MediaQueryList | null;
@@ -412,6 +414,12 @@ export class SaintChart {
   }
 
   /** Appelé quand l'utilisateur clique un repère (clé) ou le fond de la carte (null). */
+  /** Le prochain clic, ou Entrée sur un repère, donne un point de la carte (null : fin du mode). */
+  pickPoint(cb: ((point: Point) => void) | null): void {
+    this.pointPicker = cb;
+    this.svg.classList.toggle('sg-picking', cb !== null);
+  }
+
   onSelect(cb: SelectListener): () => void {
     this.selectListeners.add(cb);
     return () => this.selectListeners.delete(cb);
@@ -633,6 +641,11 @@ export class SaintChart {
     });
     root.addEventListener('pointerleave', () => this.clearHover());
     root.addEventListener('click', (e) => {
+      if (this.pointPicker) {
+        const point = this.clientToData(e.clientX, e.clientY);
+        if (point) this.pointPicker(point);
+        return;
+      }
       const key = this.keyNearPointer(e);
       if (key) this.showKey(key);
       else this.clearHover();
@@ -654,6 +667,12 @@ export class SaintChart {
         this.emitSelect(null, false);
       } else if (key && (e.key === 'Enter' || e.key === ' ')) {
         e.preventDefault();
+        const pcs = this.model?.pcs.find((p) => `p:${p.code}` === key);
+        if (this.pointPicker) {
+          // Au clavier, on place sa marque sur une catégorie.
+          if (pcs) this.pointPicker({ x: pcs.x, y: pcs.y });
+          return;
+        }
         this.emitSelect(key, e.shiftKey);
       } else if (key) {
         this.points.onKey(e, key);

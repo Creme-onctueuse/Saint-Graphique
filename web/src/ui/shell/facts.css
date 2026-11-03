@@ -278,6 +278,61 @@
   font-weight: 600;
 }
 
+/* Placez-le : la carte attend un clic, puis montre l'écart. */
+.sg-svg.sg-picking,
+.sg-svg.sg-picking * {
+  cursor: crosshair !important;
+}
+
+.sg-game-guess {
+  pointer-events: none;
+}
+
+.sg-game-guess__line {
+  stroke: var(--sg-text);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 3;
+}
+
+.sg-game-guess__dot {
+  fill: var(--sg-plot-bg);
+  stroke: var(--sg-text);
+  stroke-width: 2.5;
+}
+
+.sg-game__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sg-game__source {
+  color: var(--sg-text-muted);
+  font-size: 0.74rem;
+  overflow-wrap: anywhere;
+}
+
+.sg-game__rows {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  font-size: 0.82rem;
+  list-style: none;
+}
+
+.sg-game__rows li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.sg-game__total {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
 .sg-game__foot {
   display: flex;
   align-items: center;

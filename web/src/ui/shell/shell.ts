@@ -15,7 +15,7 @@ const PANEL_TITLES: Record<PanelId, string> = {
   electorates: 'Électorats',
   categories: 'Catégories',
   cross: 'Croiser les données',
-  game: 'Qui est-ce ?',
+  game: 'Jeu',
   method: 'Méthode',
   data: 'Données',
 };

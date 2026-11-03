@@ -1,13 +1,14 @@
 /**
- * Mini-jeu « Qui est-ce ? » : deviner un électorat d'après sa composition sociale. La réponse et les
- * leurres viennent des données ; le tirage est injectable, pour que les tests soient déterministes.
+ * Jeux sur les données : « Qui est-ce ? » (retrouver un électorat d'après sa composition), « Placez-le »
+ * (poser un électorat sur la carte) et la série du jour, qui mêle les deux. La réponse et les leurres
+ * viennent des données ; le tirage est injectable, pour que les tests soient déterministes.
  *
  * Module pur (sans DOM), testé dans game.test.ts.
  */
 import type { Dataset } from '../data/dataset.ts';
 import { groupBase, representation } from './crossing.ts';
 import { MIN_ELECTORATE_SHARE } from './facts.ts';
-import type { RawCandidate, RawElection } from './types.ts';
+import type { RawCandidate, RawElection, SourceRef } from './types.ts';
 
 /** Renvoie un nombre dans [0, 1[, comme Math.random. */
 export type Rng = () => number;
@@ -39,6 +40,8 @@ export interface GameRound {
   bars: GameBar[];
   /** Ce que dit le trait de chaque barre : dépend de ce que publie le sondage de cette élection. */
   legend: string;
+  /** Le sondage d'où vient la réponse, à montrer après chaque manche. */
+  source: SourceRef | null;
 }
 
 /** Le trait se lit parmi les inscrits ou les votants, et les agriculteurs sont parfois à part. */
@@ -128,9 +131,72 @@ export function pickRound(ds: Dataset, rng: Rng, options: RoundOptions = {}): Ga
       .map((r) => ({ group: r.group, share: r.share, reference: r.reference }))
       .sort((a, b) => a.group.localeCompare(b.group)),
     legend: gameLegend(election),
+    source: election.sources[0] ?? null,
   };
 }
 
 export function roundKey(round: GameRound): string {
   return `${round.electionId}/${round.answerId}`;
+}
+
+/** Points d'une manche réussie. */
+export const ROUND_POINTS = 100;
+/** Distance (unités de la carte) à partir de laquelle un placement ne rapporte plus rien. */
+export const PLACEMENT_ZERO_AT = 5;
+
+/** Tous les points sur place, plus rien à PLACEMENT_ZERO_AT unités ou plus. */
+export function placementPoints(distance: number): number {
+  return Math.round(ROUND_POINTS * Math.max(0, 1 - distance / PLACEMENT_ZERO_AT));
+}
+
+/** Tirage reproductible d'après un texte (FNV-1a pour la graine, mulberry32 pour la suite). */
+export function seededRng(seed: string): Rng {
+  let hash = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    hash = Math.imul(hash ^ seed.charCodeAt(i), 16777619);
+  }
+  let state = hash >>> 0;
+  return () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Le jour, heure locale, au format AAAA-MM-JJ. */
+export function dayKey(date: Date): string {
+  const pad = (n: number): string => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+export type RoundKind = 'who' | 'place';
+
+export interface SeriesRound {
+  kind: RoundKind;
+  round: GameRound;
+}
+
+const SERIES_KINDS: readonly RoundKind[] = ['who', 'place', 'who', 'place', 'who'];
+export const SERIES_LENGTH = SERIES_KINDS.length;
+
+/** La série d'un jour : les mêmes manches pour tous ce jour-là, à données égales. */
+export function dailySeries(ds: Dataset, day: string): SeriesRound[] {
+  const rng = seededRng(`saint-graphique/${day}`);
+  const played = new Set<string>();
+  const series: SeriesRound[] = [];
+  for (const kind of SERIES_KINDS) {
+    const round = pickRound(ds, rng, { played });
+    if (!round) break;
+    played.add(roundKey(round));
+    series.push({ kind, round });
+  }
+  return series;
+}
+
+/** Le résultat à partager : le score, sans les réponses. */
+export function seriesResultText(day: string, scores: readonly number[]): string {
+  const total = scores.reduce((sum, s) => sum + s, 0);
+  const [year, month, date] = day.split('-');
+  return `Saint-Graphique, série du ${date}/${month}/${year} : ${total} points sur ${scores.length * ROUND_POINTS}`;
 }

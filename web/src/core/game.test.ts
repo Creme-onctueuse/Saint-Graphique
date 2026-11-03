@@ -1,14 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import { buildDataset, type Dataset, type ElectionInfo } from '../data/dataset.ts';
 import {
+  dailySeries,
+  dayKey,
   eligibleElectorates,
   gameLegend,
   OPTION_COUNT,
   pickRound,
+  PLACEMENT_ZERO_AT,
+  placementPoints,
   playableElections,
-  roundKey,
-  shuffled,
   type Rng,
+  ROUND_POINTS,
+  roundKey,
+  seededRng,
+  SERIES_LENGTH,
+  seriesResultText,
+  shuffled,
 } from './game.ts';
 import type { RawElection } from './types.ts';
 
@@ -199,5 +207,81 @@ describe('gameLegend', () => {
     expect(gameLegend(base)).toContain('agriculteurs comptent avec les indépendants');
     const apart = { ...base, composition: { a: { '1': 10, '2': 40, '6': 50 } } };
     expect(gameLegend(apart)).not.toContain('agriculteurs');
+  });
+});
+
+describe('placementPoints', () => {
+  it('donne tout sur place, rien à partir de la limite', () => {
+    expect(placementPoints(0)).toBe(ROUND_POINTS);
+    expect(placementPoints(PLACEMENT_ZERO_AT)).toBe(0);
+    expect(placementPoints(PLACEMENT_ZERO_AT * 3)).toBe(0);
+  });
+
+  it('diminue avec la distance', () => {
+    expect(placementPoints(1)).toBeGreaterThan(placementPoints(2));
+    expect(placementPoints(PLACEMENT_ZERO_AT / 2)).toBe(ROUND_POINTS / 2);
+  });
+});
+
+describe('seededRng', () => {
+  it('rejoue la même suite pour la même graine, dans [0, 1[', () => {
+    const a = seededRng('jour');
+    const b = seededRng('jour');
+    for (let i = 0; i < 50; i++) {
+      const v = a();
+      expect(v).toBe(b());
+      expect(v).toBeGreaterThanOrEqual(0);
+      expect(v).toBeLessThan(1);
+    }
+  });
+
+  it('change avec la graine', () => {
+    expect(seededRng('un')()).not.toBe(seededRng('deux')());
+  });
+});
+
+describe('dayKey', () => {
+  it('écrit le jour local sur dix caractères', () => {
+    expect(dayKey(new Date(2026, 10, 3, 23, 59))).toBe('2026-11-03');
+    expect(dayKey(new Date(2027, 0, 9))).toBe('2027-01-09');
+  });
+});
+
+describe('dailySeries', () => {
+  const many = Array.from({ length: 6 }, (_, i) => ({ ...raw, id: `e${i}` }));
+  const ds = dataset(many);
+
+  it('alterne les deux jeux, sans répéter une manche', () => {
+    const series = dailySeries(ds, '2026-11-03');
+    expect(series).toHaveLength(SERIES_LENGTH);
+    expect(series.map((r) => r.kind)).toEqual(['who', 'place', 'who', 'place', 'who']);
+    expect(new Set(series.map((r) => roundKey(r.round))).size).toBe(SERIES_LENGTH);
+  });
+
+  it('donne les mêmes manches le même jour, d’autres le lendemain', () => {
+    const keys = (day: string): string[] => dailySeries(ds, day).map((r) => roundKey(r.round));
+    expect(keys('2026-11-03')).toEqual(keys('2026-11-03'));
+    expect(keys('2026-11-03')).not.toEqual(keys('2026-11-04'));
+  });
+
+  it('s’arrête quand aucune élection ne se prête au jeu', () => {
+    expect(dailySeries(dataset([]), '2026-11-03')).toEqual([]);
+  });
+});
+
+describe('seriesResultText', () => {
+  it('donne le total, sans les réponses', () => {
+    expect(seriesResultText('2026-11-03', [100, 60, 0, 80, 100])).toBe(
+      'Saint-Graphique, série du 03/11/2026 : 340 points sur 500',
+    );
+  });
+});
+
+describe('source d’une manche', () => {
+  it('cite le sondage de l’élection, ou rien sans source', () => {
+    const source = { id: 's', title: 'Sondage', url: 'https://exemple.fr', accessed: '2026-01-01' };
+    const cited = pickRound(dataset([{ ...raw, sources: [source] }]), () => 0);
+    expect(cited?.source?.title).toBe('Sondage');
+    expect(pickRound(dataset(), () => 0)?.source).toBeNull();
   });
 });

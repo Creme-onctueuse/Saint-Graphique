@@ -1691,8 +1691,117 @@ async function main() {
       JSON.stringify(game),
     );
     await shot('20-jeu', false);
+
+    // Placez-le : les électorats disparaissent, le clic les remplace, la réponse cite son sondage.
+    const clickMap = `(() => {
+      const svg = document.querySelector('.sg-svg').getBoundingClientRect();
+      const rect = document.querySelector('.sg-svg clipPath rect');
+      const x = svg.left + Number(rect.getAttribute('x')) + Number(rect.getAttribute('width')) / 2;
+      const y = svg.top + Number(rect.getAttribute('y')) + Number(rect.getAttribute('height')) / 2;
+      document.querySelector('.sg-plot').dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: x, clientY: y }));
+    })()`;
+    const gameState = () =>
+      evaluate(`({
+        question: document.getElementById('sg-game-question')?.textContent ?? '',
+        feedback: document.getElementById('sg-game-feedback')?.textContent ?? '',
+        source: document.getElementById('sg-game-source')?.textContent ?? '',
+        link: document.querySelector('#sg-game-source a')?.href ?? '',
+        cands: document.querySelectorAll('.sg-cand:not(.sg-exiting)').length,
+        trails: document.querySelectorAll('.sg-trail').length,
+        labels: [...document.querySelectorAll('.sg-label')].filter((l) => l.getAttribute('opacity') !== '0').length,
+        picking: document.querySelector('.sg-svg').classList.contains('sg-picking'),
+        guess: !!document.querySelector('.sg-game-guess line'),
+        inspector: !document.getElementById('sg-inspector').hidden,
+        options: document.querySelectorAll('[data-game-option]').length,
+        score: document.getElementById('sg-game-score')?.textContent ?? '',
+        hash: location.hash,
+      })`);
+    await evaluate(`document.querySelector('#sg-game-mode input[value="place"]').click()`);
+    await settle();
+    await sleep(500);
+    const placing = await gameState();
+    check(
+      'placez-le : un nom, aucun électorat, les catégories restent lisibles',
+      /Où placez-vous l’électorat de/.test(placing.question) &&
+        placing.cands === 0 &&
+        placing.trails === 0 &&
+        placing.picking &&
+        placing.labels > 5,
+      JSON.stringify(placing),
+    );
+    await evaluate(clickMap);
+    await settle();
+    await sleep(500);
+    const placed = await gameState();
+    check(
+      'placez-le : l’écart, les points, et le seul électorat demandé',
+      /unité/.test(placed.feedback) &&
+        /points sur 100/.test(placed.feedback) &&
+        placed.cands === 1 &&
+        placed.guess &&
+        !placed.picking &&
+        !placed.inspector,
+      JSON.stringify(placed),
+    );
+    check(
+      'placez-le : la réponse cite son sondage, avec un lien',
+      /^Source : /.test(placed.source) && /^https:/.test(placed.link),
+      JSON.stringify(placed),
+    );
+    await shot('20b-placez-le', false);
+
+    // Série du jour : cinq manches, les mêmes si l'on recommence, un résultat sans les réponses.
+    await evaluate(`document.querySelector('#sg-game-mode input[value="daily"]').click()`);
+    await settle();
+    const firstOfDay = (await gameState()).question;
+    const questions = [];
+    for (let i = 0; i < 5; i++) {
+      const round = await gameState();
+      questions.push(round.question);
+      if (round.options > 0) await evaluate(`document.querySelector('[data-game-option]').click()`);
+      else await evaluate(clickMap);
+      await sleep(350);
+      const answered = await gameState();
+      check(
+        `série : manche ${i + 1} répondue, sa source citée`,
+        answered.feedback.length > 0 && /^Source : /.test(answered.source),
+        JSON.stringify(answered),
+      );
+      await evaluate(`document.getElementById('sg-game-next').click()`);
+      await settle();
+    }
+    const end = await evaluate(`({
+      total: document.getElementById('sg-series-result')?.textContent ?? '',
+      rows: document.querySelectorAll('#sg-series-rows li').length,
+      cands: document.querySelectorAll('.sg-cand:not(.sg-exiting)').length,
+    })`);
+    check(
+      'série : cinq manches, un score sur 500, la carte rendue',
+      /sur 500/.test(end.total) && end.rows === 5 && end.cands > 3 && new Set(questions).size === 5,
+      JSON.stringify({ end, questions }),
+    );
+    await evaluate(`document.getElementById('sg-series-again').click()`);
+    await settle();
+    check(
+      'série : les mêmes manches au même jour',
+      (await gameState()).question === firstOfDay,
+      firstOfDay,
+    );
+    await shot('20c-serie', false);
+
     await openPanel('game');
     await settle();
+    await sleep(500);
+    const afterGame = await gameState();
+    check(
+      'jeu : quitter rend les électorats, les trajectoires et les libellés',
+      afterGame.cands > 3 &&
+        !afterGame.picking &&
+        !/[&#]h=/.test(afterGame.hash) &&
+        !/tr=0/.test(afterGame.hash) &&
+        !/lbl=0/.test(afterGame.hash),
+      JSON.stringify(afterGame),
+    );
   }
 
   // --- À propos : crédits exigés -------------------------------------------------------------------
