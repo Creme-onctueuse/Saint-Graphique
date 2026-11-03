@@ -1400,6 +1400,10 @@ async function main() {
       about.text.includes('JnthnBS/saint-graphique'),
   );
   check('mention non officielle', about.text.includes('Projet non officiel, sans affiliation'));
+  check(
+    'instituts de sondage cités',
+    ['Ifop', 'Ipsos', 'CSA'].every((name) => about.text.includes(name)),
+  );
   for (const url of [
     'https://positions-revue.fr',
     'https://www.youtube.com/@PaduTeam',
