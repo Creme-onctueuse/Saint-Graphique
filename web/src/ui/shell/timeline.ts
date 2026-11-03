@@ -12,7 +12,7 @@
 import './timeline.css';
 import type { SaintChart } from '../../chart/chart.ts';
 import type { AppState, TypeFilter } from '../../core/state.ts';
-import { TYPE_FILTERS } from '../../core/state.ts';
+import { hasCustomLayout, TYPE_FILTERS } from '../../core/state.ts';
 import {
   carrySelection,
   nearestStopId,
@@ -242,14 +242,25 @@ export class Timeline implements Feature {
   /** Change d'élection : la sélection suit sa famille. */
   private choose(id: string): void {
     const selected = carrySelection(this.ds.families, id, this.state?.selected ?? null);
-    this.actions.patch({ election: id, selected }, 'normal');
-    if (id === PROJECTION_ID && this.chart.zoomLevel < FRAME_BELOW_ZOOM) {
-      this.chart.fitElectorates(true, this.framePoints(this.filtered()));
-    }
+    // La carte de la projection prend la place du panneau : les deux côte à côte mangent la carte.
+    const panel = id === PROJECTION_ID ? { panel: null } : {};
+    this.actions.patch({ election: id, selected, ...panel }, 'normal');
+  }
+
+  /** Cadre la projection, sauf si l'on regarde déjà un détail. */
+  frameProjection(): void {
+    if (this.chart.zoomLevel >= FRAME_BELOW_ZOOM) return;
+    this.chart.fitElectorates(true, this.framePoints(this.stops.filter((s) => s.projection)));
   }
 
   private filtered(): TimelineStop[] {
     return stopsForFilter(this.stops, this.state?.typeFilter ?? 'all');
+  }
+
+  /** La lecture s'arrête avant 2027 sur des axes libres : la projection n'y a pas de place. */
+  private playStops(): TimelineStop[] {
+    const custom = this.state !== null && hasCustomLayout(this.state);
+    return this.filtered().filter((s) => !(custom && s.projection));
   }
 
   private setFilter(filter: TypeFilter): void {
@@ -294,11 +305,14 @@ export class Timeline implements Feature {
   }
 
   private startPlaying(): void {
-    const stops = this.filtered();
+    const stops = this.playStops();
     const start = playStartId(stops, this.view?.electionId ?? '');
     if (!start) return;
-    this.chart.fitElectorates(true, this.framePoints(stops));
     if (start !== this.view?.electionId) this.choose(start);
+    // Après le changement d'élection, qui peut recadrer. Sur des axes libres, les positions précalculées
+    // ne valent pas : on montre la carte entière.
+    if (this.state && hasCustomLayout(this.state)) this.chart.resetZoom();
+    else this.chart.fitElectorates(true, this.framePoints(stops));
     if (this.reducedMotion?.matches) {
       this.timer = window.setInterval(() => this.tick(), STEP_REDUCED_MS);
     } else {
@@ -310,15 +324,15 @@ export class Timeline implements Feature {
   }
 
   private tick(): void {
-    const next = nextStopId(this.filtered(), this.view?.electionId ?? '');
+    const next = nextStopId(this.playStops(), this.view?.electionId ?? '');
     if (next) this.choose(next);
-    if (!next || !nextStopId(this.filtered(), next)) this.stopPlaying();
+    if (!next || !nextStopId(this.playStops(), next)) this.stopPlaying();
   }
 
   /** Passe au scrutin suivant : l'état y est déjà, les repères y arrivent pendant le segment. */
   private beginSegment(start: number): boolean {
     const fromId = this.view?.electionId ?? '';
-    const next = nextStopId(this.filtered(), fromId);
+    const next = nextStopId(this.playStops(), fromId);
     const fromStop = this.stops.find((s) => s.id === fromId);
     if (!next || !this.view) {
       this.segment = null;

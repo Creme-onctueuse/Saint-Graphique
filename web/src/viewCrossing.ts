@@ -9,7 +9,7 @@ import { bubbleSizeLabel, bubbleSizes, parseBubbleSize } from './core/bubbleSize
 import { compositionByGroup, compositionGap, pollGroupOf, voteByGroup } from './core/crossing.ts';
 import { computeFreeLayout, type FreeLayout } from './core/freeAxes.ts';
 import { classicalMds, distanceMatrix, fitToRange, orient } from './core/mds.ts';
-import type { AppState } from './core/state.ts';
+import { hasCustomLayout, type AppState } from './core/state.ts';
 import { availableVariables, type Variable } from './core/variables.ts';
 import type { Dataset } from './data/dataset.ts';
 import type { ResolvedView } from './view.ts';
@@ -53,6 +53,8 @@ export interface CrossingInfo {
   free: FreeLayout | null;
   /** Part de l'information conservée par la carte de proximité (0 à 1). */
   explained: number | null;
+  /** Axes libres ou proximité demandés, en attente : la projection garde les axes de sa méthode. */
+  suspended: boolean;
   groupOf: (code: string) => string;
 }
 
@@ -365,7 +367,12 @@ export function applyCrossing(ds: Dataset, state: AppState, base: ResolvedView):
   let mode: CrossingMode = 'map';
   let free: FreeLayout | null = null;
   let explained: number | null = null;
-  if (state.layout === 'proximity') {
+  // La projection prolonge des positions sur les axes de la méthode : sans composition, elle n'a pas
+  // de place sur d'autres axes. Le croisement attend le prochain scrutin, sans se perdre.
+  const suspended = base.projection !== null && hasCustomLayout(state);
+  if (suspended) {
+    // La carte reste celle de la méthode.
+  } else if (state.layout === 'proximity') {
     const result = applyProximity(ds, base);
     if (result) {
       view = result.view;
@@ -427,6 +434,7 @@ export function applyCrossing(ds: Dataset, state: AppState, base: ResolvedView):
     absent: selected ? null : first.absent,
     free,
     explained,
+    suspended,
     groupOf,
     sizeLabel,
   };

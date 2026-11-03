@@ -180,10 +180,11 @@ export function startApp(): void {
   const themeSwitch = new ThemeSwitch(actions);
   initAbout(ds);
 
+  const timeline = new Timeline(byId('sg-timeline'), ds, actions, chart);
   const features: Feature[] = [
     new Search(byId('sg-search'), actions, chart),
     new Tour(actions, chart),
-    new Timeline(byId('sg-timeline'), ds, actions, chart),
+    timeline,
     new TrailsLayer(chart, ds),
     new RingsLayer(chart, ds),
     new ProjectionLayer(chart),
@@ -227,12 +228,19 @@ export function startApp(): void {
     }
     const selectionChanged =
       view?.electionId !== next.electionId || view?.method.id !== next.method.id;
+    const wasProjection = (view?.projection ?? null) !== null;
     view = next;
     chart.update(next.model, chartView(), animation);
     controls.sync(next);
     methodPanel.sync(next, state);
     if (state.panel === 'data') renderTables(tables, next);
     for (const feature of features) feature.sync(next, state);
+    // Après les fonctions : le panneau Croiser peut lui aussi recadrer quand la carte change d'axes.
+    const isProjection = next.projection !== null;
+    if (isProjection !== wasProjection && !chart.playing) {
+      if (isProjection) timeline.frameProjection();
+      else chart.resetZoom();
+    }
     if (selectionChanged) live.textContent = `Affichage : ${next.model.title}.`;
     writeUrl();
   }

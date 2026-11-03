@@ -51,6 +51,10 @@ export class ProjectionCard implements Feature {
   private readonly dataEnd = el('p', { class: 'sg-note' });
   private readonly marks = el('p', { class: 'sg-note sg-projection-card__marks' });
   private readonly ranges = el('ul', { class: 'sg-ranges' });
+  private readonly suspended = el('p', {
+    class: 'sg-note',
+    attrs: { id: 'sg-projection-suspended' },
+  });
 
   constructor(actions: AppActions) {
     const scenarios = el(
@@ -97,6 +101,7 @@ export class ProjectionCard implements Feature {
         class: 'sg-note sg-projection-card__intro',
         text: 'Où iraient les électorats selon deux scénarios. Pas une prévision du résultat.',
       }),
+      this.suspended,
       scenarios,
       el(
         'div',
@@ -127,6 +132,15 @@ export class ProjectionCard implements Feature {
     const file = view.projection;
     this.root.hidden = file === null;
     if (!file) return;
+    const waiting = view.crossing?.suspended === true;
+    this.suspended.hidden = !waiting;
+    if (waiting) {
+      this.suspended.textContent = `La projection n’existe que sur les axes de la carte. ${
+        state.layout === 'proximity'
+          ? 'Votre carte de proximité reviendra'
+          : 'Vos axes libres reviendront'
+      } au prochain scrutin.`;
+    }
     for (const input of this.inputs) input.checked = input.value === state.scenario;
     const text = verdictText(file);
     this.headline.textContent = text.headline;

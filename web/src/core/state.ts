@@ -8,10 +8,10 @@
  * lbl=0 = libellés masqués, ci=1 = ellipses de confiance affichées, bs = mesure de l'aire des bulles,
  * s = repère sélectionné (p:… ou c:…), c2 = repère comparé, p = panneau ouvert, sq=1 = proportions
  * d'origine, tr=0 = trajectoires masquées, rg=1 = anneaux de vote, ty = type d'élection du filtre,
- * sc=trend = scénario de la projection, ax, ay, ac = variables libres des axes et de la couleur,
+ * sc=trend = scénario de la projection (à cette étape seulement), ax, ay, ac = variables libres des axes et de la couleur,
  * vue=prox = carte de proximité.
  */
-import { DIPLOMA_KEYS, type DiplomaWeights } from './types.ts';
+import { DIPLOMA_KEYS, PROJECTION_ID, type DiplomaWeights } from './types.ts';
 
 export type ThemeChoice = 'system' | 'light' | 'dark';
 
@@ -85,6 +85,11 @@ export function defaultState(): AppState {
     colorBy: null,
     layout: 'map',
   };
+}
+
+/** Axes libres ou carte de proximité : la carte ne suit plus les axes de la méthode. */
+export function hasCustomLayout(s: Pick<AppState, 'axisX' | 'axisY' | 'layout'>): boolean {
+  return s.layout === 'proximity' || s.axisX !== null || s.axisY !== null;
 }
 
 function uniqSorted(list: readonly string[]): string[] {
@@ -162,7 +167,7 @@ export function serializeState(state: AppState): string {
   if (!s.showTrails) add('tr', '0');
   if (s.showRings) add('rg', '1');
   if (s.typeFilter !== 'all') add('ty', s.typeFilter);
-  if (s.scenario !== 'still') add('sc', s.scenario);
+  if (s.scenario !== 'still' && s.election === PROJECTION_ID) add('sc', s.scenario);
   if (s.axisX) add('ax', s.axisX);
   if (s.axisY) add('ay', s.axisY);
   if (s.colorBy) add('ac', s.colorBy);

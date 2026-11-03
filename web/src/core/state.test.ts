@@ -8,7 +8,7 @@ import {
 } from './state.ts';
 
 const custom: AppState = {
-  election: '2022_presidentielle_t1',
+  election: 'projection_2027',
   method: 'continuous',
   hiddenCandidates: ['le-pen', 'abstention'],
   hiddenGroups: ['7', '1'],
@@ -31,6 +31,14 @@ const custom: AppState = {
   colorBy: 'patrimoine',
   layout: 'proximity',
 };
+
+describe('scénario de la projection', () => {
+  it('n’apparaît dans l’URL qu’à l’étape 2027', () => {
+    const trend = { ...defaultState(), scenario: 'trend' as const };
+    expect(serializeState({ ...trend, election: '2022_presidentielle_t1' })).not.toContain('sc=');
+    expect(serializeState({ ...trend, election: 'projection_2027' })).toContain('sc=trend');
+  });
+});
 
 describe('aller-retour dans l’URL', () => {
   it('ignore un panneau ou un filtre inconnu', () => {

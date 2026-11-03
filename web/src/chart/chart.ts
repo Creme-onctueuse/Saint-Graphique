@@ -110,6 +110,8 @@ export class SaintChart {
   /** Glissement de la carte en cours (panneau qui s'ouvre) : les tailles poursuivent leur transition. */
   private sliding = false;
   private slideFrame: number | null = null;
+  /** Cadre demandé pendant que la carte glisse : il se calcule sur sa géométrie d'arrivée. */
+  private deferredFit: { box: DataBox; animated: boolean } | null = null;
   /** Lecture de la frise en cours : les électorats suivent `frameCandidates`. */
   private frameCandidates: ChartCandidate[] | null = null;
   private frameProgress = 0;
@@ -260,6 +262,7 @@ export class SaintChart {
       this.insets = target;
       this.replot();
       this.draw(animation);
+      this.runDeferredFit();
       return;
     }
     const from = this.insets;
@@ -279,8 +282,15 @@ export class SaintChart {
       this.zooming = t < 1;
       this.draw(t < 1 ? 'none' : 'fast');
       this.slideFrame = t < 1 ? requestAnimationFrame(step) : null;
+      if (t >= 1) this.runDeferredFit();
     };
     this.slideFrame = requestAnimationFrame(step);
+  }
+
+  private runDeferredFit(): void {
+    const fit = this.deferredFit;
+    this.deferredFit = null;
+    if (fit) this.fitTo(fit.box, fit.animated);
   }
 
   /** Recalcule la zone de tracé en gardant au centre ce qu'on y regardait. */
@@ -414,6 +424,7 @@ export class SaintChart {
   }
 
   resetZoom(animated = true): void {
+    this.deferredFit = null;
     const d = animated ? this.duration('fast') : 0;
     if (d > 0) {
       this.zoomBehavior.transform(this.plot.transition().duration(d * 2), zoomIdentity);
@@ -425,6 +436,10 @@ export class SaintChart {
 
   /** Cadre une zone de données. */
   fitTo(box: DataBox, animated = true): void {
+    if (this.slideFrame !== null) {
+      this.deferredFit = { box, animated };
+      return;
+    }
     const { x, y } = this.base();
     const [minK, maxK] = CHART_STYLE.zoomExtent;
     const t = fitTransform(this.geom, x, y, box, minK, maxK);

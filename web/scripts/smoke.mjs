@@ -1219,6 +1219,112 @@ async function main() {
     await evaluate(`location.hash = 'e=2022_presidentielle_t1'`);
     await settle();
 
+    // 2027 depuis un croisement, et le retour : les repères doivent rester dans le cadre.
+    const clickStop = (id) =>
+      evaluate(`(async () => {
+        document.querySelector('.sg-timeline input[value="' + ${JSON.stringify(id)} + '"]').click();
+        await new Promise((r) => setTimeout(r, 1100));
+      })()`);
+    const inFrame = () =>
+      evaluate(`(() => {
+        // Un rectangle de clipPath n'a pas de boîte à l'écran : on lit ses attributes, posés dans le SVG.
+        const svg = document.querySelector('.sg-svg').getBoundingClientRect();
+        const rect = document.querySelector('.sg-svg clipPath rect');
+        const left = svg.left + Number(rect.getAttribute('x'));
+        const top = svg.top + Number(rect.getAttribute('y'));
+        const right = left + Number(rect.getAttribute('width'));
+        const bottom = top + Number(rect.getAttribute('height'));
+        const inside = (el) => {
+          const r = el.getBoundingClientRect();
+          const x = r.left + r.width / 2;
+          const y = r.top + r.height / 2;
+          return x >= left && x <= right && y >= top && y <= bottom;
+        };
+        const visible = (s) => [...document.querySelectorAll(s)].filter(inside).length;
+        return {
+          cands: visible('.sg-cand'),
+          pcs: visible('.sg-pcs'),
+          labels: [...document.querySelectorAll('.sg-label')].filter((l) => l.getAttribute('opacity') !== '0').length,
+          errors: visible('.sg-projection-item'),
+          panel: !document.getElementById('sg-panel').hidden,
+          card: !document.getElementById('sg-projection').hidden,
+          waiting: document.getElementById('sg-projection-suspended').textContent,
+          axis: document.querySelector('.sg-axis-title')?.textContent ?? '',
+          hash: location.hash,
+        };
+      })()`);
+    const paths = [
+      {
+        name: 'axes libres',
+        hash: 'e=2022_presidentielle_t1&p=cross&ax=patrimoine&ay=bac5',
+        back: /Patrimoine/,
+        waiting: /axes libres/,
+        cands: 13,
+        pcs: 30,
+      },
+      {
+        name: 'préréglage',
+        hash: 'e=2022_presidentielle_t1&p=cross&ax=niveau_vie&ay=bac5&ac=patrimoine',
+        back: /Niveau de vie/,
+        waiting: /axes libres/,
+        cands: 13,
+        pcs: 30,
+      },
+      {
+        name: 'proximité',
+        hash: 'e=2022_presidentielle_t1&p=cross&vue=prox',
+        back: /^$/,
+        waiting: /proximité/,
+        cands: 12,
+        pcs: 0,
+      },
+    ];
+    for (const path of paths) {
+      await evaluate(`location.hash = '${path.hash}'`);
+      await settle();
+      await clickStop('projection_2027');
+      const at = await inFrame();
+      check(
+        `2027 depuis ${path.name} : un seul panneau, les axes de la carte, tout dans le cadre`,
+        !at.panel &&
+          at.card &&
+          at.errors >= 5 &&
+          at.cands >= 5 &&
+          path.waiting.test(at.waiting) &&
+          !/Patrimoine|Niveau de vie/.test(at.axis),
+        JSON.stringify(at),
+      );
+      await clickStop('2022_presidentielle_t1');
+      const back = await inFrame();
+      check(
+        `2022 après 2027 depuis ${path.name} : le croisement revient, entier`,
+        !back.card &&
+          path.back.test(back.axis) &&
+          back.cands >= path.cands &&
+          back.pcs === path.pcs,
+        JSON.stringify(back),
+      );
+    }
+    await evaluate(`location.hash = 'e=2022_presidentielle_t1'`);
+    await settle();
+    const before2027 = await inFrame();
+    await clickStop('projection_2027');
+    await evaluate(`document.querySelector('#sg-scenario input[value="trend"]').click()`);
+    await sleep(900);
+    await clickStop('2022_presidentielle_t1');
+    await sleep(300);
+    const after2027 = await inFrame();
+    check(
+      '2022 après 2027 : la carte entière, comme avant',
+      after2027.labels === before2027.labels && after2027.pcs === before2027.pcs,
+      JSON.stringify({ before2027, after2027 }),
+    );
+    check(
+      '2022 après 2027 : le scénario quitte l’URL',
+      !/sc=/.test(after2027.hash),
+      after2027.hash,
+    );
+
     // --- Recherche « Où suis-je ? » ---------------------------------------------------------------------
     const searched = await evaluate(`(async () => {
       const input = document.getElementById('sg-search-input');

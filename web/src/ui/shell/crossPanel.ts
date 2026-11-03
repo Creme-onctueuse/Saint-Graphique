@@ -113,7 +113,8 @@ export class CrossPanel implements Feature {
   /** Catégories Insee, et celles dont la composition du patrimoine est imputée. */
   private readonly itemCount: number;
   private readonly imputedCount: number;
-  private lastMode: CrossMode = 'map';
+  /** Ce que montrent les axes : s'il change, l'ancien cadre ne veut plus rien dire. */
+  private lastLayout = 'map';
   private initialized = false;
 
   constructor(host: HTMLElement, ds: Dataset, actions: AppActions, onLayoutChange: () => void) {
@@ -206,7 +207,6 @@ export class CrossPanel implements Feature {
           },
           'normal',
         );
-        this.onLayoutChange();
       });
       return button;
     });
@@ -324,8 +324,9 @@ export class CrossPanel implements Feature {
       this.scaleMin.textContent = color.variable.format(color.min);
       this.scaleMax.textContent = color.variable.format(color.max);
     }
-    if (mode !== this.lastMode) {
-      this.lastMode = mode;
+    const layout = free ? `free:${free.x.variable.id}:${free.y.variable.id}` : mode;
+    if (layout !== this.lastLayout) {
+      this.lastLayout = layout;
       this.onLayoutChange();
     }
   }
@@ -333,6 +334,9 @@ export class CrossPanel implements Feature {
   private noteFor(asked: CrossMode, mode: CrossMode, view: ResolvedView): string {
     const crossing = view.crossing;
     if (asked === 'proximity') {
+      if (crossing?.suspended) {
+        return 'La projection 2027 n’existe que sur les axes de la carte. La carte de proximité reviendra au prochain scrutin.';
+      }
       if (mode !== 'proximity') {
         return 'La carte de proximité compare des électorats : choisissez un scrutin sur la frise.';
       }
@@ -341,6 +345,9 @@ export class CrossPanel implements Feature {
         'Plus deux électorats sont proches, plus leur composition sociale se ressemble. ' +
         `Le plan conserve ${pct} % de l’information. Ni axes ni graduations : ces directions n’ont pas de nom.`
       );
+    }
+    if (crossing?.suspended) {
+      return 'La projection 2027 n’existe que sur les axes de la carte. Vos axes libres reviendront au prochain scrutin.';
     }
     if (asked === 'free') {
       const free = crossing?.free;
