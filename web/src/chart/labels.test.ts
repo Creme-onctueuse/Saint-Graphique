@@ -115,7 +115,7 @@ describe('groupe dense (cas de la présidentielle)', () => {
     }
   });
 
-  it('ne recouvre aucun losange du groupe', () => {
+  it('ne recouvre aucun point d’électorat du groupe', () => {
     for (const p of placed) {
       const box = boxOf(p, w, h);
       for (const o of obstacles) expect(circlePenetration(o, box)).toBe(0);

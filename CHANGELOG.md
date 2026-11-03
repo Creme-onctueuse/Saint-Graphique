@@ -6,16 +6,25 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnage [
 
 ### Ajouté
 
-- Carte plein écran, sans défilement : échelles X et Y indépendantes, option « Proportions d'origine », navigation à la molette et au glisser, cadrage des électorats, mini-carte, halos des groupes, légende toujours visible.
+- Carte plein écran, sans défilement : échelles X et Y indépendantes, option « Proportions d'origine », navigation à la molette et au glisser, cadrage des électorats, mini-carte, légende toujours visible.
 - Croisements : détail d'un électorat ou d'une catégorie, vue depuis un groupe, duel, axes libres sur les variables de l'Insee, carte de proximité par écart de composition.
 - Présidentielles de 1995, 2002, 2007 et 2012 et européennes de 2014 (CSA, Ipsos, Ifop), avec une conversion du vote par groupe contrôlée sur les scores nationaux. Avant 2017, la page rappelle que les catégories gardent leurs positions de 2026.
 - Frise : lecture de 1995 à 2024, filtre par type de scrutin, trajectoires des familles politiques (`config/families.yaml`), anneaux de vote par groupe, historique d'une famille.
 - Projection 2027 à deux scénarios (`scripts/analyze/projection.py`), avec le résultat du test sur le passé : la tendance place moins bien les électorats que « rien ne bouge », avec un écart faible.
 - « Le saviez-vous ? » : des constats calculés sur les données, soumis à des règles testées. Jeu « Qui est-ce ? ».
-- Nouveau logo et jeu d'icônes dessinés pour le projet.
+- Logo rouge et or et jeu d'icônes dessinés pour le projet.
+- Méthodes `espace_social` (Bourdieu) et `acm_individus` (ACM sur les individus du recensement), mesurées face au seuil, qu'elles n'atteignent pas : voir `docs/methodologie.md`.
+- Recherche d'un métier, d'une catégorie ou d'un électorat (touche `/`), et visite guidée en cinq étapes.
+- Panneau Croiser : l'aire des bulles peut montrer le score, le poids d'un groupe, son vote ou la part d'un total.
+- Balises de partage et image d'aperçu pour le site, avec l'adresse fixée au build.
 
 ### Modifié
 
+- Un électorat est une seule bulle, dont l'aire donne la part des inscrits, à la même échelle que les disques des catégories. Les halos des groupes disparaissent, et les ellipses de confiance deviennent une option.
+- La lecture de la frise est continue, image par image : chaque famille glisse d'une élection à l'autre, sans pause ni fondu.
+- La page passe de 815 à 570 Kio à données égales, car les valeurs répétées d'un fichier à l'autre ne sont embarquées qu'une fois. `data/computed/` reste complet.
+- Les tableaux de données ne se construisent que dans leur panneau ouvert.
+- `chart.ts`, `dataset.ts` et `inspector.ts` sont séparés par responsabilité.
 - Le dépôt devient public : les chiffres de l'Ifop et les positions lues sur les vidéos de Chris sont publiés avec leurs sources, et retirés sur demande. Le déploiement sur GitHub Pages suit chaque poussée dès que la variable `PAGES_ENABLED` est définie.
 - La réserve se résume en une ligne toujours visible et les sources tiennent sur une ligne en fin de page ; chacune s'ouvre sur son détail. Les catégories ne sont nommées que si elles sont grandes ou ont de la place, et le zoom fait apparaître les autres.
 
@@ -23,6 +32,8 @@ Format : [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versionnage [
 
 ### Corrigé
 
+- Les axes restent au bord de la carte, panneau ouvert, en zoomant et en se déplaçant : la carte est découpée à sa zone de tracé et ses axes glissent avec elle.
+- Un clic vise le point le plus proche, puis la plus petite bulle : il ne tombe plus sur un électorat voisin qui recouvre le premier.
 - Chronologie : la vue stylisée sur fond noir apparaît dès le 12 janvier 2025. Ajout des limites du relevé, une fois la collecte terminée.
 - Validation de `research/` : les axes sans libellé d'une diapositive sont admis, et les fichiers de travail préfixés par `_` ne relèvent plus du contrat.
 

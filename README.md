@@ -8,7 +8,7 @@ Le Saint-Graphique a été créé par **Chris et la PaduTeam**. Voir [Crédits e
 
 > **Projet non officiel.** Il n'a aucun lien avec Positions Revue ni avec la PaduTeam. L'algorithme original n'a pas été publié : ce dépôt reprend les **positions lues** sur les vidéos publiques et propose des méthodes de calcul ouvertes, sans prétendre à l'identité exacte.
 
-**Statut :** v1.1 en cours, une carte interactive construite sur la réplique du tableau de Chris de février 2026 ([fidélité mesurée](#fidélité-de-la-réplique), [feuille de route](#feuille-de-route)). **Projet libre et non commercial :** les chiffres tirés des rapports Ifop sont cités et retirés sur demande ([détails](#données-ifop--projet-libre-et-non-commercial)).
+**Statut :** v1.2 en cours, une carte interactive construite sur la réplique du tableau de Chris de février 2026 ([fidélité mesurée](#fidélité-de-la-réplique), [feuille de route](#feuille-de-route)). **Projet libre et non commercial :** les chiffres tirés des rapports Ifop sont cités et retirés sur demande ([détails](#données-ifop--projet-libre-et-non-commercial)).
 
 ## Le principe
 
@@ -37,13 +37,17 @@ Les deux dernières méthodes ont leurs propres axes et n'atteignent pas le seui
 
 La page est une carte plein écran. La molette zoome, le glisser déplace, un clic croise les données.
 
+Chaque électorat est une bulle. Son aire donne sa part des inscrits, à la même échelle que les disques des catégories : les tailles se comparent d'une élection à l'autre et avec les catégories. Le panneau Croiser peut lui faire mesurer autre chose : le score, le poids d'un groupe dans l'électorat, le vote d'un groupe, ou la part d'un total comme le patrimoine.
+
 - **Électorat :** les lignes vers chaque groupe social, ceux qui y sont surreprésentés, les électorats les plus ressemblants, et son historique de scrutin en scrutin.
-- **Catégorie :** comment vote son groupe. Les losanges se redimensionnent pour le montrer. Les sondages ne détaillent que six ou sept groupes : c'est le vote du groupe entier, ce que la page précise.
+- **Catégorie :** comment vote son groupe. Les bulles se redimensionnent pour le montrer. Les sondages ne détaillent que six ou sept groupes : c'est le vote du groupe entier, ce que la page précise.
 - **Duel :** Maj + clic compare deux électorats, en composition et en distance sur la carte.
 - **Croiser :** des axes libres parmi une dizaine de variables de l'Insee, et une carte de proximité où la distance dit la ressemblance des compositions.
 - **Frise :** une lecture de 1995 à 2024 avec les trajectoires des familles politiques et le vote de chaque groupe en anneaux. Seuls les électorats bougent : les catégories gardent la même position à toutes les élections.
 - **Projection 2027 :** deux scénarios, « rien ne bouge » et « la tendance continue ». Testée sur le passé, la tendance prédit moins bien : la page affiche ce résultat à côté de la projection, qui n'est pas une prévision (voir la [méthodologie](docs/methodologie.md)).
 - **Le saviez-vous ? et Qui est-ce ? :** des constats calculés sur les données, et un petit jeu.
+- **Recherche :** un métier, une catégorie ou un électorat, avec la touche `/`. Elle reste dans la page : rien n'est conservé ni envoyé.
+- **Visite guidée :** cinq étapes pour découvrir la carte, depuis la boussole.
 
 La carte s'étire pour remplir l'écran, si bien que les deux axes n'ont pas la même échelle. L'option « Proportions d'origine » rétablit le format carré. Les distances citées sont toujours mesurées en unités de la carte, jamais à l'écran.
 
@@ -129,7 +133,8 @@ Ce que ces chiffres disent, et ne disent pas :
 
 - **v1 : réplique (faite).** Méthode `read_positions`, écart mesuré et documenté.
 - **v2 : rigueur.** Une méthode calculée sur données ouvertes qui se rapproche de ces positions : retraités par ancienne catégorie, 41 postes, définition de X confrontée aux lectures. Sont déjà en place les valeurs continues, l'ACM exploratoire, les ellipses et les sources affichées.
-- **v1.1 : carte interactive (en cours).** Carte plein écran, croisements, frise animée, projection 2027, constats et jeu.
+- **v1.1 : carte interactive (faite).** Carte plein écran, croisements, frise animée, projection 2027, constats et jeu.
+- **v1.2 : histoire et méthodes (en cours).** Élections depuis 1995, bulles proportionnelles aux inscrits, lecture fluide, méthodes tirées des sciences sociales, recherche, visite guidée, dépôt prêt pour le site.
 - **v3 : exploration.** Comparaison des méthodes côte à côte, sous-groupes (âge, territoire), version anglaise.
 
 ## Publication

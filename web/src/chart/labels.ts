@@ -36,13 +36,13 @@ export interface LabelItem {
   reach?: number;
 }
 
-/** Repère à éviter (disque ou losange approché par un disque). */
+/** Repère à éviter (disque d'une catégorie ou point d'un électorat). */
 export interface Obstacle {
   key: string;
   cx: number;
   cy: number;
   r: number;
-  /** Repère à ne surtout pas recouvrir (losange d'un électorat). */
+  /** Repère à ne surtout pas recouvrir (point d'un électorat). */
   strong?: boolean;
 }
 

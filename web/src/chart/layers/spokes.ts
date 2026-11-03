@@ -19,7 +19,7 @@ const WIDTH_BASE = 1.2;
 const WIDTH_PER_PCT = 0.2;
 /** En dessous de cette part (%), la ligne reste sans nom : il y en aurait trop. */
 const LABEL_MIN_SHARE = 5;
-/** En dessous de cet écart à l'écran (px), les losanges se touchent : le lien ne montrerait rien. */
+/** En dessous de cet écart à l'écran (px), les points se touchent : le lien ne montrerait rien. */
 const LINK_MIN_PX = 44;
 
 export interface Spoke {
