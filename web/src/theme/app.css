@@ -917,6 +917,11 @@ p {
 }
 
 @media (max-width: 719px) {
+  /* Une seule ligne : l'aide reste au-dessus du bouton « Le saviez-vous ? » et hors des axes. */
+  .sg-hint__more {
+    display: none;
+  }
+
   .sg-hint {
     width: max-content;
     max-width: calc(100vw - 24px);

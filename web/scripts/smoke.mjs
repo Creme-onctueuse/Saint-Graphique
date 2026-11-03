@@ -1505,6 +1505,35 @@ async function main() {
     await openPanel(id);
   }
   await shot('06-400px', false);
+  // L'aide reste affichée jusqu'au premier geste : elle ne doit rien cacher en attendant.
+  for (const width of [400, 360]) {
+    await setViewport(width, 800);
+    await settle();
+    const hintRoom = await evaluate(`(() => {
+      const hint = document.getElementById('sg-hint');
+      const wasHidden = hint.hidden;
+      hint.hidden = false;
+      const box = hint.getBoundingClientRect();
+      const overlaps = (el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && r.left < box.right && r.right > box.left && r.top < box.bottom && r.bottom > box.top;
+      };
+      const room = {
+        height: box.height,
+        inWindow: box.left >= 0 && box.right <= innerWidth,
+        fact: overlaps(document.getElementById('sg-fact')),
+        axes: [...document.querySelectorAll('.sg-axis-end, .sg-axis-title')].some(overlaps),
+      };
+      hint.hidden = wasHidden;
+      return room;
+    })()`);
+    check(
+      `aide à ${width} px : une ligne, sans cacher le bouton ni les axes`,
+      hintRoom.height < 36 && hintRoom.inWindow && !hintRoom.fact && !hintRoom.axes,
+      JSON.stringify(hintRoom),
+    );
+  }
+  await setViewport(400, 800);
   await setViewport(1280, 800);
   await settle();
   for (const id of panelIds) {
