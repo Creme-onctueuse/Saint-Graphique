@@ -13,6 +13,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
+import { packComputed } from './pack-computed.mjs';
 
 const web = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const repo = resolve(web, '..');
@@ -51,18 +52,34 @@ function copyJson(from, to) {
   }
 }
 
+/** Fichier calculé : <méthode>/<élection>.json, hors des dossiers « _ ». */
+const COMPUTED_FILE = /^[^_][^/]*\/[^/]+\.json$/;
+
+/** Récrit les copies avec leurs valeurs répétées mises en commun : voir pack-computed.mjs. */
+function packCopies(paths) {
+  const files = Object.fromEntries(
+    paths.map((f) => [f, JSON.parse(readFileSync(join(dest, f), 'utf8'))]),
+  );
+  const { packed, pool } = packComputed(files);
+  for (const [f, file] of Object.entries(packed)) {
+    writeFileSync(join(dest, f), JSON.stringify(file), 'utf8');
+  }
+  writeFileSync(join(dest, '_pool.json'), JSON.stringify(pool), 'utf8');
+}
+
 rmSync(dest, { recursive: true, force: true });
 mkdirSync(dest, { recursive: true });
 
 // 1. Coordonnées calculées
 const realFiles = listJson(computedDir);
-const hasComputed = realFiles.some((f) => /^[^_][^/]*\/[^/]+\.json$/.test(f));
+const hasComputed = realFiles.some((f) => COMPUTED_FILE.test(f));
 const useReal = !forceSample && hasComputed;
 let copied = 0;
 let origin;
 if (useReal) {
   origin = relative(repo, computedDir).split(sep).join('/');
   for (const f of realFiles) if (copyJson(join(computedDir, f), join(dest, f))) copied++;
+  packCopies(realFiles.filter((f) => COMPUTED_FILE.test(f) && existsSync(join(dest, f))));
 } else {
   origin = `${relative(repo, sampleDir).split(sep).join('/')} (données FICTIVES)`;
   for (const f of listJson(sampleDir)) if (copyJson(join(sampleDir, f), join(dest, f))) copied++;
