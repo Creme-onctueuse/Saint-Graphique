@@ -471,6 +471,65 @@ async function main() {
     );
   }
 
+  // --- Méthodes aux axes propres : libellés, panneau, ni diagonale ni noms de régions --------------
+  const ownAxes = async () =>
+    evaluate(`(() => {
+      // Le panneau peut être replié : seul compte ce qu'il masque en son sein.
+      const shown = (el) => el !== null && !el.closest('#sg-method-panel [hidden]');
+      const panel = document.getElementById('sg-method-panel');
+      return {
+        titles: [...document.querySelectorAll('.sg-axis-title')].map((t) => t.textContent).join(' / '),
+        ends: [...document.querySelectorAll('.sg-axis-end')].map((t) => t.textContent).join(' / '),
+        regions: document.querySelectorAll('.sg-region').length,
+        retired: shown(panel.querySelector('.sg-check')),
+        sliders: [...panel.querySelectorAll('input[type=range]')].filter(shown).length,
+        panel: panel.textContent,
+        pcs: document.querySelectorAll('.sg-pcs').length,
+        summary: document.getElementById('sg-caveat-text').textContent,
+        label: document.getElementById('sg-method').selectedOptions[0].textContent,
+      };
+    })()`);
+  const hasOwn = await evaluate(
+    `[...document.querySelectorAll('#sg-method option')].some((o) => o.value === 'espace_social')`,
+  );
+  if (hasOwn) {
+    await chooseMethod('espace_social');
+    const social = await ownAxes();
+    check(
+      'espace social : ses axes, pas ceux du graphique',
+      social.titles === 'Structure du capital / Volume du capital' &&
+        social.ends.includes('capital culturel') &&
+        social.ends.includes('capital économique') &&
+        social.regions === 0,
+      JSON.stringify(social),
+    );
+    check(
+      'espace social : les poids règlent le capital culturel, sans score imposé',
+      social.sliders === 7 && !social.retired && social.panel.includes('capital culturel'),
+      social.panel,
+    );
+    check('espace social : sa réserve', social.summary.includes('Bourdieu'), social.summary);
+    await chooseMethod('acm_individus');
+    const acm = await ownAxes();
+    check(
+      'ACM sur les individus : exploratoire, sans réglage, axes lus',
+      acm.label.includes('exploratoire') &&
+        acm.sliders === 0 &&
+        acm.panel.includes('pas recalculable') &&
+        acm.titles.startsWith('Axe 1') &&
+        acm.regions === 0 &&
+        acm.pcs === 30,
+      JSON.stringify(acm),
+    );
+    await chooseMethod('ranks');
+    const back = await ownAxes();
+    check(
+      'les axes communs reviennent',
+      back.titles === 'Exploitation / Domination' && back.regions > 0 && back.retired,
+      JSON.stringify(back),
+    );
+  }
+
   // --- Clavier et infobulle ------------------------------------------------------------------------
   const tooltip = await evaluate(`(() => {
     const start = document.querySelector('.sg-pcs[tabindex="0"]');

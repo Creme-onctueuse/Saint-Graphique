@@ -36,7 +36,7 @@ COMPUTED = ROOT / "data" / "computed"
 CONFIG = ROOT / "config" / "families.yaml"
 OUT_DIR = COMPUTED / "_projection"
 
-METHODS = ("read_positions", "ranks", "continuous", "mca")
+METHODS = ("read_positions", "ranks", "continuous", "mca", "espace_social", "acm_individus")
 #: Nombre minimal de points antérieurs pour qu'un point soit prédit dans le test.
 MIN_HISTORY = 3
 #: Doses de tendance du tableau : 0 = rien ne bouge, 1 = tendance entière.

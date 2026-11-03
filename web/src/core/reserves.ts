@@ -104,6 +104,44 @@ export const PROJECTION_RESERVE =
 export const PROJECTION_RESERVE_SUMMARY =
   'Projection 2027 : prolonge 2017-2024, ne prévoit pas le résultat, données arrêtées en juillet 2024';
 
+/** Réserve d'une méthode dont les axes ne sont pas ceux du graphique de Chris. */
+export interface MethodReserve {
+  text: string;
+  summary: string;
+  /** Vrai si la méthode utilise le patrimoine et le niveau de vie : leur statut compte alors. */
+  usesWealth: boolean;
+}
+
+/** Chiffres mesurés et raisonnement : voir docs/methodologie.md. */
+export const METHOD_RESERVES: Readonly<Record<string, MethodReserve>> = {
+  espace_social: {
+    text:
+      'Espace social : cette carte suit Bourdieu (La Distinction, 1979), pas le graphique de Chris, ' +
+      'et ses axes ne sont ni l’exploitation ni la domination. Le capital culturel n’y est mesuré ' +
+      'que par les diplômes, le capital économique que par le patrimoine et le niveau de vie. Les ' +
+      'deux vont de pair : le volume porte l’essentiel des écarts, et la mise à l’échelle étire la ' +
+      'structure sur toute la largeur. En bas de la carte, être à gauche dit surtout un patrimoine ' +
+      'très faible, pas un capital culturel élevé. Les retraités gardent leurs propres diplômes, qui ' +
+      'reflètent leur génération : leur point, et avec lui les électorats âgés, est tiré vers la ' +
+      'droite et vers le bas.',
+    summary:
+      'Espace social d’après Bourdieu, pas le graphique de Chris ; retraités biaisés par leur génération',
+    usesWealth: true,
+  },
+  acm_individus: {
+    text:
+      'ACM sur les individus : le recensement ne donne ni revenu ni patrimoine, et le capital ' +
+      'économique n’y est approché que par la propriété du logement et le statut d’emploi. Les axes ' +
+      'viennent des données : ils ne valent ni exploitation et domination, ni volume et structure. ' +
+      'L’axe 2 dépasse à peine la moyenne des axes : sa lecture est fragile. Les retraités, faute de ' +
+      'condition d’emploi, sont projetés selon leur seul diplôme et leur seul logement, qui reflètent ' +
+      'leur génération.',
+    summary:
+      'ACM exploratoire : recensement sans revenu ni patrimoine, axes tirés des données et fragiles',
+    usesWealth: false,
+  },
+};
+
 /** Méthode dont les PCS sont lues sur le graphique de Chris au lieu d'être calculées. */
 export const READ_POSITIONS_METHOD = 'read_positions';
 
@@ -121,7 +159,11 @@ export const READ_POSITIONS_RESERVE =
  * rien supposer sur la nature des valeurs.
  */
 export function xAxisReserve(counts: StatusCounts | null, axisLabel: string): string | null {
-  const prefix = `Réserve sur l'axe ${axisLabel} :`;
+  return wealthReserve(counts, `Réserve sur l'axe ${axisLabel} :`);
+}
+
+/** Même réserve, pour une méthode où ces valeurs entrent dans les deux axes. */
+export function wealthReserve(counts: StatusCounts | null, prefix: string): string | null {
   if (!counts || counts.all.total === 0 || counts.all.unknown === counts.all.total) {
     return (
       `${prefix} statut inconnu des valeurs de patrimoine et de niveau de vie ` +

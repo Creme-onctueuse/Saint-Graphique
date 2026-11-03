@@ -19,7 +19,7 @@ import numpy as np
 from pipeline.model import POPULATION_ID, Election, Pcs, Point, Result
 
 #: Clés de configuration qui ne sont pas des paramètres de calcul.
-METADATA_KEYS = frozenset({"description"})
+METADATA_KEYS = frozenset({"description", "axes"})
 
 
 @runtime_checkable

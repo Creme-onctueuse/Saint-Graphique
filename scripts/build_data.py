@@ -1,4 +1,5 @@
-"""Construit les données sourcées : data/pcs.json, data/elections/<id>.json, data/SOURCES.md.
+"""Construit les données sourcées : data/pcs.json, data/acm_individus.json,
+data/elections/<id>.json et data/SOURCES.md.
 
 Usage : uv run python scripts/build_data.py [--offline]
 
@@ -24,6 +25,7 @@ sys.path.insert(0, str(ROOT))
 
 from pipeline.sources import (  # noqa: E402
     _nomenclature_pcs,
+    insee_acm_individus,
     insee_composition_patrimoine,
     insee_diplomes,
     insee_population,
@@ -236,6 +238,18 @@ def render_sources(
             rp["license"],
             "Population non scolarisée (`ETUD = 2`). Calcul à partir du fichier détail : aucun "
             "tableau agrégé de l'Insee ne croise le diplôme et les 29 postes.",
+        ],
+        [
+            "`acm_individus.json` : tableau croisé PCS, diplôme, logement, emploi",
+            rp["title"],
+            rp["url"],
+            rp["accessed"],
+            rp["license"],
+            "Population non scolarisée (`ETUD = 2`) des 30 PCS, 15 ans ou plus. Poids sommés et "
+            "arrondis, sans microdonnées. Colonnes `DIPL`, `STOCD`, `EMPL`, `TP`, `TACT`, "
+            "`STAT_CS`, `AGEREV`, `IPONDI` : recodages dans "
+            "`pipeline/sources/insee_acm_individus.py`. Le recensement ne donne ni revenu ni "
+            "patrimoine.",
         ],
         [
             "`pcs.json` : niveau de vie et patrimoine, 29 PCS actives",
@@ -494,6 +508,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  {field} : {_status_counts(pcs['items'], field)}")
     ties = ties_on_ratio(pcs["items"])
     print(f"  ex æquo stricts sur le ratio patrimoine / niveau de vie : {ties}")
+    insee_acm_individus.write_data(DATA / "acm_individus.json")
+    print("data/acm_individus.json : tableau croisé du recensement")
 
     if not args.offline:
         failures = sondages.fetch()

@@ -1,5 +1,6 @@
 /** Panneau « Méthode » : curseurs des poids de diplômes et score Y imposé aux retraités. */
 import { formatNumber } from '../core/format.ts';
+import { getClientMethod } from '../core/methods.ts';
 import type { AppState } from '../core/state.ts';
 import { DIPLOMA_KEYS, type DiplomaKey } from '../core/types.ts';
 import type { ResolvedView } from '../view.ts';
@@ -19,6 +20,11 @@ const DIPLOMA_LABELS: Record<DiplomaKey, string> = {
 /** Score proposé quand on active le forçage pour une méthode qui n'en a pas. */
 const DEFAULT_RETIRED_SCORE = -180;
 
+/** Ce que règlent les curseurs, sauf si la méthode le dit autrement. */
+const TUNING_NOTE =
+  'Score X : patrimoine / niveau de vie. Score Y : somme des parts de diplômes, ' +
+  'multipliées par les poids ci-dessous. Les méthodes placent ensuite ces scores sur [−10, 10].';
+
 interface SliderRow {
   input: HTMLInputElement;
   output: HTMLOutputElement;
@@ -27,6 +33,8 @@ interface SliderRow {
 export class MethodPanel {
   private readonly sliders = new Map<DiplomaKey, SliderRow>();
   private readonly note = el('p', { class: 'sg-note' });
+  private readonly tuningNote = el('p', { class: 'sg-note' });
+  private readonly retiredRow: HTMLDivElement;
   /** Réglages masqués quand la méthode ne se recalcule pas : ils n'auraient aucun effet. */
   private readonly tuning: HTMLDivElement;
   private readonly retiredOn = el('input', { attrs: { type: 'checkbox' } });
@@ -82,22 +90,18 @@ export class MethodPanel {
     });
     this.reset.addEventListener('click', () => actions.resetParams());
 
+    this.retiredRow = el(
+      'div',
+      { class: 'sg-row' },
+      el('label', { class: 'sg-check' }, this.retiredOn, 'Imposer un score Y aux retraités'),
+      this.retiredScore,
+    );
     this.tuning = el(
       'div',
       { class: 'sg-panel__group' },
-      el('p', {
-        class: 'sg-note',
-        text:
-          'Score X : patrimoine / niveau de vie. Score Y : somme des parts de diplômes, ' +
-          'multipliées par les poids ci-dessous. Les méthodes placent ensuite ces scores sur [−10, 10].',
-      }),
+      this.tuningNote,
       list,
-      el(
-        'div',
-        { class: 'sg-row' },
-        el('label', { class: 'sg-check' }, this.retiredOn, 'Imposer un score Y aux retraités'),
-        this.retiredScore,
-      ),
+      this.retiredRow,
       el('div', { class: 'sg-row' }, this.reset),
     );
     host.append(this.tuning, this.note);
@@ -105,7 +109,10 @@ export class MethodPanel {
 
   sync(view: ResolvedView, state: AppState): void {
     const enabled = view.canRecompute;
+    const client = getClientMethod(view.method.id);
     this.tuning.hidden = !enabled;
+    this.tuningNote.textContent = client?.tuningNote ?? TUNING_NOTE;
+    this.retiredRow.hidden = client?.retiredOverride === false;
     for (const key of DIPLOMA_KEYS) {
       const row = this.sliders.get(key);
       if (!row) continue;

@@ -1,0 +1,478 @@
+{
+  "method": "espace_social",
+  "target": {
+    "label": "Présidentielle 2027",
+    "date": 2027.3
+  },
+  "data_end": "2024-07",
+  "min_history": 3,
+  "backtest": {
+    "parties": [
+      {
+        "phi": 0.0,
+        "n": 17,
+        "position_mean": 0.5934,
+        "position_worst": 1.6036,
+        "score_mean": 6.2176,
+        "score_worst": 15.7
+      },
+      {
+        "phi": 0.25,
+        "n": 17,
+        "position_mean": 0.6337,
+        "position_worst": 1.9208,
+        "score_mean": 6.4697,
+        "score_worst": 19.0369
+      },
+      {
+        "phi": 0.5,
+        "n": 17,
+        "position_mean": 0.6854,
+        "position_worst": 2.2734,
+        "score_mean": 7.11,
+        "score_worst": 22.3738
+      },
+      {
+        "phi": 1.0,
+        "n": 17,
+        "position_mean": 0.8128,
+        "position_worst": 3.0348,
+        "score_mean": 8.3993,
+        "score_worst": 29.0476
+      }
+    ],
+    "blocs": [
+      {
+        "phi": 0.0,
+        "n": 16,
+        "position_mean": 0.4058,
+        "position_worst": 0.8982,
+        "score_mean": 4.8375,
+        "score_worst": 12.6
+      },
+      {
+        "phi": 0.25,
+        "n": 16,
+        "position_mean": 0.4328,
+        "position_worst": 0.8585,
+        "score_mean": 4.5859,
+        "score_worst": 11.9006
+      },
+      {
+        "phi": 0.5,
+        "n": 16,
+        "position_mean": 0.4652,
+        "position_worst": 0.8594,
+        "score_mean": 4.9649,
+        "score_worst": 11.2011
+      },
+      {
+        "phi": 1.0,
+        "n": 16,
+        "position_mean": 0.5366,
+        "position_worst": 1.4187,
+        "score_mean": 5.9647,
+        "score_worst": 14.904
+      }
+    ],
+    "verdict": {
+      "trend_worse_position": true,
+      "trend_worse_score": true
+    }
+  },
+  "families": [
+    {
+      "id": "lfi",
+      "label": "France insoumise",
+      "color": "#e5383b",
+      "last_election": "2024_europeennes",
+      "points": 5,
+      "still": {
+        "x": -2.3617,
+        "y": -2.3077
+      },
+      "trend": {
+        "x": -2.4192,
+        "y": -2.1752
+      },
+      "error": {
+        "still": {
+          "n": 2,
+          "position_mean": 0.5464,
+          "position_worst": 0.6867,
+          "score_mean": 13.9,
+          "score_worst": 15.7
+        },
+        "trend": {
+          "n": 2,
+          "position_mean": 0.7072,
+          "position_worst": 0.781,
+          "score_mean": 21.7809,
+          "score_worst": 29.0476
+        }
+      }
+    },
+    {
+      "id": "rn",
+      "label": "Rassemblement national",
+      "color": "#0d1b4c",
+      "last_election": "2024_legislatives_t1",
+      "points": 7,
+      "still": {
+        "x": -1.3174,
+        "y": -3.3345
+      },
+      "trend": {
+        "x": -1.3335,
+        "y": -3.1048
+      },
+      "error": {
+        "still": {
+          "n": 4,
+          "position_mean": 0.4346,
+          "position_worst": 0.8427,
+          "score_mean": 4.7,
+          "score_worst": 12.4
+        },
+        "trend": {
+          "n": 4,
+          "position_mean": 0.5435,
+          "position_worst": 1.2677,
+          "score_mean": 6.4895,
+          "score_worst": 11.0681
+        }
+      }
+    },
+    {
+      "id": "macron",
+      "label": "Majorité présidentielle",
+      "color": "#f9a825",
+      "last_election": "2024_legislatives_t1",
+      "points": 7,
+      "still": {
+        "x": -0.0677,
+        "y": -2.5605
+      },
+      "trend": {
+        "x": 0.1992,
+        "y": -2.7284
+      },
+      "error": {
+        "still": {
+          "n": 4,
+          "position_mean": 0.279,
+          "position_worst": 0.3542,
+          "score_mean": 6.125,
+          "score_worst": 11.3
+        },
+        "trend": {
+          "n": 4,
+          "position_mean": 0.4895,
+          "position_worst": 1.424,
+          "score_mean": 7.8605,
+          "score_worst": 12.2024
+        }
+      }
+    },
+    {
+      "id": "lr",
+      "label": "Les Républicains",
+      "color": "#1565c0",
+      "last_election": "2024_legislatives_t1",
+      "points": 7,
+      "still": {
+        "x": -0.6974,
+        "y": -2.7578
+      },
+      "trend": {
+        "x": -1.1781,
+        "y": -2.3814
+      },
+      "error": {
+        "still": {
+          "n": 4,
+          "position_mean": 0.6966,
+          "position_worst": 0.936,
+          "score_mean": 4.275,
+          "score_worst": 6.6
+        },
+        "trend": {
+          "n": 4,
+          "position_mean": 0.7395,
+          "position_worst": 0.9325,
+          "score_mean": 5.7483,
+          "score_worst": 12.7258
+        }
+      }
+    },
+    {
+      "id": "ps",
+      "label": "Parti socialiste",
+      "color": "#f06292",
+      "last_election": "2024_europeennes",
+      "points": 5,
+      "still": {
+        "x": -0.7582,
+        "y": -2.0386
+      },
+      "trend": {
+        "x": -0.7511,
+        "y": -2.2079
+      },
+      "error": {
+        "still": {
+          "n": 2,
+          "position_mean": 1.4927,
+          "position_worst": 1.6036,
+          "score_mean": 8.3,
+          "score_worst": 12.1
+        },
+        "trend": {
+          "n": 2,
+          "position_mean": 2.4322,
+          "position_worst": 3.0348,
+          "score_mean": 8.9765,
+          "score_worst": 14.2994
+        }
+      }
+    },
+    {
+      "id": "eelv",
+      "label": "Écologistes",
+      "color": "#2e9e4f",
+      "last_election": "2024_europeennes",
+      "points": 4,
+      "still": {
+        "x": -2.0895,
+        "y": -0.9629
+      },
+      "trend": {
+        "x": -1.6539,
+        "y": -1.401
+      },
+      "error": {
+        "still": {
+          "n": 1,
+          "position_mean": 0.3695,
+          "position_worst": 0.3695,
+          "score_mean": 0.9,
+          "score_worst": 0.9
+        },
+        "trend": {
+          "n": 1,
+          "position_mean": 0.4494,
+          "position_worst": 0.4494,
+          "score_mean": 0.8793,
+          "score_worst": 0.8793
+        }
+      }
+    }
+  ],
+  "blocs": [
+    {
+      "id": "gauche",
+      "label": "Gauche",
+      "tested": true,
+      "last_election": "2024_legislatives_t1",
+      "points": 7,
+      "still": {
+        "x": -1.5759,
+        "y": -1.9658
+      },
+      "trend": {
+        "x": -1.4771,
+        "y": -1.8758
+      },
+      "error": {
+        "still": {
+          "n": 4,
+          "position_mean": 0.2936,
+          "position_worst": 0.5254,
+          "score_mean": 0.95,
+          "score_worst": 1.7
+        },
+        "trend": {
+          "n": 4,
+          "position_mean": 0.4558,
+          "position_worst": 1.1938,
+          "score_mean": 2.3,
+          "score_worst": 6.4307
+        }
+      },
+      "score_range": {
+        "still": [
+          29.9,
+          31.8
+        ],
+        "trend": [
+          29.8,
+          34.4
+        ]
+      }
+    },
+    {
+      "id": "centre",
+      "label": "Centre",
+      "tested": true,
+      "last_election": "2024_legislatives_t1",
+      "points": 7,
+      "still": {
+        "x": -0.1136,
+        "y": -2.5602
+      },
+      "trend": {
+        "x": 0.1457,
+        "y": -2.7281
+      },
+      "error": {
+        "still": {
+          "n": 4,
+          "position_mean": 0.2875,
+          "position_worst": 0.3536,
+          "score_mean": 5.825,
+          "score_worst": 11.3
+        },
+        "trend": {
+          "n": 4,
+          "position_mean": 0.4971,
+          "position_worst": 1.4187,
+          "score_mean": 6.6946,
+          "score_worst": 10.8281
+        }
+      },
+      "score_range": {
+        "still": [
+          16.7,
+          28.3
+        ],
+        "trend": [
+          12.7,
+          26.1
+        ]
+      }
+    },
+    {
+      "id": "droite",
+      "label": "Droite",
+      "tested": true,
+      "last_election": "2024_legislatives_t1",
+      "points": 7,
+      "still": {
+        "x": -0.6974,
+        "y": -2.7578
+      },
+      "trend": {
+        "x": -1.1382,
+        "y": -2.4464
+      },
+      "error": {
+        "still": {
+          "n": 4,
+          "position_mean": 0.6997,
+          "position_worst": 0.8982,
+          "score_mean": 5.725,
+          "score_worst": 9.5
+        },
+        "trend": {
+          "n": 4,
+          "position_mean": 0.8152,
+          "position_worst": 1.0662,
+          "score_mean": 7.7177,
+          "score_worst": 14.904
+        }
+      },
+      "score_range": {
+        "still": [
+          4.5,
+          15.9
+        ],
+        "trend": [
+          0.0,
+          13.5
+        ]
+      }
+    },
+    {
+      "id": "extreme_droite",
+      "label": "Extrême droite",
+      "tested": true,
+      "last_election": "2024_legislatives_t1",
+      "points": 7,
+      "still": {
+        "x": -1.3093,
+        "y": -3.2836
+      },
+      "trend": {
+        "x": -1.3034,
+        "y": -3.0435
+      },
+      "error": {
+        "still": {
+          "n": 4,
+          "position_mean": 0.3423,
+          "position_worst": 0.6506,
+          "score_mean": 6.85,
+          "score_worst": 12.6
+        },
+        "trend": {
+          "n": 4,
+          "position_mean": 0.3782,
+          "position_worst": 0.6911,
+          "score_mean": 7.1464,
+          "score_worst": 9.8023
+        }
+      },
+      "score_range": {
+        "still": [
+          27.1,
+          40.8
+        ],
+        "trend": [
+          31.8,
+          46.1
+        ]
+      }
+    },
+    {
+      "id": "abstention",
+      "label": "Abstention",
+      "tested": false,
+      "last_election": "2024_legislatives_t1",
+      "points": 7,
+      "still": {
+        "x": -1.5704,
+        "y": -3.048
+      },
+      "trend": {
+        "x": -1.4791,
+        "y": -3.1147
+      },
+      "error": {
+        "still": {
+          "n": 4,
+          "position_mean": 0.5956,
+          "position_worst": 1.2164,
+          "score_mean": 17.025,
+          "score_worst": 26.2
+        },
+        "trend": {
+          "n": 4,
+          "position_mean": 0.8099,
+          "position_worst": 2.1463,
+          "score_mean": 22.8316,
+          "score_worst": 45.615
+        }
+      },
+      "score_range": {
+        "still": [
+          16.3,
+          50.3
+        ],
+        "trend": [
+          11.8,
+          57.4
+        ]
+      }
+    }
+  ]
+}

@@ -24,3 +24,17 @@ methods:
     description: "Analyse des correspondances multiples sur variables patrimoine/revenu/diplôme"
     n_components: 2
     candidate_pcs_level: 1
+  espace_social:
+    description: "D'après Bourdieu (La Distinction, 1979) : en hauteur le volume du capital, en largeur sa structure, du culturel à gauche à l'économique à droite. Capital économique : patrimoine et niveau de vie, en logarithme ; capital culturel : diplômes, pondérés par la durée théorique des études. Ce n'est pas une reconstruction du graphique de Chris. Le volume porte l'essentiel des écarts : l'axe horizontal est étiré par la mise à l'échelle. Les retraités restent placés selon leurs propres diplômes, qui reflètent leur génération : leur position à droite est en partie un effet d'âge."
+    axes:
+      x: { label: Structure du capital, hint: "plus à droite = capital surtout économique, plus à gauche = capital surtout culturel", low: capital culturel, high: capital économique }
+      y: { label: Volume du capital, hint: "plus haut = plus de capital, économique et culturel réunis", low: moins de capital, high: plus de capital }
+    y_weights: { bac5: 5, bac3: 3.5, bac2: 2, bac: 0, cap: -1, brevet: -3, certif_aucun: -4 }  # années d'études par rapport au bac
+    retired_y_override: null
+    candidate_pcs_level: 1
+  acm_individus:
+    description: "Analyse des correspondances multiples sur les individus du recensement 2022 (Le Roux et Rouanet, 2010) : diplôme, logement, statut d'emploi. Les PCS n'y sont pas actives : chacune est le barycentre de ses individus. Le recensement ne donne ni revenu ni patrimoine : le capital économique n'est approché que par la propriété du logement et le statut d'emploi. L'axe 1 (10,0 % de l'inertie brute, 91,4 % en taux modifié) va du logement HLM, du chômage et de l'absence de diplôme à la propriété, au bac+5 et à l'emploi stable. L'axe 2 (7,9 %, 6,1 % en taux modifié) oppose locataires du privé, emplois à durée limitée et bac+5 aux personnes installées, souvent à temps partiel : ce n'est pas la structure du capital, et sa lecture reste fragile. Les retraités, sans condition d'emploi, sont projetés selon leur seul diplôme et leur seul logement, qui reflètent leur génération."
+    axes:
+      x: { label: "Axe 1 : ressources", hint: "plus à droite = propriété, bac+5, emploi stable ; plus à gauche = logement HLM, chômage, sans diplôme", low: "HLM, chômage", high: "propriété, bac+5" }
+      y: { label: "Axe 2 : mobilité ou installation", hint: "plus haut = locataires du privé, emplois à durée limitée, bac+5 ; plus bas = personnes installées, souvent à temps partiel", low: "installés", high: "locatif privé, bac+5" }
+    candidate_pcs_level: 1

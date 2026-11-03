@@ -29,9 +29,14 @@ FAKE = ROOT / "pipeline" / "tests" / "fixtures" / "fake"
 PRES = "2099_presidentielle_t1"
 EURO = "2099_europeennes"
 TARGETS = ("population", EURO, PRES)
-BOOTSTRAPPED = ("read_positions", "ranks", "continuous")
-PARITY = ("ranks", "continuous")
-ALL_METHODS = ("read_positions", "ranks", "continuous", "mca")
+BOOTSTRAPPED = ("read_positions", "ranks", "continuous", "espace_social", "acm_individus")
+PARITY = ("ranks", "continuous", "espace_social")
+ALL_METHODS = ("read_positions", "ranks", "continuous", "mca", "espace_social", "acm_individus")
+#: Méthodes dont les axes ont leur propre sens : voir ``methods.<nom>.axes``.
+OWN_AXES = {
+    "espace_social": ("Structure du capital", "Volume du capital"),
+    "acm_individus": ("Axe 1 : ressources", "Axe 2 : mobilité ou installation"),
+}
 
 
 def _load_fake_data_module() -> ModuleType:
@@ -87,8 +92,9 @@ def test_methods_build_documents_follow_the_schema(built: Path, method: str, tar
     document = read_json(built / method / f"{target}.json")
     validate_instance(document, "computed.schema.json", f"{method}/{target}")
     assert document["method"] == method and document["election_id"] == target
-    assert document["axes"] == {"x_label": "Exploitation", "y_label": "Domination",
-                                "range": [-10, 10]}
+    x_label, y_label = OWN_AXES.get(method, ("Exploitation", "Domination"))
+    assert document["axes"] == {"x_label": x_label, "y_label": y_label, "range": [-10, 10]}
+    assert "axes" not in document["params"]
     assert "description" not in document["params"]
     if method == "read_positions":
         # Postes lus : 41 points, poids lus ou estimés, donc une somme proche de 100 seulement.

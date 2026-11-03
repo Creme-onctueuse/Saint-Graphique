@@ -26,7 +26,7 @@ from pipeline.methods.bootstrap import (
 from pipeline.model import ROOT, Election, PcsData, Result, load_elections, load_pcs
 
 FAKE = ROOT / "pipeline" / "tests" / "fixtures" / "fake"
-BOOTSTRAPPED = ("ranks", "continuous")
+BOOTSTRAPPED = ("ranks", "continuous", "espace_social", "acm_individus")
 CHI2_95 = -2 * math.log(0.05)
 
 
