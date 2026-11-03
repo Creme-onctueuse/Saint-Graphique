@@ -630,7 +630,8 @@ def test_overlay_radius_grows_with_the_square_root_of_the_weight() -> None:
 
 def test_weighted_skewness_by_hand() -> None:
     # Valeurs symétriques : 0. Puis 0 et 3 de poids 2 et 1 : moyenne 1, variance 2, moment 2.
-    assert methods_report.weighted_skewness(np.array([1.0, 2.0, 3.0]), np.ones(3)) == 0
+    symmetric = methods_report.weighted_skewness(np.array([1.0, 2.0, 3.0]), np.ones(3))
+    assert symmetric == pytest.approx(0)
     skew = methods_report.weighted_skewness(np.array([0.0, 3.0]), np.array([2.0, 1.0]))
     assert skew == pytest.approx(2 / 2**1.5)
 
