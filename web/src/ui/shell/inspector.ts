@@ -6,7 +6,13 @@
 import './crossing.css';
 import type { ChartCandidate, ChartPcs } from '../../chart/types.ts';
 import { duelRows, misleadinglyClose, neighbors } from '../../core/compare.ts';
-import { compositionByGroup, compositionGap, representation } from '../../core/crossing.ts';
+import {
+  compositionByGroup,
+  compositionGap,
+  groupBase,
+  hasAbstentionBreakdown,
+  representation,
+} from '../../core/crossing.ts';
 import { formatNumber, formatPct, MINUS, NBSP } from '../../core/format.ts';
 import { GROUP_SHORT_NAMES } from '../../core/groups.ts';
 import type { AppState } from '../../core/state.ts';
@@ -79,6 +85,13 @@ function rankedBar(share: number, max: number, color: string): HTMLSpanElement {
   fill.style.width = `${max > 0 ? (100 * share) / max : 0}%`;
   fill.style.background = color;
   return el('span', { class: 'sg-bar__track' }, fill);
+}
+
+/** Sur quoi se lisent les parts d'un groupe : sans détail de l'abstention, sur ses seuls votants. */
+function partsNote(election: RawElection, scope: string): string {
+  return hasAbstentionBreakdown(election)
+    ? `Parts calculées parmi les inscrits ${scope}, abstention comprise.`
+    : `Parts calculées parmi les votants ${scope} : ce sondage ne détaille pas l’abstention.`;
 }
 
 export class Inspector implements Feature {
@@ -294,7 +307,7 @@ export class Inspector implements Feature {
           list,
           el('p', {
             class: 'sg-note',
-            text: 'Écart entre la part du groupe dans cet électorat et sa part parmi tous les inscrits.',
+            text: `Écart entre la part du groupe dans cet électorat et sa part parmi tous les ${groupBase(election)}.`,
           }),
         ),
       );
@@ -577,7 +590,7 @@ export class Inspector implements Feature {
       ),
       el('p', {
         class: 'sg-note',
-        text: 'Parts calculées parmi les inscrits du groupe, abstention comprise.',
+        text: partsNote(election, 'du groupe'),
       }),
     );
   }
@@ -677,7 +690,7 @@ export class Inspector implements Feature {
         ),
         el('p', {
           class: 'sg-note',
-          text: 'Parts parmi les inscrits de chaque groupe, abstention comprise.',
+          text: partsNote(election, 'de chaque groupe'),
         }),
       ),
     );

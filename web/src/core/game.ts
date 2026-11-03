@@ -5,7 +5,7 @@
  * Module pur (sans DOM), testé dans game.test.ts.
  */
 import type { Dataset } from '../data/dataset.ts';
-import { representation } from './crossing.ts';
+import { groupBase, representation } from './crossing.ts';
 import { MIN_ELECTORATE_SHARE } from './facts.ts';
 import type { RawCandidate, RawElection } from './types.ts';
 
@@ -37,6 +37,15 @@ export interface GameRound {
   options: GameOption[];
   /** Composition anonyme de l'électorat, dans l'ordre des groupes. */
   bars: GameBar[];
+  /** Ce que dit le trait de chaque barre : dépend de ce que publie le sondage de cette élection. */
+  legend: string;
+}
+
+/** Le trait se lit parmi les inscrits ou les votants, et les agriculteurs sont parfois à part. */
+export function gameLegend(election: RawElection): string {
+  const farmersApart = Object.values(election.composition).some((shares) => '1' in shares);
+  const farmers = farmersApart ? '' : ' Les agriculteurs comptent avec les indépendants.';
+  return `Trait : part du groupe parmi les ${groupBase(election)}.${farmers}`;
 }
 
 /** Électorats jouables : pas l'abstention, pas moins de 2 %, et une composition connue. */
@@ -118,6 +127,7 @@ export function pickRound(ds: Dataset, rng: Rng, options: RoundOptions = {}): Ga
     bars: representation(election, answer.id, groupOf)
       .map((r) => ({ group: r.group, share: r.share, reference: r.reference }))
       .sort((a, b) => a.group.localeCompare(b.group)),
+    legend: gameLegend(election),
   };
 }
 

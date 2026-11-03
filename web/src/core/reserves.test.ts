@@ -4,6 +4,9 @@ import {
   findTies,
   formatStatus,
   IMPUTED_MARK,
+  isOlderStop,
+  olderStopReserve,
+  olderStopSummary,
   parseStatus,
   xAxisReserve,
 } from './reserves.ts';
@@ -158,5 +161,24 @@ describe('findTies', () => {
     const near = 0.1 + 0.2;
     expect(findTies([score('a', 0.3, 0), score('b', near, 1)])).toHaveLength(1);
     expect(findTies([score('a', 0.3, 0), score('b', 0.3001, 1)])).toEqual([]);
+  });
+});
+
+describe('étapes anciennes', () => {
+  it('commencent avant 2017', () => {
+    expect(isOlderStop(2014)).toBe(true);
+    expect(isOlderStop(2017)).toBe(false);
+    expect(isOlderStop(null)).toBe(false);
+    expect(isOlderStop(undefined)).toBe(false);
+  });
+
+  it('disent, en court comme en long, que l’électorat est placé sur la carte de 2026', () => {
+    expect(olderStopSummary(1995)).toContain('1995');
+    expect(olderStopSummary(1995)).toContain('2026');
+    expect(olderStopSummary(1995).length).toBeLessThan(100);
+    const full = olderStopReserve(1995);
+    expect(full).toContain('positions de 2026');
+    expect(full).toContain('1995');
+    expect(full.length).toBeGreaterThan(olderStopSummary(1995).length);
   });
 });

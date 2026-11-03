@@ -197,7 +197,7 @@ export class FactCard implements Feature {
         : `${count} scrutins`;
     const publishers = new Set(
       fact.scope.elections.flatMap((id) =>
-        (this.ds.rawElections.get(id)?.sources ?? []).flatMap((s) =>
+        (this.ds.rawElections.get(id)?.sources.slice(0, 1) ?? []).flatMap((s) =>
           s.publisher ? [shortPublisher(s.publisher)] : [],
         ),
       ),

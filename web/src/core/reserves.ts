@@ -96,13 +96,42 @@ export const COMPUTED_RESERVE_SUMMARY =
 export const READ_POSITIONS_RESERVE_SUMMARY =
   'Positions lues sur les vidéos de Chris, formule non publiée, 2 à 3 unités de la matrice v11';
 
+/** À partir de ce millésime, les tableaux sont tous du même institut, au format « en composition ». */
+export const FIRST_RECENT_YEAR = 2017;
+
+export function isOlderStop(year: number | null | undefined): boolean {
+  return typeof year === 'number' && year < FIRST_RECENT_YEAR;
+}
+
+/** Ce que veut dire une étape ancienne sur une carte d'aujourd'hui, en une ligne. */
+export function olderStopSummary(year: number): string {
+  return `Électorat de ${year} placé sur la carte sociale de 2026 : les catégories ne bougent pas`;
+}
+
+/** La même réserve, en entier. */
+export function olderStopReserve(year: number): string {
+  return (
+    `Étape ancienne : les catégories gardent leurs positions de 2026. L'électorat de ${year} est donc ` +
+    'placé sur la carte sociale d’aujourd’hui, pas sur celle de son époque : à cette date, le ' +
+    'patrimoine, les diplômes et le poids de ces catégories n’étaient pas ceux que la carte montre. ' +
+    'Seule la composition de l’électorat vient de cette élection. Elle vient d’un autre sondage que ' +
+    'les rapports Ifop de 2017 à 2024, parfois converti à partir du vote de chaque groupe : la ' +
+    'comparaison avec une autre date reste approximative.'
+  );
+}
+
+/** Ce que disent les pointillés d'une trajectoire. */
+export const SOURCE_CHANGE_RESERVE =
+  'Trajectoires : les pointillés marquent un changement d’institut entre deux étapes. Un écart à cet ' +
+  'endroit peut venir du changement de sondage, pas de l’électorat.';
+
 /** Projection 2027 : ce que la carte montre à cette étape, et ce qu'elle ne montre pas. */
 export const PROJECTION_RESERVE =
-  'Projection 2027 : cette carte prolonge les électorats de 2017 à 2024 selon deux scénarios. Elle ne ' +
+  'Projection 2027 : cette carte prolonge les électorats de 1995 à 2024 selon deux scénarios. Elle ne ' +
   'prévoit pas le résultat. Les données s’arrêtent en juillet 2024. Les familles suivent un ' +
   'classement propre à ce projet, et les candidats de 2027 n’y figurent pas.';
 export const PROJECTION_RESERVE_SUMMARY =
-  'Projection 2027 : prolonge 2017-2024, ne prévoit pas le résultat, données arrêtées en juillet 2024';
+  'Projection 2027 : prolonge 1995-2024, ne prévoit pas le résultat, données arrêtées en juillet 2024';
 
 /** Méthode dont les PCS sont lues sur le graphique de Chris au lieu d'être calculées. */
 export const READ_POSITIONS_METHOD = 'read_positions';

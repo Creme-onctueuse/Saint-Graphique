@@ -5,8 +5,9 @@
  * voix d'un candidat. En le multipliant par le score, rapporté aux inscrits, on obtient l'inverse :
  * comment vote chaque groupe.
  *
- * Limite à garder en tête : ces tableaux ne détaillent que six groupes. Les agriculteurs sont réunis
- * avec les artisans et commerçants, et les autres inactifs n'y figurent pas (voir `pollGroupOf`).
+ * Limite à garder en tête : ces tableaux ne détaillent que six groupes, sept en 1995 et 2002. Sinon,
+ * les agriculteurs sont réunis avec les artisans et commerçants, et les autres inactifs n'y figurent
+ * pas (voir `pollGroupOf`). Sans abstention par groupe, le poids d'un groupe se lit parmi les votants.
  *
  * Module pur, testé dans crossing.test.ts.
  */
@@ -30,6 +31,18 @@ export function compositionByGroup(
   return out;
 }
 
+/** Vrai si le sondage détaille l'abstention par groupe, et pas seulement son taux. */
+export function hasAbstentionBreakdown(election: RawElection): boolean {
+  return election.candidates.some(
+    (c) => c.is_abstention === true && election.composition[c.id] !== undefined,
+  );
+}
+
+/** Sur qui se lisent les parts de groupe : les inscrits, ou les seuls votants faute de détail. */
+export function groupBase(election: RawElection): 'inscrits' | 'votants' {
+  return hasAbstentionBreakdown(election) ? 'inscrits' : 'votants';
+}
+
 /** Score de chaque électorat rapporté aux inscrits : les exprimés se partagent ce que l'abstention laisse. */
 export function registeredShares(election: RawElection): Map<string, number> {
   const abstention = election.candidates.find((c) => c.is_abstention === true);
@@ -45,7 +58,7 @@ export function registeredShares(election: RawElection): Map<string, number> {
 export interface GroupVotes {
   /** Vote de chaque groupe : votes.get(groupe).get(candidat) = part (%) du groupe. */
   votes: Map<string, Map<string, number>>;
-  /** Poids de chaque groupe parmi les inscrits (%), tel que le sondage l'implique. */
+  /** Poids de chaque groupe parmi les inscrits (%), ou les votants sans abstention par groupe. */
   weights: Map<string, number>;
 }
 
@@ -72,6 +85,11 @@ export function voteByGroup(
     if (total > 0) {
       votes.set(group, new Map([...row].map(([id, v]) => [id, (100 * v) / total])));
     }
+  }
+  if (!hasAbstentionBreakdown(election) && election.candidates.some((c) => c.is_abstention)) {
+    // Le taux officiel réduit les parts à ce que l'abstention laisse : on revient à une somme de 100.
+    const total = [...weights.values()].reduce((a, b) => a + b, 0);
+    if (total > 0) for (const [group, w] of weights) weights.set(group, (100 * w) / total);
   }
   return { votes, weights };
 }

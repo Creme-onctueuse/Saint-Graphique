@@ -950,7 +950,7 @@ async function main() {
     const played = await evaluate(`(async () => {
       const seen = new Set();
       const button = document.getElementById('sg-timeline-play');
-      document.querySelector('#sg-timeline input[value="2017_presidentielle_t1"]').click();
+      document.querySelector('#sg-timeline input[value="1995_presidentielle_t1"]').click();
       await new Promise((r) => setTimeout(r, 300));
       seen.add(document.querySelector('#sg-timeline input:checked')?.value);
       button.click();
@@ -1082,7 +1082,7 @@ async function main() {
     );
     check(
       '2027 : chiffres du test',
-      /0,81/.test(project.text) && /0,62/.test(project.text),
+      /0,78/.test(project.text) && /0,74/.test(project.text),
       project.text,
     );
     check(
@@ -1125,7 +1125,7 @@ async function main() {
     })`);
     check(
       '2027 : détail de la famille dans l’inspecteur',
-      family.projection && family.history === 7,
+      family.projection && family.history === 12,
       JSON.stringify(family),
     );
     check('2027 : pas de duel sans composition', !family.compare, JSON.stringify(family));
@@ -1413,6 +1413,11 @@ async function main() {
     await setViewport(width, height);
     await settle();
     await shotOf(`${name}-carte`, '.sg-svg', width >= 1000 ? 1 : 2);
+    const stopOverlaps = await evaluate(`(() => {
+      const boxes = [...document.querySelectorAll('#sg-timeline .sg-stop, #sg-timeline .sg-year__label')].map((e) => e.getBoundingClientRect());
+      return boxes.flatMap((a, i) => boxes.slice(i + 1).filter((b) => a.left < b.right - 0.5 && b.left < a.right - 0.5 && a.top < b.bottom - 0.5 && b.top < a.bottom - 0.5)).length;
+    })()`);
+    check(`frise sans chevauchement à ${width} px`, stopOverlaps === 0, String(stopOverlaps));
     const audit = await evaluate(labelAudit);
     check(
       `aucun libellé superposé à ${width} px`,

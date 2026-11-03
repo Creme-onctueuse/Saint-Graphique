@@ -3,6 +3,7 @@
  * Tout vient des données brutes (sources de l'élection et de pcs.json) : aucune source n'est écrite
  * en dur ici.
  */
+import { shortPublisher } from '../core/format.ts';
 import type { SourceRef } from '../core/types.ts';
 import type { ResolvedView } from '../view.ts';
 import { el } from './dom.ts';
@@ -12,11 +13,7 @@ export function sourceText(s: SourceRef): string {
   return s.publisher && !s.title.startsWith(s.publisher) ? `${s.publisher} : ${s.title}` : s.title;
 }
 
-/** Nom court d'un éditeur : « Insee-DGFiP-Cnaf… » et « Insee, Progedo… » donnent « Insee ». */
-export function shortPublisher(publisher: string): string {
-  const first = (publisher.split(',')[0] ?? publisher).trim();
-  return first.startsWith('Insee') ? 'Insee' : first;
-}
+export { shortPublisher };
 
 function publishers(sources: readonly SourceRef[]): string[] {
   return [...new Set(sources.flatMap((s) => (s.publisher ? [shortPublisher(s.publisher)] : [])))];
@@ -25,7 +22,9 @@ function publishers(sources: readonly SourceRef[]): string[] {
 /** Ligne compacte : « Ifop-Fiducial 2022 · Insee · positions lues sur les vidéos de Chris ». */
 export function compactSources(view: ResolvedView): string {
   const year = view.rawElection?.year;
-  const poll = publishers(view.sources.poll).map((p) => (year ? `${p} ${year}` : p));
+  // Le sondage d'abord : les résultats officiels et les effectifs sont dans le détail.
+  const shown = view.projection ? view.sources.poll : view.sources.poll.slice(0, 1);
+  const poll = publishers(shown).map((p) => (year ? `${p} ${year}` : p));
   const read = view.sources.positions.length > 0;
   const others = publishers(read ? view.sources.positions : view.sources.pcs).filter(
     (p) => p !== 'PaduTeam',
@@ -56,7 +55,16 @@ function row(label: string, sources: readonly SourceRef[]): HTMLParagraphElement
 /** Détail des sources de la vue affichée, avec leurs liens. */
 export function renderSources(host: HTMLElement, view: ResolvedView): void {
   host.replaceChildren(
-    ...(view.isPopulation ? [] : [row('Sondage', view.sources.poll)]),
+    ...(view.isPopulation
+      ? []
+      : [
+          row(
+            view.sources.poll.length > 1 && !view.projection
+              ? 'Sondage, résultats officiels et effectifs'
+              : 'Sondage',
+            view.sources.poll,
+          ),
+        ]),
     view.sources.positions.length > 0
       ? row('Positions et poids des catégories', view.sources.positions)
       : row('Population, diplômes, revenus et patrimoine', view.sources.pcs),

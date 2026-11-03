@@ -22,10 +22,14 @@ import {
 import {
   countStatuses,
   findTies,
+  isOlderStop,
+  olderStopReserve,
+  olderStopSummary,
   parseStatus,
   PROJECTION_RESERVE,
   PROJECTION_RESERVE_SUMMARY,
   READ_POSITIONS_METHOD,
+  SOURCE_CHANGE_RESERVE,
   COMPUTED_RESERVE_SUMMARY,
   READ_POSITIONS_RESERVE,
   READ_POSITIONS_RESERVE_SUMMARY,
@@ -35,7 +39,7 @@ import {
 } from './core/reserves.ts';
 import { formatNumber } from './core/format.ts';
 import {
-  PROJECTION_MARKS,
+  projectionMarks,
   SCENARIO_LABELS,
   scenarioError,
   scenarioPoint,
@@ -43,6 +47,7 @@ import {
   type ProjectionFile,
 } from './core/projection.ts';
 import { computeScores, sameWeights } from './core/scores.ts';
+import { sourceChangesUpTo, stopsForFilter, timelineStops } from './core/timeline.ts';
 import type { AppState, Scenario } from './core/state.ts';
 import {
   POPULATION_ID,
@@ -384,6 +389,12 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
     ds.rawPcs ? countStatuses(ds.rawPcs.items) : null,
     ds.axes.xLabel,
   );
+  const older = !projection && isOlderStop(rawElection?.year) ? (rawElection?.year ?? null) : null;
+  const stops = timelineStops(ds);
+  const sourceChanges = sourceChangesUpTo(
+    stopsForFilter(stops, state.typeFilter),
+    stops.find((s) => s.id === electionId)?.date ?? Number.POSITIVE_INFINITY,
+  );
   const reserves = isRead
     ? [READ_POSITIONS_RESERVE]
     : [
@@ -480,15 +491,21 @@ export function buildView(ds: Dataset, state: AppState): ResolvedView | null {
       ? [
           PROJECTION_RESERVE,
           verdictSentence(projection),
-          `Scénario affiché : « ${SCENARIO_LABELS[state.scenario]} ». ${PROJECTION_MARKS}`,
+          `Scénario affiché : « ${SCENARIO_LABELS[state.scenario]} ». ${projectionMarks(projection)}`,
           ...reserves,
         ]
-      : reserves,
+      : [
+          ...(older ? [olderStopReserve(older)] : []),
+          ...reserves,
+          ...(state.showTrails && !isPopulation && sourceChanges ? [SOURCE_CHANGE_RESERVE] : []),
+        ],
     reserveSummary: projection
       ? PROJECTION_RESERVE_SUMMARY
-      : isRead
-        ? READ_POSITIONS_RESERVE_SUMMARY
-        : COMPUTED_RESERVE_SUMMARY,
+      : older
+        ? olderStopSummary(older)
+        : isRead
+          ? READ_POSITIONS_RESERVE_SUMMARY
+          : COMPUTED_RESERVE_SUMMARY,
     projection,
     sources: {
       poll: projection ? allPollSources(ds) : (rawElection?.sources ?? []),

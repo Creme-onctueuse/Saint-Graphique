@@ -3,6 +3,7 @@ import {
   asProjectionFile,
   backtestRow,
   formatDataEnd,
+  projectionMarks,
   scenarioError,
   scenarioPoint,
   verdictSentence,
@@ -146,5 +147,24 @@ describe('formatDataEnd', () => {
 
   it('laisse une valeur inattendue telle quelle', () => {
     expect(formatDataEnd('bientôt')).toBe('bientôt');
+  });
+});
+
+describe('projectionMarks', () => {
+  const family = file.families[0];
+  if (!family) throw new Error('fixture sans famille');
+  const withCount = (n: number): typeof family => ({
+    ...family,
+    error: { ...family.error, still: { ...family.error.still, n } },
+  });
+
+  it('donne le nombre de prédictions du fichier', () => {
+    expect(projectionMarks({ families: [withCount(3), withCount(9)] })).toContain(
+      'sur 3 à 9 prédictions',
+    );
+  });
+
+  it('ne donne pas de fourchette pour un seul nombre', () => {
+    expect(projectionMarks({ families: [withCount(4)] })).toContain('sur 4 prédictions');
   });
 });

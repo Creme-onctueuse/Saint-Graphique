@@ -12,12 +12,123 @@
   }
 }
 
+/* Sur grand écran, la place suffit pour l'élection, son institut et la méthode. */
+@media (min-width: 1700px) {
+  .sg-brand {
+    width: 450px;
+  }
+}
+
+/* L'élection et son institut d'abord : c'est le nom de la méthode qui se coupe. */
+.sg-chart-heading {
+  flex: none;
+}
+
+.sg-method-chip {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Commandes de la frise */
+.sg-timeline {
+  --sg-stop: 20px;
+  --sg-stop-line: calc(2px + var(--sg-stop) / 2 - 1px);
+  gap: 10px;
+  justify-content: stretch;
+  padding: 0 8px;
+}
+
 .sg-tl-controls {
   display: flex;
+  flex: none;
   align-items: center;
   gap: 2px;
-  margin-right: -32px;
+}
+
+.sg-timeline__none {
+  flex: none;
+}
+
+/* Un groupe par année, des intervalles à proportion des années : voir ui/shell/timeline.ts. */
+.sg-timeline .sg-timeline__track {
+  flex: 1;
+  max-width: none;
+  height: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.sg-timeline .sg-timeline__track::-webkit-scrollbar {
+  display: none;
+}
+
+.sg-timeline .sg-timeline__track::before {
+  content: none;
+}
+
+.sg-timeline__rail {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  width: max-content;
+  min-width: 100%;
+  padding: 3px 6px 1px;
+}
+
+.sg-timeline__rail .sg-year {
+  position: relative;
+  top: auto;
+  flex: none;
+  min-width: 26px;
+  gap: 0;
+  transform: none;
+}
+
+.sg-timeline__rail .sg-year__stops {
+  gap: 0;
+}
+
+.sg-timeline__rail .sg-year__label {
+  font-size: 0.66rem;
+  line-height: 1.2;
+}
+
+.sg-year__gap {
+  position: relative;
+  flex: 1 0 4px;
+  align-self: stretch;
+}
+
+/* La ligne de la frise passe derrière les étapes, d'un bout à l'autre. */
+.sg-year__gap::before,
+.sg-timeline__rail .sg-year::before {
+  content: '';
+  position: absolute;
+  top: var(--sg-stop-line);
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--sg-border);
+}
+
+/* L'avenir de la frise : la ligne devient pointillée après le dernier scrutin. */
+.sg-year__gap--future::before {
+  height: 0;
+  background: none;
+  border-top: 2px dashed var(--sg-border-strong);
+}
+
+.sg-timeline .sg-stop {
+  padding: 2px 1px;
+}
+
+.sg-timeline .sg-stop__dot {
+  width: var(--sg-stop);
+  height: var(--sg-stop);
+  font-size: 0.62rem;
 }
 
 .sg-tl-select {
@@ -38,27 +149,9 @@
   cursor: not-allowed;
 }
 
-.sg-year {
-  z-index: 1;
-}
-
-/* L'avenir de la frise : la ligne devient pointillée après le dernier scrutin. */
-.sg-timeline__track--future::before {
-  right: calc(100% - var(--sg-future-start, 100%));
-}
-
-.sg-timeline__track--future::after {
-  content: '';
-  position: absolute;
-  top: 13px;
-  left: var(--sg-future-start, 100%);
-  right: 0;
-  border-top: 2px dashed var(--sg-border-strong);
-}
-
-.sg-stop--projection .sg-stop__dot {
+.sg-timeline .sg-stop--projection .sg-stop__dot {
   border-style: dashed;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
 }
 
 .sg-stop--off {
@@ -89,6 +182,17 @@
   stroke-opacity: 0.12;
 }
 
+/* Un autre institut à l'étape suivante : l'écart peut venir de la source. */
+.sg-trail--dotted {
+  stroke-dasharray: 0.1 5;
+  stroke-width: 2;
+}
+
+.sg-trail--strong.sg-trail--dotted {
+  stroke-dasharray: 0.1 6;
+  stroke-width: 3;
+}
+
 .sg-trail-casing {
   fill: none;
   stroke: var(--sg-cand-ring);
@@ -97,6 +201,11 @@
   stroke-linecap: round;
   stroke-linejoin: round;
   pointer-events: none;
+}
+
+.sg-trail-casing--dotted {
+  stroke-dasharray: 0.1 6;
+  stroke-width: 5;
 }
 
 .sg-trail-dot {
@@ -373,7 +482,7 @@
   .sg-timeline {
     grid-column: 1 / -1;
     grid-row: 2;
-    padding: 0 22px;
+    padding: 0 8px;
   }
 
   .sg-rail,
@@ -385,10 +494,6 @@
 
 /* Téléphone : la lecture seule reste dans la barre, le reste est dans le panneau Électorats. */
 @media (max-width: 719px) {
-  .sg-tl-controls {
-    margin-right: 0;
-  }
-
   .sg-rail {
     top: auto;
   }
@@ -398,8 +503,15 @@
     top: auto;
   }
 
+  /* Plus grandes au doigt, les étapes défilent : la frise garde son échelle de temps. */
   .sg-timeline {
-    padding: 0 28px 0 2px;
+    --sg-stop: 24px;
+    gap: 2px;
+    padding: 0 2px;
+  }
+
+  .sg-timeline__rail {
+    min-width: 640px;
   }
 
   .sg-tl-controls .sg-tl-select,
@@ -433,7 +545,7 @@
 /* Le repère qui avance sur la frise pendant la lecture */
 .sg-timeline__head {
   position: absolute;
-  top: 8px;
+  top: calc(var(--sg-stop-line) + 4px);
   z-index: 1;
   width: 12px;
   height: 12px;

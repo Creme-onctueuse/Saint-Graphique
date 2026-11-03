@@ -8,6 +8,7 @@
  * Module pur, testé dans timeline.test.ts.
  */
 import { pollGroupOf, voteByGroup } from './crossing.ts';
+import { instituteOf, shortPublisher } from './format.ts';
 import type { AppState, TypeFilter } from './state.ts';
 import { PROJECTION_ID, type Point, type RawElection } from './types.ts';
 import type { FamilyConfig, FamilyInfo } from '../data/dataset.ts';
@@ -20,18 +21,25 @@ export interface TimelineStop {
   year: number;
   date: number;
   projection: boolean;
+  /** Institut du sondage, tel qu'il s'affiche : « Ifop-Fiducial », « CSA ». Null s'il est inconnu. */
+  source: string | null;
+  /** L'institut seul : deux étapes du même institut ne font pas de rupture de source. */
+  institute: string | null;
 }
 
 export interface StopSource {
   elections: readonly { id: string; label: string; type: string | null; year: number | null }[];
   families: FamilyConfig | null;
   projections: ReadonlyMap<string, { target: { label: string; date: number } }>;
+  /** Fichiers bruts des élections : le premier de leurs `sources` est le sondage. */
+  rawElections?: ReadonlyMap<string, { sources: readonly { publisher?: string }[] }>;
 }
 
 /** Étapes dans l'ordre du temps. La projection n'en est une que si un fichier existe. */
 export function timelineStops(source: StopSource): TimelineStop[] {
   const stops: TimelineStop[] = source.elections.map((e) => {
     const year = e.year ?? 0;
+    const publisher = source.rawElections?.get(e.id)?.sources[0]?.publisher;
     return {
       id: e.id,
       label: e.label,
@@ -39,6 +47,8 @@ export function timelineStops(source: StopSource): TimelineStop[] {
       year,
       date: source.families?.dates.get(e.id) ?? year,
       projection: false,
+      source: publisher ? shortPublisher(publisher) : null,
+      institute: publisher ? instituteOf(publisher) : null,
     };
   });
   const projection = source.projections.values().next().value;
@@ -50,9 +60,39 @@ export function timelineStops(source: StopSource): TimelineStop[] {
       year: Math.floor(projection.target.date),
       date: projection.target.date,
       projection: true,
+      source: null,
+      institute: null,
     });
   }
   return stops.sort((a, b) => a.date - b.date);
+}
+
+/** Nom d'une étape avec sa source : « Présidentielle 2002 (1er tour) · Ipsos ». */
+export function stopTitle(stop: Pick<TimelineStop, 'label' | 'source'>): string {
+  return stop.source ? `${stop.label} · ${stop.source}` : stop.label;
+}
+
+export interface YearGroup {
+  year: number;
+  stops: TimelineStop[];
+  /** Années écoulées depuis le groupe précédent : l'espace qui les sépare sur la frise. */
+  gap: number;
+}
+
+/** Étapes réunies par année, dans l'ordre du temps. */
+export function yearGroups(stops: readonly TimelineStop[]): YearGroup[] {
+  const byYear = new Map<number, TimelineStop[]>();
+  for (const stop of stops) {
+    const list = byYear.get(stop.year);
+    if (list) list.push(stop);
+    else byYear.set(stop.year, [stop]);
+  }
+  const years = [...byYear.keys()].sort((a, b) => a - b);
+  return years.map((year, i) => ({
+    year,
+    stops: byYear.get(year) ?? [],
+    gap: i === 0 ? 0 : year - (years[i - 1] ?? year),
+  }));
 }
 
 export function stopsForFilter(stops: readonly TimelineStop[], filter: TypeFilter): TimelineStop[] {
@@ -115,6 +155,32 @@ export function carrySelection(
 export interface TrailPoint extends Point {
   election: string;
   share: number | null;
+  /** Institut du sondage de cette étape. */
+  institute: string | null;
+}
+
+/** Partie d'une trajectoire : `sourceChange` dit que son sondage change à chaque pas. */
+export interface TrailRun {
+  points: TrailPoint[];
+  sourceChange: boolean;
+}
+
+/**
+ * Découpe une partie continue là où l'institut change entre deux étapes. Un écart à cet endroit peut
+ * venir du changement de source, pas de l'électorat : la carte le dessine en pointillés.
+ */
+export function sourceRuns(points: readonly TrailPoint[]): TrailRun[] {
+  const runs: TrailRun[] = [];
+  for (let i = 1; i < points.length; i++) {
+    const from = points[i - 1];
+    const to = points[i];
+    if (!from || !to) continue;
+    const sourceChange = from.institute !== to.institute;
+    const last = runs.at(-1);
+    if (last && last.sourceChange === sourceChange) last.points.push(to);
+    else runs.push({ points: [from, to], sourceChange });
+  }
+  return runs;
 }
 
 export interface Trail {
@@ -124,6 +190,12 @@ export interface Trail {
   isAbstention: boolean;
   /** Parties continues ; une élection sans électorat de la famille les sépare. */
   segments: TrailPoint[][];
+}
+
+/** L'institut change-t-il entre deux étapes retenues, jusqu'à la date `upTo` ? */
+export function sourceChangesUpTo(stops: readonly TimelineStop[], upTo: number): boolean {
+  const shown = stops.filter((s) => !s.projection && s.date <= upTo);
+  return shown.some((s, i) => i > 0 && s.institute !== shown[i - 1]?.institute);
 }
 
 export interface CandidatePosition extends Point {
@@ -153,7 +225,13 @@ export function familyTrails(
       const candidate = family.candidates.get(stop.id);
       const p = candidate ? position(stop.id, candidate) : null;
       if (p) {
-        current.push({ election: stop.id, x: p.x, y: p.y, share: p.share });
+        current.push({
+          election: stop.id,
+          x: p.x,
+          y: p.y,
+          share: p.share,
+          institute: stop.institute,
+        });
         color = p.color;
         isAbstention = p.isAbstention;
       } else if (current.length > 0) {

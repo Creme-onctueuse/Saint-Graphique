@@ -8,7 +8,7 @@ import { PANELS, type AppState, type PanelId } from '../../core/state.ts';
 import type { ResolvedView } from '../../view.ts';
 import type { AppActions, Feature } from '../actions.ts';
 import { byId, el } from '../dom.ts';
-import { compactSources, renderSources } from '../sources.ts';
+import { compactSources, renderSources, shortPublisher } from '../sources.ts';
 
 const PANEL_TITLES: Record<PanelId, string> = {
   electorates: 'Électorats',
@@ -112,7 +112,10 @@ export class Shell implements Feature {
     }
     if (state.panel) this.panelTitle.textContent = PANEL_TITLES[state.panel];
 
-    this.heading.textContent = view.electionLabel;
+    const pollster = view.rawElection?.sources[0]?.publisher;
+    this.heading.textContent = pollster
+      ? `${view.electionLabel} · ${shortPublisher(pollster)}`
+      : view.electionLabel;
     this.methodChip.textContent = view.method.label;
 
     byId('sg-caveat-text').textContent = view.reserveSummary;
