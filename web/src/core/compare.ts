@@ -8,9 +8,9 @@ import { compositionByGroup, compositionGap } from './crossing.ts';
 import type { Point, RawElection } from './types.ts';
 
 /** En dessous de cet écart (unités de la carte), deux électorats paraissent voisins. */
-export const NEAR_ON_MAP = 0.5;
+const NEAR_ON_MAP = 0.5;
 /** Au-dessus de cet écart (points), leur composition diffère nettement. */
-export const FAR_IN_COMPOSITION = 15;
+const FAR_IN_COMPOSITION = 15;
 
 export interface Neighbor {
   id: string;

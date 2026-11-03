@@ -1,5 +1,8 @@
 /** Petits utilitaires DOM. Le texte passe toujours par textContent, jamais par innerHTML. */
 
+/** En dessous, l'interface passe en disposition téléphone. Même seuil que dans les CSS. */
+export const PHONE_WIDTH = 720;
+
 type Child = Node | string | null | undefined | false;
 
 interface Props {

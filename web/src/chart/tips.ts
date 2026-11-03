@@ -6,7 +6,7 @@ import type { TooltipContent } from './tooltip.ts';
 import type { ChartCandidate, ChartModel, ChartPcs } from './types.ts';
 
 /** Valeur à afficher pour une position : la valeur réelle si les axes sont libres. */
-export function axisText(m: ChartModel | null, axis: 'x' | 'y', position: number): string {
+function axisText(m: ChartModel | null, axis: 'x' | 'y', position: number): string {
   return m?.axes?.text?.[axis](position) ?? formatNumber(position);
 }
 

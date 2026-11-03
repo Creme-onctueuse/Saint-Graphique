@@ -24,8 +24,8 @@ export const CLOSE_ON_MAP = 0.5;
 /** Écart de composition (points) sous lequel deux électorats sont dits semblables. */
 export const ALIKE_COMPOSITION = 12;
 /** Une corrélation doit se répéter sur ce nombre d'élections, avec ce r minimal, de même signe. */
-export const MIN_REPEATED_POLLS = 3;
-export const MIN_REPEATED_R = 0.7;
+const MIN_REPEATED_POLLS = 3;
+const MIN_REPEATED_R = 0.7;
 /** En dessous de ce score (%), l'échantillon du sondage est trop petit pour comparer un électorat. */
 export const MIN_ELECTORATE_SHARE = 2;
 

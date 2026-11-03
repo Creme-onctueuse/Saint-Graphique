@@ -36,7 +36,7 @@ import {
 } from './types.ts';
 
 /** Scores X reconnus côté client (config/methods.yaml, clé x_score). */
-export const SUPPORTED_X_SCORES: readonly string[] = ['patrimoine_over_niveau_vie'];
+const SUPPORTED_X_SCORES: readonly string[] = ['patrimoine_over_niveau_vie'];
 
 /** Code PCS des retraités, à qui la méthode de référence impose un score Y. */
 export const RETIRED_CODE = '7';
@@ -93,7 +93,7 @@ const DEFAULT_PARAMS: Record<string, MethodParams> = {
   espace_social: { ...BASE_PARAMS, y_weights: { ...STUDY_YEARS } },
 };
 
-export function cloneParams(p: MethodParams): MethodParams {
+function cloneParams(p: MethodParams): MethodParams {
   return {
     ...p,
     y_weights: { ...p.y_weights },

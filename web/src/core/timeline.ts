@@ -13,6 +13,17 @@ import type { AppState, TypeFilter } from './state.ts';
 import { PROJECTION_ID, type Point, type RawElection } from './types.ts';
 import type { FamilyConfig, FamilyInfo } from '../data/dataset.ts';
 
+const TYPE_LETTERS: Readonly<Record<string, string>> = {
+  presidentielle: 'P',
+  legislatives: 'L',
+  europeennes: 'E',
+};
+
+/** Lettre d'un type de scrutin sur la frise ; vide si le type est inconnu. */
+export function typeLetter(type: string | null | undefined): string {
+  return TYPE_LETTERS[type ?? ''] ?? '';
+}
+
 export interface TimelineStop {
   id: string;
   label: string;
@@ -253,7 +264,7 @@ export function usesMapAxes(state: Pick<AppState, 'axisX' | 'axisY' | 'layout'>)
 }
 
 /** Ordre fixe des parts d'un anneau, de la gauche vers la droite, puis ce qui n'est pas un bloc. */
-export const RING_ORDER = [
+const RING_ORDER = [
   'gauche',
   'centre',
   'droite',

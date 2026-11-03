@@ -302,7 +302,7 @@ export function asComputedFile(v: unknown, warnings: string[] = []): ComputedFil
 }
 
 /** Lit la section « families » de _config.json. */
-export function asFamilyConfig(v: unknown): FamilyConfig | null {
+function asFamilyConfig(v: unknown): FamilyConfig | null {
   if (!isRec(v) || !isRec(v['families']) || !isRec(v['blocs'])) return null;
   const dates = new Map<string, number>();
   for (const [id, value] of Object.entries(rec(v['dates']))) {

@@ -12,6 +12,7 @@ import {
   sourceRuns,
   stopsForFilter,
   timelineStops,
+  typeLetter,
   usesMapAxes,
   type CandidatePosition,
   type Trail,
@@ -22,12 +23,6 @@ import { computedKey, type Dataset } from '../../data/dataset.ts';
 import type { Feature } from '../../ui/actions.ts';
 import type { ResolvedView } from '../../view.ts';
 import type { SaintChart } from '../chart.ts';
-
-const TYPE_LETTER: Record<string, string> = {
-  presidentielle: 'P',
-  legislatives: 'L',
-  europeennes: 'E',
-};
 
 interface SegmentDatum {
   key: string;
@@ -121,7 +116,7 @@ export class TrailsLayer implements Feature {
 
   private tagOf(election: string): string {
     const info = this.ds.elections.find((e) => e.id === election);
-    return `${info?.year ?? ''} ${TYPE_LETTER[info?.type ?? ''] ?? ''}`.trim();
+    return `${info?.year ?? ''} ${typeLetter(info?.type)}`.trim();
   }
 
   private position(method: string, election: string, id: string): CandidatePosition | null {

@@ -22,6 +22,7 @@ import {
   stopsForFilter,
   stopTitle,
   timelineStops,
+  typeLetter,
   yearGroups,
   type TimelineStop,
 } from '../../core/timeline.ts';
@@ -34,12 +35,6 @@ import type { ResolvedView } from '../../view.ts';
 import type { AppActions, Feature } from '../actions.ts';
 import { byId, el } from '../dom.ts';
 import { icon, type IconName } from '../icons.ts';
-
-const TYPE_LETTER: Record<string, string> = {
-  presidentielle: 'P',
-  legislatives: 'L',
-  europeennes: 'E',
-};
 
 const FILTER_LABELS: Record<TypeFilter, string> = {
   all: 'Toutes',
@@ -172,7 +167,7 @@ export class Timeline implements Feature {
         this.rail.append(gap);
       }
       const stops = group.stops.map((s) => {
-        const letter = s.projection ? '◇' : (TYPE_LETTER[s.type ?? ''] ?? '•');
+        const letter = s.projection ? '◇' : typeLetter(s.type) || '•';
         const label = this.stop(s.id, letter, stopTitle(s));
         if (s.projection) label.classList.add('sg-stop--projection');
         return label;

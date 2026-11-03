@@ -251,13 +251,21 @@ async function main() {
     overlay: !!document.querySelector('.sg-devoverlay'),
   })`);
   check('disques PCS', initial.pcs === 41 || initial.pcs === 30, String(initial.pcs));
-  check('losanges des électorats', initial.cands > 0, String(initial.cands));
+  check('bulles des électorats', initial.cands > 0, String(initial.cands));
   check('barycentre de la population', initial.bary === 1);
   check('diagonale et quadrants', initial.diagonal && initial.quadrants === 4);
   check('libellés visibles', initial.labels >= 15, String(initial.labels));
   check('frise et méthodes remplies', initial.elections > 0 && initial.methods > 0);
   check('légende', initial.legend >= initial.cands + 2);
-  check('tableaux de données', initial.rows === initial.pcs + initial.cands);
+  check('tableaux non construits, panneau fermé', initial.rows === 0, String(initial.rows));
+  await openPanel('data');
+  const tableRows = await evaluate(`document.querySelectorAll('.sg-table tbody tr').length`);
+  check(
+    'tableaux de données, panneau ouvert',
+    tableRows === initial.pcs + initial.cands,
+    String(tableRows),
+  );
+  await openPanel('data');
   check(
     devMode ? 'mode calque présent en dev' : 'mode calque absent du build',
     initial.overlay === devMode,
@@ -1097,6 +1105,8 @@ async function main() {
     console.log(
       `[smoke] lecture : ${glide.frames} images en 3 s, plus longue ${glide.longest.toFixed(0)} ms, plus grand pas ${glide.maxStep.toFixed(1)} px`,
     );
+    // Au-delà, l'œil voit un à-coup, même sur une machine chargée.
+    check('lecture : aucune image trop longue', glide.longest < 120, `${glide.longest} ms`);
     await evaluate(`document.getElementById('sg-zoom-reset').click()`);
     await evaluate(`location.hash = 'e=2024_legislatives_t1&rg=1&s=c%3Arn'`);
     await settle();

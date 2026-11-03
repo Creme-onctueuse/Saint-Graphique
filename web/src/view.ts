@@ -118,7 +118,7 @@ export function defaultElection(ds: Dataset): string {
   return pick?.id ?? POPULATION_ID;
 }
 
-export function resolveMethod(ds: Dataset, state: AppState): MethodInfo | null {
+function resolveMethod(ds: Dataset, state: AppState): MethodInfo | null {
   const methods = availableMethods(ds);
   return (
     methods.find((m) => m.id === state.method) ??
@@ -145,7 +145,7 @@ function anyFileOf(ds: Dataset, methodId: string): ComputedFile | null {
 }
 
 /** Paramètres de référence : ceux du fichier affiché, sinon index.json ou la configuration. */
-export function methodDefaults(method: MethodInfo, file: ComputedFile | null): MethodParams {
+function methodDefaults(method: MethodInfo, file: ComputedFile | null): MethodParams {
   const base = normalizeParams(method.params, defaultParamsFor(method.id));
   return file && Object.keys(file.params).length > 0 ? normalizeParams(file.params, base) : base;
 }
@@ -259,7 +259,7 @@ function pcsFromLayout(ds: Dataset, layout: Layout, extras: PcsExtras): ChartPcs
 }
 
 /** Composition d'un électorat par groupe de niveau 1, des parts les plus fortes aux plus faibles. */
-export function compositionOf(
+function compositionOf(
   ds: Dataset,
   election: RawElection | null,
   candidateId: string,

@@ -231,7 +231,7 @@ export function startApp(): void {
     chart.update(next.model, chartView(), animation);
     controls.sync(next);
     methodPanel.sync(next, state);
-    renderTables(tables, next);
+    if (state.panel === 'data') renderTables(tables, next);
     for (const feature of features) feature.sync(next, state);
     if (selectionChanged) live.textContent = `Affichage : ${next.model.title}.`;
     writeUrl();

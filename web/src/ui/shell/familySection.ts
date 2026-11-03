@@ -11,15 +11,10 @@ import {
   timelineStops,
   type FamilyMoment,
   type TimelineStop,
+  typeLetter,
 } from '../../core/timeline.ts';
 import type { Dataset } from '../../data/dataset.ts';
 import { el } from '../dom.ts';
-
-const TYPE_LETTER: Record<string, string> = {
-  presidentielle: 'P',
-  legislatives: 'L',
-  europeennes: 'E',
-};
 
 /** Barre empilée de la composition : un segment par groupe, dans l'ordre des groupes. */
 function compositionBar(moment: FamilyMoment): HTMLSpanElement {
@@ -40,7 +35,7 @@ function compositionBar(moment: FamilyMoment): HTMLSpanElement {
 }
 
 function stopTag(stop: TimelineStop | undefined): string {
-  return stop ? `${stop.year} ${TYPE_LETTER[stop.type ?? ''] ?? ''}`.trim() : '';
+  return stop ? `${stop.year} ${typeLetter(stop.type)}`.trim() : '';
 }
 
 /**

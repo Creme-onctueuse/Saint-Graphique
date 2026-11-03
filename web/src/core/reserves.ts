@@ -9,7 +9,7 @@ import type { PcsScores } from './scores.ts';
 /** Valeurs de schemas/pcs.schema.json, plus « unknown » quand le champ manque ou est invalide. */
 export type ValueStatus = 'published' | 'imputed' | 'calculated' | 'unknown';
 
-export const STATUS_LABELS: Readonly<Record<ValueStatus, string>> = {
+const STATUS_LABELS: Readonly<Record<ValueStatus, string>> = {
   published: 'publié',
   imputed: 'imputé',
   calculated: 'calculé',
@@ -97,7 +97,7 @@ export const READ_POSITIONS_RESERVE_SUMMARY =
   'Positions lues sur les vidéos de Chris, formule non publiée, 2 à 3 unités de la matrice v11';
 
 /** À partir de ce millésime, les tableaux sont tous du même institut, au format « en composition ». */
-export const FIRST_RECENT_YEAR = 2017;
+const FIRST_RECENT_YEAR = 2017;
 
 export function isOlderStop(year: number | null | undefined): boolean {
   return typeof year === 'number' && year < FIRST_RECENT_YEAR;

@@ -8,7 +8,7 @@ import type { AppState } from './state.ts';
 
 export type SelectionState = Pick<AppState, 'selected' | 'compared'>;
 
-export function sameKind(a: string, b: string): boolean {
+function sameKind(a: string, b: string): boolean {
   return a.charAt(0) === b.charAt(0);
 }
 

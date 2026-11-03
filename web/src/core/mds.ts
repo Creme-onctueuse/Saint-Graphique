@@ -50,7 +50,7 @@ function powerIteration(m: Matrix, seed: number): { value: number; vector: numbe
 }
 
 /** Matrice des produits scalaires : −½ J D² J. */
-export function doubleCentered(distances: Matrix): Matrix {
+function doubleCentered(distances: Matrix): Matrix {
   const n = distances.length;
   const squared = distances.map((row) => row.map((d) => d * d));
   const rowMeans = squared.map((row) => row.reduce((a, b) => a + b, 0) / n);

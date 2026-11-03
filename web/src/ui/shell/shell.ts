@@ -8,7 +8,7 @@ import { PANELS, type AppState, type PanelId } from '../../core/state.ts';
 import { shortMethodLabel } from '../../data/dataset.ts';
 import type { ResolvedView } from '../../view.ts';
 import type { AppActions, Feature } from '../actions.ts';
-import { byId, el } from '../dom.ts';
+import { byId, el, PHONE_WIDTH } from '../dom.ts';
 import { compactSources, renderSources, shortPublisher } from '../sources.ts';
 
 const PANEL_TITLES: Record<PanelId, string> = {
@@ -21,7 +21,6 @@ const PANEL_TITLES: Record<PanelId, string> = {
 };
 
 /** En dessous de cette largeur (px), le rail passe en bas et les panneaux s'ouvrent par le bas. */
-const PHONE_WIDTH = 720;
 const INSET_GAP = 6;
 
 type Drawer = 'reserves' | 'sources' | null;

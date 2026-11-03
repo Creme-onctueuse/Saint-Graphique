@@ -12,10 +12,9 @@ import {
 import type { AppState, Scenario } from '../../core/state.ts';
 import type { ResolvedView } from '../../view.ts';
 import type { AppActions, Feature } from '../actions.ts';
-import { el } from '../dom.ts';
+import { el, PHONE_WIDTH } from '../dom.ts';
 
 /** Largeur où le détail s'ouvre de lui-même. */
-const DETAIL_OPEN_WIDTH = 720;
 
 const SCENARIOS: readonly Scenario[] = ['still', 'trend'];
 
@@ -85,7 +84,7 @@ export class ProjectionCard implements Feature {
         text: 'Score projeté, plus ou moins son erreur moyenne. Les partis n’ont qu’une position.',
       }),
     );
-    details.open = window.innerWidth >= DETAIL_OPEN_WIDTH;
+    details.open = window.innerWidth >= PHONE_WIDTH;
     this.root = el(
       'aside',
       {

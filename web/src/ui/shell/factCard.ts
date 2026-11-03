@@ -19,12 +19,11 @@ import { PROJECTION_ID } from '../../core/types.ts';
 import type { Dataset } from '../../data/dataset.ts';
 import type { ResolvedView } from '../../view.ts';
 import type { AppActions, Feature } from '../actions.ts';
-import { el } from '../dom.ts';
+import { el, PHONE_WIDTH } from '../dom.ts';
 import { icon } from '../icons.ts';
 import { shortPublisher } from '../sources.ts';
 
 const DISMISS_KEY = 'sg-fact-dismissed';
-const PHONE_WIDTH = 720;
 /** Délai après le dernier rendu : les repères ont fini de glisser quand on mesure (ms). */
 const SETTLE_MS = 700;
 const SLOTS = ['tl', 'tr'] as const;
